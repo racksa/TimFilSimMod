@@ -1,5 +1,3 @@
-This repository contains a snapshot of my code as it was on 28th October 2022.
-
 # Compiling the code
 Each machine the code is designed to run on has a custom entry in the makefile of the form `cilia_XXX` that should be used to generate the appropriate executable. In general, the code should be compiled by calling
 ```

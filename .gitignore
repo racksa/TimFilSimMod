@@ -1,0 +1,43 @@
+# ignore all data files
+*.dat
+*.par
+*.zip
+*.7z
+*.tar.gz
+*.scaled_bins
+*.seed
+*.backup
+*.csv
+*.fourier_modes
+*.normal
+*.polar_dir
+*.azi_dir
+*.pbs.e*
+*.pbs.o*
+
+# ignore all videos and figures
+*.avi
+*.mov
+*.pdf
+*.fig
+*.mp4
+*.png
+*.jpg
+*.jpeg
+*.bmp
+*.gif
+*.dib
+*.jpe
+*.jfif
+*.tif
+*.tiff
+*.heic
+
+# ignore executables and compiled libraries etc.
+*.exe
+*.exp
+*.lib
+*.pdb
+
+# ignore .DS_Store from Macs
+.DS_Store

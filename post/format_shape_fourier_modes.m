@@ -7,7 +7,7 @@
 
 clear;
 
-shape_name = '../avg_shape_plus_1.5_first_mode';
+shape_name = 'sphere';
 
 D = load([shape_name '.fourier_modes']);
 
@@ -16,7 +16,7 @@ curr_length = radius(0, D(2:end)) + radius(pi, D(2:end));
 D(2:end) = D(2:end)/curr_length;
 
 % Identify the current centre of the shape.
-[centre_estimate, cross_section_area, volume] = find_centre(D(2:end));
+[centre_estimate, cross_section_area, surface_area, volume] = find_centre(D(2:end));
 
 % Shift the centre to the origin.
 num_theta = max([80, 2*(D(1) - 1)]); % Guaranteeing that num_theta is even ensures we don't have to adjust the length again at the end.
@@ -72,7 +72,7 @@ function r = radius(theta, modes)
 
 end
 
-function [c,area,vol] = find_centre(modes)
+function [c, cs_area, s_area, vol] = find_centre(modes)
 
     num_intervals = 1000;
 
@@ -83,8 +83,13 @@ function [c,area,vol] = find_centre(modes)
     y = r .* sin(theta);
     c = x .* y;
     c = sum(dx .* (c(1:end-1) + c(2:end))); % Trapezium rule.
-    area = sum(dx .* (y(1:end-1) + y(2:end))); % Trapezium rule. This is the area of a cross-section containing the axis of rotation.
-    c = c/area;
+    cs_area = sum(dx .* (y(1:end-1) + y(2:end))); % Trapezium rule. This is the area of a cross-section containing the axis of rotation.
+    c = c/cs_area;
+
+    dydx = (y(2:end) - y(1:end-1))./dx;
+    dydx = [dydx(1) 0.5*(dydx(1:end-1) + dydx(2:end)) dydx(end)];
+    s_area_integrand = 2*pi*y.*sqrt(1 + dydx.^2);
+    s_area = 0.5*sum(dx .* (s_area_integrand(1:end-1) + s_area_integrand(2:end))); % Trapezium rule.
     
     disc_area = pi*y.*y;
     vol = 0.5*sum(dx .* (disc_area(1:end-1) + disc_area(2:end))); % Trapezium rule.

@@ -466,7 +466,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
         Bn *= 2.0*PI;
 
         // Match the ratio of cilium length to body length.
-        const double cilia_length_scale = 18.0*AXIS_DIR_BODY_LENGTH/785.0;
+        const double cilia_length_scale = 18.0*(2.0*FIL_LENGTH)/785.0;
         Ap *= cilia_length_scale;
         An *= cilia_length_scale;
         Bp *= cilia_length_scale;
@@ -508,7 +508,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
               cos_vec(n-1) = n*std::cos(n*phase);
               sin_vec(n-1) = -n*std::sin(n*phase);
             }*/
-            const double p_coeff = -(0.1019 + 0.0064*std::sin(phase))*2.0*FIL_LENGTH; //*AXIS_DIR_BODY_LENGTH; //(cos_vec*Bp + sin_vec*Ap)*s_vec;
+            const double p_coeff = (0.1019 + 0.0064*std::sin(phase))*2.0*FIL_LENGTH; //*AXIS_DIR_BODY_LENGTH; //(cos_vec*Bp + sin_vec*Ap)*s_vec;
             const double n_coeff = 0.0; //(cos_vec*Bn + sin_vec*An)*s_vec;
             matrix p_vec(3,1);
             p_vec(0) = polar[3*m];
@@ -2052,7 +2052,11 @@ bool mobility_solver::compute_errors(matrix& error, const std::vector<swimmer>& 
 
     read_positions_and_forces(swimmers);
 
-    std::vector<std::string> names = {"WZ", "WY", "WX", "VZ", "VY", "VX"};
+    #if SURFACE_OF_REVOLUTION_BODIES
+
+      std::vector<std::string> names = {"WZ", "WY", "WX", "VZ", "VY", "VX"};
+
+    #endif
 
     for (int n = 0; n < 6; n++){
 
@@ -2063,11 +2067,15 @@ bool mobility_solver::compute_errors(matrix& error, const std::vector<swimmer>& 
 
       body_mobility_reference.set_col(5-n, v_bodies.get_block(6*(NSWIM-1), 6));
 
-      std::ofstream file(std::string(GENERATRIX_FILE_NAME)+std::to_string(NBLOB)+"_"+names[n]+"_blob_force_distribution.dat");
-      for (int ii = 0; ii < 3*NBLOB; ii++){
-        file << rhs(ii) << " ";
-      }
-      file.close();
+      #if SURFACE_OF_REVOLUTION_BODIES
+
+        std::ofstream file(std::string(GENERATRIX_FILE_NAME)+std::to_string(NBLOB)+"_"+names[n]+"_blob_force_distribution.dat");
+        for (int ii = 0; ii < 3*NBLOB; ii++){
+          file << rhs(ii) << " ";
+        }
+        file.close();
+
+      #endif
 
     }
 

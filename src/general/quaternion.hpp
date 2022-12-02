@@ -60,6 +60,7 @@ public:
   // OTHER METHODS
   //
 
+  void randomise();
   double norm() const;
   void normalise_in_place();
   void conj_in_place();

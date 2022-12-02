@@ -1,6 +1,7 @@
 // quaternion.cpp
 
 #include <cmath>
+#include <random>
 #include "matrix.hpp"
 #include "quaternion.hpp"
 
@@ -156,6 +157,22 @@ quaternion& quaternion::operator -=(const quaternion& q){
 //
 // OTHER METHODS
 //
+
+  void quaternion::randomise(){
+
+    std::random_device rd{};
+    std::mt19937 gen = std::mt19937{rd()};
+
+    std::normal_distribution<double> d(0.0, 1.0);
+
+      (*this)(0) = d(gen);
+      (*this)(1) = d(gen);
+      (*this)(2) = d(gen);
+      (*this)(3) = d(gen);
+
+      this->normalise_in_place();
+
+  }
 
   double quaternion::norm() const {
 

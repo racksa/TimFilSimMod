@@ -5,6 +5,8 @@
 #include <algorithm>
 #include "rigid_body.hpp"
 #include "seeding.hpp"
+#include "../../config.hpp"
+#include "../general/matrix.hpp"
 
 rigid_body::~rigid_body(){}
 
@@ -184,11 +186,15 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
       }
     }
 
-  #elif SURFACE_OF_REVOLUTION_BODIES
+  #elif SURFACE_OF_REVOLUTION_BODIES or ROD
 
     #if !READ_INITIAL_CONDITIONS_FROM_BACKUP
 
-      const double body_spacing = 3.0*(AXIS_DIR_BODY_LENGTH + FIL_LENGTH);
+      #if SURFACE_OF_REVOLUTION_BODIES
+        const double body_spacing = 3.0*(AXIS_DIR_BODY_LENGTH + FIL_LENGTH);
+      #elif ROD
+        const double body_spacing = (AXIS_DIR_BODY_LENGTH);
+      #endif
 
       x[0] = id*body_spacing;
       x[1] = 0.0;
@@ -219,22 +225,32 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
     std::ifstream azi_file(file_name_trunk + ".azi_dir");
     std::ifstream normal_file(file_name_trunk + ".normal");
 
-    if (pos_file.good() && polar_file.good() && azi_file.good() && normal_file.good()){
+    #if ROD
 
-      for (int i = 0; i < 3*NBLOB; i++){
+        // seed_blobs(&blob_references[0], &polar_dir_refs[0], &azi_dir_refs[0], &normal_refs[0]);
+      seed_rod_blobs(&blob_references[0], &polar_dir_refs[0], &azi_dir_refs[0], &normal_refs[0]);
 
-        pos_file >> blob_references[i];
-        polar_file >> polar_dir_refs[i];
-        azi_file >> azi_dir_refs[i];
-        normal_file >> normal_refs[i];
+    #endif
+
+    #if SURFACE_OF_REVOLUTION_BODIES
+
+      if (pos_file.good() && polar_file.good() && azi_file.good() && normal_file.good()){
+
+        for (int i = 0; i < 3*NBLOB; i++){
+
+          pos_file >> blob_references[i];
+          polar_file >> polar_dir_refs[i];
+          azi_file >> azi_dir_refs[i];
+          normal_file >> normal_refs[i];
+
+        }
+
+      } else { // If any are missing, we'll have to re-make them all...
+
+        seed_blobs(&blob_references[0], &polar_dir_refs[0], &azi_dir_refs[0], &normal_refs[0]);
 
       }
-
-    } else { // If any are missing, we'll have to re-make them all...
-
-      seed_blobs(&blob_references[0], &polar_dir_refs[0], &azi_dir_refs[0], &normal_refs[0]);
-
-    }
+   
 
     // The seeding functions work on unit-length surfaces, so the scaling must be done after we read or calculate.
     for (int i = 0; i < 3*NBLOB; i++){
@@ -247,6 +263,8 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
     polar_file.close();
     azi_file.close();
     normal_file.close();
+    
+    #endif
 
     #if NO_CILIA_SQUIRMER
 
@@ -266,7 +284,6 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
   #elif TORUS_BODIES
 
     // NOT YET IMPLEMENTED
-
   #endif
 
 }

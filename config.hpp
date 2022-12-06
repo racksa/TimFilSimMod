@@ -5,12 +5,12 @@
 #ifndef MY_CONFIG_HEADER_INCLUDED
 #define MY_CONFIG_HEADER_INCLUDED
 
-#define SIMULATION_NAME "avg_shape_plus_1.5_first_mode_squirmer"
+#define SIMULATION_NAME "test_rod"
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Simulation type
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define CILIA_TYPE 4
+#define CILIA_TYPE 0
 // Valid options:
 // 0 = Instability-driven cilia. This choice has some sub-types (see below).
 // 1 = Geometrically-switching cilia (partially implemented)
@@ -84,12 +84,13 @@
 
 #endif
 
-#define BODY_OR_SURFACE_TYPE 2
+#define BODY_OR_SURFACE_TYPE 4
 // Valid options:
 // 0 = An infinite plane wall at z = 0. This choice has some sub-types (see below).
 // 1 = Deformed planes with 2 principal curvatures (partially implemented)
 // 2 = Surface-of-revolution bodies. This choice has some sub-types (see below).
 // 3 = Toroidal bodies (partially implemented)
+// 4 = Rigid Rod
 
 #define BASE_HEIGHT_ABOVE_SURFACE (0.5*DL)
 
@@ -108,7 +109,7 @@
   #define FIL_LATTICE_Y_SPACING (1.8*FIL_LENGTH) // For prescribed-shape cilia, this is the beat-wise separation.
   #define FIL_LATTICE_X_SPACING (2.0*DL) // Leave blank for a regular grid (i.e. squares or regular hexagons (as appropriate) based on FIL_LATTICE_Y_SPACING).
 
-#elif BODY_OR_SURFACE_TYPE==2
+#elif BODY_OR_SURFACE_TYPE==2 or BODY_OR_SURFACE_TYPE==4
 
   #define SEEDING_TYPE 0
   // Valid options:
@@ -151,7 +152,7 @@
 #define NFIL 0 // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG 20 // The number of segments comprising each filament.
 #define NSWIM 1 // The number of swimmers.
-#define NBLOB 3000 // The number of blobs to use as surface elements in each rigid body.
+#define NBLOB 22 // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
 
@@ -178,10 +179,13 @@
 
 #endif
 
-#if BODY_OR_SURFACE_TYPE==2 // Surface-of-revolution
+#if BODY_OR_SURFACE_TYPE==2 or BODY_OR_SURFACE_TYPE==4 // Surface-of-revolution
 
-  #define AXIS_DIR_BODY_LENGTH (0.6496*2.0*FIL_LENGTH) // The length of the body parallel to the axis of rotation for the surface of revolution.
-
+  #if BODY_OR_SURFACE_TYPE==2
+    #define AXIS_DIR_BODY_LENGTH (0.6496*2.0*FIL_LENGTH) // The length of the body parallel to the axis of rotation for the surface of revolution.
+  #elif BODY_OR_SURFACE_TYPE==4
+    #define AXIS_DIR_BODY_LENGTH (2.0*NBLOB*RBLOB) // The length of the body parallel to the axis of rotation for the surface of revolution.
+  #endif 
 #endif
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -220,7 +224,7 @@
 
 #endif
 
-#define TOTAL_TIME_STEPS (1*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
+#define TOTAL_TIME_STEPS (0.5*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
 #define NUM_EULER_STEPS 1 // Number of time-steps to use backwards-Euler before switching to BDF2.
 
 #if CILIA_TYPE==1
@@ -232,7 +236,7 @@
 #else
 
   #define STEPS_PER_PERIOD 300
-  #define SAVES_PER_PERIOD 300
+  #define SAVES_PER_PERIOD 20
 
 #endif
 
@@ -249,6 +253,7 @@
 #define SADDLE_BODIES (BODY_OR_SURFACE_TYPE==1)
 #define SURFACE_OF_REVOLUTION_BODIES (BODY_OR_SURFACE_TYPE==2)
 #define TORUS_BODIES (BODY_OR_SURFACE_TYPE==3)
+#define ROD (BODY_OR_SURFACE_TYPE==4)
 
 #define STOKES_DRAG_MOBILITY (MOBILITY_TYPE==0)
 #define RPY_MOBILITY (MOBILITY_TYPE==1)

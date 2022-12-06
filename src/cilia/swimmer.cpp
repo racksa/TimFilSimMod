@@ -5,6 +5,8 @@
 #include <algorithm>
 #include "swimmer.hpp"
 #include "seeding.hpp"
+#include "../general/matrix.hpp"
+#include "../../config.hpp"
 
 swimmer::~swimmer(){}
 
@@ -224,7 +226,7 @@ void swimmer::initial_setup(const int id, const double *const data_from_file, do
 
     // NOT YET IMPLEMENTED.
 
-  #elif SURFACE_OF_REVOLUTION_BODIES
+  #elif SURFACE_OF_REVOLUTION_BODIES or ROD
 
     std::string file_name_trunk = GENERATRIX_FILE_NAME+std::to_string(NFIL);
 
@@ -386,6 +388,9 @@ void swimmer::forces_and_torques(const int nt){
     }
 
     #if !PRESCRIBED_BODY_VELOCITIES
+
+      // Fake gravity
+      f(2) -= 100.0;
 
       // Finally, add any external forces on the blobs, and the induced torques on body, to f.
 
@@ -648,7 +653,7 @@ void swimmer::forces_and_torques(const int nt){
 
             B = body_mobility*B;
 
-            #if SURFACE_OF_REVOLUTION_BODIES
+            #if SURFACE_OF_REVOLUTION_BODIES or ROD
 
               if (std::string(GENERATRIX_FILE_NAME) == std::string("sphere")){
 

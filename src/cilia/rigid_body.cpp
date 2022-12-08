@@ -192,29 +192,50 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
 
       #if SURFACE_OF_REVOLUTION_BODIES
         const double body_spacing = 3.0*(AXIS_DIR_BODY_LENGTH + FIL_LENGTH);
+
+        x[0] = id*body_spacing;
+        x[1] = 0.0;
+        x[2] = 0.0;
+        xm1[0] = x[0];
+        xm1[1] = x[1];
+        xm1[2] = x[2];
+        xm2[0] = x[0];
+        xm2[1] = x[1];
+        xm2[2] = x[2];
+
+        u[0] = 0.0;
+        u[1] = 0.0;
+        u[2] = 0.0;
+        um1[0] = 0.0;
+        um1[1] = 0.0;
+        um1[2] = 0.0;
+
+        q = quaternion(1.0, 0.0, 0.0, 0.0);
+        qm1 = q;
+        
       #elif ROD
         const double body_spacing = (AXIS_DIR_BODY_LENGTH);
+        
+        x[0] = id*body_spacing;
+        x[1] = 0.0;
+        x[2] = 0.0;
+        xm1[0] = x[0];
+        xm1[1] = x[1];
+        xm1[2] = x[2];
+        xm2[0] = x[0];
+        xm2[1] = x[1];
+        xm2[2] = x[2];
+
+        u[0] = 0.0;
+        u[1] = 0.0;
+        u[2] = 0.0;
+        um1[0] = 0.0;
+        um1[1] = 0.0;
+        um1[2] = 0.0;
+
+        q = quaternion(1.0, 0.0, 0.0, 0.0);
+        qm1 = q;
       #endif
-
-      x[0] = id*body_spacing;
-      x[1] = 0.0;
-      x[2] = 0.0;
-      xm1[0] = x[0];
-      xm1[1] = x[1];
-      xm1[2] = x[2];
-      xm2[0] = x[0];
-      xm2[1] = x[1];
-      xm2[2] = x[2];
-
-      u[0] = 0.0;
-      u[1] = 0.0;
-      u[2] = 0.0;
-      um1[0] = 0.0;
-      um1[1] = 0.0;
-      um1[2] = 0.0;
-
-      q = quaternion(1.0, 0.0, 0.0, 0.0);
-      qm1 = q;
 
     #endif
 
@@ -227,7 +248,6 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
 
     #if ROD
 
-        // seed_blobs(&blob_references[0], &polar_dir_refs[0], &azi_dir_refs[0], &normal_refs[0]);
       seed_rod_blobs(&blob_references[0], &polar_dir_refs[0], &azi_dir_refs[0], &normal_refs[0]);
 
     #endif

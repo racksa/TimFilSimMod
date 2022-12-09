@@ -1,5 +1,6 @@
 VPATH = src/general src/flow_field src/cilia src/cilia/mobility
 GEN_FLAGS = -I. -Isrc/general -Isrc/flow_field -Isrc/cilia -Isrc/cilia/mobility -g -w -O3 -lineinfo
+CUFCM_ROOT = ../CUFCM/
 
 # We only compile the mobility solver that the user has selected.
 # This is particularly important when using UAMMD, which takes a long time to compile
@@ -18,6 +19,9 @@ MOBILITY_SOURCE = rpy_mobility_solver.cu weakly_coupled_filaments_rpy_mobility_s
 else ifeq ($(MOBILITY_TYPE), 3) # FCM using UAMMD
 MOBILITY_OPTS = -std=c++14 -I src/cilia/mobility/UAMMD/src -I src/cilia/mobility/UAMMD/src/third_party -DDOUBLE_PRECISION -lcufft -D_USE_MATH_DEFINES -include ciso646
 MOBILITY_SOURCE = 
+else ifeq ($(MOBILITY_TYPE), 4) # cuFCM
+MOBILITY_OPTS = -arch=sm_75 -std=c++14 -O3 -I../include -lcublas -lcufft -lcblas -lcurand -lcuda -lineinfo
+MOBILITY_SOURCE = fcm_mobility_solver.cu $(CUFCM_ROOT)CUFCM_CELLLIST.cu $(CUFCM_ROOT)CUFCM_FCM.cu $(CUFCM_ROOT)CUFCM_DATA.cu $(CUFCM_ROOT)CUFCM_SOLVER.cu $(CUFCM_ROOT)CUFCM_CORRECTION.cu
 endif
 
 CILIA_CPP = matrix.cpp quaternion.cpp segment.cpp filament.cpp broyden_solver.cpp rigid_body.cpp swimmer.cpp mobility_solver.cpp
@@ -94,3 +98,16 @@ cilia_pc: $(CILIA_CPP) $(CILIA_CUDA)
 
 flow_field_pc: $(FLOW_FIELD_CPP) $(FLOW_FIELD_CUDA)
 	nvcc $^ $(PC_OPTS) $(GEN_FLAGS) -o flow_field
+
+
+# With cuFCM
+NVCC_FLAGS=-arch=sm_75 -std=c++14 -O3 -I../include
+
+LINK=-lcublas -lcufft -llapacke -lcblas -lcurand -lcuda -lineinfo -lopenblas
+
+# CUFCM_FILES = $(CUFCM_ROOT)CUFCM_CELLLIST.cu $(CUFCM_ROOT)CUFCM_FCM.cu $(CUFCM_ROOT)CUFCM_DATA.cu $(CUFCM_ROOT)CUFCM_CORRECTION.cu $(CUFCM_ROOT)CUFCM_SOLVER.cu $(CUFCM_ROOT)CUFCM_RANDOMPACKER.cu
+
+# CUFCM_FILES_SIMPLE = $(CUFCM_ROOT)CUFCM_CELLLIST.cu $(CUFCM_ROOT)CUFCM_FCM.cu $(CUFCM_ROOT)CUFCM_DATA.cu $(CUFCM_ROOT)CUFCM_SOLVER.cu $(CUFCM_ROOT)CUFCM_CORRECTION.cu
+
+cilia_nvidia4_withCUFCM: $(CILIA_CPP) $(CILIA_CUDA)
+	nvcc $^ $(NVCC_FLAGS) $(NVIDIA4_OPTS) $(LINK) $(GEN_FLAGS) -o cilia

@@ -24,6 +24,11 @@
   #include "uammd_fcm_mobility_solver.cuh"
   typedef uammd_fcm_mobility_solver chosen_mobility_solver;
 
+#elif CUFCM
+
+  #include "./mobility/fcm_mobility_solver.hpp"
+  typedef fcm_mobility_solver chosen_mobility_solver;
+
 #endif
 
 #if !(PRESCRIBED_CILIA || NO_CILIA_SQUIRMER)
@@ -331,6 +336,10 @@ int main(int argc, char** argv){
 
       broyden.iter = 0;
 
+      ////////////////////////////////////////////////////////////
+      /////////////////////////parallelise////////////////////////
+      ////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////////
       while (error_is_too_large && (broyden.iter < MAX_BROYDEN_ITER)){
 
         broyden.find_update(swimmers, nt);
@@ -351,6 +360,8 @@ int main(int argc, char** argv){
 
           #endif
 
+          // update lie algebra element
+          // robot_arm to update positions
           swimmers[i].update(&broyden.update.data[i*per_body]);
 
           swimmers[i].forces_and_torques(nt);
@@ -380,6 +391,11 @@ int main(int argc, char** argv){
         std::cout << std::flush;
 
       }
+
+      ////////////////////////////////////////////////////////////
+      /////////////////////////parallelise////////////////////////
+      ////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////////
 
     #endif
 

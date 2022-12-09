@@ -160,4 +160,6 @@ void transpose(matrix& At, const matrix& A);
 matrix transpose(const matrix& A);
 double trace(const matrix& A);
 
+void boxing(double &x, double boxsize);
+
 #endif // MY_MATRIX_HEADER_INCLUDED

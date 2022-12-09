@@ -7,6 +7,7 @@
 #include "seeding.hpp"
 #include "../../config.hpp"
 #include "../general/matrix.hpp"
+#include "../general/quaternion.hpp"
 
 rigid_body::~rigid_body(){}
 
@@ -215,9 +216,20 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
         
       #elif ROD
         const double body_spacing = (AXIS_DIR_BODY_LENGTH);
-        
-        x[0] = id*body_spacing;
-        x[1] = 0.0;
+
+        // initialise plane 
+        int NP = ceil(sqrt(NSWIM));
+        const int j = id/NP;
+        const int i = id - j*NP;
+
+        printf("id: %d (i,j) (%d %d) ", id, i, j);
+
+        // const int k = np/(NP*NP);
+        // const int j = (np - k*NP*NP)/NP;
+        // const int i = np - k*NP*NP - j*NP;
+
+        x[0] = i*body_spacing;
+        x[1] = j*body_spacing;
         x[2] = 0.0;
         xm1[0] = x[0];
         xm1[1] = x[1];
@@ -233,7 +245,8 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
         um1[1] = 0.0;
         um1[2] = 0.0;
 
-        q = quaternion(1.0, 0.0, 0.0, 0.0);
+        q = quaternion(1.0, 1.0, 0.0, 0.0);
+        q.randomise();
         qm1 = q;
       #endif
 
@@ -436,7 +449,7 @@ void rigid_body::update(const double *const body_update){
     u[0] += body_update[3];
     u[1] += body_update[4];
     u[2] += body_update[5];
-
+    
     lie_exp(q, u);
     q *= qm1;
 

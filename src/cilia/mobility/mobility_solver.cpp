@@ -222,6 +222,9 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
         f(4) += r(2)*f_blobs_repulsion_host[id] - r(0)*f_blobs_repulsion_host[id + 2];
         f(5) += r(0)*f_blobs_repulsion_host[id + 1] - r(1)*f_blobs_repulsion_host[id];
 
+        // artificial gravity
+        // f(2) -= 1;
+
       }
 
     }
@@ -1688,8 +1691,9 @@ void mobility_solver::compute_velocities(std::vector<swimmer>& swimmers, int& nu
     num_gmres_iterations = solve_linear_system(swimmers);
 
   #else
-
-    evaluate_segment_segment_mobility();
+    #if !ROD
+      evaluate_segment_segment_mobility();
+    #endif
 
     #if !INFINITE_PLANE_WALL
 
@@ -1699,9 +1703,11 @@ void mobility_solver::compute_velocities(std::vector<swimmer>& swimmers, int& nu
 
       #endif
 
-      evaluate_blob_segment_mobility();
+      #if !ROD
+        evaluate_blob_segment_mobility();
+      #endif
       copy_blob_velocities_to_host();
-
+      
       #if !USE_BROYDEN_FOR_EVERYTHING
 
         assemble_rhs(swimmers, nt);
@@ -1710,8 +1716,10 @@ void mobility_solver::compute_velocities(std::vector<swimmer>& swimmers, int& nu
 
       #endif
 
-      copy_blob_forces_to_device();
-      evaluate_segment_blob_mobility();
+      #if !ROD
+        copy_blob_forces_to_device();
+        evaluate_segment_blob_mobility();
+      #endif
 
     #endif
 

@@ -14,7 +14,7 @@
 #include <iostream>
 #include "matrix.hpp"
 #include "quaternion.hpp"
-#include "config.hpp"
+#include "../../config.hpp"
 
 class rigid_body{
 
@@ -29,7 +29,6 @@ public:
   quaternion q;
   quaternion qm1;
   matrix Q_init; // Rotation matrix associated with the initial guess for the body's quaternion.
-
   std::vector<double> blob_references;
   std::vector<double> polar_dir_refs;
   std::vector<double> azi_dir_refs;

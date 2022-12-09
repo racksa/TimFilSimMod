@@ -12,8 +12,8 @@ class swimmer;
 // =============================================================================
 // Included dependencies
 #include <vector>
-#include "matrix.hpp"
-#include "config.hpp"
+#include "../../general/matrix.hpp"
+#include "../../../config.hpp"
 
 class mobility_solver{
 

@@ -522,6 +522,8 @@ void filament::robot_arm(){
     segments[i].x[1] = segments[i-1].x[1] + 0.5*DL*(t1[1] + t2[1]);
     segments[i].x[2] = segments[i-1].x[2] + 0.5*DL*(t1[2] + t2[2]);
 
+    
+
     t1[0] = t2[0];
     t1[1] = t2[1];
     t1[2] = t2[2];

@@ -73,6 +73,15 @@ void swimmer::initial_setup(const int id, const double *const data_from_file, do
 
         const int fil_grid_dim_x = std::round(0.25*(3.0 - std::sqrt(3.0) + std::sqrt(4.0 - 2.0*std::sqrt(3.0) + 8.0*std::sqrt(3.0)*NFIL)));
         const int fil_grid_dim_y = std::max<int>(1, int(ceil(NFIL/double(fil_grid_dim_x-1)))); // Ensure we have enough rows even if all rows were of the shorter type.
+      
+      #elif FCM_LATTICE_SEEDING
+
+        const int fil_grid_dim_x = int(cbrt(double(NFIL)));
+        const int fil_grid_dim_y = std::max<int>(1, int(sqrt(NFIL/double(fil_grid_dim_x))));
+        const int fil_grid_dim_z = std::max<int>(1, int(ceil(NFIL/double(fil_grid_dim_x*fil_grid_dim_y))));
+        const double fil_grid_step_x = 90.0; //(0.1 + SCALED_BEAT_AMPLITUDE)*L; //2.0*L*sqrt(PI/5.6);
+        const double fil_grid_step_y = fil_grid_step_x;
+        const double fil_grid_step_z = fil_grid_step_x;
 
       #endif
 
@@ -95,7 +104,9 @@ void swimmer::initial_setup(const int id, const double *const data_from_file, do
 
       // Only the x-size was provided, or both sizes were provided. In case this latter option
       // doesn't account for all filaments, we ignore the provided FIL_LATTICE_Y_NUM and calculate the y-size for ourselves.
-      const int fil_grid_dim_x = std::min<int>(NFIL, FIL_LATTICE_X_NUM);
+      #if !FCM_LATTICE_SEEDING
+        const int fil_grid_dim_x = std::min<int>(NFIL, FIL_LATTICE_X_NUM);
+      #endif
       
       #if RECTANGULAR_SEEDING
 
@@ -104,7 +115,14 @@ void swimmer::initial_setup(const int id, const double *const data_from_file, do
       #elif HEXAGONAL_SEEDING
 
         const int fil_grid_dim_y = std::max<int>(1, int(ceil(NFIL/double(fil_grid_dim_x-1))));
+      #elif FCM_LATTICE_SEEDING
 
+        const int fil_grid_dim_x = int(cbrt(double(NFIL)));
+        const int fil_grid_dim_y = std::max<int>(1, int(sqrt(NFIL/double(fil_grid_dim_x))));
+        const int fil_grid_dim_z = std::max<int>(1, int(ceil(NFIL/double(fil_grid_dim_x*fil_grid_dim_y))));
+        const double fil_grid_step_x = 60.0; //(0.1 + SCALED_BEAT_AMPLITUDE)*L; //2.0*L*sqrt(PI/5.6);
+        const double fil_grid_step_y = fil_grid_step_x;
+        const double fil_grid_step_z = fil_grid_step_x;
       #endif
 
     #endif
@@ -119,7 +137,9 @@ void swimmer::initial_setup(const int id, const double *const data_from_file, do
 
     #endif
 
-    double fil_grid_step_x;
+    #if !FCM_LATTICE_SEEDING
+      double fil_grid_step_x;
+    #endif
 
     if (!bool(FIL_LATTICE_X_SPACING)){
 
@@ -140,9 +160,9 @@ void swimmer::initial_setup(const int id, const double *const data_from_file, do
       #endif
 
     } else {
-
-      fil_grid_step_x = double(FIL_LATTICE_X_SPACING); // Cast to double lets it compile even if FIL_LATTICE_X_SPACING is blank.
-
+      #if !FCM_LATTICE_SEEDING
+        fil_grid_step_x = double(FIL_LATTICE_X_SPACING); // Cast to double lets it compile even if FIL_LATTICE_X_SPACING is blank.
+      #endif
     }
 
     const double im = 0.5*(fil_grid_dim_x - 1.0);
@@ -220,6 +240,36 @@ void swimmer::initial_setup(const int id, const double *const data_from_file, do
 
       }
 
+    #elif FCM_LATTICE_SEEDING
+
+      for (int i = 0; i < fil_grid_dim_x; i++){
+        for (int j = 0; j < fil_grid_dim_y; j++){
+          for (int k = 0; k < fil_grid_dim_z; k++){
+
+            const int fil_id = k + (j + i*fil_grid_dim_y)*fil_grid_dim_z;
+
+            if (fil_id < NFIL){
+
+              filament_references[3*fil_id] = i*fil_grid_step_x + 60;
+              filament_references[3*fil_id + 1] = j*fil_grid_step_y + 60;
+              filament_references[3*fil_id + 2] = k*fil_grid_step_z + 60;
+
+              double *const fil_x_address = &x_segs_address[3*fil_id*NSEG];
+              double *const fil_f_address = &f_segs_address[6*fil_id*NSEG];
+
+              #if READ_INITIAL_CONDITIONS_FROM_BACKUP
+
+                filaments[fil_id].initial_setup(&filament_references[3*fil_id], dir, strain_twist, &data_from_file[fil_id*data_per_fil], fil_x_address, fil_f_address, fil_id);
+
+              #else
+
+                filaments[fil_id].initial_setup(&filament_references[3*fil_id], dir, strain_twist, data_from_file, fil_x_address, fil_f_address, fil_id);
+
+              #endif
+            }
+          }
+        }
+      }
     #endif
 
   #elif SADDLE_BODIES
@@ -389,8 +439,19 @@ void swimmer::forces_and_torques(const int nt){
 
     #if !PRESCRIBED_BODY_VELOCITIES
 
+      // const matrix R = q.rot_mat();
+
+      // const matrix ref(3, 1, &blob_references[3*i]);
+
+      // const matrix ext_f = R*ref;
+
+      // x_array[3*i] = pos(0);
+      // x_array[3*i + 1] = pos(1);
+      // x_array[3*i + 2] = pos(2);
+
+
       // Fake gravity
-      f(2) -= 100.0;
+      f(2) -= 50.0;
 
       // Finally, add any external forces on the blobs, and the induced torques on body, to f.
 

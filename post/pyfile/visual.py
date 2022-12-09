@@ -32,24 +32,15 @@ class VISUAL:
 
 
     def plot(self):
-        xmin, xmax, ymin, ymax, zmin, zmax = 0, 0, 0, 0, 0, 0
-        def expand_plot_limit(new_x, new_y, new_z):
-            xmin = min(xmin, new_x)
-            xmax = max(xmax, new_x)
-            ymin = min(ymin, new_y)
-            ymax = max(ymax, new_y)
-            zmin = min(zmin, new_z)
-            zmax = max(zmax, new_z)
-
         if (self.plot_dim == 2):
             ax = plt.figure().add_subplot(1,1,1)
             # ax.axis('equal')
         if (self.plot_dim == 3):
             ax = plt.figure().add_subplot(projection='3d')
 
-        for i in range(0, 100, 5):
+        for i in range(0, self.frames, 1 ):
             print("frame ", i, "/", self.frames)
-            for swim in range(int(self.pars['NSWIM'])):
+            for swim in range(int(self.pars['NSWIM'])): 
                 line_x = list()
                 line_y = list()
                 line_z = list()
@@ -60,19 +51,23 @@ class VISUAL:
                         line_y.append(y)
                         line_z.append(z)
 
+                color = (1-0.25*swim/self.pars['NSWIM'], 0.5*swim/self.pars['NSWIM'], 0.55+0.45*swim/self.pars['NSWIM'], i/self.frames )
                 if (self.plot_dim == 2):
                     # ax.scatter(line_x, line_z, c=color_list[swim], s=1, alpha=0.2+0.8*(i/self.frames))
-                    ax.plot(line_x, line_z, color=color_list[swim])
+                    ax.plot(line_x, line_z, c=color)
                 if (self.plot_dim == 3):
                     # ax.scatter(line_x, line_y, line_z, c=color_list[swim])
-                    ax.plot(line_x, line_y, line_z, c=color_list[swim])
+                    ax.plot(line_x, line_y, line_z, c=color )
 
                 
                 
         # if (self.plot_dim == 2):
         #     ax.set_xlim((-400, 500))
         if (self.plot_dim == 3):
-            ax.set_ylim(ax.get_xlim())
+            util.set_axes_equal(ax)
+            # ax.set_zlim((-300,20))
+            # ax.set_xlim(ax.get_zlim())
+            # ax.set_ylim(ax.get_xlim())
 
         plt.show()
 

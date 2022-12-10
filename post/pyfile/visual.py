@@ -34,11 +34,11 @@ class VISUAL:
     def plot(self):
         if (self.plot_dim == 2):
             ax = plt.figure().add_subplot(1,1,1)
-            # ax.axis('equal')
+            ax.axis('equal')
         if (self.plot_dim == 3):
             ax = plt.figure().add_subplot(projection='3d')
 
-        for i in range(0, self.frames, 1 ):
+        for i in range(0, self.frames, 2 ):
             print("frame ", i, "/", self.frames)
             for swim in range(int(self.pars['NSWIM'])): 
                 line_x = list()
@@ -53,7 +53,7 @@ class VISUAL:
 
                 color = (1-0.25*swim/self.pars['NSWIM'], 0.5*swim/self.pars['NSWIM'], 0.55+0.45*swim/self.pars['NSWIM'], i/self.frames )
                 if (self.plot_dim == 2):
-                    # ax.scatter(line_x, line_z, c=color_list[swim], s=1, alpha=0.2+0.8*(i/self.frames))
+                    # ax.scatter(line_x, line_y, c='r', s=20, alpha=0.2+0.8*(i/self.frames))
                     ax.plot(line_x, line_z, c=color)
                 if (self.plot_dim == 3):
                     # ax.scatter(line_x, line_y, line_z, c=color_list[swim])

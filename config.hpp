@@ -132,7 +132,7 @@
 // Define whether the motion of the rigid bodies is imposed or allowed to evolve dynamically.
 #define PRESCRIBED_BODY_VELOCITIES false
 
-#define MOBILITY_TYPE 4
+#define MOBILITY_TYPE 1
 // Valid options:
 // 0 = Basic Stokes drag. No hydrodynamic interactions between particles.
 // 1 = Rotne-Prager-Yamakawa (RPY) mobility matrices (with the corrections due to Swan and Brady if an infinite plane wall is selected).
@@ -154,8 +154,8 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #define NFIL 0 // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG 20 // The number of segments comprising each filament.
-#define NSWIM 25 // The number of swimmers.
-#define NBLOB 42 // The number of blobs to use as surface elements in each rigid body.
+#define NSWIM 4000 // The number of swimmers.
+#define NBLOB 22 // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
 
@@ -215,7 +215,7 @@
 #if SOLVER_TYPE==1
 
   #define MAX_LINEAR_SYSTEM_ITER 350 // Maximum number of iterations used to solve the linear system in each mobility solve.
-  #define LINEAR_SYSTEM_TOL 1e-10 // Relative tolerance in the linear system solves.
+  #define LINEAR_SYSTEM_TOL 1e-6 // Relative tolerance in the linear system solves.
 
   // GMRES preconditioner type.
   // Uses left preconditioning if set to false; if you don't want a preconditioner,
@@ -227,7 +227,7 @@
 
 #endif
 
-#define TOTAL_TIME_STEPS (30*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
+#define TOTAL_TIME_STEPS (1*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
 #define NUM_EULER_STEPS 1 // Number of time-steps to use backwards-Euler before switching to BDF2.
 
 #if CILIA_TYPE==1
@@ -367,7 +367,7 @@
 
   #if !SURFACE_OF_REVOLUTION_BODIES
 
-    #error "Squirmer-type simulations are only compatible with surface-of-revolution bodies."
+    // #error "Squirmer-type simulations are only compatible with surface-of-revolution bodies."
 
   #endif
 

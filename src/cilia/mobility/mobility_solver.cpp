@@ -222,9 +222,6 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
         f(4) += r(2)*f_blobs_repulsion_host[id] - r(0)*f_blobs_repulsion_host[id + 2];
         f(5) += r(0)*f_blobs_repulsion_host[id + 1] - r(1)*f_blobs_repulsion_host[id];
 
-        // artificial gravity
-        // f(2) -= 1;
-
       }
 
     }

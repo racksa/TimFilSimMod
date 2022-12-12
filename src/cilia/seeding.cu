@@ -717,10 +717,6 @@
 
   for (int n = 0; n < NBLOB; n++){
 
-    // X[3*n] = 0.001;
-    // X[3*n + 1] = 0.0;
-    // X[3*n + 2] = 2.2*n*RBLOB;
-
     blob_references[3*n] = X[3*n];
     blob_references[3*n + 1] = X[3*n + 1];
     blob_references[3*n + 2] = X[3*n + 2];

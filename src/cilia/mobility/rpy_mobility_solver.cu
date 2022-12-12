@@ -216,6 +216,7 @@ void rpy_mobility_solver::apply_interparticle_forces(){
       cudaSetDevice(n);
 
       const int num_thread_blocks = (std::max<int>(num_segs[n], num_blobs[n]) + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
+      
       barrier_forces<<<num_thread_blocks, THREADS_PER_BLOCK>>>(f_segs_device[n], f_blobs_repulsion_device[n], x_segs_device[n], x_blobs_device[n], start_seg, num_segs[n], start_blob, num_blobs[n]);
 
       if (num_gpus > 1){

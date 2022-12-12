@@ -132,7 +132,7 @@
 // Define whether the motion of the rigid bodies is imposed or allowed to evolve dynamically.
 #define PRESCRIBED_BODY_VELOCITIES false
 
-#define MOBILITY_TYPE 1
+#define MOBILITY_TYPE 4
 // Valid options:
 // 0 = Basic Stokes drag. No hydrodynamic interactions between particles.
 // 1 = Rotne-Prager-Yamakawa (RPY) mobility matrices (with the corrections due to Swan and Brady if an infinite plane wall is selected).
@@ -154,7 +154,7 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #define NFIL 0 // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG 20 // The number of segments comprising each filament.
-#define NSWIM 4000 // The number of swimmers.
+#define NSWIM 64 // The number of swimmers.
 #define NBLOB 22 // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
@@ -187,7 +187,7 @@
   #if BODY_OR_SURFACE_TYPE==2
     #define AXIS_DIR_BODY_LENGTH (0.6496*2.0*FIL_LENGTH) // The length of the body parallel to the axis of rotation for the surface of revolution.
   #elif BODY_OR_SURFACE_TYPE==4
-    #define AXIS_DIR_BODY_LENGTH (1.0*NBLOB*RBLOB) // The length of the body parallel to the axis of rotation for the surface of revolution.
+    #define AXIS_DIR_BODY_LENGTH (0.5*NBLOB*RBLOB) // The length of the body parallel to the axis of rotation for the surface of revolution.
   #endif 
 #endif
 
@@ -227,7 +227,7 @@
 
 #endif
 
-#define TOTAL_TIME_STEPS (1*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
+#define TOTAL_TIME_STEPS (100*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
 #define NUM_EULER_STEPS 1 // Number of time-steps to use backwards-Euler before switching to BDF2.
 
 #if CILIA_TYPE==1

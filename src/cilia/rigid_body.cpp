@@ -215,22 +215,27 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
         qm1 = q;
         
       #elif ROD
-        const double body_spacing = (AXIS_DIR_BODY_LENGTH);
+        const double body_spacing = 1.2*(AXIS_DIR_BODY_LENGTH);
 
         // initialise plane 
-        int NP = ceil(sqrt(NSWIM));
-        const int j = id/NP;
-        const int i = id - j*NP;
 
-        printf("id: %d (i,j) (%d %d) ", id, i, j);
+        // int NP = ceil(sqrt(NSWIM));
+        // const int k = 0;
+        // const int j = id/NP;
+        // const int i = id - j*NP;
 
-        // const int k = np/(NP*NP);
-        // const int j = (np - k*NP*NP)/NP;
-        // const int i = np - k*NP*NP - j*NP;
 
-        x[0] = i*body_spacing;
-        x[1] = j*body_spacing;
-        x[2] = 0.0;
+        // initialise lattice
+        int NP = ceil(cbrt(NSWIM));
+        const int k = id/(NP*NP);
+        const int j = (id - k*NP*NP)/NP;
+        const int i = id - k*NP*NP - j*NP;
+
+        printf("id: %d (i,j,k) (%d %d %d) ", id, i, j, k);
+
+        x[0] = i*body_spacing + 0.5*body_spacing;
+        x[1] = j*body_spacing + 0.5*body_spacing;
+        x[2] = k*body_spacing + 0.5*body_spacing;
         xm1[0] = x[0];
         xm1[1] = x[1];
         xm1[2] = x[2];

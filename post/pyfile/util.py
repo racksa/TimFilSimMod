@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 def rot_mat(quaternion):
     ret = np.zeros((3,3))
@@ -84,8 +85,16 @@ def set_axes_equal(ax):
     ax.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
 
+def box(x, box_size):
+    return x - math.floor(x/box_size)*box_size;
 
-
+def two_points_at_boundary(two_points_x, two_points_y, two_points_z, rod_length):
+    points = np.array((two_points_x, two_points_y, two_points_z))
+    vector = points[:,1] - points[:,0]
+    if np.linalg.norm(vector) > rod_length:
+        return [0,0], [0,0], [0,0]
+        # two_points_x, two_points_y, two_points_z = [], [], []
+    return two_points_x, two_points_y, two_points_z
 
 
 

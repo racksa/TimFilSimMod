@@ -231,24 +231,41 @@ void fcm_mobility_solver::copy_segment_velocities_to_host(){
 
 void fcm_mobility_solver::apply_interparticle_forces(){
 
-  // #if !PRESCRIBED_CILIA
+  #if !PRESCRIBED_CILIA
 
-  //   int start_seg = 0;
-  //   int start_blob = 0;
+    int start_seg = 0;
+    int start_blob = 0;
 
-  //   for (int n = 0; n < num_gpus; n++){
+    for (int n = 0; n < num_gpus; n++){
 
-  //     cudaSetDevice(n);
+      cudaSetDevice(n);
 
-  //     const int num_thread_blocks = (std::max<int>(num_segs[n], num_blobs[n]) + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
-  //     barrier_forces<<<num_thread_blocks, THREADS_PER_BLOCK>>>(f_segs_device[n], f_blobs_repulsion_device[n], x_segs_device[n], x_blobs_device[n], start_seg, num_segs[n], start_blob, num_blobs[n]);
+      const int num_thread_blocks = (std::max<int>(num_segs[n], num_blobs[n]) + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
+      
+      // barrier_forces<<<num_thread_blocks, THREADS_PER_BLOCK>>>(f_segs_device[n], f_blobs_repulsion_device[n], x_segs_device[n], x_blobs_device[n], start_seg, num_segs[n], start_blob, num_blobs[n]);
 
-  //     start_seg += num_segs[n];
-  //     start_blob += num_blobs[n];
+      if (num_gpus > 1){
 
-  //   }
+        // In the barrier_forces(...) kernel, each GPU only evaluates barrier forces for the same subset of segments it evaluates velocities for.
+        // So if we have multiple GPUs but don't copy back the forces to share, HIs between segments will only include any barrier force contributions
+        // if their velocities happen to be computed on the same GPU.
+        cudaMemcpyAsync(&f_segs_host[6*start_seg], &f_segs_device[n][6*start_seg], 6*num_segs[n]*sizeof(double), cudaMemcpyDeviceToHost);
 
-  // #endif
+      }
+
+      start_seg += num_segs[n];
+      start_blob += num_blobs[n];
+
+    }
+
+    if (num_gpus > 1){
+
+      fcm_mobility_solver::wait_for_device();
+      fcm_mobility_solver::copy_segment_forces_to_device();
+
+    }
+
+  #endif
 
 }
 

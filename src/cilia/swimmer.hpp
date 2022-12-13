@@ -37,7 +37,7 @@ public:
 
   void initial_setup(const int id, const double *const data_from_file, double *const x_segs_address, double *const f_segs_address, double *const f_blobs_address);
   void initial_guess(const int nt);
-  void forces_and_torques(const int nt);
+  void forces_and_torques(const int nt, int id);
   void end_of_step(const int nt);
   void write_reference_positions() const;
   void write_data(std::ofstream& seg_state_file, std::ofstream& body_state_file) const;

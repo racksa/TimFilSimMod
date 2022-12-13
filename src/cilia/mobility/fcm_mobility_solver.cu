@@ -19,7 +19,7 @@ fcm_mobility_solver::fcm_mobility_solver(){
   }
 
   pars.N = NSWIM*NFIL*NSEG + NSWIM*NBLOB;
-  pars.rh = RSEG;
+  pars.rh = values[1];
   pars.alpha = values[2];
   pars.beta = values[3];
   pars.eta = values[4];
@@ -35,6 +35,7 @@ fcm_mobility_solver::fcm_mobility_solver(){
   cufcm_solver = new FCM_solver(pars);
   cufcm_solver->init_aux_for_filament();
 }
+
 
 void fcm_mobility_solver::free_host_memory(){
   
@@ -231,6 +232,7 @@ void fcm_mobility_solver::copy_segment_velocities_to_host(){
 
 void fcm_mobility_solver::apply_interparticle_forces(){
 
+
   #if !PRESCRIBED_CILIA
 
     int start_seg = 0;
@@ -242,7 +244,15 @@ void fcm_mobility_solver::apply_interparticle_forces(){
 
       const int num_thread_blocks = (std::max<int>(num_segs[n], num_blobs[n]) + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
       
-      // barrier_forces<<<num_thread_blocks, THREADS_PER_BLOCK>>>(f_segs_device[n], f_blobs_repulsion_device[n], x_segs_device[n], x_blobs_device[n], start_seg, num_segs[n], start_blob, num_blobs[n]);
+      // periodic_barrier_forces<<<num_thread_blocks, THREADS_PER_BLOCK>>>(
+      //   f_segs_device[n], f_blobs_repulsion_device[n],
+      //   x_segs_device[n], x_blobs_device[n],
+      //   start_seg, num_segs[n],
+      //   start_blob, num_blobs[n],
+      //   pars.boxsize);
+
+      barrier_forces<<<num_thread_blocks, THREADS_PER_BLOCK>>>(f_segs_device[n], f_blobs_repulsion_device[n], x_segs_device[n], x_blobs_device[n], start_seg, num_segs[n], start_blob, num_blobs[n]);
+
 
       if (num_gpus > 1){
 
@@ -282,35 +292,33 @@ void fcm_mobility_solver::wait_for_device(){
 
 void fcm_mobility_solver::evaluate_segment_segment_mobility(){
 
-  int start_seg = 0;
+    int start_seg = 0;
 
-  for (int n = 0; n < num_gpus; n++){
+    for (int n = 0; n < num_gpus; n++){
 
-    cudaSetDevice(n);
+      cudaSetDevice(n);
 
-    int num_thread_blocks = (num_segs[n] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
+      int num_thread_blocks = (num_segs[n] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
 
-    // Mss_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_segs_device[n], f_segs_device[n], x_segs_device[n], start_seg, num_segs[n]);
+      // Mss_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_segs_device[n], f_segs_device[n], x_segs_device[n], start_seg, num_segs[n]);
 
-    cufcm_solver->reform_data(x_segs_device[n], f_segs_device[n], v_segs_device[n],
-                              x_blobs_device[n], f_blobs_device[n], v_blobs_device[n],
-                              num_segs[n], num_blobs[n]);
-                    
-    cufcm_solver->Mss();
+      cufcm_solver->reform_data(x_segs_device[n], f_segs_device[n], v_segs_device[n],
+                                x_blobs_device[n], f_blobs_device[n], v_blobs_device[n],
+                                num_segs[n], num_blobs[n]);
+                      
+      cufcm_solver->Mss();
 
-    cufcm_solver->reform_data_back(x_segs_device[n], f_segs_device[n], v_segs_device[n],
-                                   x_blobs_device[n], f_blobs_device[n], v_blobs_device[n],
-                                   num_segs[n], num_blobs[n]);
+      cufcm_solver->reform_data_back(x_segs_device[n], f_segs_device[n], v_segs_device[n],
+                                    x_blobs_device[n], f_blobs_device[n], v_blobs_device[n],
+                                    num_segs[n], num_blobs[n]);
 
-    start_seg += num_segs[n];
+      start_seg += num_segs[n];
 
-  }
+    }
 
 }
 
 void fcm_mobility_solver::evaluate_segment_blob_mobility(){
-
-  printf("NOT IMPLEMENTED ERROR\n");
 
   int start_seg = 0;
 
@@ -356,8 +364,6 @@ void fcm_mobility_solver::evaluate_blob_blob_mobility(){
 
 void fcm_mobility_solver::evaluate_blob_segment_mobility(){
 
-  printf("NOT IMPLEMENTED ERROR\n");
-
   int start_blob = 0;
 
   for (int n = 0; n < num_gpus; n++){
@@ -373,3 +379,4 @@ void fcm_mobility_solver::evaluate_blob_segment_mobility(){
   }
 
 }
+

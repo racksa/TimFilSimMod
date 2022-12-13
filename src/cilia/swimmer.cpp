@@ -396,7 +396,7 @@ void swimmer::initial_guess(const int nt){
 
 }
 
-void swimmer::forces_and_torques(const int nt){
+void swimmer::forces_and_torques(const int nt, int id){
 
   #if !PRESCRIBED_CILIA
 
@@ -451,7 +451,15 @@ void swimmer::forces_and_torques(const int nt){
 
 
       // Fake gravity
-      f(2) -= 50.0;
+
+      if(id==0){
+        f(0) += 30;
+      }
+      if(id==1){
+        f(0) -= 30;
+      }
+
+      // f(2) -= 3.0;
 
       // Finally, add any external forces on the blobs, and the induced torques on body, to f.
 

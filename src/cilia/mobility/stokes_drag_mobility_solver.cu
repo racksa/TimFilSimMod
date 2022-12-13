@@ -5,7 +5,7 @@
 #include <cmath>
 #include <algorithm>
 #include "stokes_drag_mobility_solver.hpp"
-#include "cuda_functions.hpp"
+#include "../cuda_functions.hpp"
 
 stokes_drag_mobility_solver::~stokes_drag_mobility_solver(){}
 

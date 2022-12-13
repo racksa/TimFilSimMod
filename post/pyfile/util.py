@@ -48,6 +48,7 @@ def rot_mat(quaternion):
 
 def blob_point_from_data(body_states, blob_references):
     blob_pos = np.matmul(rot_mat(body_states[3:7]), blob_references)
+    # print('blobref, blobpos', blob_references, blob_pos)
 
     x = body_states[0] + blob_pos[0]
     y = body_states[1] + blob_pos[1]

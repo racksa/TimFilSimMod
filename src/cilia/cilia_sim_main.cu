@@ -289,7 +289,7 @@ int main(int argc, char** argv){
 
       swimmers[i].initial_guess(nt);
 
-      swimmers[i].forces_and_torques(nt);
+      swimmers[i].forces_and_torques(nt, i);
 
     }
 
@@ -364,7 +364,7 @@ int main(int argc, char** argv){
           // robot_arm to update positions
           swimmers[i].update(&broyden.update.data[i*per_body]);
 
-          swimmers[i].forces_and_torques(nt);
+          swimmers[i].forces_and_torques(nt, i);
 
         }
 

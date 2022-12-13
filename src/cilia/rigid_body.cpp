@@ -233,9 +233,9 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
 
         printf("id: %d (i,j,k) (%d %d %d) ", id, i, j, k);
 
-        x[0] = i*body_spacing + 0.5*body_spacing;
-        x[1] = j*body_spacing + 0.5*body_spacing;
-        x[2] = k*body_spacing + 0.5*body_spacing;
+        x[0] = i*body_spacing + body_spacing;
+        x[1] = j*body_spacing + body_spacing;
+        x[2] = k*body_spacing + body_spacing;
         xm1[0] = x[0];
         xm1[1] = x[1];
         xm1[2] = x[2];
@@ -252,6 +252,15 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
 
         q = quaternion(1.0, 1.0, 0.0, 0.0);
         q.randomise();
+        if(id==0){
+          q = quaternion(1.0, 0.0, 1.0, 0.0);
+          q.normalise_in_place();
+        }
+        if(id==1){
+          q = quaternion(1.0, 0.0, 0.0, 1.0);
+          q.normalise_in_place();
+        }
+
         qm1 = q;
       #endif
 

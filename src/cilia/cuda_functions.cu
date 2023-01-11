@@ -1320,84 +1320,171 @@ __global__ void barrier_forces(double * __restrict__ f_segs, double * __restrict
 
 __global__ void periodic_barrier_forces(double * __restrict__ f_segs, double * __restrict__ f_blobs_repulsion, const double *const __restrict__ x_segs, const double *const __restrict__ x_blobs, const int start_seg, const int num_segs, const int start_blob, const int num_blobs, const double boxsize){
 
-  #if !(PRESCRIBED_CILIA || NO_CILIA_SQUIRMER)
+  // Work out which particle(s) this thread will compute the force for
+  const int index = threadIdx.x + blockIdx.x*blockDim.x;
+  const int stride = blockDim.x*gridDim.x;
 
-    // Work out which particle(s) this thread will compute the force for
-    const int index = threadIdx.x + blockIdx.x*blockDim.x;
-    const int stride = blockDim.x*gridDim.x;
+  double fx, fy, fz;
+  double xi, yi, zi;
+  int fili;
 
-    // Declare the shared memory for this thread block
-    __shared__ double x_shared[THREADS_PER_BLOCK];
-    __shared__ double y_shared[THREADS_PER_BLOCK];
-    __shared__ double z_shared[THREADS_PER_BLOCK];
+  /*
+  for (int i = (start_seg + index); (i-threadIdx.x) < (start_seg + num_segs); i+=stride){
 
-    double fx, fy, fz;
-    double xi, yi, zi;
-    int fili;
+    if (i < (start_seg + num_segs)){
 
-    for (int i = (start_seg + index); (i-threadIdx.x) < (start_seg + num_segs); i+=stride){
+      fx = 0.0;
+      fy = 0.0;
+      fz = 0.0;
+
+      xi = x_segs[3*i];
+      yi = x_segs[3*i + 1];
+      zi = x_segs[3*i + 2];
+
+      fili = i/NSEG;
+
+      #if INFINITE_PLANE_WALL
+
+        if (zi < BASE_HEIGHT_ABOVE_SURFACE){
+
+          fz = fmin(1.0, 1.0 - (zi - RSEG)/(0.5*DL - RSEG)); // max magnitude one radius from wall
+          fz *= REPULSIVE_FORCE_FACTOR*END_FORCE_MAGNITUDE*fz*fz*fz; // 4th power
+
+        }
+
+      #endif
+
+    }
+
+    for (int j_start = 0; j_start < NTOTAL; j_start += THREADS_PER_BLOCK){
+
+      const int j_to_read = j_start + threadIdx.x;
+
+      if (j_to_read < NSWIM*NFIL*NSEG){
+
+        x_shared[threadIdx.x] = x_segs[3*j_to_read];
+        y_shared[threadIdx.x] = x_segs[3*j_to_read + 1];
+        z_shared[threadIdx.x] = x_segs[3*j_to_read + 2];
+
+      } else if (j_to_read < NTOTAL){
+
+        x_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG)];
+        y_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG) + 1];
+        z_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG) + 2];
+
+      }
+
+      __syncthreads();
 
       if (i < (start_seg + num_segs)){
+
+        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NTOTAL); j++){
+
+          const double a_sum = (j_start + j < NSWIM*NFIL*NSEG) ? 2.0*RSEG : RSEG + RBLOB;
+          const double chi_fac = 10.0/a_sum; // 1.0/(1.1*a_sum - a_sum)
+
+          const double dx = xi - x_shared[j];
+          const double dy = yi - y_shared[j];
+          const double dz = zi - z_shared[j];
+
+          const double dist = sqrt(dx*dx + dy*dy + dz*dz);
+
+          int filj = (j_start + j)/NSEG;
+
+          if (!(fili==filj && abs(i -(j_start + j))<=1) && (dist < 1.1*a_sum)){
+
+            double fac = fmin(1.0, 1.0 - chi_fac*(dist - a_sum));
+            fac *= REPULSIVE_FORCE_FACTOR*END_FORCE_MAGNITUDE*fac*fac*fac;
+
+            const double dm1 = 1.0/dist;
+
+            fx += fac*dx*dm1;
+            fy += fac*dy*dm1;
+            fz += fac*dz*dm1;
+
+          }
+
+        }
+
+      }
+
+      __syncthreads();
+
+    }
+
+    if (i < (start_seg + num_segs)){
+
+      f_segs[6*i] += fx; // Don't shift index as f_segs has global size.
+      f_segs[6*i + 1] += fy;
+      f_segs[6*i + 2] += fz;
+
+    }
+
+  }
+  */
+
+  #if !PRESCRIBED_BODY_VELOCITIES
+
+    for (int i = (start_blob + index); (i-threadIdx.x) < (start_blob + num_blobs); i+=stride){
+
+      if (i < (start_blob + num_blobs)){
 
         fx = 0.0;
         fy = 0.0;
         fz = 0.0;
 
-        xi = x_segs[3*i];
-        yi = x_segs[3*i + 1];
-        zi = x_segs[3*i + 2];
+        xi = x_blobs[3*i];
+        yi = x_blobs[3*i + 1];
+        zi = x_blobs[3*i + 2];
 
-        fili = i/NSEG;
-
-        #if INFINITE_PLANE_WALL
-
-          if (zi < BASE_HEIGHT_ABOVE_SURFACE){
-
-            fz = fmin(1.0, 1.0 - (zi - RSEG)/(0.5*DL - RSEG)); // max magnitude one radius from wall
-            fz *= REPULSIVE_FORCE_FACTOR*END_FORCE_MAGNITUDE*fz*fz*fz; // 4th power
-
-          }
-
-        #endif
+        // box_images(xi, boxsize);
+        // box_images(yi, boxsize);
+        // box_images(zi, boxsize);
 
       }
 
       for (int j_start = 0; j_start < NTOTAL; j_start += THREADS_PER_BLOCK){
 
-        const int j_to_read = j_start + threadIdx.x;
+        // const int j_to_read = j_start + threadIdx.x;
 
-        if (j_to_read < NSWIM*NFIL*NSEG){
+        // if (j_to_read < NSWIM*NFIL*NSEG){
 
-          x_shared[threadIdx.x] = x_segs[3*j_to_read];
-          y_shared[threadIdx.x] = x_segs[3*j_to_read + 1];
-          z_shared[threadIdx.x] = x_segs[3*j_to_read + 2];
+        //   x_shared[threadIdx.x] = x_segs[3*j_to_read];
+        //   y_shared[threadIdx.x] = x_segs[3*j_to_read + 1];
+        //   z_shared[threadIdx.x] = x_segs[3*j_to_read + 2];
 
-        } else if (j_to_read < NTOTAL){
+        // } else if (j_to_read < NTOTAL){
 
-          x_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG)];
-          y_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG) + 1];
-          z_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG) + 2];
+        //   x_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG)];
+        //   y_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG) + 1];
+        //   z_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG) + 2];
 
-        }
+        //   // box_images(x_shared[threadIdx.x], boxsize);
+        //   // box_images(y_shared[threadIdx.x], boxsize);
+        //   // box_images(z_shared[threadIdx.x], boxsize);
 
-        __syncthreads();
+        // }
 
-        if (i < (start_seg + num_segs)){
+        // __syncthreads();
 
-          for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NTOTAL); j++){
+        if (i < (start_blob + num_blobs)){
 
-            const double a_sum = (j_start + j < NSWIM*NFIL*NSEG) ? 2.0*RSEG : RSEG + RBLOB;
+          for (int j=0; j_start + j < NTOTAL; j++){
+
+            const double a_sum = (j_start + j < NSWIM*NFIL*NSEG) ? RBLOB + RSEG : 2.0*RBLOB;
             const double chi_fac = 10.0/a_sum; // 1.0/(1.1*a_sum - a_sum)
 
-            const double dx = xi - x_shared[j];
-            const double dy = yi - y_shared[j];
-            const double dz = zi - z_shared[j];
+            double dx = xi - x_blobs[3*j];
+            double dy = yi - x_blobs[3*j+1];
+            double dz = zi - x_blobs[3*j+2];
+
+            // dx = dx - boxsize * double(int(dx/(0.5*boxsize)));
+            // dy = dy - boxsize * double(int(dy/(0.5*boxsize)));
+            // dz = dz - boxsize * double(int(dz/(0.5*boxsize)));
 
             const double dist = sqrt(dx*dx + dy*dy + dz*dz);
 
-            int filj = (j_start + j)/NSEG;
-
-            if (!(fili==filj && abs(i -(j_start + j))<=1) && (dist < 1.1*a_sum)){
+            if (((i + NSWIM*NFIL*NSEG) != (j_start + j)) && (dist < 1.1*a_sum)){
 
               double fac = fmin(1.0, 1.0 - chi_fac*(dist - a_sum));
               fac *= REPULSIVE_FORCE_FACTOR*END_FORCE_MAGNITUDE*fac*fac*fac;
@@ -1418,111 +1505,17 @@ __global__ void periodic_barrier_forces(double * __restrict__ f_segs, double * _
 
       }
 
-      if (i < (start_seg + num_segs)){
+      if (i < (start_blob + num_blobs)){
 
-        f_segs[6*i] += fx; // Don't shift index as f_segs has global size.
-        f_segs[6*i + 1] += fy;
-        f_segs[6*i + 2] += fz;
+        const int p = 3*(i - start_blob);
+
+        f_blobs_repulsion[p] = fx;
+        f_blobs_repulsion[p + 1] = fy;
+        f_blobs_repulsion[p + 2] = fz;
 
       }
 
     }
-
-    #if !PRESCRIBED_BODY_VELOCITIES
-
-      for (int i = (start_blob + index); (i-threadIdx.x) < (start_blob + num_blobs); i+=stride){
-
-        if (i < (start_blob + num_blobs)){
-
-          fx = 0.0;
-          fy = 0.0;
-          fz = 0.0;
-
-          xi = x_blobs[3*i];
-          yi = x_blobs[3*i + 1];
-          zi = x_blobs[3*i + 2];
-
-          // box_images(xi, boxsize);
-          // box_images(yi, boxsize);
-          // box_images(zi, boxsize);
-
-        }
-
-        for (int j_start = 0; j_start < NTOTAL; j_start += THREADS_PER_BLOCK){
-
-          const int j_to_read = j_start + threadIdx.x;
-
-          if (j_to_read < NSWIM*NFIL*NSEG){
-
-            x_shared[threadIdx.x] = x_segs[3*j_to_read];
-            y_shared[threadIdx.x] = x_segs[3*j_to_read + 1];
-            z_shared[threadIdx.x] = x_segs[3*j_to_read + 2];
-
-          } else if (j_to_read < NTOTAL){
-
-            x_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG)];
-            y_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG) + 1];
-            z_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG) + 2];
-
-            // box_images(x_shared[threadIdx.x], boxsize);
-            // box_images(y_shared[threadIdx.x], boxsize);
-            // box_images(z_shared[threadIdx.x], boxsize);
-
-          }
-
-          __syncthreads();
-
-          if (i < (start_blob + num_blobs)){
-
-            for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NTOTAL); j++){
-
-              const double a_sum = (j_start + j < NSWIM*NFIL*NSEG) ? RBLOB + RSEG : 2.0*RBLOB;
-              const double chi_fac = 10.0/a_sum; // 1.0/(1.1*a_sum - a_sum)
-
-              double dx = xi - x_shared[j];
-              double dy = yi - y_shared[j];
-              double dz = zi - z_shared[j];
-
-              // dx = dx - boxsize * double(int(dx/(0.5*boxsize)));
-              // dy = dy - boxsize * double(int(dy/(0.5*boxsize)));
-              // dz = dz - boxsize * double(int(dz/(0.5*boxsize)));
-
-              const double dist = sqrt(dx*dx + dy*dy + dz*dz);
-
-              if (((i + NSWIM*NFIL*NSEG) != (j_start + j)) && (dist < 1.1*a_sum)){
-
-                double fac = fmin(1.0, 1.0 - chi_fac*(dist - a_sum));
-                fac *= REPULSIVE_FORCE_FACTOR*END_FORCE_MAGNITUDE*fac*fac*fac;
-
-                const double dm1 = 1.0/dist;
-
-                fx += fac*dx*dm1;
-                fy += fac*dy*dm1;
-                fz += fac*dz*dm1;
-
-              }
-
-            }
-
-          }
-
-          __syncthreads();
-
-        }
-
-        if (i < (start_blob + num_blobs)){
-
-          const int p = 3*(i - start_blob);
-
-          f_blobs_repulsion[p] = fx;
-          f_blobs_repulsion[p + 1] = fy;
-          f_blobs_repulsion[p + 2] = fz;
-
-        }
-
-      }
-
-    #endif
 
   #endif
 

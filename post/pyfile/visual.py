@@ -32,7 +32,7 @@ class VISUAL:
 
 
         self.plot_start_frame = 1
-        self.plot_end_frame = 25
+        self.plot_end_frame = 30
         self.plot_interval = 1
 
     def set_plot_dim(self, dim):

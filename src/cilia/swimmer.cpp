@@ -453,10 +453,10 @@ void swimmer::forces_and_torques(const int nt, int id){
       // Fake gravity
 
       if(id==0){
-        f(0) += 30;
+        f(0) -= 30;
       }
       if(id==1){
-        f(0) -= 30;
+        f(0) += 30;
       }
 
       // f(2) -= 3.0;

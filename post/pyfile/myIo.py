@@ -16,3 +16,10 @@ def read_pars(fileName):
     for i in range(len(df)):
         ret_pardict[df.iloc[i, 1]] = df.iloc[i, 0]
     return ret_pardict
+
+def write_line(text, fileName):
+    with open(fileName, 'a') as the_file:
+        the_file.write(text + '\n')
+    
+def clean_file(fileName):
+    open(fileName, 'w')

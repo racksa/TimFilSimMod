@@ -2,6 +2,7 @@
 
 #include "cuda_functions.hpp"
 #include "config.hpp"
+#include <stdio.h>
 
 // RPY kernels
 
@@ -1437,9 +1438,9 @@ __global__ void periodic_barrier_forces(double * __restrict__ f_segs, double * _
         yi = x_blobs[3*i + 1];
         zi = x_blobs[3*i + 2];
 
-        // box_images(xi, boxsize);
-        // box_images(yi, boxsize);
-        // box_images(zi, boxsize);
+        box_images(xi, boxsize);
+        box_images(yi, boxsize);
+        box_images(zi, boxsize);
 
       }
 
@@ -1471,16 +1472,35 @@ __global__ void periodic_barrier_forces(double * __restrict__ f_segs, double * _
 
           for (int j=0; j_start + j < NTOTAL; j++){
 
+            double xj = x_blobs[3*j];
+            double yj = x_blobs[3*j+1];
+            double zj = x_blobs[3*j+2];
+
+            box_images(xj, boxsize);
+            box_images(yj, boxsize);
+            box_images(zj, boxsize);
+
             const double a_sum = (j_start + j < NSWIM*NFIL*NSEG) ? RBLOB + RSEG : 2.0*RBLOB;
             const double chi_fac = 10.0/a_sum; // 1.0/(1.1*a_sum - a_sum)
 
-            double dx = xi - x_blobs[3*j];
-            double dy = yi - x_blobs[3*j+1];
-            double dz = zi - x_blobs[3*j+2];
+            double dx = xi - xj;
+            double dy = yi - yj;
+            double dz = zi - zj;
 
-            // dx = dx - boxsize * double(int(dx/(0.5*boxsize)));
-            // dy = dy - boxsize * double(int(dy/(0.5*boxsize)));
-            // dz = dz - boxsize * double(int(dz/(0.5*boxsize)));
+            dx -= boxsize * double(int(dx/(0.5*boxsize)));
+            dy -= boxsize * double(int(dy/(0.5*boxsize)));
+            dz -= boxsize * double(int(dz/(0.5*boxsize)));
+
+            // printf("**********xi=%.4f xj=%.4f dx=%.4f ratio=%.4f reset = %.4f\n", 
+            //       xi, xj, dx, dx/(0.5*boxsize), double(int(dx/(0.5*boxsize))));
+            
+            // if(double(int(dx/(0.5*boxsize))) != 0){
+            //   printf("**********xi=%.4f xj=%.4f dx=%.4f\n", xi, xj, dx);
+            // }
+
+            // dx -= floor(dx/(0.5*boxsize))*boxsize;
+            // dy -= floor(dy/(0.5*boxsize))*boxsize;
+            // dz -= floor(dz/(0.5*boxsize))*boxsize;
 
             const double dist = sqrt(dx*dx + dy*dy + dz*dz);
 

@@ -17,8 +17,9 @@ color_list.pop(2)
 # color_list = ['#00ffff', '#faebD7', '#838bbb', '#0000ff', '	#8a2be2', '#ff4040', '#7fff00', '#ff6103', '#9932cc', '#ff1493', '#030303']
 
 simName = 'test_rod'
+superpuntoDatafileName = '../../' + simName + '_superpunto.dat'
 
-boxsize = 30
+boxsize = 60
 
 
 class VISUAL:
@@ -30,14 +31,18 @@ class VISUAL:
         self.pars = myIo.read_pars('../../' + simName + '.par')
         self.frames = len(self.body_states)
 
-
-        self.plot_start_frame = 1
-        self.plot_end_frame = 30
+        self.plot_start_frame = 0
+        self.plot_end_frame =200
         self.plot_interval = 1
+
+        self.output_to_superpunto = False
 
     def set_plot_dim(self, dim):
         self.plot_dim = dim
 
+    def enable_superpunto(self):
+        self.output_to_superpunto = True
+        myIo.clean_file(superpuntoDatafileName)
 
     def plot(self):
         if (self.plot_dim == 2):
@@ -48,8 +53,9 @@ class VISUAL:
 
         for i in range(self.plot_start_frame, self.plot_end_frame, self.plot_interval):
             print("frame ", i, "/", self.frames)
+            if(self.output_to_superpunto):
+                myIo.write_line('#', superpuntoDatafileName)
             for swim in range(int(self.pars['NSWIM'])):
-
 
                 x0, y0, z0 = util.blob_point_from_data(self.body_states[i][7*swim : 7*swim+7], self.blob_references[:3])
                 x1, y1, z1 = util.blob_point_from_data(self.body_states[i][7*swim : 7*swim+7], self.blob_references[-3:])
@@ -70,13 +76,24 @@ class VISUAL:
                 random.seed(3*swim+2)
                 cb = random.random()
                 color = (cr, cg, cb, (i+1-self.plot_start_frame)/(self.plot_end_frame-self.plot_start_frame) )
+
+                if(self.output_to_superpunto):
+                    for blob in range(int(self.pars['NBLOB'])):
+                        blob_x, blob_y, blob_z = util.blob_point_from_data(self.body_states[i][7*swim : 7*swim+7], self.blob_references[3*blob:3*blob+3])
+                        
+                        myIo.write_line(str(util.box(blob_x, boxsize)) + ' ' +\
+                                        str(util.box(blob_y, boxsize)) + ' ' +\
+                                        str(util.box(blob_z, boxsize)) + ' ' +\
+                                        str(float(self.pars['RBLOB'])) + ' ' +\
+                                        str(0),
+                                        superpuntoDatafileName)
                 
                 if (self.plot_dim == 2):
                     ax.scatter(two_points_x, two_points_y)
                     ax.plot(two_points_x, two_points_y, c=color)
                 if (self.plot_dim == 3):
                     ax.plot(two_points_x, two_points_y, two_points_z, c=color )
-        
+                 
         if (self.plot_dim == 3):
             util.set_axes_equal(ax)
             ax.set_xlabel("x")
@@ -84,7 +101,6 @@ class VISUAL:
             ax.set_zlabel("z")
 
         plt.show()
-
 
 
 

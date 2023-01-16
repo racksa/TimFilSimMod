@@ -1319,7 +1319,13 @@ __global__ void barrier_forces(double * __restrict__ f_segs, double * __restrict
 
 // Periodic interaction kernels
 
-__global__ void periodic_barrier_forces(double * __restrict__ f_segs, double * __restrict__ f_blobs_repulsion, const double *const __restrict__ x_segs, const double *const __restrict__ x_blobs, const int start_seg, const int num_segs, const int start_blob, const int num_blobs, const double boxsize){
+__global__ void periodic_barrier_forces(double * __restrict__ f_segs,
+                                        double * __restrict__ f_blobs_repulsion,
+                                        const double *const __restrict__ x_segs,
+                                        const double *const __restrict__ x_blobs,
+                                        const int num_segs,
+                                        const int num_blobs,
+                                        const double boxsize){
 
   // Work out which particle(s) this thread will compute the force for
   const int index = threadIdx.x + blockIdx.x*blockDim.x;
@@ -1426,113 +1432,73 @@ __global__ void periodic_barrier_forces(double * __restrict__ f_segs, double * _
 
   #if !PRESCRIBED_BODY_VELOCITIES
 
-    for (int i = (start_blob + index); (i-threadIdx.x) < (start_blob + num_blobs); i+=stride){
+    for (int i = index; i < num_blobs; i+=stride){
 
-      if (i < (start_blob + num_blobs)){
+      fx = 0.0;
+      fy = 0.0;
+      fz = 0.0;
 
-        fx = 0.0;
-        fy = 0.0;
-        fz = 0.0;
+      xi = x_blobs[3*i];
+      yi = x_blobs[3*i + 1];
+      zi = x_blobs[3*i + 2];
 
-        xi = x_blobs[3*i];
-        yi = x_blobs[3*i + 1];
-        zi = x_blobs[3*i + 2];
+      box_images(xi, boxsize);
+      box_images(yi, boxsize);
+      box_images(zi, boxsize);
 
-        box_images(xi, boxsize);
-        box_images(yi, boxsize);
-        box_images(zi, boxsize);
+      for (int j=0; j < NTOTAL; j++){
 
-      }
+        double xj = x_blobs[3*j];
+        double yj = x_blobs[3*j+1];
+        double zj = x_blobs[3*j+2];
 
-      for (int j_start = 0; j_start < NTOTAL; j_start += THREADS_PER_BLOCK){
+        box_images(xj, boxsize);
+        box_images(yj, boxsize);
+        box_images(zj, boxsize);
 
-        // const int j_to_read = j_start + threadIdx.x;
+        const double a_sum = (j < NSWIM*NFIL*NSEG) ? RBLOB + RSEG : 2.0*RBLOB;
+        const double chi_fac = 10.0/a_sum; // 1.0/(1.1*a_sum - a_sum)
 
-        // if (j_to_read < NSWIM*NFIL*NSEG){
+        double dx = xi - xj;
+        double dy = yi - yj;
+        double dz = zi - zj;
 
-        //   x_shared[threadIdx.x] = x_segs[3*j_to_read];
-        //   y_shared[threadIdx.x] = x_segs[3*j_to_read + 1];
-        //   z_shared[threadIdx.x] = x_segs[3*j_to_read + 2];
+        dx -= boxsize * double(int(dx/(0.5*boxsize)));
+        dy -= boxsize * double(int(dy/(0.5*boxsize)));
+        dz -= boxsize * double(int(dz/(0.5*boxsize)));
 
-        // } else if (j_to_read < NTOTAL){
-
-        //   x_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG)];
-        //   y_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG) + 1];
-        //   z_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG) + 2];
-
-        //   // box_images(x_shared[threadIdx.x], boxsize);
-        //   // box_images(y_shared[threadIdx.x], boxsize);
-        //   // box_images(z_shared[threadIdx.x], boxsize);
-
+        // printf("**********xi=%.4f xj=%.4f dx=%.4f ratio=%.4f reset = %.4f\n", 
+        //       xi, xj, dx, dx/(0.5*boxsize), double(int(dx/(0.5*boxsize))));
+        
+        // if(double(int(dx/(0.5*boxsize))) != 0){
+        //   printf("**********xi=%.4f xj=%.4f dx=%.4f\n", xi, xj, dx);
         // }
 
-        // __syncthreads();
+        const double dist = sqrt(dx*dx + dy*dy + dz*dz);
 
-        if (i < (start_blob + num_blobs)){
+        if (((i + NSWIM*NFIL*NSEG) != j) && (dist < 1.1*a_sum)){
 
-          for (int j=0; j_start + j < NTOTAL; j++){
+          double fac = fmin(1.0, 1.0 - chi_fac*(dist - a_sum));
+          fac *= REPULSIVE_FORCE_FACTOR*END_FORCE_MAGNITUDE*fac*fac*fac;
 
-            double xj = x_blobs[3*j];
-            double yj = x_blobs[3*j+1];
-            double zj = x_blobs[3*j+2];
+          const double dm1 = 1.0/dist;
 
-            box_images(xj, boxsize);
-            box_images(yj, boxsize);
-            box_images(zj, boxsize);
-
-            const double a_sum = (j_start + j < NSWIM*NFIL*NSEG) ? RBLOB + RSEG : 2.0*RBLOB;
-            const double chi_fac = 10.0/a_sum; // 1.0/(1.1*a_sum - a_sum)
-
-            double dx = xi - xj;
-            double dy = yi - yj;
-            double dz = zi - zj;
-
-            dx -= boxsize * double(int(dx/(0.5*boxsize)));
-            dy -= boxsize * double(int(dy/(0.5*boxsize)));
-            dz -= boxsize * double(int(dz/(0.5*boxsize)));
-
-            // printf("**********xi=%.4f xj=%.4f dx=%.4f ratio=%.4f reset = %.4f\n", 
-            //       xi, xj, dx, dx/(0.5*boxsize), double(int(dx/(0.5*boxsize))));
-            
-            // if(double(int(dx/(0.5*boxsize))) != 0){
-            //   printf("**********xi=%.4f xj=%.4f dx=%.4f\n", xi, xj, dx);
-            // }
-
-            // dx -= floor(dx/(0.5*boxsize))*boxsize;
-            // dy -= floor(dy/(0.5*boxsize))*boxsize;
-            // dz -= floor(dz/(0.5*boxsize))*boxsize;
-
-            const double dist = sqrt(dx*dx + dy*dy + dz*dz);
-
-            if (((i + NSWIM*NFIL*NSEG) != (j_start + j)) && (dist < 1.1*a_sum)){
-
-              double fac = fmin(1.0, 1.0 - chi_fac*(dist - a_sum));
-              fac *= REPULSIVE_FORCE_FACTOR*END_FORCE_MAGNITUDE*fac*fac*fac;
-
-              const double dm1 = 1.0/dist;
-
-              fx += fac*dx*dm1;
-              fy += fac*dy*dm1;
-              fz += fac*dz*dm1;
-
-            }
-
-          }
+          fx += fac*dx*dm1;
+          fy += fac*dy*dm1;
+          fz += fac*dz*dm1;
 
         }
 
-        __syncthreads();
-
       }
 
-      if (i < (start_blob + num_blobs)){
+      __syncthreads();
 
-        const int p = 3*(i - start_blob);
+      f_blobs_repulsion[3*i] = fx;
+      f_blobs_repulsion[3*i + 1] = fy;
+      f_blobs_repulsion[3*i + 2] = fz;
 
-        f_blobs_repulsion[p] = fx;
-        f_blobs_repulsion[p + 1] = fy;
-        f_blobs_repulsion[p + 2] = fz;
-
+      if(i==0){
+          printf("fx=%.4f x = (%.4f %.4f %.4f)\n", fx, xi, yi, zi);
       }
 
     }

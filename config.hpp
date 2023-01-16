@@ -154,7 +154,7 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #define NFIL 0 // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG 40// The number of segments comprising each filament.
-#define NSWIM 2 // The number of swimmers.
+#define NSWIM 4 // The number of swimmers.
 #define NBLOB 22 // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.

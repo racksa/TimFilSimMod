@@ -25,7 +25,7 @@ __global__ void Msf_mult(double *V, const double *const F, const double *const F
 
 // Generic interaction kernels
 __global__ void barrier_forces(double *f_segs, double *f_blobs_repulsion, const double *const x_segs, const double *const x_blobs, const int start_seg, const int num_segs, const int start_blob, const int num_blobs);
-__global__ void periodic_barrier_forces(double *f_segs, double *f_blobs_repulsion, const double *const x_segs, const double *const x_blobs, const int start_seg, const int num_segs, const int start_blob, const int num_blobs, const double boxsize);
+__global__ void periodic_barrier_forces(double *f_segs, double *f_blobs_repulsion, const double *const x_segs, const double *const x_blobs, const int num_segs, const int num_blobs, const double boxsize);
 
 __host__ __device__
 void box_images(double &x, double box_size);

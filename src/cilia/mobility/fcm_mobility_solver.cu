@@ -235,49 +235,33 @@ void fcm_mobility_solver::apply_interparticle_forces(){
 
   #if !PRESCRIBED_CILIA
 
-    int start_seg = 0;
-    int start_blob = 0;
+    cudaSetDevice(0);
 
-    for (int n = 0; n < num_gpus; n++){
+    const int num_thread_blocks = (std::max<int>(num_segs[0], num_blobs[0]) + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
+    
+    cufcm_solver->reform_data(x_segs_device[0], f_segs_device[0], v_segs_device[0],
+                            x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0],
+                            num_segs[0], num_blobs[0]);
 
-      cudaSetDevice(n);
+    copy_interparticle_blob_forces_to_host();
+    printf("\nbefore = %.4f x=(%.4f %.4f %.4f) \n", f_blobs_repulsion_host[0], x_blobs_host[0], x_blobs_host[1], x_blobs_host[2]);
 
-      const int num_thread_blocks = (std::max<int>(num_segs[n], num_blobs[n]) + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
-      
-      periodic_barrier_forces<<<num_thread_blocks, THREADS_PER_BLOCK>>>(
-        f_segs_device[n], f_blobs_repulsion_device[n],
-        x_segs_device[n], x_blobs_device[n],
-        start_seg, num_segs[n],
-        start_blob, num_blobs[n],
-        pars.boxsize);
+    cufcm_solver->apply_repulsion_for_timcode();
 
-      // barrier_forces<<<num_thread_blocks, THREADS_PER_BLOCK>>>(
-      //   f_segs_device[n], f_blobs_repulsion_device[n], 
-      //   x_segs_device[n], x_blobs_device[n], 
-      //   start_seg, num_segs[n], 
-      //   start_blob, num_blobs[n]);
+    cufcm_solver->reform_data_back(x_segs_device[0], f_segs_device[0], v_segs_device[0],
+                                  x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0],
+                                  num_segs[0], num_blobs[0]);
 
+    periodic_barrier_forces<<<num_thread_blocks, THREADS_PER_BLOCK>>>(
+      f_segs_device[0], f_blobs_repulsion_device[0],
+      x_segs_device[0], x_blobs_device[0],
+      num_segs[0],
+      num_blobs[0],
+      pars.boxsize);
 
-      if (num_gpus > 1){
-
-        // In the barrier_forces(...) kernel, each GPU only evaluates barrier forces for the same subset of segments it evaluates velocities for.
-        // So if we have multiple GPUs but don't copy back the forces to share, HIs between segments will only include any barrier force contributions
-        // if their velocities happen to be computed on the same GPU.
-        cudaMemcpyAsync(&f_segs_host[6*start_seg], &f_segs_device[n][6*start_seg], 6*num_segs[n]*sizeof(double), cudaMemcpyDeviceToHost);
-
-      }
-
-      start_seg += num_segs[n];
-      start_blob += num_blobs[n];
-
-    }
-
-    if (num_gpus > 1){
-
-      fcm_mobility_solver::wait_for_device();
-      fcm_mobility_solver::copy_segment_forces_to_device();
-
-    }
+    copy_interparticle_blob_forces_to_host();
+    printf("\nafter = %.4f x=(%.4f %.4f %.4f) \n", f_blobs_repulsion_host[0], x_blobs_host[0], x_blobs_host[1], x_blobs_host[2]);
+    
 
   #endif
 
@@ -298,27 +282,24 @@ void fcm_mobility_solver::evaluate_segment_segment_mobility(){
 
     int start_seg = 0;
 
-    for (int n = 0; n < num_gpus; n++){
+    cudaSetDevice(0);
 
-      cudaSetDevice(n);
+    int num_thread_blocks = (num_segs[0] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
 
-      int num_thread_blocks = (num_segs[n] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
+    // Mss_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_segs_device[0], f_segs_device[0], x_segs_device[0], start_seg, num_segs[0]);
 
-      // Mss_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_segs_device[n], f_segs_device[n], x_segs_device[n], start_seg, num_segs[n]);
+    cufcm_solver->reform_data(x_segs_device[0], f_segs_device[0], v_segs_device[0],
+                              x_blobs_device[0], f_blobs_device[0], v_blobs_device[0],
+                              num_segs[0], num_blobs[0]);
+                    
+    cufcm_solver->Mss();
 
-      cufcm_solver->reform_data(x_segs_device[n], f_segs_device[n], v_segs_device[n],
-                                x_blobs_device[n], f_blobs_device[n], v_blobs_device[n],
-                                num_segs[n], num_blobs[n]);
-                      
-      cufcm_solver->Mss();
+    cufcm_solver->reform_data_back(x_segs_device[0], f_segs_device[0], v_segs_device[0],
+                                  x_blobs_device[0], f_blobs_device[0], v_blobs_device[0],
+                                  num_segs[0], num_blobs[0]);
 
-      cufcm_solver->reform_data_back(x_segs_device[n], f_segs_device[n], v_segs_device[n],
-                                    x_blobs_device[n], f_blobs_device[n], v_blobs_device[n],
-                                    num_segs[n], num_blobs[n]);
+    start_seg += num_segs[0];
 
-      start_seg += num_segs[n];
-
-    }
 
 }
 
@@ -342,27 +323,19 @@ void fcm_mobility_solver::evaluate_segment_blob_mobility(){
 
 void fcm_mobility_solver::evaluate_blob_blob_mobility(){
 
-  int start_blob = 0;
+  cudaSetDevice(0);
 
-  for (int n = 0; n < num_gpus; n++){
+  int num_thread_blocks = (num_segs[0] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
 
-    cudaSetDevice(n);
+  cufcm_solver->reform_data(x_segs_device[0], f_segs_device[0], v_segs_device[0],
+                            x_blobs_device[0], f_blobs_device[0], v_blobs_device[0],
+                            num_segs[0], num_blobs[0]);
+                  
+  cufcm_solver->Mss();
 
-    int num_thread_blocks = (num_segs[n] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
-
-    cufcm_solver->reform_data(x_segs_device[n], f_segs_device[n], v_segs_device[n],
-                              x_blobs_device[n], f_blobs_device[n], v_blobs_device[n],
-                              num_segs[n], num_blobs[n]);
-                    
-    cufcm_solver->Mss();
-
-    cufcm_solver->reform_data_back(x_segs_device[n], f_segs_device[n], v_segs_device[n],
-                                   x_blobs_device[n], f_blobs_device[n], v_blobs_device[n],
-                                   num_segs[n], num_blobs[n]);
-
-    start_blob += num_blobs[n];
-
-  }
+  cufcm_solver->reform_data_back(x_segs_device[0], f_segs_device[0], v_segs_device[0],
+                                  x_blobs_device[0], f_blobs_device[0], v_blobs_device[0],
+                                  num_segs[0], num_blobs[0]);
 
 }
 

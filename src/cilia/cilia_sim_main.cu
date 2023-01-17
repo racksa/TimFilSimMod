@@ -369,6 +369,10 @@ int main(int argc, char** argv){
         }
 
         mobility.compute_velocities(swimmers, num_gmres_iterations, nt);
+        if(nt%100==0){
+          printf("Checking overlap\n");
+          mobility.cufcm_solver->check_overlap();
+        }
 
         error_is_too_large = mobility.compute_errors(broyden.new_error, swimmers, nt);
 
@@ -376,7 +380,7 @@ int main(int argc, char** argv){
 
           std::cout << DELETE_CURRENT_LINE << std::flush;
           std::cout << "Broyden's method diverged after " << broyden.iter+1 << " iterations during step " << nt+1 << "." << std::endl;
-
+          
           return 0;
 
         }
@@ -415,7 +419,9 @@ int main(int argc, char** argv){
 
         std::cout << DELETE_CURRENT_LINE << std::flush;
         std::cout << "Broyden's method failed to converge within " << MAX_BROYDEN_ITER << " iterations during step " << nt+1 << "." << std::endl;
-
+        printf("Checking overlap\n");
+        mobility.cufcm_solver->check_overlap();
+        mobility.cufcm_solver->write_data_call();
         return 0;
 
       } else {

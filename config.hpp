@@ -154,7 +154,7 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #define NFIL 0 // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG 40// The number of segments comprising each filament.
-#define NSWIM 4 // The number of swimmers.
+#define NSWIM 512 // The number of swimmers.
 #define NBLOB 22 // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
@@ -227,7 +227,7 @@
 
 #endif
 
-#define TOTAL_TIME_STEPS (100*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
+#define TOTAL_TIME_STEPS (400*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
 #define NUM_EULER_STEPS 1 // Number of time-steps to use backwards-Euler before switching to BDF2.
 
 #if CILIA_TYPE==1
@@ -304,7 +304,7 @@
 #if INSTABILITY_CILIA
 
   #define END_FORCE_MAGNITUDE (DIMENSIONLESS_FORCE*KB/(DL*DL*NSEG*NSEG))
-  #define REPULSIVE_FORCE_FACTOR 2.0 // How much stronger is the barrier force than the driving force.
+  #define REPULSIVE_FORCE_FACTOR 4.0 // How much stronger is the barrier force than the driving force.
   #define DT (36.3833/STEPS_PER_PERIOD) // Based on the period of a single DIMENSIONLESS_FORCE = 220.0 filament above a no-slip wall.
 
 #elif CONSTANT_BASE_ROTATION

@@ -19,7 +19,7 @@ color_list.pop(2)
 simName = 'test_rod'
 superpuntoDatafileName = '../../' + simName + '_superpunto.dat'
 
-boxsize = 60
+boxsize = 128
 
 
 class VISUAL:
@@ -32,7 +32,7 @@ class VISUAL:
         self.frames = len(self.body_states)
 
         self.plot_start_frame = 0
-        self.plot_end_frame = 2
+        self.plot_end_frame = 60
         self.plot_interval = 1
 
         self.output_to_superpunto = False

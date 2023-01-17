@@ -215,7 +215,7 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
         qm1 = q;
         
       #elif ROD
-        const double body_spacing = 1.2*(AXIS_DIR_BODY_LENGTH);
+        const double body_spacing = 1.6*(AXIS_DIR_BODY_LENGTH);
 
         // initialise plane 
 
@@ -224,22 +224,17 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
         // const int j = id/NP;
         // const int i = id - j*NP;
 
-
         // initialise lattice
         int NP = ceil(cbrt(NSWIM));
         const int k = id/(NP*NP);
         const int j = (id - k*NP*NP)/NP;
         const int i = id - k*NP*NP - j*NP;
 
-        printf("id: %d (i,j,k) (%d %d %d) ", id, i, j, k);
-
         x[0] = i*body_spacing + body_spacing;
         x[1] = j*body_spacing + body_spacing;
         x[2] = k*body_spacing + body_spacing;
 
-        // if(id==1){
-        //   x[1] = 60.0-body_spacing;
-        // }
+        printf("id: %d (x y z)=(%.4f %.4f %.4f) ", id, x[0], x[1], x[2]);
 
         xm1[0] = x[0];
         xm1[1] = x[1];
@@ -258,22 +253,22 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
         q = quaternion(1.0, 1.0, 0.0, 0.0);
         q.randomise();
 
-        if(id==0){
-          q = quaternion(1.0, 0.0, 1.0, 0.0);
-          q.normalise_in_place();
-        }
-        if(id==1){
-          q = quaternion(1.0, 0.0, 0.0, 1.0);
-          q.normalise_in_place();
-        }
-        if(id==2){
-          q = quaternion(1.0, 0.0, 0.0, 1.0);
-          q.normalise_in_place();
-        }
-        if(id==3){
-          q = quaternion(1.0, 0.0, 1.0, 0.0);
-          q.normalise_in_place();
-        }
+        // if(id==0){
+        //   q = quaternion(1.0, 0.0, 1.0, 0.0);
+        //   q.normalise_in_place();
+        // }
+        // if(id==1){
+        //   q = quaternion(1.0, 0.0, 0.0, 1.0);
+        //   q.normalise_in_place();
+        // }
+        // if(id==2){
+        //   q = quaternion(1.0, 0.0, 0.0, 1.0);
+        //   q.normalise_in_place();
+        // }
+        // if(id==3){
+        //   q = quaternion(1.0, 0.0, 1.0, 0.0);
+        //   q.normalise_in_place();
+        // }
 
         qm1 = q;
       #endif

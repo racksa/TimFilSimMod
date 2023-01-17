@@ -238,30 +238,45 @@ void fcm_mobility_solver::apply_interparticle_forces(){
     cudaSetDevice(0);
 
     const int num_thread_blocks = (std::max<int>(num_segs[0], num_blobs[0]) + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
-    
-    cufcm_solver->reform_data(x_segs_device[0], f_segs_device[0], v_segs_device[0],
-                            x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0],
-                            num_segs[0], num_blobs[0]);
 
-    copy_interparticle_blob_forces_to_host();
-    printf("\nbefore = %.4f x=(%.4f %.4f %.4f) \n", f_blobs_repulsion_host[0], x_blobs_host[0], x_blobs_host[1], x_blobs_host[2]);
+    FILE *pfile;
 
-    cufcm_solver->apply_repulsion_for_timcode();
+    // periodic_barrier_forces<<<num_thread_blocks, THREADS_PER_BLOCK>>>(
+    //   f_segs_device[0], f_blobs_repulsion_device[0],
+    //   x_segs_device[0], x_blobs_device[0],
+    //   num_segs[0],
+    //   num_blobs[0],
+    //   pars.boxsize);
 
-    cufcm_solver->reform_data_back(x_segs_device[0], f_segs_device[0], v_segs_device[0],
-                                  x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0],
-                                  num_segs[0], num_blobs[0]);
+    // cudaMemcpy(&f_blobs_repulsion_host[0], f_blobs_repulsion_device[0], 3*num_blobs[0]*sizeof(double), cudaMemcpyDeviceToHost);
+    // pfile = fopen("barrier_force_fil.dat", "w");
+    // for(int i = 0; i < num_blobs[0]; i++){
+    //     fprintf(pfile, "FIL %d %.8f %.8f %.8f %.8f %.8f %.8f \n", 
+    //     i, f_blobs_repulsion_host[3*i], f_blobs_repulsion_host[3*i+1], f_blobs_repulsion_host[3*i+2],
+    //     x_blobs_host[3*i], x_blobs_host[3*i+1], x_blobs_host[3*i+2]);
+    //     }
+    // fprintf(pfile, "\n#");
+    // fclose(pfile);
 
-    periodic_barrier_forces<<<num_thread_blocks, THREADS_PER_BLOCK>>>(
-      f_segs_device[0], f_blobs_repulsion_device[0],
-      x_segs_device[0], x_blobs_device[0],
-      num_segs[0],
-      num_blobs[0],
-      pars.boxsize);
+    // cufcm_solver->reform_data(x_segs_device[0], f_segs_device[0], v_segs_device[0],
+    //                         x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0],
+    //                         num_segs[0], num_blobs[0], true);
 
-    copy_interparticle_blob_forces_to_host();
-    printf("\nafter = %.4f x=(%.4f %.4f %.4f) \n", f_blobs_repulsion_host[0], x_blobs_host[0], x_blobs_host[1], x_blobs_host[2]);
-    
+    // cufcm_solver->apply_repulsion_for_timcode(num_segs[0], num_blobs[0]);
+
+    // cufcm_solver->reform_data_back(x_segs_device[0], f_segs_device[0], v_segs_device[0],
+    //                               x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0],
+    //                               num_segs[0], num_blobs[0], true);
+
+    // cudaMemcpy(&f_blobs_repulsion_host[0], f_blobs_repulsion_device[0], 3*num_blobs[0]*sizeof(double), cudaMemcpyDeviceToHost);
+    // pfile = fopen("barrier_force_fcm.dat", "w");
+    // for(int i = 0; i < num_blobs[0]; i++){
+    //     fprintf(pfile, "FCM %d %.8f %.8f %.8f %.8f %.8f %.8f \n", 
+    //     i, f_blobs_repulsion_host[3*i], f_blobs_repulsion_host[3*i+1], f_blobs_repulsion_host[3*i+2],
+    //     x_blobs_host[3*i], x_blobs_host[3*i+1], x_blobs_host[3*i+2]);
+    //     }
+    // fprintf(pfile, "\n#");
+    // fclose(pfile);
 
   #endif
 
@@ -290,13 +305,13 @@ void fcm_mobility_solver::evaluate_segment_segment_mobility(){
 
     cufcm_solver->reform_data(x_segs_device[0], f_segs_device[0], v_segs_device[0],
                               x_blobs_device[0], f_blobs_device[0], v_blobs_device[0],
-                              num_segs[0], num_blobs[0]);
+                              num_segs[0], num_blobs[0], false);
                     
     cufcm_solver->Mss();
 
     cufcm_solver->reform_data_back(x_segs_device[0], f_segs_device[0], v_segs_device[0],
                                   x_blobs_device[0], f_blobs_device[0], v_blobs_device[0],
-                                  num_segs[0], num_blobs[0]);
+                                  num_segs[0], num_blobs[0], false);
 
     start_seg += num_segs[0];
 
@@ -329,13 +344,13 @@ void fcm_mobility_solver::evaluate_blob_blob_mobility(){
 
   cufcm_solver->reform_data(x_segs_device[0], f_segs_device[0], v_segs_device[0],
                             x_blobs_device[0], f_blobs_device[0], v_blobs_device[0],
-                            num_segs[0], num_blobs[0]);
+                            num_segs[0], num_blobs[0], false);
                   
   cufcm_solver->Mss();
 
   cufcm_solver->reform_data_back(x_segs_device[0], f_segs_device[0], v_segs_device[0],
                                   x_blobs_device[0], f_blobs_device[0], v_blobs_device[0],
-                                  num_segs[0], num_blobs[0]);
+                                  num_segs[0], num_blobs[0], false);
 
 }
 

@@ -449,24 +449,24 @@ void swimmer::forces_and_torques(const int nt, int id){
 
 
       // Fake gravity
-      if(id==0){
-        f(0) += 20;
-        f(1) += 20;
-      }
-      if(id==1){
-        f(0) -= 30;
-        f(1) += 30;
-      }
-      if(id==2){
-        f(0) += 30;
-        f(1) -= 30;
-      }
-      if(id==3){
-        f(0) -= 30;
-        f(1) -= 30;
-      }
+      // if(id==0){
+      //   f(0) += 20;
+      //   f(1) += 20;
+      // }
+      // if(id==1){
+      //   f(0) -= 30;
+      //   f(1) += 30;
+      // }
+      // if(id==2){
+      //   f(0) += 30;
+      //   f(1) -= 30;
+      // }
+      // if(id==3){
+      //   f(0) -= 30;
+      //   f(1) -= 30;
+      // }
 
-      // f(2) -= 30.0;
+      f(2) += 10.0;
 
       // Finally, add any external forces on the blobs, and the induced torques on body, to f.
 

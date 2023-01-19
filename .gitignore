@@ -1,4 +1,5 @@
 # ignore all data files
+*.out
 *.dat
 *.par
 *.zip

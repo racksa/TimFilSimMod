@@ -1476,7 +1476,7 @@ __global__ void periodic_barrier_forces(double * __restrict__ f_segs,
 
         const double dist = sqrt(dx*dx + dy*dy + dz*dz);
 
-        if (((i + NSWIM*NFIL*NSEG) != j) && (dist < 1.2*a_sum)){
+        if (((i + NSWIM*NFIL*NSEG) != j) && (dist < 1.1*a_sum)){
 
           double fac = fmin(1.0, 1.0 - chi_fac*(dist - a_sum));
           fac *= REPULSIVE_FORCE_FACTOR*END_FORCE_MAGNITUDE*fac*fac*fac;

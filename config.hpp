@@ -152,10 +152,10 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define NFIL 0 // The number of filaments attached to the rigid body/surface in each swimmer.
-#define NSEG 40// The number of segments comprising each filament.
-#define NSWIM 512 // The number of swimmers.
-#define NBLOB 22 // The number of blobs to use as surface elements in each rigid body.
+#define NFIL (0) // The number of filaments attached to the rigid body/surface in each swimmer.
+#define NSEG (0)// The number of segments comprising each filament.
+#define NSWIM (512) // The number of swimmers.
+#define NBLOB (22) // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
 
@@ -168,7 +168,7 @@
 
 #if CILIA_TYPE==0
 
-  #define DIMENSIONLESS_FORCE 220.0
+  #define DIMENSIONLESS_FORCE 30.0
 
 #elif CILIA_TYPE==1
 
@@ -188,7 +188,7 @@
     #define AXIS_DIR_BODY_LENGTH (0.6496*2.0*FIL_LENGTH) // The length of the body parallel to the axis of rotation for the surface of revolution.
   #elif BODY_OR_SURFACE_TYPE==4
     #define AXIS_DIR_BODY_LENGTH (0.5*NBLOB*RBLOB) // The length of the body parallel to the axis of rotation for the surface of revolution.
-  #endif 
+  #endif
 #endif
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -201,7 +201,7 @@
 // This factor avoids over-adjusting during the Broyden's iterations.
 // Setting it to 1 will give standard behaviour, and values smaller than 1 should help with convergence problems by having Broyden's method do more of the heavy lifting.
 // Choosing 0.4 seems to work well when using GMRES, whilst 0.1 appears to be a good choice for a "Broyden's only" simulation.
-#define JACOBIAN_CONFIDENCE_FACTOR 0.4
+#define JACOBIAN_CONFIDENCE_FACTOR 0.1
 
 #define MAX_BROYDEN_ITER 100 // Maximum number of Broyden's method iterations per time-step.
 #define TOL 1e-4 // Tolerance to be reached by the Broyden's method solve.
@@ -227,7 +227,7 @@
 
 #endif
 
-#define TOTAL_TIME_STEPS (400*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
+#define TOTAL_TIME_STEPS (1000*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
 #define NUM_EULER_STEPS 1 // Number of time-steps to use backwards-Euler before switching to BDF2.
 
 #if CILIA_TYPE==1
@@ -304,9 +304,9 @@
 #if INSTABILITY_CILIA
 
   #define END_FORCE_MAGNITUDE (DIMENSIONLESS_FORCE*KB/(DL*DL*NSEG*NSEG))
-  #define REPULSIVE_FORCE_FACTOR 4.0 // How much stronger is the barrier force than the driving force.
+  #define REPULSIVE_FORCE_FACTOR 10.0 // How much stronger is the barrier force than the driving force.
   #define DT (36.3833/STEPS_PER_PERIOD) // Based on the period of a single DIMENSIONLESS_FORCE = 220.0 filament above a no-slip wall.
-
+  // #define DT (4.3/STEPS_PER_PERIOD)
 #elif CONSTANT_BASE_ROTATION
 
   #define DT (2.0*PI/(BASE_ROTATION_RATE*STEPS_PER_PERIOD))

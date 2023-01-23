@@ -422,6 +422,7 @@ int main(int argc, char** argv){
         printf("Checking overlap\n");
         mobility.cufcm_solver->check_overlap();
         mobility.cufcm_solver->write_data_call();
+        mobility.write_repulsion();
         return 0;
 
       } else {

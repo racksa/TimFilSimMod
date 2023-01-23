@@ -68,6 +68,7 @@ public:
   void compute_velocities(std::vector<swimmer>& swimmers, int& num_gmres_iterations, const int nt);
   bool compute_errors(matrix& error, const std::vector<swimmer>& swimmers, const int nt);
   void write_data(const int nt, const std::vector<swimmer>& swimmers);
+  
 
   #if !USE_BROYDEN_FOR_EVERYTHING
 

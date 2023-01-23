@@ -153,8 +153,8 @@
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #define NFIL (0) // The number of filaments attached to the rigid body/surface in each swimmer.
-#define NSEG (0)// The number of segments comprising each filament.
-#define NSWIM (512) // The number of swimmers.
+#define NSEG (1)// The number of segments comprising each filament.
+#define NSWIM (13824) // The number of swimmers.
 #define NBLOB (22) // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
@@ -168,7 +168,7 @@
 
 #if CILIA_TYPE==0
 
-  #define DIMENSIONLESS_FORCE 30.0
+  #define DIMENSIONLESS_FORCE 5.0
 
 #elif CILIA_TYPE==1
 
@@ -203,7 +203,7 @@
 // Choosing 0.4 seems to work well when using GMRES, whilst 0.1 appears to be a good choice for a "Broyden's only" simulation.
 #define JACOBIAN_CONFIDENCE_FACTOR 0.1
 
-#define MAX_BROYDEN_ITER 100 // Maximum number of Broyden's method iterations per time-step.
+#define MAX_BROYDEN_ITER 200 // Maximum number of Broyden's method iterations per time-step.
 #define TOL 1e-4 // Tolerance to be reached by the Broyden's method solve.
 
 #define SOLVER_TYPE 0
@@ -239,7 +239,7 @@
 #else
 
   #define STEPS_PER_PERIOD 300
-  #define SAVES_PER_PERIOD 20
+  #define SAVES_PER_PERIOD 100
 
 #endif
 
@@ -304,9 +304,9 @@
 #if INSTABILITY_CILIA
 
   #define END_FORCE_MAGNITUDE (DIMENSIONLESS_FORCE*KB/(DL*DL*NSEG*NSEG))
-  #define REPULSIVE_FORCE_FACTOR 10.0 // How much stronger is the barrier force than the driving force.
+  #define REPULSIVE_FORCE_FACTOR 1.0 // How much stronger is the barrier force than the driving force.
   #define DT (36.3833/STEPS_PER_PERIOD) // Based on the period of a single DIMENSIONLESS_FORCE = 220.0 filament above a no-slip wall.
-  // #define DT (4.3/STEPS_PER_PERIOD)
+
 #elif CONSTANT_BASE_ROTATION
 
   #define DT (2.0*PI/(BASE_ROTATION_RATE*STEPS_PER_PERIOD))

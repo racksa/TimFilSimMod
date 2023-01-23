@@ -234,7 +234,24 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
         x[1] = j*body_spacing + body_spacing;
         x[2] = k*body_spacing + body_spacing;
 
-        printf("id: %d (x y z)=(%.4f %.4f %.4f) ", id, x[0], x[1], x[2]);
+        // if(id==0){
+        //   x[0] = body_spacing;
+        //   x[1] = body_spacing;
+        // }
+        // if(id==1){
+        //   x[0] = -body_spacing;
+        //   x[1] = body_spacing;
+        // }
+        // if(id==2){
+        //   x[0] = body_spacing;
+        //   x[1] = -body_spacing;
+        // }
+        // if(id==3){
+        //   x[0] = -body_spacing;
+        //   x[1] = -body_spacing;
+        // }
+
+        printf("id: %d (x y z)=(%.4f %.4f %.4f) \n", id, x[0], x[1], x[2]);
 
         xm1[0] = x[0];
         xm1[1] = x[1];
@@ -253,22 +270,22 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
         q = quaternion(1.0, 1.0, 0.0, 0.0);
         q.randomise();
 
-        // if(id==0){
-        //   q = quaternion(1.0, 0.0, 1.0, 0.0);
-        //   q.normalise_in_place();
-        // }
-        // if(id==1){
-        //   q = quaternion(1.0, 0.0, 0.0, 1.0);
-        //   q.normalise_in_place();
-        // }
-        // if(id==2){
-        //   q = quaternion(1.0, 0.0, 0.0, 1.0);
-        //   q.normalise_in_place();
-        // }
-        // if(id==3){
-        //   q = quaternion(1.0, 0.0, 1.0, 0.0);
-        //   q.normalise_in_place();
-        // }
+        if(id==0){
+          q = quaternion(1.0, 0.0, 1.0, 0.0);
+          q.normalise_in_place();
+        }
+        if(id==1){
+          q = quaternion(1.0, 0.0, 0.0, 1.0);
+          q.normalise_in_place();
+        }
+        if(id==2){
+          q = quaternion(1.0, 0.0, 0.0, 1.0);
+          q.normalise_in_place();
+        }
+        if(id==3){
+          q = quaternion(1.0, 0.0, 1.0, 0.0);
+          q.normalise_in_place();
+        }
 
         qm1 = q;
       #endif

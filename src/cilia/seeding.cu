@@ -687,7 +687,7 @@
 
   const std::string file_name_trunk = GENERATRIX_FILE_NAME+std::to_string(NBLOB);
 
-  std::cout << "Seeding the blobs for rods..." << std::endl;
+  // std::cout << "Seeding the blobs for rods..." << std::endl;
 
   shape_fourier_description shape;
 
@@ -755,13 +755,12 @@
 
   }
 
-
   blob_ref_file.close();
   polar_file.close();
   azi_file.close();
   normal_file.close();
 
-  std::cout << "...done!" << std::endl;
+  // std::cout << "...done!" << std::endl;
 
   };
 

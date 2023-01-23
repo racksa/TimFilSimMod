@@ -239,7 +239,7 @@ void fcm_mobility_solver::apply_interparticle_forces(){
 
     const int num_thread_blocks = (std::max<int>(num_segs[0], num_blobs[0]) + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
 
-    FILE *pfile;
+    // FILE *pfile;
 
     // periodic_barrier_forces<<<num_thread_blocks, THREADS_PER_BLOCK>>>(
     //   f_segs_device[0], f_blobs_repulsion_device[0],
@@ -258,15 +258,15 @@ void fcm_mobility_solver::apply_interparticle_forces(){
     // fprintf(pfile, "\n#");
     // fclose(pfile);
 
-    // cufcm_solver->reform_data(x_segs_device[0], f_segs_device[0], v_segs_device[0],
-    //                         x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0],
-    //                         num_segs[0], num_blobs[0], true);
+    cufcm_solver->reform_data(x_segs_device[0], f_segs_device[0], v_segs_device[0],
+                            x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0],
+                            num_segs[0], num_blobs[0], true);
 
-    // cufcm_solver->apply_repulsion_for_timcode(num_segs[0], num_blobs[0]);
+    cufcm_solver->apply_repulsion_for_timcode(num_segs[0], num_blobs[0]);
 
-    // cufcm_solver->reform_data_back(x_segs_device[0], f_segs_device[0], v_segs_device[0],
-    //                               x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0],
-    //                               num_segs[0], num_blobs[0], true);
+    cufcm_solver->reform_data_back(x_segs_device[0], f_segs_device[0], v_segs_device[0],
+                                  x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0],
+                                  num_segs[0], num_blobs[0], true);
 
     // cudaMemcpy(&f_blobs_repulsion_host[0], f_blobs_repulsion_device[0], 3*num_blobs[0]*sizeof(double), cudaMemcpyDeviceToHost);
     // pfile = fopen("barrier_force_fcm.dat", "w");
@@ -370,5 +370,18 @@ void fcm_mobility_solver::evaluate_blob_segment_mobility(){
 
   }
 
+}
+
+void fcm_mobility_solver::write_repulsion(){
+  FILE *pfile;
+  cudaMemcpy(&f_blobs_repulsion_host[0], f_blobs_repulsion_device[0], 3*num_blobs[0]*sizeof(double), cudaMemcpyDeviceToHost);
+  pfile = fopen("barrier_force_fil.dat", "w");
+  for(int i = 0; i < num_blobs[0]; i++){
+      fprintf(pfile, "FIL %d %.8f %.8f %.8f %.8f %.8f %.8f \n", 
+      i, f_blobs_repulsion_host[3*i], f_blobs_repulsion_host[3*i+1], f_blobs_repulsion_host[3*i+2],
+      x_blobs_host[3*i], x_blobs_host[3*i+1], x_blobs_host[3*i+2]);
+      }
+  fprintf(pfile, "\n#");
+  fclose(pfile);
 }
 

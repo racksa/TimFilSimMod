@@ -69,6 +69,7 @@ public:
 
   ~fcm_mobility_solver();
   fcm_mobility_solver();
+  void write_repulsion();
 
 }; // End of fcm_mobility_solver class definition
 

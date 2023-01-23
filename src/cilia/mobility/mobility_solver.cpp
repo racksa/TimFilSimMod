@@ -1868,11 +1868,11 @@ bool mobility_solver::compute_errors(matrix& error, const std::vector<swimmer>& 
             v[1] = -(swimmers[n].body.x[1] + c1*swimmers[n].body.xm1[1] + c2*swimmers[n].body.xm2[1])/(c3*DT);
             v[2] = -(swimmers[n].body.x[2] + c1*swimmers[n].body.xm1[2] + c2*swimmers[n].body.xm2[2])/(c3*DT);
 
-            const double v[3] = {(c2*swimmers[n].body.um1[0] - swimmers[n].body.u[0])/(c3*DT),
+            const double w[3] = {(c2*swimmers[n].body.um1[0] - swimmers[n].body.u[0])/(c3*DT),
                                   (c2*swimmers[n].body.um1[1] - swimmers[n].body.u[1])/(c3*DT),
                                   (c2*swimmers[n].body.um1[2] - swimmers[n].body.u[2])/(c3*DT)};
 
-            dexp(omega, swimmers[n].body.u, v);
+            dexp(omega, swimmers[n].body.u, w);
 
           }
 

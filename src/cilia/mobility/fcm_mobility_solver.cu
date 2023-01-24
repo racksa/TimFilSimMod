@@ -88,13 +88,13 @@ void fcm_mobility_solver::allocate_host_memory(){
   cudaSetDevice(0);
 
   // Allocate pinned host memory to allow async copying
-  cudaHostAlloc(&v_segs_host, 6*NSWIM*NFIL*NSEG*sizeof(double), cudaHostAllocPortable);
-  cudaHostAlloc(&v_blobs_host, 3*NSWIM*NBLOB*sizeof(double), cudaHostAllocPortable);
-  cudaHostAlloc(&x_segs_host, 3*NSWIM*NFIL*NSEG*sizeof(double), cudaHostAllocPortable);
-  cudaHostAlloc(&x_blobs_host, 3*NSWIM*NBLOB*sizeof(double), cudaHostAllocPortable);
-  cudaHostAlloc(&f_segs_host, 6*NSWIM*NFIL*NSEG*sizeof(double), cudaHostAllocPortable);
-  cudaHostAlloc(&f_blobs_host, 3*NSWIM*NBLOB*sizeof(double), cudaHostAllocPortable);
-  cudaHostAlloc(&f_blobs_repulsion_host, 3*NSWIM*NBLOB*sizeof(double), cudaHostAllocPortable);
+  cudaHostAlloc(&v_segs_host, 6*NSWIM*NFIL*NSEG*sizeof(Real), cudaHostAllocPortable);
+  cudaHostAlloc(&v_blobs_host, 3*NSWIM*NBLOB*sizeof(Real), cudaHostAllocPortable);
+  cudaHostAlloc(&x_segs_host, 3*NSWIM*NFIL*NSEG*sizeof(Real), cudaHostAllocPortable);
+  cudaHostAlloc(&x_blobs_host, 3*NSWIM*NBLOB*sizeof(Real), cudaHostAllocPortable);
+  cudaHostAlloc(&f_segs_host, 6*NSWIM*NFIL*NSEG*sizeof(Real), cudaHostAllocPortable);
+  cudaHostAlloc(&f_blobs_host, 3*NSWIM*NBLOB*sizeof(Real), cudaHostAllocPortable);
+  cudaHostAlloc(&f_blobs_repulsion_host, 3*NSWIM*NBLOB*sizeof(Real), cudaHostAllocPortable);
 
   num_segs = new int[num_gpus];
   num_blobs = new int[num_gpus];
@@ -116,27 +116,27 @@ void fcm_mobility_solver::allocate_host_memory(){
 
 void fcm_mobility_solver::allocate_device_memory(){
   
-  v_segs_device = new double*[num_gpus];
-  v_blobs_device = new double*[num_gpus];
-  x_segs_device = new double*[num_gpus];
-  x_blobs_device = new double*[num_gpus];
-  f_segs_device = new double*[num_gpus];
-  f_blobs_device = new double*[num_gpus];
-  f_blobs_repulsion_device = new double*[num_gpus];
+  v_segs_device = new Real*[num_gpus];
+  v_blobs_device = new Real*[num_gpus];
+  x_segs_device = new Real*[num_gpus];
+  x_blobs_device = new Real*[num_gpus];
+  f_segs_device = new Real*[num_gpus];
+  f_blobs_device = new Real*[num_gpus];
+  f_blobs_repulsion_device = new Real*[num_gpus];
 
   for (int n = 0; n < num_gpus; n++){
 
     cudaSetDevice(n);
 
-    cudaMalloc(&v_segs_device[n], 6*num_segs[n]*sizeof(double));
-    cudaMalloc(&v_blobs_device[n], 3*num_blobs[n]*sizeof(double));
+    cudaMalloc(&v_segs_device[n], 6*num_segs[n]*sizeof(Real));
+    cudaMalloc(&v_blobs_device[n], 3*num_blobs[n]*sizeof(Real));
 
-    cudaMalloc(&x_segs_device[n], 3*NSWIM*NFIL*NSEG*sizeof(double));
-    cudaMalloc(&x_blobs_device[n], 3*NSWIM*NBLOB*sizeof(double));
+    cudaMalloc(&x_segs_device[n], 3*NSWIM*NFIL*NSEG*sizeof(Real));
+    cudaMalloc(&x_blobs_device[n], 3*NSWIM*NBLOB*sizeof(Real));
 
-    cudaMalloc(&f_segs_device[n], 6*NSWIM*NFIL*NSEG*sizeof(double));
-    cudaMalloc(&f_blobs_device[n], 3*NSWIM*NBLOB*sizeof(double));
-    cudaMalloc(&f_blobs_repulsion_device[n], 3*num_blobs[n]*sizeof(double));
+    cudaMalloc(&f_segs_device[n], 6*NSWIM*NFIL*NSEG*sizeof(Real));
+    cudaMalloc(&f_blobs_device[n], 3*NSWIM*NBLOB*sizeof(Real));
+    cudaMalloc(&f_blobs_repulsion_device[n], 3*num_blobs[n]*sizeof(Real));
 
   }
 
@@ -147,7 +147,7 @@ void fcm_mobility_solver::copy_segment_positions_to_device(){
   for (int n = 0; n < num_gpus; n++){
 
     cudaSetDevice(n);
-    cudaMemcpyAsync(x_segs_device[n], x_segs_host, 3*NSWIM*NFIL*NSEG*sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(x_segs_device[n], x_segs_host, 3*NSWIM*NFIL*NSEG*sizeof(Real), cudaMemcpyHostToDevice);
 
   }
 
@@ -158,7 +158,7 @@ void fcm_mobility_solver::copy_segment_forces_to_device(){
   for (int n = 0; n < num_gpus; n++){
 
     cudaSetDevice(n);
-    cudaMemcpyAsync(f_segs_device[n], f_segs_host, 6*NSWIM*NFIL*NSEG*sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(f_segs_device[n], f_segs_host, 6*NSWIM*NFIL*NSEG*sizeof(Real), cudaMemcpyHostToDevice);
 
   }
 
@@ -169,7 +169,7 @@ void fcm_mobility_solver::copy_blob_positions_to_device(){
   for (int n = 0; n < num_gpus; n++){
 
     cudaSetDevice(n);
-    cudaMemcpyAsync(x_blobs_device[n], x_blobs_host, 3*NSWIM*NBLOB*sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(x_blobs_device[n], x_blobs_host, 3*NSWIM*NBLOB*sizeof(Real), cudaMemcpyHostToDevice);
 
   }
 
@@ -180,7 +180,7 @@ void fcm_mobility_solver::copy_blob_forces_to_device(){
   for (int n = 0; n < num_gpus; n++){
 
     cudaSetDevice(n);
-    cudaMemcpyAsync(f_blobs_device[n], f_blobs_host, 3*NSWIM*NBLOB*sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(f_blobs_device[n], f_blobs_host, 3*NSWIM*NBLOB*sizeof(Real), cudaMemcpyHostToDevice);
 
   }
 
@@ -193,7 +193,7 @@ void fcm_mobility_solver::copy_interparticle_blob_forces_to_host(){
   for (int n = 0; n < num_gpus; n++){
 
     cudaSetDevice(n);
-    cudaMemcpyAsync(&f_blobs_repulsion_host[3*start_blob], f_blobs_repulsion_device[n], 3*num_blobs[n]*sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpyAsync(&f_blobs_repulsion_host[3*start_blob], f_blobs_repulsion_device[n], 3*num_blobs[n]*sizeof(Real), cudaMemcpyDeviceToHost);
     start_blob += num_blobs[n];
 
   }
@@ -207,7 +207,7 @@ void fcm_mobility_solver::copy_blob_velocities_to_host(){
   for (int n = 0; n < num_gpus; n++){
 
     cudaSetDevice(n);
-    cudaMemcpyAsync(&v_blobs_host[3*start_blob], v_blobs_device[n], 3*num_blobs[n]*sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpyAsync(&v_blobs_host[3*start_blob], v_blobs_device[n], 3*num_blobs[n]*sizeof(Real), cudaMemcpyDeviceToHost);
     start_blob += num_blobs[n];
 
   }
@@ -222,7 +222,7 @@ void fcm_mobility_solver::copy_segment_velocities_to_host(){
 
     cudaSetDevice(n);
 
-    cudaMemcpyAsync(&v_segs_host[6*start_seg], v_segs_device[n], 6*num_segs[n]*sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpyAsync(&v_segs_host[6*start_seg], v_segs_device[n], 6*num_segs[n]*sizeof(Real), cudaMemcpyDeviceToHost);
 
     start_seg += num_segs[n];
 
@@ -248,7 +248,7 @@ void fcm_mobility_solver::apply_interparticle_forces(){
     //   num_blobs[0],
     //   pars.boxsize);
 
-    // cudaMemcpy(&f_blobs_repulsion_host[0], f_blobs_repulsion_device[0], 3*num_blobs[0]*sizeof(double), cudaMemcpyDeviceToHost);
+    // cudaMemcpy(&f_blobs_repulsion_host[0], f_blobs_repulsion_device[0], 3*num_blobs[0]*sizeof(Real), cudaMemcpyDeviceToHost);
     // pfile = fopen("barrier_force_fil.dat", "w");
     // for(int i = 0; i < num_blobs[0]; i++){
     //     fprintf(pfile, "FIL %d %.8f %.8f %.8f %.8f %.8f %.8f \n", 
@@ -267,8 +267,8 @@ void fcm_mobility_solver::apply_interparticle_forces(){
     cufcm_solver->reform_data_back(x_segs_device[0], f_segs_device[0], v_segs_device[0],
                                   x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0],
                                   num_segs[0], num_blobs[0], true);
-
-    // cudaMemcpy(&f_blobs_repulsion_host[0], f_blobs_repulsion_device[0], 3*num_blobs[0]*sizeof(double), cudaMemcpyDeviceToHost);
+                                
+    // cudaMemcpy(&f_blobs_repulsion_host[0], f_blobs_repulsion_device[0], 3*num_blobs[0]*sizeof(Real), cudaMemcpyDeviceToHost);
     // pfile = fopen("barrier_force_fcm.dat", "w");
     // for(int i = 0; i < num_blobs[0]; i++){
     //     fprintf(pfile, "FCM %d %.8f %.8f %.8f %.8f %.8f %.8f \n", 
@@ -345,7 +345,7 @@ void fcm_mobility_solver::evaluate_blob_blob_mobility(){
   cufcm_solver->reform_data(x_segs_device[0], f_segs_device[0], v_segs_device[0],
                             x_blobs_device[0], f_blobs_device[0], v_blobs_device[0],
                             num_segs[0], num_blobs[0], false);
-                  
+
   cufcm_solver->Mss();
 
   cufcm_solver->reform_data_back(x_segs_device[0], f_segs_device[0], v_segs_device[0],
@@ -374,7 +374,7 @@ void fcm_mobility_solver::evaluate_blob_segment_mobility(){
 
 void fcm_mobility_solver::write_repulsion(){
   FILE *pfile;
-  cudaMemcpy(&f_blobs_repulsion_host[0], f_blobs_repulsion_device[0], 3*num_blobs[0]*sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(&f_blobs_repulsion_host[0], f_blobs_repulsion_device[0], 3*num_blobs[0]*sizeof(Real), cudaMemcpyDeviceToHost);
   pfile = fopen("barrier_force_fil.dat", "w");
   for(int i = 0; i < num_blobs[0]; i++){
       fprintf(pfile, "FIL %d %.8f %.8f %.8f %.8f %.8f %.8f \n", 

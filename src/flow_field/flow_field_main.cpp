@@ -30,7 +30,7 @@ int main(int argc, char** argv){
 
   flow_field_evaluator flow;
   int TOTAL_TIME_STEPS, PLOT_FREQUENCY_IN_STEPS;
-  double DT;
+  Real DT;
 
   std::fscanf(sim_par_file, "%i %s %s", &flow.NFIL, &buffer, &buffer);
   std::cout << "NFIL = " << flow.NFIL << std::endl;
@@ -48,8 +48,8 @@ int main(int argc, char** argv){
   std::cout << "MU = " << flow.MU << std::endl;
   std::fscanf(sim_par_file, "%lf %s %s", &flow.RSEG, &buffer, &buffer);
   std::cout << "RSEG = " << flow.RSEG << std::endl;
-  for (int n = 0; n < 6; n++){ // Throw away the next 6 values, all of which are doubles
-    double temp;
+  for (int n = 0; n < 6; n++){ // Throw away the next 6 values, all of which are Reals
+    Real temp;
     std::fscanf(sim_par_file, "%lf %s %s", &temp, &buffer, &buffer);
   }
   std::fscanf(sim_par_file, "%i %s %s", &TOTAL_TIME_STEPS, &buffer, &buffer);

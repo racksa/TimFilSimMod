@@ -12,6 +12,7 @@ class swimmer;
 // =============================================================================
 // Included dependencies
 #include <vector>
+#include <chrono>
 #include "../../general/matrix.hpp"
 #include "../../../config.hpp"
 
@@ -51,13 +52,13 @@ public:
   // As such, it must exist for any mobility solver. Moreover, these external classes expect to receive
   // raw pointers to locations for storing these data, and so that is the form we will require here, even
   // if it just ends up pointing to the storage inside a std::vector or something similar inside the derived class.
-  double *v_segs_host;
-  double *v_blobs_host;
-  double *x_segs_host;
-  double *x_blobs_host;
-  double *f_segs_host;
-  double *f_blobs_host;
-  double *f_blobs_repulsion_host;
+  Real *v_segs_host;
+  Real *v_blobs_host;
+  Real *x_segs_host;
+  Real *x_blobs_host;
+  Real *f_segs_host;
+  Real *f_blobs_host;
+  Real *f_blobs_repulsion_host;
 
   ~mobility_solver();
   mobility_solver();
@@ -95,13 +96,13 @@ public:
 
   #if DYNAMIC_PHASE_EVOLUTION
 
-    std::vector<double> gen_phase_force_refs;
+    std::vector<Real> gen_phase_force_refs;
 
   #endif
 
   #if DYNAMIC_SHAPE_ROTATION
 
-    std::vector<double> gen_angle_force_refs;
+    std::vector<Real> gen_angle_force_refs;
 
   #endif
 

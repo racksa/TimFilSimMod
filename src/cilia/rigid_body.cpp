@@ -13,12 +13,12 @@ rigid_body::~rigid_body(){}
 
 rigid_body::rigid_body(){}
 
-void rigid_body::initial_setup(const int id, double *const f_address, const double *const data_from_file){
+void rigid_body::initial_setup(const int id, Real *const f_address, const Real *const data_from_file){
 
-  blob_references = std::vector<double>(3*NBLOB);
-  polar_dir_refs = std::vector<double>(3*NBLOB);
-  azi_dir_refs = std::vector<double>(3*NBLOB);
-  normal_refs = std::vector<double>(3*NBLOB);
+  blob_references = std::vector<Real>(3*NBLOB);
+  polar_dir_refs = std::vector<Real>(3*NBLOB);
+  azi_dir_refs = std::vector<Real>(3*NBLOB);
+  normal_refs = std::vector<Real>(3*NBLOB);
 
   Q_init = matrix(3,3);
 
@@ -26,8 +26,8 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
 
     blob_forces = f_address;
 
-    blob_forces_m1 = std::vector<double>(3*NBLOB);
-    blob_forces_m2 = std::vector<double>(3*NBLOB);
+    blob_forces_m1 = std::vector<Real>(3*NBLOB);
+    blob_forces_m2 = std::vector<Real>(3*NBLOB);
 
   #endif
 
@@ -103,19 +103,19 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
   #elif SADDLE_BODIES
 
     // Setting both to INFINITY will form a plane.
-    const double radius_of_curvature_x = INFINITY;
-    const double radius_of_curvature_y = INFINITY;
+    const Real radius_of_curvature_x = INFINITY;
+    const Real radius_of_curvature_y = INFINITY;
 
-    const double grid_length_x = DL*NSEG;
-    const double grid_length_y = DL*NSEG;
+    const Real grid_length_x = DL*NSEG;
+    const Real grid_length_y = DL*NSEG;
     const int surf_grid_dim_x = round(sqrt(grid_length_x*NBLOB/grid_length_y));
-    const int surf_grid_dim_y = ceil(NBLOB/double(surf_grid_dim_x));
-    const double surf_grid_step_x = (surf_grid_dim_x > 1) ? grid_length_x/(double(surf_grid_dim_x) - 1.0) : 0.0;
-    const double surf_grid_step_y = (surf_grid_dim_y > 1) ? grid_length_y/(double(surf_grid_dim_y) - 1.0) : 0.0;
+    const int surf_grid_dim_y = ceil(NBLOB/Real(surf_grid_dim_x));
+    const Real surf_grid_step_x = (surf_grid_dim_x > 1) ? grid_length_x/(Real(surf_grid_dim_x) - 1.0) : 0.0;
+    const Real surf_grid_step_y = (surf_grid_dim_y > 1) ? grid_length_y/(Real(surf_grid_dim_y) - 1.0) : 0.0;
 
     #if !READ_INITIAL_CONDITIONS_FROM_BACKUP
 
-      const double body_spacing = std::max<double>(grid_length_x, grid_length_y) + 3.0*DL*NSEG;
+      const Real body_spacing = std::max<Real>(grid_length_x, grid_length_y) + 3.0*DL*NSEG;
 
       x[0] = id*body_spacing;
       x[1] = 0.0;
@@ -139,15 +139,15 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
 
     #endif
 
-    const double im = 0.5*(surf_grid_dim_x - 1.0);
-    const double jm = 0.5*(surf_grid_dim_y - 1.0);
+    const Real im = 0.5*(surf_grid_dim_x - 1.0);
+    const Real jm = 0.5*(surf_grid_dim_y - 1.0);
 
-    const double theta_x = surf_grid_step_x/radius_of_curvature_x;
-    const double theta_y = surf_grid_step_y/radius_of_curvature_y;
+    const Real theta_x = surf_grid_step_x/radius_of_curvature_x;
+    const Real theta_y = surf_grid_step_y/radius_of_curvature_y;
 
     // The multiblob method won't work if the point we designate as the position of the body
     // coincides with one of the blob positions, so we displace it from the body.
-    const double height_offset = RBLOB;
+    const Real height_offset = RBLOB;
 
     for (int i = 0; i < surf_grid_dim_x; i++){
       for (int j = 0; j < surf_grid_dim_y; j++){
@@ -192,7 +192,7 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
     #if !READ_INITIAL_CONDITIONS_FROM_BACKUP
 
       #if SURFACE_OF_REVOLUTION_BODIES
-        const double body_spacing = 3.0*(AXIS_DIR_BODY_LENGTH + FIL_LENGTH);
+        const Real body_spacing = 3.0*(AXIS_DIR_BODY_LENGTH + FIL_LENGTH);
 
         x[0] = id*body_spacing;
         x[1] = 0.0;
@@ -215,7 +215,7 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
         qm1 = q;
         
       #elif ROD
-        const double body_spacing = 1.6*(AXIS_DIR_BODY_LENGTH);
+        const Real body_spacing = 1.6*(AXIS_DIR_BODY_LENGTH);
 
         // initialise plane 
 
@@ -251,7 +251,7 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
         //   x[1] = -body_spacing;
         // }
 
-        printf("id: %d (x y z)=(%.4f %.4f %.4f) \n", id, x[0], x[1], x[2]);
+        // printf("id: %d (x y z)=(%.4f %.4f %.4f) \n", id, x[0], x[1], x[2]);
 
         xm1[0] = x[0];
         xm1[1] = x[1];
@@ -347,8 +347,8 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
 
       for (int n = 0; n < NBLOB; n++){
 
-        const double my_cyl_rad = std::sqrt(blob_references[3*n]*blob_references[3*n] + blob_references[3*n + 1]*blob_references[3*n + 1]);
-        max_cylindrical_radius = std::max<double>(max_cylindrical_radius, my_cyl_rad);
+        const Real my_cyl_rad = std::sqrt(blob_references[3*n]*blob_references[3*n] + blob_references[3*n + 1]*blob_references[3*n + 1]);
+        max_cylindrical_radius = std::max<Real>(max_cylindrical_radius, my_cyl_rad);
 
       }
 
@@ -363,7 +363,7 @@ void rigid_body::initial_setup(const int id, double *const f_address, const doub
 
 void rigid_body::initial_guess(const int nt){
 
-  double initial_guess_x[3], initial_guess_u[3];
+  Real initial_guess_x[3], initial_guess_u[3];
 
   if (nt <= NUM_EULER_STEPS){
 
@@ -434,7 +434,7 @@ void rigid_body::initial_guess(const int nt){
 
       for (int n = 0; n < 3*NBLOB; n++){
 
-        const double temp = 3.0*(blob_forces[n] - blob_forces_m1[n]) + blob_forces_m2[n];
+        const Real temp = 3.0*(blob_forces[n] - blob_forces_m1[n]) + blob_forces_m2[n];
 
         blob_forces_m2[n] = blob_forces_m1[n];
         blob_forces_m1[n] = blob_forces[n];
@@ -448,7 +448,7 @@ void rigid_body::initial_guess(const int nt){
 
 }
 
-void rigid_body::blob_positions(double *const x_array) const {
+void rigid_body::blob_positions(Real *const x_array) const {
 
   const matrix R = q.rot_mat();
 
@@ -468,7 +468,7 @@ void rigid_body::blob_positions(double *const x_array) const {
 
 }
 
-void rigid_body::update(const double *const body_update){
+void rigid_body::update(const Real *const body_update){
 
   #if !INFINITE_PLANE_WALL
 
@@ -550,7 +550,7 @@ void rigid_body::write_backup(std::ofstream& backup_file) const {
 
 #if PRESCRIBED_BODY_VELOCITIES
 
-  void rigid_body::prescribed_translational_velocity(double *const V, const double t, const int id) const {
+  void rigid_body::prescribed_translational_velocity(Real *const V, const Real t, const int id) const {
 
     V[0] = 0.0;
     V[1] = 0.0;
@@ -558,7 +558,7 @@ void rigid_body::write_backup(std::ofstream& backup_file) const {
 
   }
 
-  void rigid_body::prescribed_rotational_velocity(double *const W, const double t, const int id) const {
+  void rigid_body::prescribed_rotational_velocity(Real *const W, const Real t, const int id) const {
 
     W[0] = 0.0;
     W[1] = 0.0;

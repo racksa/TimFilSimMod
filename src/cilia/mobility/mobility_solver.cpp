@@ -7,6 +7,7 @@
 #include <string>
 #include "mobility_solver.hpp"
 #include "swimmer.hpp"
+#include "omp.h"
 
 mobility_solver::~mobility_solver(){}
 
@@ -43,7 +44,7 @@ void mobility_solver::initialise(){
 
         int num_saves;
         generalised_phase_force_file >> num_saves;
-        gen_phase_force_refs = std::vector<double>(num_saves);
+        gen_phase_force_refs = std::vector<Real>(num_saves);
         for (int n = 0; n < num_saves; n++){
 
           generalised_phase_force_file >> gen_phase_force_refs[n];
@@ -75,7 +76,7 @@ void mobility_solver::initialise(){
 
         int num_saves;
         generalised_angle_force_file >> num_saves;
-        gen_angle_force_refs = std::vector<double>(num_saves);
+        gen_angle_force_refs = std::vector<Real>(num_saves);
         for (int n = 0; n < num_saves; n++){
 
           generalised_angle_force_file >> gen_angle_force_refs[n];
@@ -203,6 +204,31 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
   #if !(PRESCRIBED_BODY_VELOCITIES || PRESCRIBED_CILIA)
 
     wait_for_device();
+    
+    // #pragma omp parallel
+    // {
+    //   int swimmer_per_thread = NSWIM/omp_get_num_threads();
+    //   for(int i = 0; i < swimmer_per_thread; i++){
+    //     int n = swimmer_per_thread*omp_get_thread_num() + i;
+    //     matrix& f = swimmers[n].f;
+    //     const matrix R = swimmers[n].body.q.rot_mat();
+
+    //     for (int m = 0; m < NBLOB; m++){
+
+    //       const int id = 3*(n*NBLOB + m);
+    //       const matrix r = R*matrix(3, 1, &swimmers[n].body.blob_references[3*m]);
+
+    //       f(0) += f_blobs_repulsion_host[id];
+    //       f(1) += f_blobs_repulsion_host[id + 1];
+    //       f(2) += f_blobs_repulsion_host[id + 2];
+
+    //       f(3) += r(1)*f_blobs_repulsion_host[id + 2] - r(2)*f_blobs_repulsion_host[id + 1];
+    //       f(4) += r(2)*f_blobs_repulsion_host[id] - r(0)*f_blobs_repulsion_host[id + 2];
+    //       f(5) += r(0)*f_blobs_repulsion_host[id + 1] - r(1)*f_blobs_repulsion_host[id];
+
+    //     }
+    //   }
+    // }
 
     for (int n = 0; n < NSWIM; n++){
 
@@ -232,13 +258,13 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
 #if !USE_BROYDEN_FOR_EVERYTHING
 
-  double cyclic_cubic_spline_interpolation(const double phase, const std::vector<double>& in){
+  Real cyclic_cubic_spline_interpolation(const Real phase, const std::vector<Real>& in){
 
-    double phi_index = 0.5*phase/PI; // = phase/(2*pi)
+    Real phi_index = 0.5*phase/PI; // = phase/(2*pi)
     phi_index -= std::floor(phi_index); // Map this ratio into [0,1]
     phi_index *= in.size();
 
-    double q;
+    Real q;
 
     // Cubic Hermite spline interpolation
     int phi_index_int_lower_bound = int(phi_index); // Rounds towards 0.
@@ -255,16 +281,16 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
       // Otherwise, we're safely in the interior
       const int phi_index_int_upper_bound = (phi_index_int_lower_bound == in.size() - 1) ? 0 : (phi_index_int_lower_bound + 1);
 
-      const double q_lower = in[phi_index_int_lower_bound];
-      const double q_prime_lower = (phi_index_int_lower_bound == 0) ? (in[1] - in[0]) : 0.5*(in[phi_index_int_upper_bound] - in[phi_index_int_lower_bound-1]);
+      const Real q_lower = in[phi_index_int_lower_bound];
+      const Real q_prime_lower = (phi_index_int_lower_bound == 0) ? (in[1] - in[0]) : 0.5*(in[phi_index_int_upper_bound] - in[phi_index_int_lower_bound-1]);
 
-      const double q_upper = in[phi_index_int_upper_bound];
-      const double q_prime_upper = (phi_index_int_upper_bound == 0) ? (in[0] - in[in.size()-1])
+      const Real q_upper = in[phi_index_int_upper_bound];
+      const Real q_prime_upper = (phi_index_int_upper_bound == 0) ? (in[0] - in[in.size()-1])
                                                                     : 0.5*(in[(phi_index_int_upper_bound == in.size()-1) ? 0 : phi_index_int_upper_bound+1] - in[phi_index_int_lower_bound]);
 
-      const double t = phi_index - phi_index_int_lower_bound;
-      const double t2 = t*t;
-      const double t3 = t2*t;
+      const Real t = phi_index - phi_index_int_lower_bound;
+      const Real t2 = t*t;
+      const Real t3 = t2*t;
 
       q = q_lower*(2.0*t3 - 3.0*t2 + 1.0) + q_prime_lower*(t3 - 2.0*t2 + t) + q_upper*(3.0*t2 - 2.0*t3) + q_prime_upper*(t3 - t2);
 
@@ -278,7 +304,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
     #if PRESCRIBED_BODY_VELOCITIES
 
-      const double t = DT*(nt+1.0);
+      const Real t = DT*(nt+1.0);
 
       for (int n = 0; n < NSWIM; n++){
 
@@ -300,13 +326,13 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
           #if DYNAMIC_SHAPE_ROTATION
 
             // Interpolate to find the generalised driving force
-            double q_angle = cyclic_cubic_spline_interpolation(swimmers[n].filaments[i].phase, gen_angle_force_refs);
+            Real q_angle = cyclic_cubic_spline_interpolation(swimmers[n].filaments[i].phase, gen_angle_force_refs);
 
             // Scale if the natural frequency of this cilium differs from the reference case
             q_angle *= 0.5*swimmers[n].filaments[i].omega0/PI;
 
             // Apply the torsional spring force
-            double Qbar = 0.0;
+            Real Qbar = 0.0;
             for (int ii = 0; ii < gen_angle_force_refs.size(); ii++){
               Qbar += std::abs(gen_angle_force_refs[ii]);
             }
@@ -318,7 +344,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
           #if DYNAMIC_PHASE_EVOLUTION
 
             // Interpolate to find the generalised driving force
-            double q_phase = cyclic_cubic_spline_interpolation(swimmers[n].filaments[i].phase, gen_phase_force_refs);
+            Real q_phase = cyclic_cubic_spline_interpolation(swimmers[n].filaments[i].phase, gen_phase_force_refs);
 
             // Scale if the natural frequency of this cilium differs from the reference case
             q_phase *= 0.5*swimmers[n].filaments[i].omega0/PI;
@@ -466,20 +492,20 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
         Bn *= 2.0*PI;
 
         // Match the ratio of cilium length to body length.
-        const double cilia_length_scale = 18.0*(2.0*FIL_LENGTH)/785.0;
+        const Real cilia_length_scale = 18.0*(2.0*FIL_LENGTH)/785.0;
         Ap *= cilia_length_scale;
         An *= cilia_length_scale;
         Bp *= cilia_length_scale;
         Bn *= cilia_length_scale;
 
-        const double MCW_length = cilia_length_scale; // TODO: This should be in the config, but will require other things being added to the config too.
+        const Real MCW_length = cilia_length_scale; // TODO: This should be in the config, but will require other things being added to the config too.
 
         // Slip velocities for pure squirmer:
         for (int n = 0; n < NSWIM; n++){
 
-          const std::vector<double>& polar = swimmers[n].body.polar_dir_refs;
-          const std::vector<double>& normal = swimmers[n].body.normal_refs;
-          const std::vector<double>& refs = swimmers[n].body.blob_references;
+          const std::vector<Real>& polar = swimmers[n].body.polar_dir_refs;
+          const std::vector<Real>& normal = swimmers[n].body.normal_refs;
+          const std::vector<Real>& refs = swimmers[n].body.blob_references;
 
           // Some other things we will need to evaluate velocities:
           const int num_fourier_modes = Ap.num_rows;
@@ -491,14 +517,14 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
           const matrix Q = swimmers[n].body.q.rot_mat();
 
-          const double MCW_length_in_radians = MCW_length/swimmers[n].body.max_cylindrical_radius;
+          const Real MCW_length_in_radians = MCW_length/swimmers[n].body.max_cylindrical_radius;
 
           for (int m = 0; m < NBLOB; m++){
 
-            const double phi = std::atan2(refs[3*m + 1], refs[3*m]); // Azimuthal angle coordinate of the point on the surface in a body-fixed spherical cordinate system.
+            const Real phi = std::atan2(refs[3*m + 1], refs[3*m]); // Azimuthal angle coordinate of the point on the surface in a body-fixed spherical cordinate system.
 
             // What would be the phase of a filament attached to this point on the surface?
-            double phase = 2.0*PI*nt*DT; // = 2.0*PI*t/T, since the period is T = 1.
+            Real phase = 2.0*PI*nt*DT; // = 2.0*PI*t/T, since the period is T = 1.
             phase += 2.0*PI*phi/MCW_length_in_radians; // Shift due to the MCW.
 
          /*   // What would the velocity of the tip of this filament be?
@@ -508,8 +534,8 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
               cos_vec(n-1) = n*std::cos(n*phase);
               sin_vec(n-1) = -n*std::sin(n*phase);
             }*/
-            const double p_coeff = (0.1019 + 0.0064*std::sin(phase))*2.0*FIL_LENGTH; //*AXIS_DIR_BODY_LENGTH; //(cos_vec*Bp + sin_vec*Ap)*s_vec;
-            const double n_coeff = 0.0; //(cos_vec*Bn + sin_vec*An)*s_vec;
+            const Real p_coeff = (0.1019 + 0.0064*std::sin(phase))*2.0*FIL_LENGTH; //*AXIS_DIR_BODY_LENGTH; //(cos_vec*Bp + sin_vec*Ap)*s_vec;
+            const Real n_coeff = 0.0; //(cos_vec*Bn + sin_vec*An)*s_vec;
             matrix p_vec(3,1);
             p_vec(0) = polar[3*m];
             p_vec(1) = polar[3*m + 1];
@@ -566,8 +592,8 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
       matrix out = in;
 
-      const double seg_mob_inv = 6.0*PI*MU*RSEG;
-      const double blob_mob_inv = 6.0*PI*MU*RBLOB;
+      const Real seg_mob_inv = 6.0*PI*MU*RSEG;
+      const Real blob_mob_inv = 6.0*PI*MU*RBLOB;
 
       out.multiply_block(0, 3*NSWIM*NFIL*NSEG, seg_mob_inv);
       out.multiply_block(3*NSWIM*NFIL*NSEG, 3*NSWIM*NBLOB, blob_mob_inv);
@@ -588,13 +614,13 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
             for (int m = 0; m < NFIL; m++){
 
-              double dot_phase = 0.0;
-              double Knorm_phase = 0.0;
+              Real dot_phase = 0.0;
+              Real Knorm_phase = 0.0;
 
               #if DYNAMIC_SHAPE_ROTATION
 
-                double dot_angle = 0.0;
-                double Knorm_angle = 0.0;
+                Real dot_angle = 0.0;
+                Real Knorm_angle = 0.0;
 
               #endif
 
@@ -646,8 +672,8 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
             for (int m = 0; m < NFIL; m++){
 
-              double dot_angle = 0.0;
-              double Knorm_angle = 0.0;
+              Real dot_angle = 0.0;
+              Real Knorm_angle = 0.0;
 
               for (int k = 0; k < 3*NSEG; k++){
 
@@ -691,7 +717,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
               out(out_id + 1) -= out(seg_force_id + 1);
               out(out_id + 2) -= out(seg_force_id + 2);
 
-              const double diff[3] = {segments[k].x[0] - swimmers[n].body.x[0], segments[k].x[1] - swimmers[n].body.x[1], segments[k].x[2] - swimmers[n].body.x[2]};
+              const Real diff[3] = {segments[k].x[0] - swimmers[n].body.x[0], segments[k].x[1] - swimmers[n].body.x[1], segments[k].x[2] - swimmers[n].body.x[2]};
               out(out_id + 3) -= diff[1]*out(seg_force_id + 2) - diff[2]*out(seg_force_id + 1);
               out(out_id + 4) -= diff[2]*out(seg_force_id) - diff[0]*out(seg_force_id + 2);
               out(out_id + 5) -= diff[0]*out(seg_force_id + 1) - diff[1]*out(seg_force_id);
@@ -725,7 +751,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
               const int phase_id = 3*NSWIM*(NBLOB + NFIL*NSEG + 2) + NFIL*n + m;
 
-              double Knormsq = 0.0;
+              Real Knormsq = 0.0;
 
               matrix v1(3,1), v2(3,1);
               v1.zero();
@@ -769,7 +795,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
               const int phase_id = 3*NSWIM*(NBLOB + NFIL*NSEG + 2) + NFIL*n + m;
 
-              double Knormsq = 0.0;
+              Real Knormsq = 0.0;
 
               matrix v1(3,1), v2(3,1);
               v1.zero();
@@ -818,7 +844,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
             for (int k = 0; k < NSEG; k++){
 
               const int seg_force_id = 3*(n*NFIL*NSEG + m*NSEG + k);
-              const double diff[3] = {segments[k].x[0] - swimmers[n].body.x[0], segments[k].x[1] - swimmers[n].body.x[1], segments[k].x[2] - swimmers[n].body.x[2]};
+              const Real diff[3] = {segments[k].x[0] - swimmers[n].body.x[0], segments[k].x[1] - swimmers[n].body.x[1], segments[k].x[2] - swimmers[n].body.x[2]};
               out(seg_force_id) += seg_mob_inv*(out(out_id) + out(out_id + 4)*diff[2] - out(out_id + 5)*diff[1]);
               out(seg_force_id + 1) += seg_mob_inv*(out(out_id + 1) + out(out_id + 5)*diff[0] - out(out_id + 3)*diff[2]);
               out(seg_force_id + 2) += seg_mob_inv*(out(out_id + 2) + out(out_id + 3)*diff[1] - out(out_id + 4)*diff[0]);
@@ -852,7 +878,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
     #else
 
-      const double Minv = 6.0*PI*MU*RBLOB; // Diagonal approx.
+      const Real Minv = 6.0*PI*MU*RBLOB; // Diagonal approx.
 
       #if PRESCRIBED_BODY_VELOCITIES
 
@@ -983,13 +1009,13 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
             out(out_id + 1) -= in(swim_id + 1);
             out(out_id + 2) -= in(swim_id + 2);
 
-            const double diff[3] = {x_segs_host[out_id] - swimmers[n].body.x[0], x_segs_host[out_id + 1] - swimmers[n].body.x[1], x_segs_host[out_id + 2] - swimmers[n].body.x[2]};
+            const Real diff[3] = {x_segs_host[out_id] - swimmers[n].body.x[0], x_segs_host[out_id + 1] - swimmers[n].body.x[1], x_segs_host[out_id + 2] - swimmers[n].body.x[2]};
             out(out_id) -= in(swim_id + 4)*diff[2] - in(swim_id + 5)*diff[1];
             out(out_id + 1) -= in(swim_id + 5)*diff[0] - in(swim_id + 3)*diff[2];
             out(out_id + 2) -= in(swim_id + 3)*diff[1] - in(swim_id + 4)*diff[0];
 
             // -K^T mult
-            const double seg_force[3] = {f_segs_host[2*out_id], f_segs_host[2*out_id + 1], f_segs_host[2*out_id + 2]};
+            const Real seg_force[3] = {f_segs_host[2*out_id], f_segs_host[2*out_id + 1], f_segs_host[2*out_id + 2]};
             out(swim_id) -= seg_force[0];
             out(swim_id + 1) -= seg_force[1];
             out(swim_id + 2) -= seg_force[2];
@@ -1016,7 +1042,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
             out(out_id + 2) -= in(swim_id + 3)*diff(1) - in(swim_id + 4)*diff(0);
 
             // -K^T mult
-            const double blob_force[3] = {f_blobs_host[3*(n*NBLOB + m)], f_blobs_host[3*(n*NBLOB + m) + 1], f_blobs_host[3*(n*NBLOB + m) + 2]};
+            const Real blob_force[3] = {f_blobs_host[3*(n*NBLOB + m)], f_blobs_host[3*(n*NBLOB + m) + 1], f_blobs_host[3*(n*NBLOB + m) + 2]};
             out(swim_id) -= blob_force[0];
             out(swim_id + 1) -= blob_force[1];
             out(swim_id + 2) -= blob_force[2];
@@ -1048,11 +1074,11 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
             #endif
 
-            const double phi_dot = in(in_pos);
+            const Real phi_dot = in(in_pos);
 
             #if DYNAMIC_SHAPE_ROTATION
 
-              const double shape_rotation_angle_dot = in(in_pos + NSWIM*NFIL);
+              const Real shape_rotation_angle_dot = in(in_pos + NSWIM*NFIL);
 
             #endif
 
@@ -1098,7 +1124,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
             #endif
 
-            const double shape_rotation_angle_dot = in(in_pos);
+            const Real shape_rotation_angle_dot = in(in_pos);
 
             for (int k = 0; k < 3*NSEG; k++){
 
@@ -1253,7 +1279,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
     #endif
 
-    const double norm_of_rhs = norm(rhs);
+    const Real norm_of_rhs = norm(rhs);
 
     // If the right hand side is zero, then the solution is zero.
     if (norm_of_rhs == 0.0){
@@ -1474,7 +1500,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
       }
 
-      const double q_norm = norm(Q.get_col(iter));
+      const Real q_norm = norm(Q.get_col(iter));
 
       H(iter,iter-1) = q_norm;
 
@@ -1484,7 +1510,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
       // Apply any previous rotations IN ORDER. These have all already been applied to the RHS vector beta.
       for (int i = 1; i < iter; i++){
 
-        const double temp = CS(i-1)*H(i-1,iter-1) + SN(i-1)*H(i,iter-1);
+        const Real temp = CS(i-1)*H(i-1,iter-1) + SN(i-1)*H(i,iter-1);
         H(i,iter-1) = CS(i-1)*H(i,iter-1) - SN(i-1)*H(i-1,iter-1);
         H(i-1,iter-1) = temp;
 
@@ -1501,14 +1527,14 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
         if (std::abs(H(iter,iter-1)) > std::abs(H(iter-1,iter-1))){
 
-          const double temp = H(iter-1,iter-1)/H(iter,iter-1);
-          SN(iter-1) = (2.0*double(H(iter,iter-1) > 0) - 1.0)/sqrt(1.0 + temp*temp);
+          const Real temp = H(iter-1,iter-1)/H(iter,iter-1);
+          SN(iter-1) = (2.0*Real(H(iter,iter-1) > 0) - 1.0)/sqrt(1.0 + temp*temp);
           CS(iter-1) = temp*SN(iter-1);
 
         } else {
 
-          const double temp = H(iter,iter-1)/H(iter-1,iter-1);
-          CS(iter-1) = (2.0*double(H(iter-1,iter-1) > 0) - 1.0)/sqrt(1.0 + temp*temp);
+          const Real temp = H(iter,iter-1)/H(iter-1,iter-1);
+          CS(iter-1) = (2.0*Real(H(iter-1,iter-1) > 0) - 1.0)/sqrt(1.0 + temp*temp);
           SN(iter-1) = temp*CS(iter-1);
 
         }
@@ -1523,7 +1549,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
       // beta(iter) now contains the (signed) error in the least-squares system, and hence the error in the linear system.
       // If it is small enough, or we've reached the maximum number of iterations, we generate the solution and return.
-      const double relative_error = std::abs(beta(iter))/norm_of_rhs;
+      const Real relative_error = std::abs(beta(iter))/norm_of_rhs;
 
       if ((relative_error <= LINEAR_SYSTEM_TOL) || (iter == max_iter)){
 
@@ -1679,7 +1705,14 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
 void mobility_solver::compute_velocities(std::vector<swimmer>& swimmers, int& num_gmres_iterations, const int nt){
 
+  auto start = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds;
+  
   read_positions_and_forces(swimmers);
+
+  if(DISPLAYTIME){elapsed_seconds = std::chrono::system_clock::now()-start;
+  std::cout<<std::endl<<"\t\t\tread position time"<<elapsed_seconds.count()<<std::endl;}
+  
 
   #if PRESCRIBED_CILIA
 
@@ -1696,9 +1729,17 @@ void mobility_solver::compute_velocities(std::vector<swimmer>& swimmers, int& nu
 
       #if USE_BROYDEN_FOR_EVERYTHING
 
+          if(DISPLAYTIME) start = std::chrono::system_clock::now();
+
           evaluate_blob_blob_mobility();
 
+          if(DISPLAYTIME){elapsed_seconds = std::chrono::system_clock::now()-start;
+          std::cout<<std::endl<<"\t\t\tfcm mobility time"<<elapsed_seconds.count()<<std::endl;}
+          
+
       #endif
+
+      if(DISPLAYTIME) start = std::chrono::system_clock::now();
 
       #if !ROD
         evaluate_blob_segment_mobility();
@@ -1722,6 +1763,9 @@ void mobility_solver::compute_velocities(std::vector<swimmer>& swimmers, int& nu
 
     copy_segment_velocities_to_host();
 
+    if(DISPLAYTIME){elapsed_seconds = std::chrono::system_clock::now()-start;
+    std::cout<<std::endl<<"\t\t\tcopy time"<<elapsed_seconds.count()<<std::endl;}
+
     wait_for_device();
 
   #endif
@@ -1735,9 +1779,9 @@ bool mobility_solver::compute_errors(matrix& error, const std::vector<swimmer>& 
 
   bool error_is_too_large = false;
 
-  const double c1 = -4.0/3.0;
-  const double c2 = 1.0/3.0;
-  const double c3 = -2.0/3.0;
+  const Real c1 = -4.0/3.0;
+  const Real c2 = 1.0/3.0;
+  const Real c3 = -2.0/3.0;
 
   for (int n = 0; n < NSWIM; n++){
 
@@ -1763,8 +1807,8 @@ bool mobility_solver::compute_errors(matrix& error, const std::vector<swimmer>& 
 
         int id = 6*(j + NSEG*(i + n*NFIL));
 
-        const double *const v = &v_segs_host[id];
-        const double *const omega = &v_segs_host[id + 3];
+        const Real *const v = &v_segs_host[id];
+        const Real *const omega = &v_segs_host[id + 3];
 
         #if INFINITE_PLANE_WALL
 
@@ -1803,7 +1847,7 @@ bool mobility_solver::compute_errors(matrix& error, const std::vector<swimmer>& 
 
         id += 3*NSEG;
 
-        double W[3];
+        Real W[3];
         dexpinv(W, segments[j].u, omega);
 
         if (nt < NUM_EULER_STEPS){
@@ -1843,7 +1887,7 @@ bool mobility_solver::compute_errors(matrix& error, const std::vector<swimmer>& 
 
       #if USE_BROYDEN_FOR_EVERYTHING
 
-        double v[3], omega[3];
+        Real v[3], omega[3];
 
         #if PRESCRIBED_BODY_VELOCITIES
 
@@ -1868,7 +1912,7 @@ bool mobility_solver::compute_errors(matrix& error, const std::vector<swimmer>& 
             v[1] = -(swimmers[n].body.x[1] + c1*swimmers[n].body.xm1[1] + c2*swimmers[n].body.xm2[1])/(c3*DT);
             v[2] = -(swimmers[n].body.x[2] + c1*swimmers[n].body.xm1[2] + c2*swimmers[n].body.xm2[2])/(c3*DT);
 
-            const double w[3] = {(c2*swimmers[n].body.um1[0] - swimmers[n].body.u[0])/(c3*DT),
+            const Real w[3] = {(c2*swimmers[n].body.um1[0] - swimmers[n].body.u[0])/(c3*DT),
                                   (c2*swimmers[n].body.um1[1] - swimmers[n].body.u[1])/(c3*DT),
                                   (c2*swimmers[n].body.um1[2] - swimmers[n].body.u[2])/(c3*DT)};
 
@@ -1917,7 +1961,7 @@ bool mobility_solver::compute_errors(matrix& error, const std::vector<swimmer>& 
 
         #if PRESCRIBED_BODY_VELOCITIES
 
-          double w[3];
+          Real w[3];
           dexpinv(w, swimmers[n].body.u, omega);
 
           if (nt < NUM_EULER_STEPS){
@@ -1970,7 +2014,7 @@ bool mobility_solver::compute_errors(matrix& error, const std::vector<swimmer>& 
         const int body_id = 6*n;
         const int id = n*6*(NFIL*NSEG + 1) + 6*NFIL*NSEG;
 
-        double w[3];
+        Real w[3];
         dexpinv(w, swimmers[n].body.u, &v_bodies.data[body_id+3]);
 
         if (nt < NUM_EULER_STEPS){
@@ -2041,7 +2085,7 @@ bool mobility_solver::compute_errors(matrix& error, const std::vector<swimmer>& 
     KTKinv_reference = inverse(KTK);
 
     // Reference mobility matrix
-    double* original_posns = new double[3*(NSWIM-1)];
+    Real* original_posns = new Real[3*(NSWIM-1)];
 
     for (int n = 0; n < NSWIM-1; n++){
 
@@ -2088,7 +2132,7 @@ bool mobility_solver::compute_errors(matrix& error, const std::vector<swimmer>& 
 
       if (std::string(GENERATRIX_FILE_NAME) == std::string("sphere")){
 
-        const double R = 0.5*AXIS_DIR_BODY_LENGTH;
+        const Real R = 0.5*AXIS_DIR_BODY_LENGTH;
         matrix Ntrue(6, 6);
         Ntrue.zero();
         Ntrue(0,0) = 1.0/(6.0*PI*MU*R);
@@ -2154,7 +2198,7 @@ void mobility_solver::write_data(const int nt, const std::vector<swimmer>& swimm
 
       #if USE_BROYDEN_FOR_EVERYTHING
 
-        double v[3], omega[3];
+        Real v[3], omega[3];
 
         #if PRESCRIBED_BODY_VELOCITIES
 
@@ -2179,7 +2223,7 @@ void mobility_solver::write_data(const int nt, const std::vector<swimmer>& swimm
             v[1] = 0.5*(3.0*swimmers[n].body.x[1] - 4.0*swimmers[n].body.xm1[1] + swimmers[n].body.xm2[1])/DT;
             v[2] = 0.5*(3.0*swimmers[n].body.x[2] - 4.0*swimmers[n].body.xm1[2] + swimmers[n].body.xm2[2])/DT;
 
-            const double w[3] = {(1.5*swimmers[n].body.u[0] - 0.5*swimmers[n].body.um1[0])/DT,
+            const Real w[3] = {(1.5*swimmers[n].body.u[0] - 0.5*swimmers[n].body.um1[0])/DT,
                                   (1.5*swimmers[n].body.u[1] - 0.5*swimmers[n].body.um1[1])/DT,
                                    (1.5*swimmers[n].body.u[2] - 0.5*swimmers[n].body.um1[2])/DT};
 

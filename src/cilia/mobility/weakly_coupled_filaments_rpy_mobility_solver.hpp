@@ -34,9 +34,9 @@ public:
   weakly_coupled_filaments_rpy_mobility_solver();
 
   // GPU memory
-  double **f_fils_device; // Total force summed over all segments.
-  double **s_fils_device; // Total first-moment of force summed over all segments.
-  double **x_fils_device; // Average segment position for each filament.
+  Real **f_fils_device; // Total force summed over all segments.
+  Real **s_fils_device; // Total first-moment of force summed over all segments.
+  Real **x_fils_device; // Average segment position for each filament.
 
 }; // End of weakly_coupled_filaments_rpy_mobility_solver class definition
 

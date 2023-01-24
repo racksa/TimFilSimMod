@@ -49,13 +49,13 @@ public:
   int *num_blobs;
 
   // GPU memory
-  double **v_segs_device;
-  double **v_blobs_device;
-  double **x_segs_device;
-  double **x_blobs_device;
-  double **f_segs_device;
-  double **f_blobs_device;
-  double **f_blobs_repulsion_device;
+  Real **v_segs_device;
+  Real **v_blobs_device;
+  Real **x_segs_device;
+  Real **x_blobs_device;
+  Real **f_segs_device;
+  Real **f_blobs_device;
+  Real **f_blobs_repulsion_device;
 
   ~rpy_mobility_solver();
   rpy_mobility_solver();

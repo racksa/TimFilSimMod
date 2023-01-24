@@ -62,13 +62,13 @@ void rpy_mobility_solver::allocate_host_memory(){
   cudaSetDevice(0);
 
   // Allocate pinned host memory to allow async copying
-  cudaHostAlloc(&v_segs_host, 6*NSWIM*NFIL*NSEG*sizeof(double), cudaHostAllocPortable);
-  cudaHostAlloc(&v_blobs_host, 3*NSWIM*NBLOB*sizeof(double), cudaHostAllocPortable);
-  cudaHostAlloc(&x_segs_host, 3*NSWIM*NFIL*NSEG*sizeof(double), cudaHostAllocPortable);
-  cudaHostAlloc(&x_blobs_host, 3*NSWIM*NBLOB*sizeof(double), cudaHostAllocPortable);
-  cudaHostAlloc(&f_segs_host, 6*NSWIM*NFIL*NSEG*sizeof(double), cudaHostAllocPortable);
-  cudaHostAlloc(&f_blobs_host, 3*NSWIM*NBLOB*sizeof(double), cudaHostAllocPortable);
-  cudaHostAlloc(&f_blobs_repulsion_host, 3*NSWIM*NBLOB*sizeof(double), cudaHostAllocPortable);
+  cudaHostAlloc(&v_segs_host, 6*NSWIM*NFIL*NSEG*sizeof(Real), cudaHostAllocPortable);
+  cudaHostAlloc(&v_blobs_host, 3*NSWIM*NBLOB*sizeof(Real), cudaHostAllocPortable);
+  cudaHostAlloc(&x_segs_host, 3*NSWIM*NFIL*NSEG*sizeof(Real), cudaHostAllocPortable);
+  cudaHostAlloc(&x_blobs_host, 3*NSWIM*NBLOB*sizeof(Real), cudaHostAllocPortable);
+  cudaHostAlloc(&f_segs_host, 6*NSWIM*NFIL*NSEG*sizeof(Real), cudaHostAllocPortable);
+  cudaHostAlloc(&f_blobs_host, 3*NSWIM*NBLOB*sizeof(Real), cudaHostAllocPortable);
+  cudaHostAlloc(&f_blobs_repulsion_host, 3*NSWIM*NBLOB*sizeof(Real), cudaHostAllocPortable);
 
   num_segs = new int[num_gpus];
   num_blobs = new int[num_gpus];
@@ -90,27 +90,27 @@ void rpy_mobility_solver::allocate_host_memory(){
 
 void rpy_mobility_solver::allocate_device_memory(){
   
-  v_segs_device = new double*[num_gpus];
-  v_blobs_device = new double*[num_gpus];
-  x_segs_device = new double*[num_gpus];
-  x_blobs_device = new double*[num_gpus];
-  f_segs_device = new double*[num_gpus];
-  f_blobs_device = new double*[num_gpus];
-  f_blobs_repulsion_device = new double*[num_gpus];
+  v_segs_device = new Real*[num_gpus];
+  v_blobs_device = new Real*[num_gpus];
+  x_segs_device = new Real*[num_gpus];
+  x_blobs_device = new Real*[num_gpus];
+  f_segs_device = new Real*[num_gpus];
+  f_blobs_device = new Real*[num_gpus];
+  f_blobs_repulsion_device = new Real*[num_gpus];
 
   for (int n = 0; n < num_gpus; n++){
 
     cudaSetDevice(n);
 
-    cudaMalloc(&v_segs_device[n], 6*num_segs[n]*sizeof(double));
-    cudaMalloc(&v_blobs_device[n], 3*num_blobs[n]*sizeof(double));
+    cudaMalloc(&v_segs_device[n], 6*num_segs[n]*sizeof(Real));
+    cudaMalloc(&v_blobs_device[n], 3*num_blobs[n]*sizeof(Real));
 
-    cudaMalloc(&x_segs_device[n], 3*NSWIM*NFIL*NSEG*sizeof(double));
-    cudaMalloc(&x_blobs_device[n], 3*NSWIM*NBLOB*sizeof(double));
+    cudaMalloc(&x_segs_device[n], 3*NSWIM*NFIL*NSEG*sizeof(Real));
+    cudaMalloc(&x_blobs_device[n], 3*NSWIM*NBLOB*sizeof(Real));
 
-    cudaMalloc(&f_segs_device[n], 6*NSWIM*NFIL*NSEG*sizeof(double));
-    cudaMalloc(&f_blobs_device[n], 3*NSWIM*NBLOB*sizeof(double));
-    cudaMalloc(&f_blobs_repulsion_device[n], 3*num_blobs[n]*sizeof(double));
+    cudaMalloc(&f_segs_device[n], 6*NSWIM*NFIL*NSEG*sizeof(Real));
+    cudaMalloc(&f_blobs_device[n], 3*NSWIM*NBLOB*sizeof(Real));
+    cudaMalloc(&f_blobs_repulsion_device[n], 3*num_blobs[n]*sizeof(Real));
 
   }
 
@@ -121,7 +121,7 @@ void rpy_mobility_solver::copy_segment_positions_to_device(){
   for (int n = 0; n < num_gpus; n++){
 
     cudaSetDevice(n);
-    cudaMemcpyAsync(x_segs_device[n], x_segs_host, 3*NSWIM*NFIL*NSEG*sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(x_segs_device[n], x_segs_host, 3*NSWIM*NFIL*NSEG*sizeof(Real), cudaMemcpyHostToDevice);
 
   }
 
@@ -132,7 +132,7 @@ void rpy_mobility_solver::copy_segment_forces_to_device(){
   for (int n = 0; n < num_gpus; n++){
 
     cudaSetDevice(n);
-    cudaMemcpyAsync(f_segs_device[n], f_segs_host, 6*NSWIM*NFIL*NSEG*sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(f_segs_device[n], f_segs_host, 6*NSWIM*NFIL*NSEG*sizeof(Real), cudaMemcpyHostToDevice);
 
   }
 
@@ -143,7 +143,7 @@ void rpy_mobility_solver::copy_blob_positions_to_device(){
   for (int n = 0; n < num_gpus; n++){
 
     cudaSetDevice(n);
-    cudaMemcpyAsync(x_blobs_device[n], x_blobs_host, 3*NSWIM*NBLOB*sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(x_blobs_device[n], x_blobs_host, 3*NSWIM*NBLOB*sizeof(Real), cudaMemcpyHostToDevice);
 
   }
 
@@ -154,7 +154,7 @@ void rpy_mobility_solver::copy_blob_forces_to_device(){
   for (int n = 0; n < num_gpus; n++){
 
     cudaSetDevice(n);
-    cudaMemcpyAsync(f_blobs_device[n], f_blobs_host, 3*NSWIM*NBLOB*sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(f_blobs_device[n], f_blobs_host, 3*NSWIM*NBLOB*sizeof(Real), cudaMemcpyHostToDevice);
 
   }
 
@@ -167,7 +167,7 @@ void rpy_mobility_solver::copy_interparticle_blob_forces_to_host(){
   for (int n = 0; n < num_gpus; n++){
 
     cudaSetDevice(n);
-    cudaMemcpyAsync(&f_blobs_repulsion_host[3*start_blob], f_blobs_repulsion_device[n], 3*num_blobs[n]*sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpyAsync(&f_blobs_repulsion_host[3*start_blob], f_blobs_repulsion_device[n], 3*num_blobs[n]*sizeof(Real), cudaMemcpyDeviceToHost);
     start_blob += num_blobs[n];
 
   }
@@ -181,7 +181,7 @@ void rpy_mobility_solver::copy_blob_velocities_to_host(){
   for (int n = 0; n < num_gpus; n++){
 
     cudaSetDevice(n);
-    cudaMemcpyAsync(&v_blobs_host[3*start_blob], v_blobs_device[n], 3*num_blobs[n]*sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpyAsync(&v_blobs_host[3*start_blob], v_blobs_device[n], 3*num_blobs[n]*sizeof(Real), cudaMemcpyDeviceToHost);
     start_blob += num_blobs[n];
 
   }
@@ -196,7 +196,7 @@ void rpy_mobility_solver::copy_segment_velocities_to_host(){
 
     cudaSetDevice(n);
 
-    cudaMemcpyAsync(&v_segs_host[6*start_seg], v_segs_device[n], 6*num_segs[n]*sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpyAsync(&v_segs_host[6*start_seg], v_segs_device[n], 6*num_segs[n]*sizeof(Real), cudaMemcpyDeviceToHost);
 
     start_seg += num_segs[n];
 
@@ -224,7 +224,7 @@ void rpy_mobility_solver::apply_interparticle_forces(){
         // In the barrier_forces(...) kernel, each GPU only evaluates barrier forces for the same subset of segments it evaluates velocities for.
         // So if we have multiple GPUs but don't copy back the forces to share, HIs between segments will only include any barrier force contributions
         // if their velocities happen to be computed on the same GPU.
-        cudaMemcpyAsync(&f_segs_host[6*start_seg], &f_segs_device[n][6*start_seg], 6*num_segs[n]*sizeof(double), cudaMemcpyDeviceToHost);
+        cudaMemcpyAsync(&f_segs_host[6*start_seg], &f_segs_device[n][6*start_seg], 6*num_segs[n]*sizeof(Real), cudaMemcpyDeviceToHost);
 
       }
 

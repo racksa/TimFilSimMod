@@ -168,7 +168,7 @@
 
 #if CILIA_TYPE==0
 
-  #define DIMENSIONLESS_FORCE 5.0
+  #define DIMENSIONLESS_FORCE 10.0
 
 #elif CILIA_TYPE==1
 
@@ -197,6 +197,7 @@
 
 // Threads per block for kernel execution. Should be a multiple of 32, the warp size.
 #define THREADS_PER_BLOCK 64
+#define OMP_THREAD_NUM 4
 
 // This factor avoids over-adjusting during the Broyden's iterations.
 // Setting it to 1 will give standard behaviour, and values smaller than 1 should help with convergence problems by having Broyden's method do more of the heavy lifting.
@@ -239,7 +240,7 @@
 #else
 
   #define STEPS_PER_PERIOD 300
-  #define SAVES_PER_PERIOD 100
+  #define SAVES_PER_PERIOD 20
 
 #endif
 
@@ -304,7 +305,7 @@
 #if INSTABILITY_CILIA
 
   #define END_FORCE_MAGNITUDE (DIMENSIONLESS_FORCE*KB/(DL*DL*NSEG*NSEG))
-  #define REPULSIVE_FORCE_FACTOR 1.0 // How much stronger is the barrier force than the driving force.
+  #define REPULSIVE_FORCE_FACTOR 0.5 // How much stronger is the barrier force than the driving force.
   #define DT (36.3833/STEPS_PER_PERIOD) // Based on the period of a single DIMENSIONLESS_FORCE = 220.0 filament above a no-slip wall.
 
 #elif CONSTANT_BASE_ROTATION
@@ -421,6 +422,33 @@
 
   #error "I haven't implemented the preconditioner for free bodies with DYNAMIC_SHAPE_ROTATION enabled yet..."
 
+#endif
+
+#define DISPLAYTIME false
+
+#define USE_DOUBLE_PRECISION true
+
+#if USE_DOUBLE_PRECISION
+    typedef double Real;
+    typedef long Integer;
+    #define my_rint rint
+    #define my_exp exp
+    #define my_floor floor
+    #define my_fmod fmod
+    #define my_getrf_ dgetrf_
+    #define my_getri_ dgetri_
+    #define my_gemm_ dgemm_
+#else
+    typedef float Real;
+    typedef int Integer;
+    #define my_rint rintf
+    #define my_exp expf
+    #define my_floor floorf
+    #define my_fmod fmodf
+    #define my_getrf_ sgetrf_
+    #define my_getri_ sgetri_
+    #define my_gemm_ sgemm_
+    
 #endif
 
 #endif // MY_CONFIG_HEADER_INCLUDED

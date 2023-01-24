@@ -26,7 +26,7 @@ public:
   int iter;
   int max_iter;
   int total_iter;
-  double avg_iter;
+  Real avg_iter;
 
   broyden_solver();
   ~broyden_solver();

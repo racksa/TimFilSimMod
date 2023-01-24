@@ -23,10 +23,10 @@ public:
 
   rigid_body body;
 
-  std::vector<double> filament_references;
-  std::vector<double> polar_dir_refs;
-  std::vector<double> azi_dir_refs;
-  std::vector<double> normal_refs;
+  std::vector<Real> filament_references;
+  std::vector<Real> polar_dir_refs;
+  std::vector<Real> azi_dir_refs;
+  std::vector<Real> normal_refs;
   
   std::vector<filament> filaments;
 
@@ -35,7 +35,7 @@ public:
   ~swimmer();
   swimmer();
 
-  void initial_setup(const int id, const double *const data_from_file, double *const x_segs_address, double *const f_segs_address, double *const f_blobs_address);
+  void initial_setup(const int id, const Real *const data_from_file, Real *const x_segs_address, Real *const f_segs_address, Real *const f_blobs_address);
   void initial_guess(const int nt);
   void forces_and_torques(const int nt, int id);
   void end_of_step(const int nt);
@@ -61,7 +61,7 @@ public:
 
     void prepare_jacobian_inv(const int nt);
     matrix jacobian_inv_mult(const matrix& in, const int nt) const;
-    void update(const double *const swimmer_update);
+    void update(const Real *const swimmer_update);
 
   #endif
 

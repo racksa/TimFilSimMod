@@ -58,12 +58,12 @@ filament::~filament(){}
 
 filament::filament(){}
 
-void filament::initial_setup(const double *const base_pos,
-                              const double *const dir_in,
-                              const double *const strain_twist_in,
-                              const double *const data_from_file,
-                              double *const x_address,
-                              double *const f_address,
+void filament::initial_setup(const Real *const base_pos,
+                              const Real *const dir_in,
+                              const Real *const strain_twist_in,
+                              const Real *const data_from_file,
+                              Real *const x_address,
+                              Real *const f_address,
                               const int fil_id){
 
   segments = std::vector<segment>(NSEG);
@@ -106,7 +106,7 @@ void filament::initial_setup(const double *const base_pos,
         shape_rotation_angle = data_from_file[p++];
         shape_rotation_angle_dot = data_from_file[p++];
 
-        vel_dir_angle = std::vector<double>(3*NSEG);
+        vel_dir_angle = std::vector<Real>(3*NSEG);
 
       #else
 
@@ -121,7 +121,7 @@ void filament::initial_setup(const double *const base_pos,
 
       #endif
 
-      vel_dir_phase = std::vector<double>(3*NSEG);
+      vel_dir_phase = std::vector<Real>(3*NSEG);
 
       #if FIT_TO_DATA_BEAT
 
@@ -183,9 +183,9 @@ void filament::initial_setup(const double *const base_pos,
       clamp_lambdam2[1] = data_from_file[p++];
       clamp_lambdam2[2] = data_from_file[p++];
 
-      lambda = std::vector<double>(3*(NSEG-1));
-      lambdam1 = std::vector<double>(3*(NSEG-1));
-      lambdam2 = std::vector<double>(3*(NSEG-1));
+      lambda = std::vector<Real>(3*(NSEG-1));
+      lambdam1 = std::vector<Real>(3*(NSEG-1));
+      lambdam2 = std::vector<Real>(3*(NSEG-1));
 
       for (int n = 0; n < NSEG-1; n++){
 
@@ -216,8 +216,8 @@ void filament::initial_setup(const double *const base_pos,
 
   #else
 
-    const double dir_norm = sqrt(dir_in[0]*dir_in[0] + dir_in[1]*dir_in[1] + dir_in[2]*dir_in[2]);
-    const double dir[3] = {dir_in[0]/dir_norm, dir_in[1]/dir_norm, dir_in[2]/dir_norm};
+    const Real dir_norm = sqrt(dir_in[0]*dir_in[0] + dir_in[1]*dir_in[1] + dir_in[2]*dir_in[2]);
+    const Real dir[3] = {dir_in[0]/dir_norm, dir_in[1]/dir_norm, dir_in[2]/dir_norm};
 
     quaternion qtemp(dir[0], 0.0, -dir[2], dir[1]);
     qtemp.sqrt_in_place();
@@ -247,7 +247,7 @@ void filament::initial_setup(const double *const base_pos,
           // Random phases
           std::random_device rd{};
           std::mt19937 gen{rd()};
-          std::uniform_real_distribution<double> distribution(0.0, 2.0*PI);
+          std::uniform_real_distribution<Real> distribution(0.0, 2.0*PI);
           phase = distribution(gen);
 
         #elif (CILIA_IC_TYPE==2)
@@ -259,7 +259,7 @@ void filament::initial_setup(const double *const base_pos,
 
           #elif SURFACE_OF_REVOLUTION_BODIES
 
-            const double phi = atan2(base_pos[1], base_pos[0]);
+            const Real phi = atan2(base_pos[1], base_pos[0]);
 
             // TODO: Make this meaningful for non-spheres.
             phase = phi*PI*AXIS_DIR_BODY_LENGTH/CILIA_MCW_WAVELENGTH; // = phi * circumference / wavelength, if the body is a sphere.
@@ -279,7 +279,7 @@ void filament::initial_setup(const double *const base_pos,
 
         #if SURFACE_OF_REVOLUTION_BODIES
 
-          //const double phi = atan2(base_pos[1], base_pos[0]);
+          //const Real phi = atan2(base_pos[1], base_pos[0]);
 
           // Reduce the speed of the MCW on dorsal side of the swimmer
           //omega0 = (phi >= 0.0) ? 2.0*PI/1.7262 : 2.0*PI; // Uses T = 1.
@@ -290,16 +290,16 @@ void filament::initial_setup(const double *const base_pos,
 
       // qtemp maps x to the surface normal, which we want, but we also need to rotate about the surface normal to align
       // the 'normal' vector at the base (i.e. the second frame vector) with the polar direction.
-      double base_normal[3];
+      Real base_normal[3];
       qtemp.normal(base_normal);
 
-      double polar_dir[3] = {0.0, 0.0, -1.0};
-      const double dir_dot_polar_dir = dir[0]*polar_dir[0] + dir[1]*polar_dir[1] + dir[2]*polar_dir[2];
+      Real polar_dir[3] = {0.0, 0.0, -1.0};
+      const Real dir_dot_polar_dir = dir[0]*polar_dir[0] + dir[1]*polar_dir[1] + dir[2]*polar_dir[2];
       polar_dir[0] -= dir_dot_polar_dir*dir[0];
       polar_dir[1] -= dir_dot_polar_dir*dir[1];
       polar_dir[2] -= dir_dot_polar_dir*dir[2];
 
-      const double norm_polar_dir = sqrt(polar_dir[0]*polar_dir[0] + polar_dir[1]*polar_dir[1] + polar_dir[2]*polar_dir[2]);
+      const Real norm_polar_dir = sqrt(polar_dir[0]*polar_dir[0] + polar_dir[1]*polar_dir[1] + polar_dir[2]*polar_dir[2]);
       quaternion q2;
 
       if (norm_polar_dir > 0.0){
@@ -321,9 +321,9 @@ void filament::initial_setup(const double *const base_pos,
       // The default constructor will make q2 the identity, so this is what will happen here.
 
       // Introduce tilt
-      //const double tilt_angle = -2.0*PI/16.0;
-      //const double sn = sin(0.5*tilt_angle);
-      //const double cs = cos(0.5*tilt_angle);
+      //const Real tilt_angle = -2.0*PI/16.0;
+      //const Real sn = sin(0.5*tilt_angle);
+      //const Real cs = cos(0.5*tilt_angle);
       //q2 = quaternion(cs, sn*dir[0], sn*dir[1], sn*dir[2])*q2;
 
       body_qm1 = q2*qtemp;
@@ -339,11 +339,11 @@ void filament::initial_setup(const double *const base_pos,
 
       #endif
 
-      vel_dir_phase = std::vector<double>(3*NSEG);
+      vel_dir_phase = std::vector<Real>(3*NSEG);
 
       #if (DYNAMIC_SHAPE_ROTATION || WRITE_GENERALISED_FORCES)
 
-        vel_dir_angle = std::vector<double>(3*NSEG);
+        vel_dir_angle = std::vector<Real>(3*NSEG);
 
         shape_rotation_angle_dot = 0.0; // Initial guess. Shouldn't actually be necessary if we entered here because of WRITE_GENERALISED_FORCES?
 
@@ -357,8 +357,8 @@ void filament::initial_setup(const double *const base_pos,
 
       inverse_jacobian = matrix(6*NSEG, 6*NSEG);
 
-      double seg_pos[3] = {base_pos[0], base_pos[1], base_pos[2]};
-      double seg_u[3] = {0.0, 0.0, 0.0};
+      Real seg_pos[3] = {base_pos[0], base_pos[1], base_pos[2]};
+      Real seg_u[3] = {0.0, 0.0, 0.0};
 
       for (int i = 0; i < NSEG; i++) {
 
@@ -379,9 +379,9 @@ void filament::initial_setup(const double *const base_pos,
 
       #endif
 
-      lambda = std::vector<double>(3*(NSEG-1));
-      lambdam1 = std::vector<double>(3*(NSEG-1));
-      lambdam2 = std::vector<double>(3*(NSEG-1));
+      lambda = std::vector<Real>(3*(NSEG-1));
+      lambdam1 = std::vector<Real>(3*(NSEG-1));
+      lambdam2 = std::vector<Real>(3*(NSEG-1));
 
       for (int i = 0; i < 3*(NSEG-1); i++){
 
@@ -401,7 +401,7 @@ void filament::initial_setup(const double *const base_pos,
         clamp_lambda[1] = 0.0;
         clamp_lambda[2] = 0.0;
 
-        const double pMag = 0.01*END_FORCE_MAGNITUDE;
+        const Real pMag = 0.01*END_FORCE_MAGNITUDE;
 
         #if (CILIA_IC_TYPE==0)
 
@@ -427,10 +427,10 @@ void filament::initial_setup(const double *const base_pos,
 
           std::random_device rd{};
           std::mt19937 gen{rd()};
-          std::normal_distribution<double> d(0,1);
+          std::normal_distribution<Real> d(0,1);
 
-          double dir1[3] = {d(gen), d(gen), d(gen)};
-          const double norm_dir1 = sqrt(dir1[0]*dir1[0] + dir1[1]*dir1[1] + dir1[2]*dir1[2]);
+          Real dir1[3] = {d(gen), d(gen), d(gen)};
+          const Real norm_dir1 = sqrt(dir1[0]*dir1[0] + dir1[1]*dir1[1] + dir1[2]*dir1[2]);
 
           perturbation1[0] = pMag*dir1[0]/norm_dir1;
           perturbation1[1] = pMag*dir1[1]/norm_dir1;
@@ -444,12 +444,12 @@ void filament::initial_setup(const double *const base_pos,
 
           std::random_device rd{};
           std::mt19937 gen{rd()};
-          std::normal_distribution<double> d(0,1);
+          std::normal_distribution<Real> d(0,1);
 
-          double dir1[3] = {d(gen), d(gen), d(gen)};
-          const double norm_dir1 = sqrt(dir1[0]*dir1[0] + dir1[1]*dir1[1] + dir1[2]*dir1[2]);
-          double dir2[3] = {d(gen), d(gen), d(gen)};
-          const double norm_dir2 = sqrt(dir2[0]*dir2[0] + dir2[1]*dir2[1] + dir2[2]*dir2[2]);
+          Real dir1[3] = {d(gen), d(gen), d(gen)};
+          const Real norm_dir1 = sqrt(dir1[0]*dir1[0] + dir1[1]*dir1[1] + dir1[2]*dir1[2]);
+          Real dir2[3] = {d(gen), d(gen), d(gen)};
+          const Real norm_dir2 = sqrt(dir2[0]*dir2[0] + dir2[1]*dir2[1] + dir2[2]*dir2[2]);
 
           perturbation1[0] = pMag*dir1[0]/norm_dir1;
           perturbation1[1] = pMag*dir1[1]/norm_dir1;
@@ -510,7 +510,7 @@ void filament::initial_setup(const double *const base_pos,
 
 void filament::robot_arm(){
 
-  double t1[3], t2[3];
+  Real t1[3], t2[3];
 
   segments[0].tangent(t1);
 
@@ -532,7 +532,7 @@ void filament::robot_arm(){
 
 }
 
-void filament::accept_state_from_rigid_body(const double *const x_in, const double *const u_in){
+void filament::accept_state_from_rigid_body(const Real *const x_in, const Real *const u_in){
 
   segments[0].x[0] = x_in[0];
   segments[0].x[1] = x_in[1];
@@ -546,7 +546,7 @@ void filament::accept_state_from_rigid_body(const double *const x_in, const doub
   #else
 
     // Write it this way to trigger the quaternion update too.
-    const double u_update[3] = {u_in[0] - segments[0].u[0], u_in[1] - segments[0].u[1], u_in[2] - segments[0].u[2]};
+    const Real u_update[3] = {u_in[0] - segments[0].u[0], u_in[1] - segments[0].u[1], u_in[2] - segments[0].u[2]};
     segments[0].update(u_update);
 
   #endif
@@ -657,7 +657,7 @@ void filament::accept_state_from_rigid_body(const double *const x_in, const doub
 
     }
 
-    void filament::fitted_shape_tangent(double& tx, double& ty, const double s) const {
+    void filament::fitted_shape_tangent(Real& tx, Real& ty, const Real s) const {
 
       matrix svec(3,1);
       svec(0) = 1.0;
@@ -678,7 +678,7 @@ void filament::accept_state_from_rigid_body(const double *const x_in, const doub
 
     }
 
-    matrix filament::fitted_shape(const double s) const {
+    matrix filament::fitted_shape(const Real s) const {
 
       matrix pos(3,1);
       pos(2) = 0.0;
@@ -704,7 +704,7 @@ void filament::accept_state_from_rigid_body(const double *const x_in, const doub
 
     }
 
-    matrix filament::fitted_shape_velocity_direction(const double s) const {
+    matrix filament::fitted_shape_velocity_direction(const Real s) const {
 
       matrix dir(3,1);
       dir(2) = 0.0;
@@ -730,26 +730,26 @@ void filament::accept_state_from_rigid_body(const double *const x_in, const doub
 
     }
 
-    double filament::fitted_curve_length(const double s) const {
+    Real filament::fitted_curve_length(const Real s) const {
 
-      double length = 0.0;
+      Real length = 0.0;
 
       if (s > 0){
 
-        double tx, ty; // Components of shape tangent
+        Real tx, ty; // Components of shape tangent
 
         const int num_traps = 10*NSEG;
-        const double dl = 1.0/double(num_traps);
+        const Real dl = 1.0/Real(num_traps);
 
         // Start with the whole trapeziums
         fitted_shape_tangent(tx, ty, 0);
-        double f0 = sqrt(tx*tx + ty*ty);
-        const double floor_val = floor(s/dl);
+        Real f0 = sqrt(tx*tx + ty*ty);
+        const Real floor_val = floor(s/dl);
 
         for (int n = 1; n <= floor_val; n++){
 
           fitted_shape_tangent(tx, ty, n*dl);
-          double f1 = sqrt(tx*tx + ty*ty);
+          Real f1 = sqrt(tx*tx + ty*ty);
 
           length += 0.5*dl*(f0 + f1);
 
@@ -760,12 +760,12 @@ void filament::accept_state_from_rigid_body(const double *const x_in, const doub
         // Interpolate between the mesh points to get the final value.
         // I want to do it like this, rather than have the mesh depend on the input s,
         // to ensure that the output is monotonic.
-        const double ceil_val = ceil(s/dl);
+        const Real ceil_val = ceil(s/dl);
 
         if (ceil_val > floor_val){
 
           fitted_shape_tangent(tx, ty, ceil(s/dl)*dl);
-          double f1 = sqrt(tx*tx + ty*ty);
+          Real f1 = sqrt(tx*tx + ty*ty);
 
           length += ((s/dl - floor_val)/(ceil_val - floor_val))*0.5*dl*(f0 + f1);
 
@@ -779,7 +779,7 @@ void filament::accept_state_from_rigid_body(const double *const x_in, const doub
 
     void filament::find_fitted_shape_s(){
 
-      s_to_use = std::vector<double>(NSEG);
+      s_to_use = std::vector<Real>(NSEG);
       s_to_use[0] = 0.0;
       s_to_use[NSEG-1] = 1.0;
 
@@ -789,20 +789,20 @@ void filament::accept_state_from_rigid_body(const double *const x_in, const doub
 
         s_values_file << s_to_use[0] << " ";
 
-        const double total_length = fitted_curve_length(1.0);
+        const Real total_length = fitted_curve_length(1.0);
 
         for (int n = 1; n < NSEG-1; n++){
 
-          const double target_fraction = double(n)/double(NSEG-1);
+          const Real target_fraction = Real(n)/Real(NSEG-1);
 
-          double s_lower_bound = s_to_use[n-1];
-          double s_upper_bound = 1.0;
+          Real s_lower_bound = s_to_use[n-1];
+          Real s_upper_bound = 1.0;
 
           // Bisection method
-          double curr_s_estimate = 0.5*(s_lower_bound + s_upper_bound);
-          double curr_frac_estimate = fitted_curve_length(curr_s_estimate)/total_length;
+          Real curr_s_estimate = 0.5*(s_lower_bound + s_upper_bound);
+          Real curr_frac_estimate = fitted_curve_length(curr_s_estimate)/total_length;
 
-          while (std::abs(curr_frac_estimate - target_fraction) > 0.1/double(NSEG)){
+          while (std::abs(curr_frac_estimate - target_fraction) > 0.1/Real(NSEG)){
 
             if (curr_frac_estimate > target_fraction){
 
@@ -831,7 +831,7 @@ void filament::accept_state_from_rigid_body(const double *const x_in, const doub
       #else
 
         // Bilinear interpolation
-        double phi_index = 0.5*phase/PI; // = phase/(2*pi)
+        Real phi_index = 0.5*phase/PI; // = phase/(2*pi)
         phi_index -= std::floor(phi_index); // Map this ratio into [0,1)
         phi_index *= (*s_to_use_ref_ptr).num_rows;
 
@@ -857,7 +857,7 @@ void filament::accept_state_from_rigid_body(const double *const x_in, const doub
 
         for (int n = 1; n < NSEG-1; n++){
 
-          double s_index = ((*s_to_use_ref_ptr).num_cols - 1)*n/double(NSEG-1);
+          Real s_index = ((*s_to_use_ref_ptr).num_cols - 1)*n/Real(NSEG-1);
           int s_index_lower_bound = int(s_index);
 
           s_to_use[n] = svec(s_index_lower_bound) + (s_index - s_index_lower_bound)*(svec(s_index_lower_bound+1) - svec(s_index_lower_bound));
@@ -870,21 +870,21 @@ void filament::accept_state_from_rigid_body(const double *const x_in, const doub
 
   #elif BUILD_A_BEAT
 
-    double filament::build_a_beat_tangent_angle(const double s) const {
+    Real filament::build_a_beat_tangent_angle(const Real s) const {
 
-      const double wR = RECOVERY_STROKE_WINDOW_LENGTH*2.0*PI;
-      const double wE = EFFECTIVE_STROKE_LENGTH*2.0*PI;
-      const double phi_transition = wE + s*(2.0*PI - wE - wR); // Assumes 0 <= s <= 1
+      const Real wR = RECOVERY_STROKE_WINDOW_LENGTH*2.0*PI;
+      const Real wE = EFFECTIVE_STROKE_LENGTH*2.0*PI;
+      const Real phi_transition = wE + s*(2.0*PI - wE - wR); // Assumes 0 <= s <= 1
 
-      //const double shifted_phase = phase - 2.0*PI*std::floor(0.5*phase/PI);
-      double shifted_phase = phase - s*2.0*PI*ZERO_VELOCITY_AVOIDANCE_LENGTH;
+      //const Real shifted_phase = phase - 2.0*PI*std::floor(0.5*phase/PI);
+      Real shifted_phase = phase - s*2.0*PI*ZERO_VELOCITY_AVOIDANCE_LENGTH;
       shifted_phase -= 2.0*PI*std::floor(0.5*shifted_phase/PI);
 
-      double delta;
+      Real delta;
 
       if (shifted_phase < wE){
 
-        const double temp = PI*(wE - shifted_phase)/wE;
+        const Real temp = PI*(wE - shifted_phase)/wE;
 
         delta = temp - std::sin(temp)*std::cos(temp);
 
@@ -894,7 +894,7 @@ void filament::accept_state_from_rigid_body(const double *const x_in, const doub
 
       } else if (shifted_phase < phi_transition + wR){
 
-        const double temp = PI*(shifted_phase - phi_transition)/wR;
+        const Real temp = PI*(shifted_phase - phi_transition)/wR;
 
         delta = temp - std::sin(temp)*std::cos(temp);
 
@@ -908,7 +908,7 @@ void filament::accept_state_from_rigid_body(const double *const x_in, const doub
 
     }
 
-    void filament::build_a_beat_tangent(matrix& t, const double s) const {
+    void filament::build_a_beat_tangent(matrix& t, const Real s) const {
 
       // Because of how we define quaternions to map the x-axis to the tangent, tx should be
       // the normal/vertical component of the reference tangent.
@@ -918,23 +918,23 @@ void filament::accept_state_from_rigid_body(const double *const x_in, const doub
 
     }
 
-    void filament::build_a_beat_tangent_phase_deriv(matrix& k, const double s) const {
+    void filament::build_a_beat_tangent_phase_deriv(matrix& k, const Real s) const {
 
-      const double fac = 2.0*(PI - 2.0*beat_switch_theta);
+      const Real fac = 2.0*(PI - 2.0*beat_switch_theta);
 
-      const double wR = RECOVERY_STROKE_WINDOW_LENGTH*2.0*PI;
-      const double wE = EFFECTIVE_STROKE_LENGTH*2.0*PI;
-      const double phi_transition = wE + s*(2.0*PI - wE - wR); // Assumes 0 <= s <= 1
+      const Real wR = RECOVERY_STROKE_WINDOW_LENGTH*2.0*PI;
+      const Real wE = EFFECTIVE_STROKE_LENGTH*2.0*PI;
+      const Real phi_transition = wE + s*(2.0*PI - wE - wR); // Assumes 0 <= s <= 1
 
-      //const double shifted_phase = phase - 2.0*PI*std::floor(0.5*phase/PI);
-      double shifted_phase = phase - s*2.0*PI*ZERO_VELOCITY_AVOIDANCE_LENGTH;
+      //const Real shifted_phase = phase - 2.0*PI*std::floor(0.5*phase/PI);
+      Real shifted_phase = phase - s*2.0*PI*ZERO_VELOCITY_AVOIDANCE_LENGTH;
       shifted_phase -= 2.0*PI*std::floor(0.5*shifted_phase/PI);
 
-      double delta_deriv;
+      Real delta_deriv;
 
       if (shifted_phase < wE){
 
-        const double temp = PI*(wE - shifted_phase)/wE;
+        const Real temp = PI*(wE - shifted_phase)/wE;
 
         delta_deriv = std::sin(temp);
         delta_deriv *= -delta_deriv/wE;
@@ -945,7 +945,7 @@ void filament::accept_state_from_rigid_body(const double *const x_in, const doub
 
       } else if (shifted_phase < phi_transition + wR){
 
-        const double temp = PI*(shifted_phase - phi_transition)/wR;
+        const Real temp = PI*(shifted_phase - phi_transition)/wR;
 
         delta_deriv = std::sin(temp);
         delta_deriv *= delta_deriv/wR;
@@ -966,7 +966,7 @@ void filament::accept_state_from_rigid_body(const double *const x_in, const doub
 
 #endif
 
-void filament::initial_guess(const int nt, const double *const x_in, const double *const u_in){
+void filament::initial_guess(const int nt, const Real *const x_in, const Real *const u_in){
 
   #if PRESCRIBED_CILIA
 
@@ -1098,7 +1098,7 @@ void filament::initial_guess(const int nt, const double *const x_in, const doubl
       #elif BUILD_A_BEAT
 
         // Shape
-        build_a_beat_tangent(t2, double(n)/double(NSEG - 1));
+        build_a_beat_tangent(t2, Real(n)/Real(NSEG - 1));
 
         #if (DYNAMIC_SHAPE_ROTATION || WRITE_GENERALISED_FORCES)
 
@@ -1117,7 +1117,7 @@ void filament::initial_guess(const int nt, const double *const x_in, const doubl
         t1 = t2;
 
         // Velocity direction
-        build_a_beat_tangent_phase_deriv(k2, double(n)/double(NSEG - 1));
+        build_a_beat_tangent_phase_deriv(k2, Real(n)/Real(NSEG - 1));
 
         #if (DYNAMIC_SHAPE_ROTATION || WRITE_GENERALISED_FORCES)
 
@@ -1222,7 +1222,7 @@ void filament::initial_guess(const int nt, const double *const x_in, const doubl
 
       for (int n = 0; n < 3*(NSEG-1); n++){
 
-        const double temp = 3.0*(lambda[n] - lambdam1[n]) + lambdam2[n];
+        const Real temp = 3.0*(lambda[n] - lambdam1[n]) + lambdam2[n];
 
         lambdam2[n] = lambdam1[n];
         lambdam1[n] = lambda[n];
@@ -1230,7 +1230,7 @@ void filament::initial_guess(const int nt, const double *const x_in, const doubl
 
       }
 
-      double temp = 3.0*(tether_lambda[0] - tether_lambdam1[0]) + tether_lambdam2[0];
+      Real temp = 3.0*(tether_lambda[0] - tether_lambdam1[0]) + tether_lambdam2[0];
       tether_lambdam2[0] = tether_lambdam1[0];
       tether_lambdam1[0] = tether_lambda[0];
       tether_lambda[0] = temp;
@@ -1318,13 +1318,13 @@ void filament::end_of_step(const int nt){
 
 #if GEOMETRIC_CILIA
 
-  double filament::find_my_angle(){
+  Real filament::find_my_angle(){
 
     /*const vec3 vertical = body_q.rotate(my_vertical);
     const vec3 positive_angle_direction = body_q.rotate(fast_beating_direction);
     const vec3 tangent = segments[0].tangent();
-    const double x_component = dot(tangent, positive_angle_direction);
-    const double z_component = dot(tangent, vertical);
+    const Real x_component = dot(tangent, positive_angle_direction);
+    const Real z_component = dot(tangent, vertical);
 
     return atan(x_component/z_component);*/
 
@@ -1359,14 +1359,14 @@ void filament::internal_forces_and_torques(const int nt){
 
   }
 
-  double t[3];
+  Real t[3];
   matrix R(3,3);
   quaternion qmid;
 
   for (int i = 0; i < NSEG-1; i++){
 
     // Inex. constraint forces and torques
-    const double *const lam = &lambda[3*i];
+    const Real *const lam = &lambda[3*i];
 
     f[6*i] -= lam[0];
     f[6*i + 1] -= lam[1];
@@ -1442,7 +1442,7 @@ void filament::internal_forces_and_torques(const int nt){
 
     #endif
 
-    double clamping_torque[3];
+    Real clamping_torque[3];
     dexpinv_transpose(clamping_torque, segments[0].u, clamp_lambda);
     f[3] += clamping_torque[0];
     f[4] += clamping_torque[1];
@@ -1450,7 +1450,7 @@ void filament::internal_forces_and_torques(const int nt){
 
   #elif CONSTANT_BASE_ROTATION
 
-    double clamping_torque[3];
+    Real clamping_torque[3];
     dexpinv_transpose(clamping_torque, segments[0].u, clamp_lambda);
     f[3] += clamping_torque[0];
     f[4] += clamping_torque[1];
@@ -1465,14 +1465,14 @@ matrix filament::jacobian_lie_algebra_block(const int nt){
   matrix E(3*NSEG, 3*NSEG);
   E.zero();
 
-  const double time_step_fac = (nt < NUM_EULER_STEPS) ? DT : 2.0*DT/3.0;
+  const Real time_step_fac = (nt < NUM_EULER_STEPS) ? DT : 2.0*DT/3.0;
 
   // We deal with the end particles seperately:
 
   // n = 0
-  const double Tfac = 1.0/(8.0*PI*MU*RSEG*RSEG*RSEG);
+  const Real Tfac = 1.0/(8.0*PI*MU*RSEG*RSEG*RSEG);
 
-  double t[3], n[3], b[3], tp1[3], np1[3], bp1[3];
+  Real t[3], n[3], b[3], tp1[3], np1[3], bp1[3];
 
   segments[0].tangent(t);
   segments[0].normal(n);
@@ -1497,7 +1497,7 @@ matrix filament::jacobian_lie_algebra_block(const int nt){
   matrix dOmega = Tfac*(ElasticPart + ConstraintPart);
 
   matrix LieMat = -rcross(segments[0].u); // = transpose of rcross
-  double approx_Omega[3] = {Tfac*f[3], Tfac*f[4], Tfac*f[5]};
+  Real approx_Omega[3] = {Tfac*f[3], Tfac*f[4], Tfac*f[5]};
   matrix OmegaMat = rcross(approx_Omega);
   matrix u_vec(3, 1, segments[0].u);
   matrix Block = -time_step_fac*(dOmega - 0.5*(OmegaMat + LieMat*dOmega) + (rcross(OmegaMat*u_vec) + LieMat*OmegaMat + LieMat*LieMat*dOmega)/12.0);
@@ -1517,7 +1517,7 @@ matrix filament::jacobian_lie_algebra_block(const int nt){
   segments[NSEG-1].normal(n);
   segments[NSEG-1].binormal(b);
 
-  double tm1[3], nm1[3], bm1[3];
+  Real tm1[3], nm1[3], bm1[3];
 
   segments[NSEG-2].tangent(tm1);
   segments[NSEG-2].normal(nm1);
@@ -1585,7 +1585,7 @@ matrix filament::jacobian_lie_algebra_block(const int nt){
     midpoint_quaternion(qmh, segments[k-1].q, segments[k].q);
 
     // Diagonal block
-    const double lamvec[3] = {lambda[3*(k-1)] + lambda[3*k], lambda[3*(k-1) + 1] + lambda[3*k + 1], lambda[3*(k-1) + 2] + lambda[3*k + 2]};
+    const Real lamvec[3] = {lambda[3*(k-1)] + lambda[3*k], lambda[3*(k-1) + 1] + lambda[3*k + 1], lambda[3*(k-1) + 2] + lambda[3*k + 2]};
     ConstraintPart = -0.5*DL*rcross(lamvec)*rcross(t);
 
     KphLieDerivative = body_frame_moment_lie_derivative(segments[k].q, segments[k+1].q, false);
@@ -1653,7 +1653,7 @@ void filament::invert_approx_jacobian(const int nt){
 
   // Begin with the dependence of the position equations on the Lagrange
   // multipliers (both those relating to inextensibility and the tethering constraint).
-  double fac = (nt < NUM_EULER_STEPS) ? -DT/(6.0*PI*MU*RSEG) : -DT/(9.0*PI*MU*RSEG);
+  Real fac = (nt < NUM_EULER_STEPS) ? -DT/(6.0*PI*MU*RSEG) : -DT/(9.0*PI*MU*RSEG);
 
   for (int i = 0; i < 3*NSEG; i++) {
 
@@ -1669,7 +1669,7 @@ void filament::invert_approx_jacobian(const int nt){
 
   // Now we include the dependence of these same equations on the Lie algebra
   // elements.
-  double t[3];
+  Real t[3];
   matrix temp(3,3);
 
   #if GEOMETRIC_CILIA
@@ -1779,7 +1779,7 @@ void filament::invert_approx_jacobian(const int nt){
 
 }
 
-void filament::update(const double *const u){
+void filament::update(const Real *const u){
 
   tether_lambda[0] += u[0];
   tether_lambda[1] += u[1];
@@ -1787,13 +1787,13 @@ void filament::update(const double *const u){
 
   for (int i = 1; i < NSEG; i++){
 
-    double *const lam = &lambda[3*(i-1)];
+    Real *const lam = &lambda[3*(i-1)];
 
     lam[0] += u[3*i];
     lam[1] += u[3*i + 1];
     lam[2] += u[3*i + 2];
 
-    const double *const seg_update = &u[3*(NSEG+i)];
+    const Real *const seg_update = &u[3*(NSEG+i)];
     segments[i].update(seg_update);
 
   }
@@ -1806,7 +1806,7 @@ void filament::update(const double *const u){
 
   #elif GEOMETRIC_CILIA
 
-    const double *const seg_update = &u[3*NSEG];
+    const Real *const seg_update = &u[3*NSEG];
     segments[0].update(seg_update);
 
   #endif

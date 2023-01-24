@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "broyden_solver.hpp"
 #include "swimmer.hpp"
+#include "omp.h"
 
 broyden_solver::~broyden_solver(){}
 
@@ -42,6 +43,15 @@ broyden_solver::broyden_solver(){
     #endif
 
     // Start-of-step part
+    // #pragma omp parallel
+    // {
+    //   int swimmer_per_thread = NSWIM/omp_get_num_threads();
+    //   for(int i = 0; i < swimmer_per_thread; i++){
+    //     int n = swimmer_per_thread*omp_get_thread_num() + i;
+    //     update.set_block(n*per_body, per_body, swimmers[n].jacobian_inv_mult(error.get_block(n*per_body, per_body), nt));
+    //   }
+    // }
+
     for (int n = 0; n < NSWIM; n++){
 
       update.set_block(n*per_body, per_body, swimmers[n].jacobian_inv_mult(error.get_block(n*per_body, per_body), nt));
@@ -53,7 +63,7 @@ broyden_solver::broyden_solver(){
     // Update part
     for (int i = 0; i < iter; i++){
 
-      double error_dot_D_col_i = 0.0;
+      Real error_dot_D_col_i = 0.0;
 
       for (int n = 0; n < NBROY; n++){
 
@@ -99,7 +109,7 @@ broyden_solver::broyden_solver(){
       // Update part
       for (int i = 0; i < iter; i++){
 
-        double error_dot_D_col_i = 0.0;
+        Real error_dot_D_col_i = 0.0;
 
         for (int n = 0; n < NBROY; n++){
 
@@ -113,7 +123,7 @@ broyden_solver::broyden_solver(){
 
       D.set_col(iter, new_error - error);
 
-      const double delta_error = norm(D.get_col(iter));
+      const Real delta_error = norm(D.get_col(iter));
 
       C.divide_col(iter, delta_error);
       D.divide_col(iter, delta_error);
@@ -125,7 +135,7 @@ broyden_solver::broyden_solver(){
     iter++;
     total_iter++;
     max_iter = std::max<int>(max_iter, iter);
-    avg_iter = double(total_iter)/(nt + 1.0 - nt_start);
+    avg_iter = Real(total_iter)/(nt + 1.0 - nt_start);
 
   }
 

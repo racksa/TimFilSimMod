@@ -1,6 +1,7 @@
 // matrix_unit_testing.cpp
 
 #include "matrix.hpp"
+#include "../../config.hpp"
 
 int main(){
 
@@ -16,7 +17,7 @@ int main(){
 
     for (int elem = 0; elem < num_rows*num_cols; elem++){
 
-        A(elem) = double(elem);
+        A(elem) = Real(elem);
 
     }
 
@@ -27,12 +28,12 @@ int main(){
     //
     // Test 2: Is the memory organised in column-major order?
     //
-    double cumulative_error = 0.0;
+    Real cumulative_error = 0.0;
 
     for (int row = 0; row < num_rows; row++){
 
-        cumulative_error += std::abs(A(row,0) - double(row)); // Check the first column...
-        cumulative_error += std::abs(A(row, num_cols-1) - double(row + num_rows*(num_cols-1))); // ...and the last column.
+        cumulative_error += std::abs(A(row,0) - Real(row)); // Check the first column...
+        cumulative_error += std::abs(A(row, num_cols-1) - Real(row + num_rows*(num_cols-1))); // ...and the last column.
 
     }
 

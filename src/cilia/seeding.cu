@@ -12,20 +12,20 @@
   #include <string>
   #include "matrix.hpp"
 
-  __global__ void find_nearest_neighbours(int *const ids, const double *const samples, const int num_samples, const double *const X, const int N){
+  __global__ void find_nearest_neighbours(int *const ids, const Real *const samples, const int num_samples, const Real *const X, const int N){
 
     // Work out which sample(s) this thread will compute the nearest-neighbour for
     const int index = threadIdx.x + blockIdx.x*blockDim.x;
     const int stride = blockDim.x*gridDim.x;
 
     // Declare the shared memory for this thread block
-    __shared__ double x_shared[THREADS_PER_BLOCK];
-    __shared__ double y_shared[THREADS_PER_BLOCK];
-    __shared__ double z_shared[THREADS_PER_BLOCK];
+    __shared__ Real x_shared[THREADS_PER_BLOCK];
+    __shared__ Real y_shared[THREADS_PER_BLOCK];
+    __shared__ Real z_shared[THREADS_PER_BLOCK];
 
-    double xi, yi, zi;
+    Real xi, yi, zi;
     int min_id;
-    double min_dist = 1e100;
+    Real min_dist = 1e100;
 
     for (int i = index; (i-threadIdx.x) < num_samples; i+=stride){
 
@@ -55,11 +55,11 @@
 
           for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < N); j++){
 
-            const double dx = xi - x_shared[j];
-            const double dy = yi - y_shared[j];
-            const double dz = zi - z_shared[j];
+            const Real dx = xi - x_shared[j];
+            const Real dy = yi - y_shared[j];
+            const Real dz = zi - z_shared[j];
 
-            const double dist = sqrt(dx*dx + dy*dy + dz*dz);
+            const Real dist = sqrt(dx*dx + dy*dy + dz*dz);
 
             if (dist < min_dist){
 
@@ -166,7 +166,7 @@
 
   };
 
-  double radius(const double theta) const {
+  Real radius(const Real theta) const {
 
     matrix cos_mat(num_modes,1);
     matrix sin_mat(num_modes,1);
@@ -182,17 +182,17 @@
 
   };
 
-  matrix location(const double theta, const double phi) const {
+  matrix location(const Real theta, const Real phi) const {
 
     matrix loc(3,1);
 
-    const double r = radius(theta);
+    const Real r = radius(theta);
 
-    const double cp = std::cos(phi);
-    const double sp = std::sin(phi);
+    const Real cp = std::cos(phi);
+    const Real sp = std::sin(phi);
 
-    const double ct = std::cos(theta);
-    const double st = std::sin(theta);
+    const Real ct = std::cos(theta);
+    const Real st = std::sin(theta);
 
     loc(0) = r*cp*st;
     loc(1) = r*sp*st;
@@ -202,7 +202,7 @@
 
   };
 
-  matrix azi_dir(const double phi) const {
+  matrix azi_dir(const Real phi) const {
 
     matrix e(3,1);
 
@@ -214,9 +214,9 @@
 
   };
 
-  double radius_deriv(const double theta) const {
+  Real radius_deriv(const Real theta) const {
 
-    double out = 0.0;
+    Real out = 0.0;
 
     for (int n = 1; n < num_modes; n++){
 
@@ -228,9 +228,9 @@
 
   };
 
-  double radius_second_deriv(const double theta) const {
+  Real radius_second_deriv(const Real theta) const {
 
-    double out = 0.0;
+    Real out = 0.0;
 
     for (int n = 1; n < num_modes; n++){
 
@@ -242,20 +242,20 @@
 
   };
 
-  matrix polar_dir(const double theta, const double phi) const {
+  matrix polar_dir(const Real theta, const Real phi) const {
 
-    const double r = radius(theta);
-    const double rprime = radius_deriv(theta);
+    const Real r = radius(theta);
+    const Real rprime = radius_deriv(theta);
 
-    const double cp = std::cos(phi);
-    const double sp = std::sin(phi);
+    const Real cp = std::cos(phi);
+    const Real sp = std::sin(phi);
 
-    const double ct = std::cos(theta);
-    const double st = std::sin(theta);
+    const Real ct = std::cos(theta);
+    const Real st = std::sin(theta);
 
     matrix e(3,1);
 
-    const double temp = rprime*st + r*ct;
+    const Real temp = rprime*st + r*ct;
     e(0) = cp*temp;
     e(1) = sp*temp;
     e(2) = rprime*ct - r*st;
@@ -264,13 +264,13 @@
 
   };
 
-  matrix surface_normal(const double theta, const double phi) const {
+  matrix surface_normal(const Real theta, const Real phi) const {
 
     return cross(polar_dir(theta, phi), azi_dir(phi));
 
   };
 
-  matrix full_frame(const double theta, const double phi) const {
+  matrix full_frame(const Real theta, const Real phi) const {
 
     matrix frame(9,1);
 
@@ -292,24 +292,24 @@
     if (std::string(GENERATRIX_FILE_NAME) == std::string("sphere")){
 
       // There's a really simple way of generating uniform samples on a sphere.
-      std::normal_distribution<double> d(0.0, 1.0);
+      std::normal_distribution<Real> d(0.0, 1.0);
 
       sample(0) = d(gen);
       sample(1) = d(gen);
       sample(2) = d(gen);
 
-      const double sample_norm = norm(sample);
+      const Real sample_norm = norm(sample);
 
       sample /= sample_norm;
 
     } else {
 
-      std::uniform_real_distribution<double> d(0.0, 1.0);
+      std::uniform_real_distribution<Real> d(0.0, 1.0);
 
-      const double u1 = d(gen);
-      const double phi = 2.0*PI*u1;
+      const Real u1 = d(gen);
+      const Real phi = 2.0*PI*u1;
 
-      const double u2 = d(gen);
+      const Real u2 = d(gen);
 
       const int num_theta = polar_angle_area_fractions.num_cols * polar_angle_area_fractions.num_rows; // So it doesn't matter whether I made it a row vector or a column vector.
 
@@ -317,11 +317,11 @@
 
         if (u2 < polar_angle_area_fractions(n)){
 
-          const double frac = (u2 - polar_angle_area_fractions(n-1))/(polar_angle_area_fractions(n) - polar_angle_area_fractions(n-1));
-          const double theta_l = PI*(n-1)/double(num_theta-1);
-          const double dtheta = PI/double(num_theta-1);
+          const Real frac = (u2 - polar_angle_area_fractions(n-1))/(polar_angle_area_fractions(n) - polar_angle_area_fractions(n-1));
+          const Real theta_l = PI*(n-1)/Real(num_theta-1);
+          const Real dtheta = PI/Real(num_theta-1);
 
-          const double theta = theta_l + frac*dtheta;
+          const Real theta = theta_l + frac*dtheta;
 
           sample = location(theta, phi);
 
@@ -337,10 +337,10 @@
 
   };
 
-  double polar_angle_area_fraction_integrand(const double theta) const {
+  Real polar_angle_area_fraction_integrand(const Real theta) const {
 
-    const double r = radius(theta);
-    const double rprime = radius_deriv(theta);
+    const Real r = radius(theta);
+    const Real rprime = radius_deriv(theta);
 
     return r*std::sin(theta)*std::sqrt(r*r + rprime*rprime);
 
@@ -354,13 +354,13 @@
 
     polar_angle_area_fractions(0) = 0.0;
 
-    double F_old = 0.0;
+    Real F_old = 0.0;
 
     for (int n = 1; n < num_theta_locs; n++){
 
-      const double theta = PI*n/double(num_theta_locs-1);
-      const double F = polar_angle_area_fraction_integrand(theta);
-      polar_angle_area_fractions(n) = polar_angle_area_fractions(n-1) + 0.5*PI*(F + F_old)/double(num_theta_locs-1); // Trapezium rule.
+      const Real theta = PI*n/Real(num_theta_locs-1);
+      const Real F = polar_angle_area_fraction_integrand(theta);
+      polar_angle_area_fractions(n) = polar_angle_area_fractions(n-1) + 0.5*PI*(F + F_old)/Real(num_theta_locs-1); // Trapezium rule.
 
       F_old = F;
 
@@ -390,39 +390,39 @@
 
   };
 
-  double surface_projection_error(const double theta, const double x1, const double x2) const {
+  Real surface_projection_error(const Real theta, const Real x1, const Real x2) const {
 
-    const double r = radius(theta);
-    const double rp = radius_deriv(theta);
+    const Real r = radius(theta);
+    const Real rp = radius_deriv(theta);
 
-    const double c = std::cos(theta);
-    const double s = std::sin(theta);
+    const Real c = std::cos(theta);
+    const Real s = std::sin(theta);
 
     return r*rp + x1*(r*s - rp*c) - x2*(r*c + rp*s);
 
   };
 
-  double surface_projection_error_deriv(const double theta, const double x1, const double x2) const {
+  Real surface_projection_error_deriv(const Real theta, const Real x1, const Real x2) const {
 
-    const double r = radius(theta);
-    const double rp = radius_deriv(theta);
-    const double rpp = radius_second_deriv(theta);
+    const Real r = radius(theta);
+    const Real rp = radius_deriv(theta);
+    const Real rpp = radius_second_deriv(theta);
 
-    const double c = std::cos(theta);
-    const double s = std::sin(theta);
+    const Real c = std::cos(theta);
+    const Real s = std::sin(theta);
 
     return r*rpp + rp*rp + x1*((r-rpp)*c + 2.0*rp*s) - x2*((rpp-r)*s + 2.0*rp*c);
 
   };
 
-  void project_onto_surface(double *const X) const {
+  void project_onto_surface(Real *const X) const {
 
-    double theta = std::atan2(std::sqrt(X[0]*X[0] + X[1]*X[1]), X[2]);
+    Real theta = std::atan2(std::sqrt(X[0]*X[0] + X[1]*X[1]), X[2]);
 
     if (std::string(GENERATRIX_FILE_NAME) == std::string("sphere")){
 
-      const double curr_radius = std::sqrt(X[0]*X[0] + X[1]*X[1] + X[2]*X[2]);
-      const double targ_radius = radius(theta);
+      const Real curr_radius = std::sqrt(X[0]*X[0] + X[1]*X[1] + X[2]*X[2]);
+      const Real targ_radius = radius(theta);
 
       X[0] *= targ_radius/curr_radius;
       X[1] *= targ_radius/curr_radius;
@@ -430,14 +430,14 @@
 
     } else {
 
-      const double x1 = X[2];
-      const double x2 = std::sqrt(X[0]*X[0] + X[1]*X[1]);
+      const Real x1 = X[2];
+      const Real x2 = std::sqrt(X[0]*X[0] + X[1]*X[1]);
 
-      double error = surface_projection_error(theta, x1, x2);
+      Real error = surface_projection_error(theta, x1, x2);
 
       while (error > 1e-2){
 
-        const double error_prime = surface_projection_error_deriv(theta, x1, x2);
+        const Real error_prime = surface_projection_error_deriv(theta, x1, x2);
 
         theta -= error/error_prime; // Newton's method.
 
@@ -445,7 +445,7 @@
 
       }
 
-      const double phi = std::atan2(X[1], X[0]);
+      const Real phi = std::atan2(X[1], X[0]);
 
       const matrix loc = location(theta, phi);
 
@@ -465,7 +465,7 @@
 
 
 
-  void equal_area_seeding(double *const pos_ref, double *const polar_dir_refs, double *const azi_dir_refs, double *const normal_refs, const int N, shape_fourier_description& shape){
+  void equal_area_seeding(Real *const pos_ref, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs, const int N, shape_fourier_description& shape){
 
     if (N == 0){
 
@@ -480,9 +480,9 @@
     int samples_per_iter = 1000;
 
     // Allocate memory for the CUDA nearest-neighbour search.
-    double *samples, *X;
-    cudaMallocManaged(&samples, 3*samples_per_iter*sizeof(double));
-    cudaMallocManaged(&X, 3*N*sizeof(double));
+    Real *samples, *X;
+    cudaMallocManaged(&samples, 3*samples_per_iter*sizeof(Real));
+    cudaMallocManaged(&X, 3*N*sizeof(Real));
 
     int *sample_nn_ids;
     cudaMallocManaged(&sample_nn_ids, samples_per_iter*sizeof(int));
@@ -493,11 +493,11 @@
     if (std::string(GENERATRIX_FILE_NAME) == std::string("sphere")){
 
       // We use the spiral distribution given by Saff and Kuijlaars (1997) as our initial positions.
-      double phi = 0.0;
+      Real phi = 0.0;
 
       for (int n = 0; n < N; n++){
 
-        const double theta = std::acos((N == 1) ? -1.0 : 2.0*n/double(N-1) - 1.0);
+        const Real theta = std::acos((N == 1) ? -1.0 : 2.0*n/Real(N-1) - 1.0);
 
         const matrix d = shape.location(theta, phi);
 
@@ -511,7 +511,7 @@
 
         } else {
 
-          const double r = std::sqrt(d(0)*d(0) + d(1)*d(1));
+          const Real r = std::sqrt(d(0)*d(0) + d(1)*d(1));
 
           phi += 3.6/(r*std::sqrt(N));
 
@@ -568,9 +568,9 @@
 
         const int min_id = sample_nn_ids[n];
 
-        X[3*min_id] = (count[min_id]*X[3*min_id] + samples[3*n])/double(count[min_id] + 1);
-        X[3*min_id + 1] = (count[min_id]*X[3*min_id + 1] + samples[3*n + 1])/double(count[min_id] + 1);
-        X[3*min_id + 2] = (count[min_id]*X[3*min_id + 2] + samples[3*n + 2])/double(count[min_id] + 1);
+        X[3*min_id] = (count[min_id]*X[3*min_id] + samples[3*n])/Real(count[min_id] + 1);
+        X[3*min_id + 1] = (count[min_id]*X[3*min_id + 1] + samples[3*n + 1])/Real(count[min_id] + 1);
+        X[3*min_id + 2] = (count[min_id]*X[3*min_id + 2] + samples[3*n + 2])/Real(count[min_id] + 1);
 
         count[min_id]++;
 
@@ -606,7 +606,7 @@
 
         old_count = count;
 
-        if (double(min_change)/double(max_change) > 0.99){
+        if (Real(min_change)/Real(max_change) > 0.99){
 
           break;
 
@@ -623,8 +623,8 @@
       pos_ref[3*n + 1] = X[3*n + 1];
       pos_ref[3*n + 2] = X[3*n + 2];
 
-      const double theta = std::atan2(std::sqrt(X[3*n]*X[3*n] + X[3*n + 1]*X[3*n + 1]), X[3*n + 2]);
-      const double phi = std::atan2(X[3*n + 1], X[3*n]);
+      const Real theta = std::atan2(std::sqrt(X[3*n]*X[3*n] + X[3*n + 1]*X[3*n + 1]), X[3*n + 2]);
+      const Real phi = std::atan2(X[3*n + 1], X[3*n]);
 
       matrix frame = shape.full_frame(theta, phi);
 
@@ -648,7 +648,7 @@
 
 
 
-  void seed_blobs(double *const blob_references, double *const polar_dir_refs, double *const azi_dir_refs, double *const normal_refs){
+  void seed_blobs(Real *const blob_references, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs){
 
     const std::string file_name_trunk = GENERATRIX_FILE_NAME+std::to_string(NBLOB);
 
@@ -683,7 +683,7 @@
   };
 
 
-  void seed_rod_blobs(double *const blob_references, double *const polar_dir_refs, double *const azi_dir_refs, double *const normal_refs){
+  void seed_rod_blobs(Real *const blob_references, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs){
 
   const std::string file_name_trunk = GENERATRIX_FILE_NAME+std::to_string(NBLOB);
 
@@ -691,16 +691,16 @@
 
   shape_fourier_description shape;
 
-  double* X;
-  cudaMallocManaged(&X, 3*NBLOB*sizeof(double));
+  Real* X;
+  cudaMallocManaged(&X, 3*NBLOB*sizeof(Real));
 
   ////////////////////////////////////////////////
   int pair = 0;
 
   for (int n=0; n<NBLOB; n+=2){
 
-    const double theta = pair*0.5*PI;
-    const double x = sqrt(2.0)*RBLOB*(pair - 0.25*NBLOB + 0.5);
+    const Real theta = pair*0.5*PI;
+    const Real x = sqrt(2.0)*RBLOB*(pair - 0.25*NBLOB + 0.5);
 
     X[3*n] = x;
     X[3*n + 1] = RBLOB*cos(theta);
@@ -721,8 +721,8 @@
     blob_references[3*n + 1] = X[3*n + 1];
     blob_references[3*n + 2] = X[3*n + 2];
 
-    const double theta = std::atan2(std::sqrt(X[3*n]*X[3*n] + X[3*n + 1]*X[3*n + 1]), X[3*n + 2]);
-    const double phi = std::atan2(X[3*n + 1], X[3*n]);
+    const Real theta = std::atan2(std::sqrt(X[3*n]*X[3*n] + X[3*n + 1]*X[3*n + 1]), X[3*n + 2]);
+    const Real phi = std::atan2(X[3*n + 1], X[3*n]);
 
     matrix frame = shape.full_frame(theta, phi);
 
@@ -768,7 +768,7 @@
 
 
 
-  void seed_filaments(double *const filament_references, double *const polar_dir_refs, double *const azi_dir_refs, double *const normal_refs){
+  void seed_filaments(Real *const filament_references, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs){
 
     std::string file_name_trunk = GENERATRIX_FILE_NAME+std::to_string(NFIL);
 
@@ -792,17 +792,17 @@
 
       std::cout << "Seeding locations according to a spiral pattern..." << std::endl;
 
-      const double theta_max = 0.5/double(R_OVER_L); // = 0.5 * 2*PI*L/(2*PI*R), meaning the width of the band is L as measured across the sphere surface.
-      const double h = 2.0*std::sin(theta_max);
+      const Real theta_max = 0.5/Real(R_OVER_L); // = 0.5 * 2*PI*L/(2*PI*R), meaning the width of the band is L as measured across the sphere surface.
+      const Real h = 2.0*std::sin(theta_max);
       const int num_fils_for_sphere = std::ceil(NFIL*2.0/h);
       const int offset = std::round(0.5*(num_fils_for_sphere - NFIL));
 
-      double phi = 0.0;
+      Real phi = 0.0;
 
       for (int n = 0; n < NFIL; n++){
 
-        filament_references[3*n + 2] = 2.0*(n + offset)/double(num_fils_for_sphere - 1) - 1.0;
-        const double r = std::sqrt(1.0 - filament_references[3*n + 2]*filament_references[3*n + 2]);
+        filament_references[3*n + 2] = 2.0*(n + offset)/Real(num_fils_for_sphere - 1) - 1.0;
+        const Real r = std::sqrt(1.0 - filament_references[3*n + 2]*filament_references[3*n + 2]);
         filament_references[3*n] = r*std::cos(phi);
         filament_references[3*n + 1] = r*std::sin(phi);
 
@@ -816,19 +816,19 @@
 
       std::cout << "Seeding..." << std::endl;
 
-      const double theta_max = 0.5/double(R_OVER_L); // = 0.5 * 2*PI*L/(2*PI*R), meaning the width of the band is L as measured across the sphere surface.
-      const double h = 2.0*std::sin(theta_max);
+      const Real theta_max = 0.5/Real(R_OVER_L); // = 0.5 * 2*PI*L/(2*PI*R), meaning the width of the band is L as measured across the sphere surface.
+      const Real h = 2.0*std::sin(theta_max);
       const int num_fils_in_main_band = std::round(0.9*NFIL); // Put 90% in the main band
       const int num_fils_for_sphere = std::ceil(num_fils_in_main_band*2.0/h);
       const int offset = std::round(0.5*(num_fils_for_sphere - num_fils_in_main_band));
 
       // Seed the main band
-      double phi = 0.0;
+      Real phi = 0.0;
 
       for (int n = 0; n < num_fils_in_main_band; n++){
 
-        filament_references[3*n + 2] = 2.0*(n + offset)/double(num_fils_for_sphere - 1) - 1.0;
-        const double r = std::sqrt(1.0 - filament_references[3*n + 2]*filament_references[3*n + 2]);
+        filament_references[3*n + 2] = 2.0*(n + offset)/Real(num_fils_for_sphere - 1) - 1.0;
+        const Real r = std::sqrt(1.0 - filament_references[3*n + 2]*filament_references[3*n + 2]);
         filament_references[3*n] = r*std::cos(phi);
         filament_references[3*n + 1] = r*std::sin(phi);
 
@@ -840,8 +840,8 @@
       for (int n = num_fils_in_main_band; n < NFIL; n++){
 
         filament_references[3*n + 2] = -0.9; // Some fixed location for the bottom band
-        const double r = std::sqrt(1.0 - filament_references[3*n + 2]*filament_references[3*n + 2]);
-        phi = 2.0*PI*double(n - num_fils_in_main_band)/double(NFIL - num_fils_in_main_band);
+        const Real r = std::sqrt(1.0 - filament_references[3*n + 2]*filament_references[3*n + 2]);
+        phi = 2.0*PI*Real(n - num_fils_in_main_band)/Real(NFIL - num_fils_in_main_band);
         filament_references[3*n] = r*std::cos(phi);
         filament_references[3*n + 1] = r*std::sin(phi);
 

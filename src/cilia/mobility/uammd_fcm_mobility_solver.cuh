@@ -131,21 +131,21 @@ public:
     // Everything unique to this derived class:
 
     // These vectors will be aliased by the raw pointers required by the base interface class.
-    thrust::host_vector<double> v_segs_host_thrust;
-    thrust::host_vector<double> v_blobs_host_thrust;
-    thrust::host_vector<double> x_segs_host_thrust;
-    thrust::host_vector<double> x_blobs_host_thrust;
-    thrust::host_vector<double> f_segs_host_thrust;
-    thrust::host_vector<double> f_blobs_host_thrust;
-    thrust::host_vector<double> f_blobs_repulsion_host_thrust;
+    thrust::host_vector<Real> v_segs_host_thrust;
+    thrust::host_vector<Real> v_blobs_host_thrust;
+    thrust::host_vector<Real> x_segs_host_thrust;
+    thrust::host_vector<Real> x_blobs_host_thrust;
+    thrust::host_vector<Real> f_segs_host_thrust;
+    thrust::host_vector<Real> f_blobs_host_thrust;
+    thrust::host_vector<Real> f_blobs_repulsion_host_thrust;
 
-    thrust::device_vector<double> v_segs_device_thrust;
-    thrust::device_vector<double> v_blobs_device_thrust;
-    thrust::device_vector<double> x_segs_device_thrust;
-    thrust::device_vector<double> x_blobs_device_thrust;
-    thrust::device_vector<double> f_segs_device_thrust;
-    thrust::device_vector<double> f_blobs_device_thrust;
-    thrust::device_vector<double> f_blobs_repulsion_device_thrust;
+    thrust::device_vector<Real> v_segs_device_thrust;
+    thrust::device_vector<Real> v_blobs_device_thrust;
+    thrust::device_vector<Real> x_segs_device_thrust;
+    thrust::device_vector<Real> x_blobs_device_thrust;
+    thrust::device_vector<Real> f_segs_device_thrust;
+    thrust::device_vector<Real> f_blobs_device_thrust;
+    thrust::device_vector<Real> f_blobs_repulsion_device_thrust;
 
     std::shared_ptr<FCM> fcm;
 
@@ -166,29 +166,29 @@ void uammd_fcm_mobility_solver::free_device_memory(){}
 void uammd_fcm_mobility_solver::allocate_host_memory(){
 
     v_segs_host_thrust.resize(6*NSWIM*NFIL*NSEG);
-    v_segs_host = (double *) thrust::raw_pointer_cast(v_segs_host_thrust.data());
+    v_segs_host = (Real *) thrust::raw_pointer_cast(v_segs_host_thrust.data());
 
     v_blobs_host_thrust.resize(3*NSWIM*NBLOB);
-    v_blobs_host = (double *) thrust::raw_pointer_cast(v_blobs_host_thrust.data());
+    v_blobs_host = (Real *) thrust::raw_pointer_cast(v_blobs_host_thrust.data());
 
     x_segs_host_thrust.resize(3*NSWIM*NFIL*NSEG);
-    x_segs_host = (double *) thrust::raw_pointer_cast(x_segs_host_thrust.data());
+    x_segs_host = (Real *) thrust::raw_pointer_cast(x_segs_host_thrust.data());
 
     x_blobs_host_thrust.resize(3*NSWIM*NBLOB);
-    x_blobs_host = (double *) thrust::raw_pointer_cast(x_blobs_host_thrust.data());
+    x_blobs_host = (Real *) thrust::raw_pointer_cast(x_blobs_host_thrust.data());
 
     f_segs_host_thrust.resize(6*NSWIM*NFIL*NSEG);
-    f_segs_host = (double *) thrust::raw_pointer_cast(f_segs_host_thrust.data());
+    f_segs_host = (Real *) thrust::raw_pointer_cast(f_segs_host_thrust.data());
 
     f_blobs_host_thrust.resize(3*NSWIM*NBLOB);
-    f_blobs_host = (double *) thrust::raw_pointer_cast(f_blobs_host_thrust.data());
+    f_blobs_host = (Real *) thrust::raw_pointer_cast(f_blobs_host_thrust.data());
 
     f_blobs_repulsion_host_thrust.resize(3*NSWIM*NBLOB);
-    f_blobs_repulsion_host = (double *) thrust::raw_pointer_cast(f_blobs_repulsion_host_thrust.data());
+    f_blobs_repulsion_host = (Real *) thrust::raw_pointer_cast(f_blobs_repulsion_host_thrust.data());
 
     // These should be provided in the config file eventually.
     int domain_length = 128; // Measured in grid points. The domain must be a cube because of the way Raul forced it to keep the radius as RSEG ( = RBLOB).
-    double tolerance = 1e-4;
+    Real tolerance = 1e-4;
 
     fcm = uammd_fcm::initializeFCM(RSEG, MU, domain_length, domain_length, domain_length, tolerance);
 

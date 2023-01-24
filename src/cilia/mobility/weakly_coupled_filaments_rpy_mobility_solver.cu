@@ -31,17 +31,17 @@ void weakly_coupled_filaments_rpy_mobility_solver::allocate_device_memory(){
   
   rpy_mobility_solver::allocate_device_memory();
 
-  f_fils_device = new double*[num_gpus];
-  s_fils_device = new double*[num_gpus];
-  x_fils_device = new double*[num_gpus];
+  f_fils_device = new Real*[num_gpus];
+  s_fils_device = new Real*[num_gpus];
+  x_fils_device = new Real*[num_gpus];
 
   for (int n = 0; n < num_gpus; n++){
 
     cudaSetDevice(n);
 
-    cudaMalloc(&f_fils_device[n], 3*NSWIM*NFIL*sizeof(double));
-    cudaMalloc(&s_fils_device[n], 1*sizeof(double)); // cudaMalloc(&s_fils_device[n], 9*NSWIM*NFIL*sizeof(double));
-    cudaMalloc(&x_fils_device[n], 3*NSWIM*NFIL*sizeof(double));
+    cudaMalloc(&f_fils_device[n], 3*NSWIM*NFIL*sizeof(Real));
+    cudaMalloc(&s_fils_device[n], 1*sizeof(Real)); // cudaMalloc(&s_fils_device[n], 9*NSWIM*NFIL*sizeof(Real));
+    cudaMalloc(&x_fils_device[n], 3*NSWIM*NFIL*sizeof(Real));
 
   }
 
@@ -52,7 +52,7 @@ void weakly_coupled_filaments_rpy_mobility_solver::copy_segment_positions_to_dev
   for (int n = 0; n < num_gpus; n++){
 
     cudaSetDevice(n);
-    cudaMemcpyAsync(x_segs_device[n], x_segs_host, 3*NSWIM*NFIL*NSEG*sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(x_segs_device[n], x_segs_host, 3*NSWIM*NFIL*NSEG*sizeof(Real), cudaMemcpyHostToDevice);
 
     int num_thread_blocks = (3*NSWIM*NFIL*NSEG + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
 
@@ -71,7 +71,7 @@ void weakly_coupled_filaments_rpy_mobility_solver::copy_segment_forces_to_device
   for (int n = 0; n < num_gpus; n++){
 
     cudaSetDevice(n);
-    cudaMemcpyAsync(f_segs_device[n], f_segs_host, 6*NSWIM*NFIL*NSEG*sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(f_segs_device[n], f_segs_host, 6*NSWIM*NFIL*NSEG*sizeof(Real), cudaMemcpyHostToDevice);
 
     int num_thread_blocks = (3*NSWIM*NFIL*NSEG + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
 

@@ -101,7 +101,7 @@ flow_field_pc: $(FLOW_FIELD_CPP) $(FLOW_FIELD_CUDA)
 
 
 # With cuFCM
-NVCC_FLAGS=-arch=sm_75 -std=c++14 -O3 -I../include
+NVCC_FLAGS=-arch=sm_75 -std=c++14 -O3 -I../include -Xcompiler -fopenmp
 
 LINK=-lcublas -lcufft -llapacke -lcblas -lcurand -lcuda -lineinfo -lopenblas
 

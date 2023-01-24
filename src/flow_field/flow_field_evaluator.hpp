@@ -18,9 +18,9 @@ public:
   bool QUATERNION_BASED_DATA;
   bool REMOVE_NET_FORCE_STOKESLET;
   bool ADVANCE_TRACER_POSITIONS;
-  double MU;
-  double RSEG;
-  double DT; // Simulation time between data saves, not necessarily the DT of the original simulation.
+  Real MU;
+  Real RSEG;
+  Real DT; // Simulation time between data saves, not necessarily the DT of the original simulation.
   matrix fil_refs;
   matrix blob_refs;
 
@@ -28,26 +28,26 @@ public:
   int num_gpus;
 
   // CUDA variables
-  double *v_flow_host;
-  double **v_flow_device;
+  Real *v_flow_host;
+  Real **v_flow_device;
 
-  double *x_flow_host;
-  double **x_flow_device;
+  Real *x_flow_host;
+  Real **x_flow_device;
 
-  double *x_segs_host;
-  double **x_segs_device;
+  Real *x_segs_host;
+  Real **x_segs_device;
 
-  double *x_bods_host;
-  double **x_bods_device;
+  Real *x_bods_host;
+  Real **x_bods_device;
 
-  double *x_blobs_host;
-  double **x_blobs_device;
+  Real *x_blobs_host;
+  Real **x_blobs_device;
 
-  double *f_segs_host;
-  double **f_segs_device;
+  Real *f_segs_host;
+  Real **f_segs_device;
 
-  double *f_blobs_host;
-  double **f_blobs_device;
+  Real *f_blobs_host;
+  Real **f_blobs_device;
 
   int *num_flow_points;
 

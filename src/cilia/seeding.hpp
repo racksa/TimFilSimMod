@@ -9,10 +9,10 @@
 
 #if SURFACE_OF_REVOLUTION_BODIES or ROD
 
-    void seed_blobs(double *const blob_references, double *const polar_dir_refs, double *const azi_dir_refs, double *const normal_refs);
-    void seed_filaments(double *const filament_references, double *const polar_dir_refs, double *const azi_dir_refs, double *const normal_refs);
+    void seed_blobs(Real *const blob_references, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs);
+    void seed_filaments(Real *const filament_references, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs);
 
-    void seed_rod_blobs(double *const blob_references, double *const polar_dir_refs, double *const azi_dir_refs, double *const normal_refs);
+    void seed_rod_blobs(Real *const blob_references, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs);
 
 #endif
 

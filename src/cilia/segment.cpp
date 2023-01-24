@@ -8,7 +8,7 @@ segment::~segment(){}
 
 segment::segment(){}
 
-void segment::initial_setup(const double *const x_in, const quaternion& q_in, const double *const u_in){
+void segment::initial_setup(const Real *const x_in, const quaternion& q_in, const Real *const u_in){
 
   x[0] = x_in[0];
   x[1] = x_in[1];
@@ -58,7 +58,7 @@ void segment::initial_guess(const int nt){
 
   } else {
 
-    double temp = 2.0*u[0] - um1[0];
+    Real temp = 2.0*u[0] - um1[0];
     um1[0] = u[0];
     u[0] = temp;
 
@@ -78,7 +78,7 @@ void segment::initial_guess(const int nt){
 
 }
 
-void segment::update(const double *const u_update){
+void segment::update(const Real *const u_update){
 
   u[0] += u_update[0];
   u[1] += u_update[1];
@@ -89,19 +89,19 @@ void segment::update(const double *const u_update){
 
 }
 
-void segment::tangent(double *const t) const {
+void segment::tangent(Real *const t) const {
 
   q.tangent(t);
 
 }
 
-void segment::normal(double *const n) const {
+void segment::normal(Real *const n) const {
 
   q.normal(n);
 
 }
 
-void segment::binormal(double *const b) const {
+void segment::binormal(Real *const b) const {
 
   q.binormal(b);
 

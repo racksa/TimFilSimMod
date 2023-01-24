@@ -19,17 +19,17 @@ matrix::matrix(const int num_rows_input, const int num_cols_input){
   num_rows = num_rows_input;
   num_cols = num_cols_input;
 
-  data = std::vector<double>(num_rows*num_cols);
+  data = std::vector<Real>(num_rows*num_cols);
   data.shrink_to_fit();
 
 }
 
-matrix::matrix(const int num_rows_input, const int num_cols_input, const double *const memptr){
+matrix::matrix(const int num_rows_input, const int num_cols_input, const Real *const memptr){
 
   num_rows = num_rows_input;
   num_cols = num_cols_input;
 
-  data = std::vector<double>(num_rows*num_cols);
+  data = std::vector<Real>(num_rows*num_cols);
   data.shrink_to_fit();
 
   for (int i = 0; i < num_rows*num_cols; i++){
@@ -59,27 +59,27 @@ matrix::matrix(const matrix& M){
 //
 
 // Element access
-double& matrix::operator()(const int row, const int col){
+Real& matrix::operator()(const int row, const int col){
 
   // Everything must be column-major to be consistent with BLAS, LAPACK etc.
   return data[row + col*num_rows];
 
 }
 
-double matrix::operator()(const int row, const int col) const {
+Real matrix::operator()(const int row, const int col) const {
 
   // Everything must be column-major to be consistent with BLAS, LAPACK etc.
   return data[row + col*num_rows];
 
 }
 
-double& matrix::operator()(const int elem){
+Real& matrix::operator()(const int elem){
 
   return data[elem];
 
 }
 
-double matrix::operator()(const int elem) const {
+Real matrix::operator()(const int elem) const {
 
   return data[elem];
 
@@ -107,7 +107,7 @@ matrix& matrix::operator =(const matrix& X){
 // Of course, we can help by ensuring that memory access is contiguous.
 
 // In-place scalar multiplication
-matrix& matrix::operator *=(const double s){
+matrix& matrix::operator *=(const Real s){
 
   for (int i = 0; i < num_rows*num_cols; i++){
 
@@ -120,7 +120,7 @@ matrix& matrix::operator *=(const double s){
 }
 
 // In-place scalar division
-matrix& matrix::operator /=(const double s){
+matrix& matrix::operator /=(const Real s){
 
   for (int i = 0; i < num_rows*num_cols; i++){
 
@@ -167,12 +167,12 @@ matrix& matrix::operator -=(const matrix& rhs){
 
 }
 
-// Conversion of 1x1 matrix to a double
-matrix::operator double() const{
+// Conversion of 1x1 matrix to a Real
+matrix::operator Real() const{
 
   if ((num_rows != 1) || (num_cols != 1)){
 
-    std::cout << std::endl << "ERROR: Cannot convert a " << num_rows << "-by-" << num_cols << " matrix to a double." << std::endl << std::endl;
+    std::cout << std::endl << "ERROR: Cannot convert a " << num_rows << "-by-" << num_cols << " matrix to a Real." << std::endl << std::endl;
     exit(-1);
 
   }
@@ -240,9 +240,9 @@ bool matrix::is_finite() const {
 
 }
 
-double matrix::trace() const {
+Real matrix::trace() const {
 
-  double tr = 0.0;
+  Real tr = 0.0;
 
   for (int n = 0; n < num_rows; n++){ // As expected, this method is meaningless if num_rows != num_cols. Indeed, it will even segfault if num_rows > num_cols.
 
@@ -291,7 +291,7 @@ void matrix::set_block(const int start_row, const int start_col, const int rows_
 
 }
 
-void matrix::set_block(const int start_row, const int start_col, const int rows_in_block, const int cols_in_block, const double block_constant){
+void matrix::set_block(const int start_row, const int start_col, const int rows_in_block, const int cols_in_block, const Real block_constant){
 
   for (int col = 0; col < cols_in_block; col++){
     for (int row = 0; row < rows_in_block; row++){
@@ -327,7 +327,7 @@ void matrix::subtract_from_block(const int start_row, const int start_col, const
 
 }
 
-void matrix::multiply_block(const int start_row, const int start_col, const int rows_in_block, const int cols_in_block, const double block_constant){
+void matrix::multiply_block(const int start_row, const int start_col, const int rows_in_block, const int cols_in_block, const Real block_constant){
 
   for (int col = 0; col < cols_in_block; col++){
     for (int row = 0; row < rows_in_block; row++){
@@ -339,7 +339,7 @@ void matrix::multiply_block(const int start_row, const int start_col, const int 
 
 }
 
-void matrix::divide_block(const int start_row, const int start_col, const int rows_in_block, const int cols_in_block, const double block_constant){
+void matrix::divide_block(const int start_row, const int start_col, const int rows_in_block, const int cols_in_block, const Real block_constant){
 
   this->multiply_block(start_row, start_col, rows_in_block, cols_in_block, 1.0/block_constant);
 
@@ -382,7 +382,7 @@ void matrix::set_block(const int start_elem, const int elems_in_block, const mat
 
 }
 
-void matrix::set_block(const int start_elem, const int elems_in_block, const double block_constant){
+void matrix::set_block(const int start_elem, const int elems_in_block, const Real block_constant){
 
   for (int elem = 0; elem < elems_in_block; elem++){
 
@@ -412,7 +412,7 @@ void matrix::subtract_from_block(const int start_elem, const int elems_in_block,
 
 }
 
-void matrix::multiply_block(const int start_elem, const int elems_in_block, const double block_constant){
+void matrix::multiply_block(const int start_elem, const int elems_in_block, const Real block_constant){
 
   for (int elem = 0; elem < elems_in_block; elem++){
 
@@ -422,7 +422,7 @@ void matrix::multiply_block(const int start_elem, const int elems_in_block, cons
 
 }
 
-void matrix::divide_block(const int start_elem, const int elems_in_block, const double block_constant){
+void matrix::divide_block(const int start_elem, const int elems_in_block, const Real block_constant){
 
   this->multiply_block(start_elem, elems_in_block, 1.0/block_constant);
 
@@ -447,7 +447,7 @@ void matrix::set_col(const int col, const matrix& block){
 
 }
 
-void matrix::set_col(const int col, const double block_constant){
+void matrix::set_col(const int col, const Real block_constant){
 
   this->set_block(0, col, num_rows, 1, block_constant);
 
@@ -465,13 +465,13 @@ void matrix::subtract_from_col(const int col, const matrix& block){
 
 }
 
-void matrix::multiply_col(const int col, const double block_constant){
+void matrix::multiply_col(const int col, const Real block_constant){
 
   this->multiply_block(0, col, num_rows, 1, block_constant);
 
 }
 
-void matrix::divide_col(const int col, const double block_constant){
+void matrix::divide_col(const int col, const Real block_constant){
 
   this->divide_block(0, col, num_rows, 1, block_constant);
 
@@ -495,7 +495,7 @@ void matrix::set_row(const int row, const matrix& block){
 
 }
 
-void matrix::set_row(const int row, const double block_constant){
+void matrix::set_row(const int row, const Real block_constant){
 
   this->set_block(row, 0, 1, num_cols, block_constant);
 
@@ -513,13 +513,13 @@ void matrix::subtract_from_row(const int row, const matrix& block){
 
 }
 
-void matrix::multiply_row(const int row, const double block_constant){
+void matrix::multiply_row(const int row, const Real block_constant){
 
   this->multiply_block(row, 0, 1, num_cols, block_constant);
 
 }
 
-void matrix::divide_row(const int row, const double block_constant){
+void matrix::divide_row(const int row, const Real block_constant){
 
   this->divide_block(row, 0, 1, num_cols, block_constant);
 
@@ -528,10 +528,10 @@ void matrix::divide_row(const int row, const double block_constant){
 extern "C" {
 
   // LU decomoposition of a general matrix. Overwrites the input with the output.
-  void dgetrf_(int*, int*, double*, int*, int*, int*);
+  void my_getrf_(int*, int*, Real*, int*, int*, int*);
 
   // Generates the inverse of a matrix given its LU decomposition from dgetrf_. Overwrites the input with the output.
-  void dgetri_(int*, double*, int*, int*, double*, int*, int*);
+  void my_getri_(int*, Real*, int*, int*, Real*, int*, int*);
 
 }
 
@@ -539,12 +539,12 @@ void matrix::invert(){
 
   // Allocate everything we need for the LU-decomposition LAPACK call:
   int N = num_rows;
-  double *ptr = &data[0];
+  Real *ptr = &data[0];
   int *pivots = new int[N];
   int info;
 
   // Call the LAPACK routine:
-  dgetrf_(&N, &N, ptr, &N, pivots, &info);
+  my_getrf_(&N, &N, ptr, &N, pivots, &info);
 
   if (info != 0){
 
@@ -555,10 +555,10 @@ void matrix::invert(){
 
   // Allocate additional stuff for the inversion LAPACK call:
   int work_size = N*N;
-  double *work = new double[work_size];
+  Real *work = new Real[work_size];
 
   // Call the LAPACK inversion routine:
-  dgetri_(&N, ptr, &N, pivots, work, &work_size, &info);
+  my_getri_(&N, ptr, &N, pivots, work, &work_size, &info);
 
   // Clean up:
   delete[] pivots;
@@ -570,21 +570,21 @@ void matrix::invert(){
 // BINARY OPERATOR OVERLOADING
 //
 
-matrix operator /(matrix M, const double s){
+matrix operator /(matrix M, const Real s){
 
   M /= s;
   return M;
 
 };
 
-matrix operator *(matrix M, const double s){
+matrix operator *(matrix M, const Real s){
 
   M *= s;
   return M;
 
 };
 
-matrix operator *(const double s, matrix M){
+matrix operator *(const Real s, matrix M){
 
   M *= s;
   return M;
@@ -609,7 +609,7 @@ extern "C" {
 
   // Returns C = alpha*op(A)*op(B) + beta*C -- i.e. overwrites C -- where op(X) = X or X^T and can be different for A and B.
   // The special case op(X) = X and beta = 0 gives us C = A*B.
-  void dgemm_(char*, char*, int*, int*, int*, double*, const double*, int*, const double*, int*, double*, double*, int*);
+  void my_gemm_(char*, char*, int*, int*, int*, Real*, const Real*, int*, const Real*, int*, Real*, Real*, int*);
 
 }
 
@@ -623,17 +623,17 @@ matrix operator *(const matrix& lhs, const matrix& rhs){
   int num_rows = lhs_times_rhs.num_rows;
   int num_cols = lhs_times_rhs.num_cols;
   int inner_dim = lhs.num_cols;
-  double alpha = 1.0;
-  const double *lhs_ptr = &lhs.data[0];
+  Real alpha = 1.0;
+  const Real *lhs_ptr = &lhs.data[0];
   int ld_lhs = lhs.num_rows;
-  const double *rhs_ptr = &rhs.data[0];
+  const Real *rhs_ptr = &rhs.data[0];
   int ld_rhs = rhs.num_rows;
-  double beta = 0.0;
-  double *soln_ptr = &lhs_times_rhs.data[0];
+  Real beta = 0.0;
+  Real *soln_ptr = &lhs_times_rhs.data[0];
   int ld_soln = num_rows;
 
   // Call the LAPACK routine:
-  dgemm_(&Nchar, &Nchar, &num_rows, &num_cols, &inner_dim, &alpha, lhs_ptr, &ld_lhs, rhs_ptr, &ld_rhs, &beta, soln_ptr, &ld_soln);
+  my_gemm_(&Nchar, &Nchar, &num_rows, &num_cols, &inner_dim, &alpha, lhs_ptr, &ld_lhs, rhs_ptr, &ld_rhs, &beta, soln_ptr, &ld_soln);
 
   // Return the solution:
   return lhs_times_rhs;
@@ -662,7 +662,7 @@ std::ostream& operator <<(std::ostream& stream, const matrix& M){
 // OTHER FUNCTIONS ASSOCIATED WITH MATRICES
 //
 
-void rcross(matrix& M, const double *const v){
+void rcross(matrix& M, const Real *const v){
 
   M(0,0) = 0.0;
   M(1,0) = -v[2];
@@ -678,7 +678,7 @@ void rcross(matrix& M, const double *const v){
 
 };
 
-matrix rcross(const double *const v){
+matrix rcross(const Real *const v){
 
   matrix M(3,3);
 
@@ -712,10 +712,10 @@ matrix inverse(matrix M){
 
 };
 
-double dot(const matrix& A, const matrix& B){
+Real dot(const matrix& A, const matrix& B){
 
   // Returns the Frobenius inner product, which reduces to the vector dot product for singleton dimensions.
-  double out = 0.0;
+  Real out = 0.0;
 
   // Only makes sense if they're the same size.
   for (int n = 0; n < A.num_rows*A.num_cols; n++){
@@ -728,7 +728,7 @@ double dot(const matrix& A, const matrix& B){
 
 };
 
-double norm(const matrix& M){
+Real norm(const matrix& M){
 
   // Returns the Frobenius norm, which reduces to the Euclidean norm for singleton dimensions.
   return std::sqrt(dot(M,M));
@@ -759,7 +759,7 @@ matrix zero(const int num_rows_input, const int num_cols_input){
 
 };
 
-matrix cross(const double *const v, const double *const w){
+matrix cross(const Real *const v, const Real *const w){
 
   matrix out(3,1);
 
@@ -771,13 +771,13 @@ matrix cross(const double *const v, const double *const w){
 
 };
 
-matrix cross(const matrix& v, const double *const w){
+matrix cross(const matrix& v, const Real *const w){
 
   return cross(&v.data[0], w);
 
 };
 
-matrix cross(const double *const v, const matrix& w){
+matrix cross(const Real *const v, const matrix& w){
 
   return cross(v, &w.data[0]);
 
@@ -829,7 +829,7 @@ matrix transpose(const matrix& A){
 
 };
 
-double trace(const matrix& A){
+Real trace(const matrix& A){
 
   return A.trace();
 

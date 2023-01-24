@@ -10,26 +10,26 @@
 #define PI 3.14159265358979323846264338327950288
 #define THREADS_PER_BLOCK 64
 
-__global__ void flow_velocities(double *const __restrict__ Vf, const double *const __restrict__ Xf, const double *const __restrict__ Fs,
-                                  const double *const __restrict__ Fb, const double *const __restrict__ Xs, const double *const __restrict__ Xbody, const double *const __restrict__ Xb,
-                                  const int Nf, const int Ns, const int Nbods, const int Nb, const double prefac, const int remove_net_force){
+__global__ void flow_velocities(Real *const __restrict__ Vf, const Real *const __restrict__ Xf, const Real *const __restrict__ Fs,
+                                  const Real *const __restrict__ Fb, const Real *const __restrict__ Xs, const Real *const __restrict__ Xbody, const Real *const __restrict__ Xb,
+                                  const int Nf, const int Ns, const int Nbods, const int Nb, const Real prefac, const int remove_net_force){
 
   const int index = threadIdx.x + blockIdx.x*blockDim.x;
   const int stride = blockDim.x*gridDim.x;
 
   // Declare the shared memory for this thread block
-  __shared__ double x_shared[THREADS_PER_BLOCK];
-  __shared__ double y_shared[THREADS_PER_BLOCK];
-  __shared__ double z_shared[THREADS_PER_BLOCK];
-  __shared__ double fx_shared[THREADS_PER_BLOCK];
-  __shared__ double fy_shared[THREADS_PER_BLOCK];
-  __shared__ double fz_shared[THREADS_PER_BLOCK];
-  __shared__ double taux_shared[THREADS_PER_BLOCK];
-  __shared__ double tauy_shared[THREADS_PER_BLOCK];
-  __shared__ double tauz_shared[THREADS_PER_BLOCK];
+  __shared__ Real x_shared[THREADS_PER_BLOCK];
+  __shared__ Real y_shared[THREADS_PER_BLOCK];
+  __shared__ Real z_shared[THREADS_PER_BLOCK];
+  __shared__ Real fx_shared[THREADS_PER_BLOCK];
+  __shared__ Real fy_shared[THREADS_PER_BLOCK];
+  __shared__ Real fz_shared[THREADS_PER_BLOCK];
+  __shared__ Real taux_shared[THREADS_PER_BLOCK];
+  __shared__ Real tauy_shared[THREADS_PER_BLOCK];
+  __shared__ Real tauz_shared[THREADS_PER_BLOCK];
 
-  double vx, vy, vz;
-  double xi, yi, zi;
+  Real vx, vy, vz;
+  Real xi, yi, zi;
 
   // Stay in the loop as long as any thread in the block still needs to compute velocities.
   for (int i = index; (i-threadIdx.x) < Nf; i += stride){
@@ -67,14 +67,14 @@ __global__ void flow_velocities(double *const __restrict__ Vf, const double *con
         for (int j = 0; (j < THREADS_PER_BLOCK) && (j_start + j < Ns*Nbods); j++){
 
           // Calculate the flow velocity
-          double xdiff = xi - x_shared[j];
-          double ydiff = yi - y_shared[j];
-          double zdiff = zi - z_shared[j];
+          Real xdiff = xi - x_shared[j];
+          Real ydiff = yi - y_shared[j];
+          Real zdiff = zi - z_shared[j];
 
           // Stokeslet part
-          double rm2 = 1.0/(xdiff*xdiff + ydiff*ydiff + zdiff*zdiff);
-          double rm1 = sqrt(rm2);
-          double rm2_times_r_dot_f = rm2*(xdiff*fx_shared[j] + ydiff*fy_shared[j] + zdiff*fz_shared[j]);
+          Real rm2 = 1.0/(xdiff*xdiff + ydiff*ydiff + zdiff*zdiff);
+          Real rm1 = sqrt(rm2);
+          Real rm2_times_r_dot_f = rm2*(xdiff*fx_shared[j] + ydiff*fy_shared[j] + zdiff*fz_shared[j]);
 
           vx += rm1*(fx_shared[j] + xdiff*rm2_times_r_dot_f);
           vy += rm1*(fy_shared[j] + ydiff*rm2_times_r_dot_f);
@@ -86,29 +86,29 @@ __global__ void flow_velocities(double *const __restrict__ Vf, const double *con
             // the Stokeslet must be corrected to the Blakelet.
 
             // First, remove a Stokeslet contribution at the image location
-            const double Rz = zi + z_shared[j];
-            const double R2 = xdiff*xdiff + ydiff*ydiff + Rz*Rz;
-            const double Rm1 = sqrt(1.0/R2);
-            const double Rm2_times_R_dot_f = (xdiff*fx_shared[j] + ydiff*fy_shared[j] + Rz*fz_shared[j])*Rm1*Rm1;
+            const Real Rz = zi + z_shared[j];
+            const Real R2 = xdiff*xdiff + ydiff*ydiff + Rz*Rz;
+            const Real Rm1 = sqrt(1.0/R2);
+            const Real Rm2_times_R_dot_f = (xdiff*fx_shared[j] + ydiff*fy_shared[j] + Rz*fz_shared[j])*Rm1*Rm1;
 
             vx -= Rm1*(fx_shared[j] + xdiff*Rm2_times_R_dot_f);
             vy -= Rm1*(fy_shared[j] + ydiff*Rm2_times_R_dot_f);
             vz -= Rm1*(fz_shared[j] + Rz*Rm2_times_R_dot_f);
 
             // Then add the higher-order correction, which doesn't depend on the z-component of the force
-            const double Dxx = (3.0*xdiff*xdiff - R2)*zi;
-            const double Dxy = 3.0*xdiff*ydiff*zi;
-            const double Dxz = (R2 - 3.0*Rz*zi)*xdiff;
+            const Real Dxx = (3.0*xdiff*xdiff - R2)*zi;
+            const Real Dxy = 3.0*xdiff*ydiff*zi;
+            const Real Dxz = (R2 - 3.0*Rz*zi)*xdiff;
 
             // Dyx = Dxy so no new term
-            const double Dyy = (3.0*ydiff*ydiff - R2)*zi;
-            const double Dyz = (R2 - 3.0*Rz*zi)*ydiff;
+            const Real Dyy = (3.0*ydiff*ydiff - R2)*zi;
+            const Real Dyz = (R2 - 3.0*Rz*zi)*ydiff;
 
-            const double Dzx = (3.0*Rz*zi + R2)*xdiff;
-            const double Dzy = (3.0*Rz*zi + R2)*ydiff;
-            const double Dzz = (R2 - 3.0*Rz*Rz)*zi;
+            const Real Dzx = (3.0*Rz*zi + R2)*xdiff;
+            const Real Dzy = (3.0*Rz*zi + R2)*ydiff;
+            const Real Dzz = (R2 - 3.0*Rz*Rz)*zi;
 
-            const double Dfac = 2.0*z_shared[j]*Rm1*Rm1*Rm1*Rm1*Rm1;
+            const Real Dfac = 2.0*z_shared[j]*Rm1*Rm1*Rm1*Rm1*Rm1;
             vx += Dfac*(Dxx*fx_shared[j] + Dxy*fy_shared[j] + Dxz*fz_shared[j]);
             vy += Dfac*(Dxy*fx_shared[j] + Dyy*fy_shared[j] + Dyz*fz_shared[j]);
             vz += Dfac*(Dzx*fx_shared[j] + Dzy*fy_shared[j] + Dzz*fz_shared[j]);
@@ -116,7 +116,7 @@ __global__ void flow_velocities(double *const __restrict__ Vf, const double *con
           }
 
           // Rotlet part
-          const double rm3 = rm1*rm2;
+          const Real rm3 = rm1*rm2;
 
           vx += rm3*(tauy_shared[j]*zdiff - tauz_shared[j]*ydiff);
           vy += rm3*(tauz_shared[j]*xdiff - taux_shared[j]*zdiff);
@@ -127,14 +127,14 @@ __global__ void flow_velocities(double *const __restrict__ Vf, const double *con
             // Which body does this segment belong to?
             const int body_id = (j_start + j)/Ns;
 
-            double xdiff = xi - Xbody[3*body_id];
-            double ydiff = yi - Xbody[3*body_id + 1];
-            double zdiff = zi - Xbody[3*body_id + 2];
+            Real xdiff = xi - Xbody[3*body_id];
+            Real ydiff = yi - Xbody[3*body_id + 1];
+            Real zdiff = zi - Xbody[3*body_id + 2];
 
             // Stokeslet part
-            double rm2 = 1.0/(xdiff*xdiff + ydiff*ydiff + zdiff*zdiff);
-            double rm1 = sqrt(rm2);
-            double rm2_times_r_dot_f = rm2*(xdiff*fx_shared[j] + ydiff*fy_shared[j] + zdiff*fz_shared[j]);
+            Real rm2 = 1.0/(xdiff*xdiff + ydiff*ydiff + zdiff*zdiff);
+            Real rm1 = sqrt(rm2);
+            Real rm2_times_r_dot_f = rm2*(xdiff*fx_shared[j] + ydiff*fy_shared[j] + zdiff*fz_shared[j]);
 
             vx -= rm1*(fx_shared[j] + xdiff*rm2_times_r_dot_f);
             vy -= rm1*(fy_shared[j] + ydiff*rm2_times_r_dot_f);
@@ -173,14 +173,14 @@ __global__ void flow_velocities(double *const __restrict__ Vf, const double *con
         for (int j = 0; (j < THREADS_PER_BLOCK) && (j_start + j < Nb*Nbods); j++){
 
           // Calculate the flow velocity
-          double xdiff = xi - x_shared[j];
-          double ydiff = yi - y_shared[j];
-          double zdiff = zi - z_shared[j];
+          Real xdiff = xi - x_shared[j];
+          Real ydiff = yi - y_shared[j];
+          Real zdiff = zi - z_shared[j];
 
           // Only have the Stokeslet part for blobs
-          double rm2 = 1.0/(xdiff*xdiff + ydiff*ydiff + zdiff*zdiff);
-          double rm1 = sqrt(rm2);
-          double rm2_times_r_dot_f = rm2*(xdiff*fx_shared[j] + ydiff*fy_shared[j] + zdiff*fz_shared[j]);
+          Real rm2 = 1.0/(xdiff*xdiff + ydiff*ydiff + zdiff*zdiff);
+          Real rm1 = sqrt(rm2);
+          Real rm2_times_r_dot_f = rm2*(xdiff*fx_shared[j] + ydiff*fy_shared[j] + zdiff*fz_shared[j]);
 
           vx += rm1*(fx_shared[j] + xdiff*rm2_times_r_dot_f);
           vy += rm1*(fy_shared[j] + ydiff*rm2_times_r_dot_f);
@@ -191,14 +191,14 @@ __global__ void flow_velocities(double *const __restrict__ Vf, const double *con
             // Which body does this blob belong to?
             const int body_id = (j_start + j)/Nb;
 
-            double xdiff = xi - Xbody[3*body_id];
-            double ydiff = yi - Xbody[3*body_id + 1];
-            double zdiff = zi - Xbody[3*body_id + 2];
+            Real xdiff = xi - Xbody[3*body_id];
+            Real ydiff = yi - Xbody[3*body_id + 1];
+            Real zdiff = zi - Xbody[3*body_id + 2];
 
             // Stokeslet part
-            double rm2 = 1.0/(xdiff*xdiff + ydiff*ydiff + zdiff*zdiff);
-            double rm1 = sqrt(rm2);
-            double rm2_times_r_dot_f = rm2*(xdiff*fx_shared[j] + ydiff*fy_shared[j] + zdiff*fz_shared[j]);
+            Real rm2 = 1.0/(xdiff*xdiff + ydiff*ydiff + zdiff*zdiff);
+            Real rm1 = sqrt(rm2);
+            Real rm2_times_r_dot_f = rm2*(xdiff*fx_shared[j] + ydiff*fy_shared[j] + zdiff*fz_shared[j]);
 
             vx -= rm1*(fx_shared[j] + xdiff*rm2_times_r_dot_f);
             vy -= rm1*(fy_shared[j] + ydiff*rm2_times_r_dot_f);
@@ -271,21 +271,21 @@ void flow_field_evaluator::setup(FILE *fil_ref_file, FILE *blob_ref_file){
   cudaSetDevice(0);
 
   // Allocate pinned host memory to allow async copying
-  cudaHostAlloc(&v_flow_host, 3*NFLOW*sizeof(double), cudaHostAllocPortable);
-  cudaHostAlloc(&x_flow_host, 3*NFLOW*sizeof(double), cudaHostAllocPortable);
-  cudaHostAlloc(&x_segs_host, 3*NBOD*NFIL*NSEG*sizeof(double), cudaHostAllocPortable);
-  cudaHostAlloc(&x_bods_host, 3*NBOD*sizeof(double), cudaHostAllocPortable);
-  cudaHostAlloc(&x_blobs_host, 3*NBOD*NBLOB*sizeof(double), cudaHostAllocPortable);
-  cudaHostAlloc(&f_segs_host, 6*NBOD*NFIL*NSEG*sizeof(double), cudaHostAllocPortable);
-  cudaHostAlloc(&f_blobs_host, 3*NBOD*NBLOB*sizeof(double), cudaHostAllocPortable);
+  cudaHostAlloc(&v_flow_host, 3*NFLOW*sizeof(Real), cudaHostAllocPortable);
+  cudaHostAlloc(&x_flow_host, 3*NFLOW*sizeof(Real), cudaHostAllocPortable);
+  cudaHostAlloc(&x_segs_host, 3*NBOD*NFIL*NSEG*sizeof(Real), cudaHostAllocPortable);
+  cudaHostAlloc(&x_bods_host, 3*NBOD*sizeof(Real), cudaHostAllocPortable);
+  cudaHostAlloc(&x_blobs_host, 3*NBOD*NBLOB*sizeof(Real), cudaHostAllocPortable);
+  cudaHostAlloc(&f_segs_host, 6*NBOD*NFIL*NSEG*sizeof(Real), cudaHostAllocPortable);
+  cudaHostAlloc(&f_blobs_host, 3*NBOD*NBLOB*sizeof(Real), cudaHostAllocPortable);
 
-  v_flow_device = new double*[num_gpus];
-  x_flow_device = new double*[num_gpus];
-  x_segs_device = new double*[num_gpus];
-  x_bods_device = new double*[num_gpus];
-  x_blobs_device = new double*[num_gpus];
-  f_segs_device = new double*[num_gpus];
-  f_blobs_device = new double*[num_gpus];
+  v_flow_device = new Real*[num_gpus];
+  x_flow_device = new Real*[num_gpus];
+  x_segs_device = new Real*[num_gpus];
+  x_bods_device = new Real*[num_gpus];
+  x_blobs_device = new Real*[num_gpus];
+  f_segs_device = new Real*[num_gpus];
+  f_blobs_device = new Real*[num_gpus];
 
   num_flow_points = new int[num_gpus];
   num_flow_points[0] = NFLOW;
@@ -302,15 +302,15 @@ void flow_field_evaluator::setup(FILE *fil_ref_file, FILE *blob_ref_file){
 
     cudaSetDevice(n);
 
-    cudaMalloc(&v_flow_device[n], 3*num_flow_points[n]*sizeof(double));
-    cudaMalloc(&x_flow_device[n], 3*num_flow_points[n]*sizeof(double));
+    cudaMalloc(&v_flow_device[n], 3*num_flow_points[n]*sizeof(Real));
+    cudaMalloc(&x_flow_device[n], 3*num_flow_points[n]*sizeof(Real));
 
-    cudaMalloc(&x_segs_device[n], 3*NBOD*NFIL*NSEG*sizeof(double));
-    cudaMalloc(&x_bods_device[n], 3*NBOD*sizeof(double));
-    cudaMalloc(&x_blobs_device[n], 3*NBOD*NBLOB*sizeof(double));
+    cudaMalloc(&x_segs_device[n], 3*NBOD*NFIL*NSEG*sizeof(Real));
+    cudaMalloc(&x_bods_device[n], 3*NBOD*sizeof(Real));
+    cudaMalloc(&x_blobs_device[n], 3*NBOD*NBLOB*sizeof(Real));
 
-    cudaMalloc(&f_segs_device[n], 6*NBOD*NFIL*NSEG*sizeof(double));
-    cudaMalloc(&f_blobs_device[n], 3*NBOD*NBLOB*sizeof(double));
+    cudaMalloc(&f_segs_device[n], 6*NBOD*NFIL*NSEG*sizeof(Real));
+    cudaMalloc(&f_blobs_device[n], 3*NBOD*NBLOB*sizeof(Real));
 
   }
 
@@ -337,23 +337,23 @@ void flow_field_evaluator::setup(FILE *fil_ref_file, FILE *blob_ref_file){
   }
 
   // Provide initial flow positions
-  const double DL = 2.2*RSEG;
-  const double r = 2.3*DL*NSEG;
-  double phi = 0.0;
+  const Real DL = 2.2*RSEG;
+  const Real r = 2.3*DL*NSEG;
+  Real phi = 0.0;
 
-  const double b = DL; // Only for planar spiral seeding
+  const Real b = DL; // Only for planar spiral seeding
 
-  const double x_length = 36.0*DL*NSEG; // These are for rectangular planar seeding
-  const double y_length = x_length;
-  const int num_flow_x = int(std::sqrt(double(NFLOW)));
-  const int num_flow_y = std::max<int>(1, int(ceil(NFLOW/double(num_flow_x))));
+  const Real x_length = 36.0*DL*NSEG; // These are for rectangular planar seeding
+  const Real y_length = x_length;
+  const int num_flow_x = int(std::sqrt(Real(NFLOW)));
+  const int num_flow_y = std::max<int>(1, int(ceil(NFLOW/Real(num_flow_x))));
 
   for (int n = 0; n < NFLOW; n++){
 
     /* // Spiral seeding on a sphere of radius r:
-    x_flow_host[3*n + 2] = (NFLOW == 1) ? -1.0 : 2.0*n/double(NFLOW-1) - 1.0;
+    x_flow_host[3*n + 2] = (NFLOW == 1) ? -1.0 : 2.0*n/Real(NFLOW-1) - 1.0;
 
-    double r_local = std::sqrt(1.0 - x_flow_host[3*n + 2]*x_flow_host[3*n + 2]);
+    Real r_local = std::sqrt(1.0 - x_flow_host[3*n + 2]*x_flow_host[3*n + 2]);
 
     if ((n == 0) || (n == NFLOW-1)){
 
@@ -372,7 +372,7 @@ void flow_field_evaluator::setup(FILE *fil_ref_file, FILE *blob_ref_file){
     */
 
     /* // Spiral seeding in a plane, starting at distance r from the swimmer's centre:
-    const double r_n = r + b*phi;
+    const Real r_n = r + b*phi;
 
     x_flow_host[3*n] = r_n*std::cos(phi);
     x_flow_host[3*n + 1] = 0.0;
@@ -384,9 +384,9 @@ void flow_field_evaluator::setup(FILE *fil_ref_file, FILE *blob_ref_file){
 
     // Rectangular seeding in a plane. This is primarily for producing time-averaged flow speed images
     // and so will not worry about tracers being inside the swimmer -- speeds at these locations can simply be ignored.
-    x_flow_host[3*n] = 0.0; //(double(n - num_flow_x*std::floor(double(n)/double(num_flow_x)))/double(num_flow_x) - 0.5)*x_length;
+    x_flow_host[3*n] = 0.0; //(Real(n - num_flow_x*std::floor(Real(n)/Real(num_flow_x)))/Real(num_flow_x) - 0.5)*x_length;
     x_flow_host[3*n + 1] = -2.2032e+03 + 8.0*(n - 551.0*std::floor(n/551.0)); //0.0;
-    x_flow_host[3*n + 2] = 8.0*(1.0 + std::floor(n/551.0)); //(std::floor(double(n)/double(num_flow_x))/double(num_flow_y) - 0.5)*y_length;
+    x_flow_host[3*n + 2] = 8.0*(1.0 + std::floor(n/551.0)); //(std::floor(Real(n)/Real(num_flow_x))/Real(num_flow_y) - 0.5)*y_length;
 
 
     // Fill velocity array with zeros initially so the update does nothing at the start of the first step.
@@ -407,7 +407,7 @@ void flow_field_evaluator::read_positions_and_forces(FILE *body_state_file, FILE
   int j = 0; // Entry in segment force arrays
   int k = 0; // Entry for blob arrays
 
-  const double DL = 2.2*RSEG;
+  const Real DL = 2.2*RSEG;
 
   // Write the segment and blob data to the host arrays
   for (int b = 0; b < NBOD; b++){
@@ -509,11 +509,11 @@ void flow_field_evaluator::read_positions_and_forces(FILE *body_state_file, FILE
   for (int n = 0; n < num_gpus; n++){
 
     cudaSetDevice(n);
-    cudaMemcpyAsync(x_segs_device[n], x_segs_host, 3*NBOD*NFIL*NSEG*sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpyAsync(x_bods_device[n], x_bods_host, 3*NBOD*sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpyAsync(f_segs_device[n], f_segs_host, 6*NBOD*NFIL*NSEG*sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpyAsync(x_blobs_device[n], x_blobs_host, 3*NBOD*NBLOB*sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpyAsync(f_blobs_device[n], f_blobs_host, 3*NBOD*NBLOB*sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(x_segs_device[n], x_segs_host, 3*NBOD*NFIL*NSEG*sizeof(Real), cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(x_bods_device[n], x_bods_host, 3*NBOD*sizeof(Real), cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(f_segs_device[n], f_segs_host, 6*NBOD*NFIL*NSEG*sizeof(Real), cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(x_blobs_device[n], x_blobs_host, 3*NBOD*NBLOB*sizeof(Real), cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(f_blobs_device[n], f_blobs_host, 3*NBOD*NBLOB*sizeof(Real), cudaMemcpyHostToDevice);
 
   }
 
@@ -536,7 +536,7 @@ void flow_field_evaluator::read_positions_and_forces(FILE *body_state_file, FILE
   for (int n = 0; n < num_gpus; n++){
 
     cudaSetDevice(n);
-    cudaMemcpyAsync(x_flow_device[n], &x_flow_host[3*flow_points_offset], 3*num_flow_points[n]*sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpyAsync(x_flow_device[n], &x_flow_host[3*flow_points_offset], 3*num_flow_points[n]*sizeof(Real), cudaMemcpyHostToDevice);
     flow_points_offset += num_flow_points[n];
 
   }
@@ -546,7 +546,7 @@ void flow_field_evaluator::read_positions_and_forces(FILE *body_state_file, FILE
 void flow_field_evaluator::velocities(){
 
   // Launch the kernel
-  const double prefac = 1.0/(8.0*PI*MU);
+  const Real prefac = 1.0/(8.0*PI*MU);
 
   for (int n = 0; n < num_gpus; n++){
 
@@ -563,7 +563,7 @@ void flow_field_evaluator::velocities(){
   for (int n = 0; n < num_gpus; n++){
 
     cudaSetDevice(n);
-    cudaMemcpyAsync(&v_flow_host[3*flow_points_offset], v_flow_device[n], 3*num_flow_points[n]*sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpyAsync(&v_flow_host[3*flow_points_offset], v_flow_device[n], 3*num_flow_points[n]*sizeof(Real), cudaMemcpyDeviceToHost);
     flow_points_offset += num_flow_points[n];
 
   }

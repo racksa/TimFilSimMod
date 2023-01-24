@@ -13,18 +13,19 @@ class matrix;
 // Included dependencies
 #include <iostream>
 #include <fstream>
+#include "../../config.hpp"
 
 class quaternion {
 
 public:
 
-  double scalar_part;
-  double vector_part[3];
+  Real scalar_part;
+  Real vector_part[3];
 
   ~quaternion();
   quaternion();
-  quaternion(const double q0, const double q1, const double q2, const double q3);
-  quaternion(const double q0, const double *const q);
+  quaternion(const Real q0, const Real q1, const Real q2, const Real q3);
+  quaternion(const Real q0, const Real *const q);
   quaternion(const quaternion& q);
 
   //
@@ -32,17 +33,17 @@ public:
   //
 
   // Element access
-  double& operator()(const int elem);
-  double operator()(const int elem) const;
+  Real& operator()(const int elem);
+  Real operator()(const int elem) const;
 
   // Assignment
   quaternion& operator =(const quaternion& q); // q1 = q
 
   // In-place scalar multiplication
-  quaternion& operator *=(const double s); // q *= s
+  quaternion& operator *=(const Real s); // q *= s
 
   // In-place scalar division
-  quaternion& operator /=(const double s); // q /= s
+  quaternion& operator /=(const Real s); // q /= s
 
   // Sign swap
   quaternion operator -() const; // For calls of the form q1 = -q2;
@@ -61,16 +62,16 @@ public:
   //
 
   void randomise();
-  double norm() const;
+  Real norm() const;
   void normalise_in_place();
   void conj_in_place();
   void sqrt_in_place();
   void write_data(std::ofstream& data_file) const;
 
   // Array versions for if we just want to see the values and maybe do basic addition etc.
-  void tangent(double *const t) const;
-  void normal(double *const n) const;
-  void binormal(double *const b) const;
+  void tangent(Real *const t) const;
+  void normal(Real *const n) const;
+  void binormal(Real *const b) const;
 
   // Matrix versions for if we want to rotate them etc.
   void tangent(matrix& t) const;
@@ -96,9 +97,9 @@ public:
 // BINARY OPERATOR OVERLOADING
 //
 
-quaternion operator /(quaternion q, const double s);
-quaternion operator *(quaternion q, const double s);
-quaternion operator *(const double s, quaternion q);
+quaternion operator /(quaternion q, const Real s);
+quaternion operator *(quaternion q, const Real s);
+quaternion operator *(const Real s, quaternion q);
 quaternion operator *(quaternion p, const quaternion& q);
 quaternion operator +(quaternion p, const quaternion& q);
 quaternion operator -(quaternion p, const quaternion& q);
@@ -108,13 +109,13 @@ std::ostream& operator <<(std::ostream& stream, const quaternion& q);
 // OTHER FUNCTIONS ASSOCIATED WITH QUATERNIONS
 //
 
-void lie_exp(quaternion& q, const double *const u);
-quaternion lie_exp(const double *const u);
+void lie_exp(quaternion& q, const Real *const u);
+quaternion lie_exp(const Real *const u);
 void midpoint_quaternion(quaternion& qmid, const quaternion& q1, const quaternion& q2);
 quaternion midpoint_quaternion(const quaternion& q1, const quaternion& q2);
-void dexp(double *const out, const double *const u, const double *const v);
-void dexpinv(double *const out, const double *const u, const double *const v);
-void dexpinv_transpose(double *const out, const double *const u, const double *const v);
-void bch(double *const out, const double *const u, const double *const v);
+void dexp(Real *const out, const Real *const u, const Real *const v);
+void dexpinv(Real *const out, const Real *const u, const Real *const v);
+void dexpinv_transpose(Real *const out, const Real *const u, const Real *const v);
+void bch(Real *const out, const Real *const u, const Real *const v);
 
 #endif // MY_QUATERNION_HEADER_INCLUDED

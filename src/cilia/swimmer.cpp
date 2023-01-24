@@ -12,12 +12,12 @@ swimmer::~swimmer(){}
 
 swimmer::swimmer(){}
 
-void swimmer::initial_setup(const int id, const double *const data_from_file, double *const x_segs_address, double *const f_segs_address, double *const f_blobs_address){
+void swimmer::initial_setup(const int id, const Real *const data_from_file, Real *const x_segs_address, Real *const f_segs_address, Real *const f_blobs_address){
 
-  filament_references = std::vector<double>(3*NFIL);
-  polar_dir_refs = std::vector<double>(3*NFIL);
-  azi_dir_refs = std::vector<double>(3*NFIL);
-  normal_refs = std::vector<double>(3*NFIL);
+  filament_references = std::vector<Real>(3*NFIL);
+  polar_dir_refs = std::vector<Real>(3*NFIL);
+  azi_dir_refs = std::vector<Real>(3*NFIL);
+  normal_refs = std::vector<Real>(3*NFIL);
 
   filaments = std::vector<filament>(NFIL);
 
@@ -66,22 +66,22 @@ void swimmer::initial_setup(const int id, const double *const data_from_file, do
       // Neither value is given, so we attempt to make a regular lattice.
       #if RECTANGULAR_SEEDING
 
-        const int fil_grid_dim_x = int(sqrt(double(NFIL)));
-        const int fil_grid_dim_y = std::max<int>(1, int(ceil(NFIL/double(fil_grid_dim_x))));
+        const int fil_grid_dim_x = int(sqrt(Real(NFIL)));
+        const int fil_grid_dim_y = std::max<int>(1, int(ceil(NFIL/Real(fil_grid_dim_x))));
 
       #elif HEXAGONAL_SEEDING
 
         const int fil_grid_dim_x = std::round(0.25*(3.0 - std::sqrt(3.0) + std::sqrt(4.0 - 2.0*std::sqrt(3.0) + 8.0*std::sqrt(3.0)*NFIL)));
-        const int fil_grid_dim_y = std::max<int>(1, int(ceil(NFIL/double(fil_grid_dim_x-1)))); // Ensure we have enough rows even if all rows were of the shorter type.
+        const int fil_grid_dim_y = std::max<int>(1, int(ceil(NFIL/Real(fil_grid_dim_x-1)))); // Ensure we have enough rows even if all rows were of the shorter type.
       
       #elif FCM_LATTICE_SEEDING
 
-        const int fil_grid_dim_x = int(cbrt(double(NFIL)));
-        const int fil_grid_dim_y = std::max<int>(1, int(sqrt(NFIL/double(fil_grid_dim_x))));
-        const int fil_grid_dim_z = std::max<int>(1, int(ceil(NFIL/double(fil_grid_dim_x*fil_grid_dim_y))));
-        const double fil_grid_step_x = 90.0; //(0.1 + SCALED_BEAT_AMPLITUDE)*L; //2.0*L*sqrt(PI/5.6);
-        const double fil_grid_step_y = fil_grid_step_x;
-        const double fil_grid_step_z = fil_grid_step_x;
+        const int fil_grid_dim_x = int(cbrt(Real(NFIL)));
+        const int fil_grid_dim_y = std::max<int>(1, int(sqrt(NFIL/Real(fil_grid_dim_x))));
+        const int fil_grid_dim_z = std::max<int>(1, int(ceil(NFIL/Real(fil_grid_dim_x*fil_grid_dim_y))));
+        const Real fil_grid_step_x = 90.0; //(0.1 + SCALED_BEAT_AMPLITUDE)*L; //2.0*L*sqrt(PI/5.6);
+        const Real fil_grid_step_y = fil_grid_step_x;
+        const Real fil_grid_step_z = fil_grid_step_x;
 
       #endif
 
@@ -92,11 +92,11 @@ void swimmer::initial_setup(const int id, const double *const data_from_file, do
 
       #if RECTANGULAR_SEEDING
 
-        const int fil_grid_dim_x = std::max<int>(1, int(ceil(NFIL/double(fil_grid_dim_y))));
+        const int fil_grid_dim_x = std::max<int>(1, int(ceil(NFIL/Real(fil_grid_dim_y))));
 
       #elif HEXAGONAL_SEEDING
 
-        const int fil_grid_dim_x = std::max<int>(1, int(ceil(NFIL/double(fil_grid_dim_y-1))));
+        const int fil_grid_dim_x = std::max<int>(1, int(ceil(NFIL/Real(fil_grid_dim_y-1))));
 
       #endif
 
@@ -110,35 +110,35 @@ void swimmer::initial_setup(const int id, const double *const data_from_file, do
       
       #if RECTANGULAR_SEEDING
 
-        const int fil_grid_dim_y = std::max<int>(1, int(ceil(NFIL/double(fil_grid_dim_x))));
+        const int fil_grid_dim_y = std::max<int>(1, int(ceil(NFIL/Real(fil_grid_dim_x))));
 
       #elif HEXAGONAL_SEEDING
 
-        const int fil_grid_dim_y = std::max<int>(1, int(ceil(NFIL/double(fil_grid_dim_x-1))));
+        const int fil_grid_dim_y = std::max<int>(1, int(ceil(NFIL/Real(fil_grid_dim_x-1))));
       #elif FCM_LATTICE_SEEDING
 
-        const int fil_grid_dim_x = int(cbrt(double(NFIL)));
-        const int fil_grid_dim_y = std::max<int>(1, int(sqrt(NFIL/double(fil_grid_dim_x))));
-        const int fil_grid_dim_z = std::max<int>(1, int(ceil(NFIL/double(fil_grid_dim_x*fil_grid_dim_y))));
-        const double fil_grid_step_x = 60.0; //(0.1 + SCALED_BEAT_AMPLITUDE)*L; //2.0*L*sqrt(PI/5.6);
-        const double fil_grid_step_y = fil_grid_step_x;
-        const double fil_grid_step_z = fil_grid_step_x;
+        const int fil_grid_dim_x = int(cbrt(Real(NFIL)));
+        const int fil_grid_dim_y = std::max<int>(1, int(sqrt(NFIL/Real(fil_grid_dim_x))));
+        const int fil_grid_dim_z = std::max<int>(1, int(ceil(NFIL/Real(fil_grid_dim_x*fil_grid_dim_y))));
+        const Real fil_grid_step_x = 60.0; //(0.1 + SCALED_BEAT_AMPLITUDE)*L; //2.0*L*sqrt(PI/5.6);
+        const Real fil_grid_step_y = fil_grid_step_x;
+        const Real fil_grid_step_z = fil_grid_step_x;
       #endif
 
     #endif
 
     #if RECTANGULAR_SEEDING
 
-      const double fil_grid_step_y = FIL_LATTICE_Y_SPACING;
+      const Real fil_grid_step_y = FIL_LATTICE_Y_SPACING;
 
     #elif HEXAGONAL_SEEDING
 
-      const double fil_grid_step_y = 0.5*FIL_LATTICE_Y_SPACING;  // Gives us beat-wise separations of 2*fil_grid_step_y = FIL_LATTICE_Y_SPACING
+      const Real fil_grid_step_y = 0.5*FIL_LATTICE_Y_SPACING;  // Gives us beat-wise separations of 2*fil_grid_step_y = FIL_LATTICE_Y_SPACING
 
     #endif
 
     #if !FCM_LATTICE_SEEDING
-      double fil_grid_step_x;
+      Real fil_grid_step_x;
     #endif
 
     if (!bool(FIL_LATTICE_X_SPACING)){
@@ -161,15 +161,15 @@ void swimmer::initial_setup(const int id, const double *const data_from_file, do
 
     } else {
       #if !FCM_LATTICE_SEEDING
-        fil_grid_step_x = double(FIL_LATTICE_X_SPACING); // Cast to double lets it compile even if FIL_LATTICE_X_SPACING is blank.
+        fil_grid_step_x = Real(FIL_LATTICE_X_SPACING); // Cast to Real lets it compile even if FIL_LATTICE_X_SPACING is blank.
       #endif
     }
 
-    const double im = 0.5*(fil_grid_dim_x - 1.0);
-    const double jm = 0.5*(fil_grid_dim_y - 1.0);
+    const Real im = 0.5*(fil_grid_dim_x - 1.0);
+    const Real jm = 0.5*(fil_grid_dim_y - 1.0);
 
-    const double dir[3] = {0.0, 0.0, 1.0};
-    const double strain_twist[3] = {0.0, 0.0, 0.0};
+    const Real dir[3] = {0.0, 0.0, 1.0};
+    const Real strain_twist[3] = {0.0, 0.0, 0.0};
 
     #if RECTANGULAR_SEEDING
 
@@ -184,8 +184,8 @@ void swimmer::initial_setup(const int id, const double *const data_from_file, do
             filament_references[3*fil_id + 1] = (j-jm)*fil_grid_step_y;
             filament_references[3*fil_id + 2] = BASE_HEIGHT_ABOVE_SURFACE;
 
-            double *const fil_x_address = &x_segs_address[3*fil_id*NSEG];
-            double *const fil_f_address = &f_segs_address[6*fil_id*NSEG];
+            Real *const fil_x_address = &x_segs_address[3*fil_id*NSEG];
+            Real *const fil_f_address = &f_segs_address[6*fil_id*NSEG];
 
             #if READ_INITIAL_CONDITIONS_FROM_BACKUP
 
@@ -219,8 +219,8 @@ void swimmer::initial_setup(const int id, const double *const data_from_file, do
             filament_references[3*fil_id + 1] = (j-jm)*fil_grid_step_y;
             filament_references[3*fil_id + 2] = BASE_HEIGHT_ABOVE_SURFACE;
 
-            double *const fil_x_address = &x_segs_address[3*fil_id*NSEG];
-            double *const fil_f_address = &f_segs_address[6*fil_id*NSEG];
+            Real *const fil_x_address = &x_segs_address[3*fil_id*NSEG];
+            Real *const fil_f_address = &f_segs_address[6*fil_id*NSEG];
 
             #if READ_INITIAL_CONDITIONS_FROM_BACKUP
 
@@ -254,8 +254,8 @@ void swimmer::initial_setup(const int id, const double *const data_from_file, do
               filament_references[3*fil_id + 1] = j*fil_grid_step_y + 60;
               filament_references[3*fil_id + 2] = k*fil_grid_step_z + 60;
 
-              double *const fil_x_address = &x_segs_address[3*fil_id*NSEG];
-              double *const fil_f_address = &f_segs_address[6*fil_id*NSEG];
+              Real *const fil_x_address = &x_segs_address[3*fil_id*NSEG];
+              Real *const fil_f_address = &f_segs_address[6*fil_id*NSEG];
 
               #if READ_INITIAL_CONDITIONS_FROM_BACKUP
 
@@ -330,15 +330,15 @@ void swimmer::initial_setup(const int id, const double *const data_from_file, do
     azi_file.close();
     normal_file.close();
 
-    const double strain_twist[3] = {0.0, 0.0, 0.0};
+    const Real strain_twist[3] = {0.0, 0.0, 0.0};
 
     for (int i = 0; i < NFIL; i++) {
 
-      double *const fil_x_address = &x_segs_address[3*i*NSEG];
-      double *const fil_f_address = &f_segs_address[6*i*NSEG];
+      Real *const fil_x_address = &x_segs_address[3*i*NSEG];
+      Real *const fil_f_address = &f_segs_address[6*i*NSEG];
 
-      const double *const dir = &normal_refs[3*i];
-      const double pos[3] = {body.x[0] + filament_references[3*i], body.x[1] + filament_references[3*i + 1], body.x[2] + filament_references[3*i + 2]};
+      const Real *const dir = &normal_refs[3*i];
+      const Real pos[3] = {body.x[0] + filament_references[3*i], body.x[1] + filament_references[3*i + 1], body.x[2] + filament_references[3*i + 2]};
 
       #if READ_INITIAL_CONDITIONS_FROM_BACKUP
 
@@ -412,15 +412,15 @@ void swimmer::forces_and_torques(const int nt, int id){
         // due to the filament segments.
         for (int m = 0; m < NSEG; m++){
 
-          const double *const f_seg = &filaments[n].f[6*m];
+          const Real *const f_seg = &filaments[n].f[6*m];
 
           f(0) -= f_seg[0];
           f(1) -= f_seg[1];
           f(2) -= f_seg[2];
 
-          const double xdiff = filaments[n].segments[m].x[0] - body.x[0];
-          const double ydiff = filaments[n].segments[m].x[1] - body.x[1];
-          const double zdiff = filaments[n].segments[m].x[2] - body.x[2];
+          const Real xdiff = filaments[n].segments[m].x[0] - body.x[0];
+          const Real ydiff = filaments[n].segments[m].x[1] - body.x[1];
+          const Real zdiff = filaments[n].segments[m].x[2] - body.x[2];
 
           f(3) -= f_seg[3] + ydiff*f_seg[2] - zdiff*f_seg[1];
           f(4) -= f_seg[4] + zdiff*f_seg[0] - xdiff*f_seg[2];
@@ -479,21 +479,27 @@ void swimmer::forces_and_torques(const int nt, int id){
 #if !(PRESCRIBED_CILIA || NO_CILIA_SQUIRMER)
 
   void swimmer::prepare_jacobian_inv(const int nt){
-
+    
+    // printf("prepare_jacobian_inv pass1\n");
+    
     for (int i = 0; i < NFIL; i++){
 
       filaments[i].invert_approx_jacobian(nt);
 
     }
 
+    // printf("prepare_jacobian_inv pass2\n");
+
     #if !INFINITE_PLANE_WALL
 
       // Use aliases so we don't have to write body.(...) everywhere.
       const matrix& Q_init = body.Q_init;
-      const double *const u = body.u;
-      const double *const x = body.x;
+      const Real *const u = body.u;
+      const Real *const x = body.x;
 
       matrix& schur_mat = schur_mat_inv; // Use an alias then invert in-place.
+
+      // printf("prepare_jacobian_inv matrix pass1\n");
 
       #if USE_BROYDEN_FOR_EVERYTHING
 
@@ -509,15 +515,17 @@ void swimmer::forces_and_torques(const int nt, int id){
 
           schur_mat.zero();
 
-          const double blob_mob_fac = (nt < NUM_EULER_STEPS) ? -6.0*PI*MU*RBLOB/DT : -9.0*PI*MU*RBLOB/DT; // We can absorb the DT factor here because they never appear separately.
+          const Real blob_mob_fac = (nt < NUM_EULER_STEPS) ? -6.0*PI*MU*RBLOB/DT : -9.0*PI*MU*RBLOB/DT; // We can absorb the DT factor here because they never appear separately.
 
           schur_mat(0, 0) = -NBLOB*blob_mob_fac;
           schur_mat(1, 1) = -NBLOB*blob_mob_fac;
           schur_mat(2, 2) = -NBLOB*blob_mob_fac;
 
+          // printf("prepare_jacobian_inv matrix pass2\n");
+
           for (int m = 0; m < NBLOB; m++){
 
-            const double blob_force[3] = {body.blob_forces[3*m], body.blob_forces[3*m + 1], body.blob_forces[3*m + 2]};
+            const Real blob_force[3] = {body.blob_forces[3*m], body.blob_forces[3*m + 1], body.blob_forces[3*m + 2]};
             const matrix blob_diff = Q_init*matrix(3, 1, &body.blob_references[3*m]);
             const matrix rcross_blob_diff = rcross(blob_diff);
 
@@ -532,13 +540,15 @@ void swimmer::forces_and_torques(const int nt, int id){
 
           }
 
+          // printf("prepare_jacobian_inv pass3\n");
+
           for (int n = 0; n < NFIL; n++){
 
             const matrix fil_base_disp = Q_init*matrix(3, 1, &filament_references[3*n]);
 
             schur_mat.add_to_block(3, 3, 3, 3, rcross(filaments[n].tether_lambda)*rcross(fil_base_disp));
 
-            const double u_cross_lambda[3] = {u[1]*filaments[n].clamp_lambda[2] - u[2]*filaments[n].clamp_lambda[1],
+            const Real u_cross_lambda[3] = {u[1]*filaments[n].clamp_lambda[2] - u[2]*filaments[n].clamp_lambda[1],
                                               u[2]*filaments[n].clamp_lambda[0] - u[0]*filaments[n].clamp_lambda[2],
                                               u[0]*filaments[n].clamp_lambda[1] - u[1]*filaments[n].clamp_lambda[0]};
 
@@ -595,7 +605,7 @@ void swimmer::forces_and_torques(const int nt, int id){
             B.set_block(3*NSEG, 3, 3, 3, filaments[n].elastic_clamping_block1);
             B.set_block(3*NSEG + 3, 3, 3, 3, filaments[n].elastic_clamping_block2);
 
-            const double disp_norm = sqrt(fil_base_disp(0)*fil_base_disp(0) + fil_base_disp(1)*fil_base_disp(1) + fil_base_disp(2)*fil_base_disp(2));
+            const Real disp_norm = sqrt(fil_base_disp(0)*fil_base_disp(0) + fil_base_disp(1)*fil_base_disp(1) + fil_base_disp(2)*fil_base_disp(2));
 
             const matrix Du = rcross((0.5*DL + disp_norm)*fil_base_disp/disp_norm);
 
@@ -613,11 +623,13 @@ void swimmer::forces_and_torques(const int nt, int id){
 
           }
 
+          // printf("prepare_jacobian_inv pass4\n");
+
         #endif
 
       #else
 
-        const double dt_fac = (nt < NUM_EULER_STEPS) ? -DT : -2.0*DT/3.0;
+        const Real dt_fac = (nt < NUM_EULER_STEPS) ? -DT : -2.0*DT/3.0;
         const matrix body_lie_cross = -rcross(u);
 
         // This approx. doesn't require knowledge of the mobility solver.
@@ -640,7 +652,7 @@ void swimmer::forces_and_torques(const int nt, int id){
 
             omega_lie_deriv -= rcross(filaments[i].tether_lambda)*rcross(fil_base_disp);
 
-            const double u_cross_lambda[3] = {u[1]*filaments[i].clamp_lambda[2] - u[2]*filaments[i].clamp_lambda[1],
+            const Real u_cross_lambda[3] = {u[1]*filaments[i].clamp_lambda[2] - u[2]*filaments[i].clamp_lambda[1],
                                               u[2]*filaments[i].clamp_lambda[0] - u[0]*filaments[i].clamp_lambda[2],
                                               u[0]*filaments[i].clamp_lambda[1] - u[1]*filaments[i].clamp_lambda[0]};
 
@@ -650,7 +662,7 @@ void swimmer::forces_and_torques(const int nt, int id){
 
               filaments[i].segments[NSEG-1].tangent(t);
 
-              const double disp_norm = sqrt(fil_base_disp(0)*fil_base_disp(0) + fil_base_disp(1)*fil_base_disp(1) + fil_base_disp(2)*fil_base_disp(2));
+              const Real disp_norm = sqrt(fil_base_disp(0)*fil_base_disp(0) + fil_base_disp(1)*fil_base_disp(1) + fil_base_disp(2)*fil_base_disp(2));
 
               omega_lie_deriv += rcross(END_FORCE_MAGNITUDE*t)*rcross((0.5*DL + disp_norm)*fil_base_disp/disp_norm);
 
@@ -735,7 +747,7 @@ void swimmer::forces_and_torques(const int nt, int id){
 
                 // If the body is a sphere, we can make corrections to dependencies on the segment variables
                 // using the RPY expression for interacting spheres of different sizes.
-                const double R = 0.5*AXIS_DIR_BODY_LENGTH;
+                const Real R = 0.5*AXIS_DIR_BODY_LENGTH;
 
                 for (int n = 0; n < NSEG; n++){
 
@@ -743,8 +755,8 @@ void swimmer::forces_and_torques(const int nt, int id){
 
                   I.identity();
 
-                  double rhat[3] = {segments[n].x[0] - x[0], segments[n].x[1] - x[1], segments[n].x[2] - x[2]};
-                  const double r = sqrt(rhat[0]*rhat[0] + rhat[1]*rhat[1] + rhat[2]*rhat[2]);
+                  Real rhat[3] = {segments[n].x[0] - x[0], segments[n].x[1] - x[1], segments[n].x[2] - x[2]};
+                  const Real r = sqrt(rhat[0]*rhat[0] + rhat[1]*rhat[1] + rhat[2]*rhat[2]);
                   rhat[0] /= r;
                   rhat[1] /= r;
                   rhat[2] /= r;
@@ -820,7 +832,7 @@ void swimmer::forces_and_torques(const int nt, int id){
             A.set_block(3*NSEG, 3, 3, 3, filaments[i].elastic_clamping_block1);
             A.set_block(3*NSEG + 3, 3, 3, 3, filaments[i].elastic_clamping_block2);
 
-            const double disp_norm = sqrt(fil_base_disp(0)*fil_base_disp(0) + fil_base_disp(1)*fil_base_disp(1) + fil_base_disp(2)*fil_base_disp(2));
+            const Real disp_norm = sqrt(fil_base_disp(0)*fil_base_disp(0) + fil_base_disp(1)*fil_base_disp(1) + fil_base_disp(2)*fil_base_disp(2));
             const matrix D = rcross((0.5*DL + disp_norm)*fil_base_disp/disp_norm);
 
             for (int n = 0; n < NSEG; n++){
@@ -838,6 +850,8 @@ void swimmer::forces_and_torques(const int nt, int id){
       #endif
 
       schur_mat.invert(); // Stored in schur_mat_inv via aliasing.
+
+      // printf("prepare_jacobian_inv pass5\n");
 
     #endif
 
@@ -863,7 +877,7 @@ void swimmer::forces_and_torques(const int nt, int id){
 
         matrix b1 = in.get_block(0, 6*NFIL*NSEG);
 
-        const double blob_mob_fac = -6.0*PI*MU*RBLOB;
+        const Real blob_mob_fac = -6.0*PI*MU*RBLOB;
 
         #if PRESCRIBED_BODY_VELOCITIES
 
@@ -895,7 +909,7 @@ void swimmer::forces_and_torques(const int nt, int id){
 
           out.set_block(6*NFIL*NSEG, 6, schur_mat_inv*b3);
 
-          const double dt_fac = (nt < NUM_EULER_STEPS) ? 1.0/DT : 1.5/DT;
+          const Real dt_fac = (nt < NUM_EULER_STEPS) ? 1.0/DT : 1.5/DT;
 
           for (int m = 0; m < NBLOB; m++){
 
@@ -931,7 +945,7 @@ void swimmer::forces_and_torques(const int nt, int id){
           B.set_block(3*NSEG + 3, 3, 3, 3, filaments[n].elastic_clamping_block2);
 
           const matrix fil_base_disp = Q_init*matrix(3, 1, &filament_references[3*n]);
-          const double disp_norm = sqrt(fil_base_disp(0)*fil_base_disp(0) + fil_base_disp(1)*fil_base_disp(1) + fil_base_disp(2)*fil_base_disp(2));
+          const Real disp_norm = sqrt(fil_base_disp(0)*fil_base_disp(0) + fil_base_disp(1)*fil_base_disp(1) + fil_base_disp(2)*fil_base_disp(2));
           const matrix D = rcross((0.5*DL + disp_norm)*fil_base_disp/disp_norm);
 
           for (int m = 0; m < NSEG; m++){
@@ -979,7 +993,7 @@ void swimmer::forces_and_torques(const int nt, int id){
           A.set_block(3*NSEG + 3, 3, 3, 3, filaments[i].elastic_clamping_block2);
 
           const matrix fil_base_disp = Q_init*matrix(3, 1, &filament_references[3*i]);
-          const double disp_norm = sqrt(fil_base_disp(0)*fil_base_disp(0) + fil_base_disp(1)*fil_base_disp(1) + fil_base_disp(2)*fil_base_disp(2));
+          const Real disp_norm = sqrt(fil_base_disp(0)*fil_base_disp(0) + fil_base_disp(1)*fil_base_disp(1) + fil_base_disp(2)*fil_base_disp(2));
           const matrix D = rcross((0.5*DL + disp_norm)*fil_base_disp/disp_norm);
 
           for (int n = 0; n < NSEG; n++){
@@ -1000,7 +1014,7 @@ void swimmer::forces_and_torques(const int nt, int id){
 
   }
 
-  void swimmer::update(const double *const swimmer_update){
+  void swimmer::update(const Real *const swimmer_update){
 
     #if !INFINITE_PLANE_WALL
 
@@ -1088,15 +1102,15 @@ void swimmer::write_backup(std::ofstream& backup_file) const {
 
       KTMinvK_inv.zero();
 
-      const double seg_mob_fac = 6.0*PI*MU*RSEG;
-      const double blob_mob_fac = 6.0*PI*MU*RBLOB;
+      const Real seg_mob_fac = 6.0*PI*MU*RSEG;
+      const Real blob_mob_fac = 6.0*PI*MU*RBLOB;
 
-      const double eye_fac = double(NFIL*NSEG)*seg_mob_fac + double(NBLOB)*blob_mob_fac;
+      const Real eye_fac = Real(NFIL*NSEG)*seg_mob_fac + Real(NBLOB)*blob_mob_fac;
       KTMinvK_inv(0, 0) = eye_fac;
       KTMinvK_inv(1, 1) = eye_fac;
       KTMinvK_inv(2, 2) = eye_fac;
 
-      const double *const x = body.x;
+      const Real *const x = body.x;
 
       for (int n = 0; n < NFIL; n++){
 
@@ -1104,7 +1118,7 @@ void swimmer::write_backup(std::ofstream& backup_file) const {
 
         for (int m = 0; m < NSEG; m++){
 
-          const double diff[3] = {segments[m].x[0] - x[0], segments[m].x[1] - x[1], segments[m].x[2] - x[2]};
+          const Real diff[3] = {segments[m].x[0] - x[0], segments[m].x[1] - x[1], segments[m].x[2] - x[2]};
           const matrix rcross_mat = rcross(diff);
 
           KTMinvK_inv.add_to_block(0, 3, 3, 3, seg_mob_fac*rcross_mat);
@@ -1137,7 +1151,7 @@ void swimmer::write_backup(std::ofstream& backup_file) const {
         // Each filament/cilium contributes independently
         for (int n = 0; n < NFIL; n++){
 
-          double Knormsq = 0.0;
+          Real Knormsq = 0.0;
           matrix v1(3,1), v2(3,1);
           v1.zero();
           v2.zero();

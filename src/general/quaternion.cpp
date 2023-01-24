@@ -21,7 +21,7 @@ quaternion::quaternion(){
 
 }
 
-quaternion::quaternion(const double q0, const double q1, const double q2, const double q3){
+quaternion::quaternion(const Real q0, const Real q1, const Real q2, const Real q3){
 
   scalar_part = q0;
   vector_part[0] = q1;
@@ -30,7 +30,7 @@ quaternion::quaternion(const double q0, const double q1, const double q2, const 
 
 }
 
-quaternion::quaternion(const double q0, const double *const q){
+quaternion::quaternion(const Real q0, const Real *const q){
 
   scalar_part = q0;
   vector_part[0] = q[0];
@@ -53,13 +53,13 @@ quaternion::quaternion(const quaternion& q){
 //
 
 // Element access
-double& quaternion::operator()(const int elem){
+Real& quaternion::operator()(const int elem){
 
   return (elem == 0) ? scalar_part : vector_part[elem-1];
 
 }
 
-double quaternion::operator()(const int elem) const {
+Real quaternion::operator()(const int elem) const {
 
   return (elem == 0) ? scalar_part : vector_part[elem-1];
 
@@ -78,7 +78,7 @@ quaternion& quaternion::operator =(const quaternion& q){
 }
 
 // In-place scalar multiplication
-quaternion& quaternion::operator *=(const double s){
+quaternion& quaternion::operator *=(const Real s){
 
   scalar_part *= s;
   vector_part[0] *= s;
@@ -90,7 +90,7 @@ quaternion& quaternion::operator *=(const double s){
 }
 
 // In-place scalar division
-quaternion& quaternion::operator /=(const double s){
+quaternion& quaternion::operator /=(const Real s){
 
   scalar_part /= s;
   vector_part[0] /= s;
@@ -116,10 +116,10 @@ quaternion& quaternion::operator *=(const quaternion& q){
   // It's possible there's a more efficient way to write this, but this should
   // be "q *= q safe", which is nice.
 
-  const double q0 = scalar_part*q.scalar_part - (vector_part[0]*q.vector_part[0] + vector_part[1]*q.vector_part[1] + vector_part[2]*q.vector_part[2]);
-  const double q1 = scalar_part*q.vector_part[0] + q.scalar_part*vector_part[0] + vector_part[1]*q.vector_part[2] - vector_part[2]*q.vector_part[1];
-  const double q2 = scalar_part*q.vector_part[1] + q.scalar_part*vector_part[1] + vector_part[2]*q.vector_part[0] - vector_part[0]*q.vector_part[2];
-  const double q3 = scalar_part*q.vector_part[2] + q.scalar_part*vector_part[2] + vector_part[0]*q.vector_part[1] - vector_part[1]*q.vector_part[0];
+  const Real q0 = scalar_part*q.scalar_part - (vector_part[0]*q.vector_part[0] + vector_part[1]*q.vector_part[1] + vector_part[2]*q.vector_part[2]);
+  const Real q1 = scalar_part*q.vector_part[0] + q.scalar_part*vector_part[0] + vector_part[1]*q.vector_part[2] - vector_part[2]*q.vector_part[1];
+  const Real q2 = scalar_part*q.vector_part[1] + q.scalar_part*vector_part[1] + vector_part[2]*q.vector_part[0] - vector_part[0]*q.vector_part[2];
+  const Real q3 = scalar_part*q.vector_part[2] + q.scalar_part*vector_part[2] + vector_part[0]*q.vector_part[1] - vector_part[1]*q.vector_part[0];
 
   scalar_part = q0;
   vector_part[0] = q1;
@@ -163,7 +163,7 @@ quaternion& quaternion::operator -=(const quaternion& q){
     std::random_device rd{};
     std::mt19937 gen = std::mt19937{rd()};
 
-    std::normal_distribution<double> d(0.0, 1.0);
+    std::normal_distribution<Real> d(0.0, 1.0);
 
       (*this)(0) = d(gen);
       (*this)(1) = d(gen);
@@ -174,7 +174,7 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
   }
 
-  double quaternion::norm() const {
+  Real quaternion::norm() const {
 
     return sqrt(scalar_part*scalar_part + vector_part[0]*vector_part[0] + vector_part[1]*vector_part[1] + vector_part[2]*vector_part[2]);
 
@@ -216,7 +216,7 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
       scalar_part = sqrt(0.5*(1.0 + scalar_part));
 
-      const double temp = 2.0*scalar_part;
+      const Real temp = 2.0*scalar_part;
 
       vector_part[0] /= temp;
       vector_part[1] /= temp;
@@ -232,7 +232,7 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
   }
 
-  void quaternion::tangent(double *const t) const {
+  void quaternion::tangent(Real *const t) const {
 
     t[0] = 1.0 - 2.0*(vector_part[1]*vector_part[1] + vector_part[2]*vector_part[2]);
     t[1] = 2.0*(vector_part[0]*vector_part[1] + scalar_part*vector_part[2]);
@@ -240,7 +240,7 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
   }
 
-  void quaternion::normal(double *const n) const {
+  void quaternion::normal(Real *const n) const {
 
     n[0] = 2.0*(vector_part[0]*vector_part[1] - scalar_part*vector_part[2]);
     n[1] = 1.0 - 2.0*(vector_part[0]*vector_part[0] + vector_part[2]*vector_part[2]);
@@ -248,7 +248,7 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
   }
 
-  void quaternion::binormal(double *const b) const {
+  void quaternion::binormal(Real *const b) const {
 
     b[0] = 2.0*(vector_part[0]*vector_part[2] + scalar_part*vector_part[1]);
     b[1] = 2.0*(vector_part[1]*vector_part[2] - scalar_part*vector_part[0]);
@@ -280,7 +280,7 @@ quaternion& quaternion::operator -=(const quaternion& q){
     R(1,1) = 1.0;
     R(2,2) = 1.0;
 
-    double temp = 2.0*vector_part[0]*vector_part[0];
+    Real temp = 2.0*vector_part[0]*vector_part[0];
     R(1,1) -= temp;
     R(2,2) -= temp;
 
@@ -415,21 +415,21 @@ quaternion& quaternion::operator -=(const quaternion& q){
   // BINARY OPERATOR OVERLOADING
   //
 
-  quaternion operator /(quaternion q, const double s){
+  quaternion operator /(quaternion q, const Real s){
 
     q /= s;
     return q;
 
   }
 
-  quaternion operator *(quaternion q, const double s){
+  quaternion operator *(quaternion q, const Real s){
 
     q *= s;
     return q;
 
   }
 
-  quaternion operator *(const double s, quaternion q){
+  quaternion operator *(const Real s, quaternion q){
 
     q *= s;
     return q;
@@ -469,9 +469,9 @@ quaternion& quaternion::operator -=(const quaternion& q){
   // OTHER FUNCTIONS ASSOCIATED WITH QUATERNIONS
   //
 
-  void lie_exp(quaternion& q, const double *const u){
+  void lie_exp(quaternion& q, const Real *const u){
 
-    const double theta = sqrt(u[0]*u[0] + u[1]*u[1] + u[2]*u[2]);
+    const Real theta = sqrt(u[0]*u[0] + u[1]*u[1] + u[2]*u[2]);
 
     if (theta < 1e-10){ // No trig involved in the norm(u)-based denominator so we don't have to use SMALL_ANGLE.
 
@@ -482,8 +482,8 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
     } else {
 
-      const double cs = cos(0.5*theta);
-      const double sn = sin(0.5*theta)/theta;
+      const Real cs = cos(0.5*theta);
+      const Real sn = sin(0.5*theta)/theta;
 
       q.scalar_part = cs;
       q.vector_part[0] = sn*u[0];
@@ -494,7 +494,7 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
   }
 
-  quaternion lie_exp(const double *const u){
+  quaternion lie_exp(const Real *const u){
 
     quaternion q;
     lie_exp(q, u);
@@ -521,26 +521,26 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
   }
 
-  void dexp(double *const out, const double *const u, const double *const v){
+  void dexp(Real *const out, const Real *const u, const Real *const v){
 
-    const double theta2 = u[0]*u[0] + u[1]*u[1] + u[2]*u[2];
-    const double theta = sqrt(theta2);
+    const Real theta2 = u[0]*u[0] + u[1]*u[1] + u[2]*u[2];
+    const Real theta = sqrt(theta2);
 
-    double alpha, beta;
+    Real alpha, beta;
 
     if (theta < SMALL_ANGLE){
 
       // Rather than use a Taylor series approx., this is constructed to be the inverse of the
       // Taylor series approx. we use for dexpinv at small angles; i.e. to ensure that dexp(u, dexpinv(u,v))
       // = dexpinv(u, dexp(u,v)) = v holds for any choice of u and v.
-      const double theta4 = theta2*theta2;
+      const Real theta4 = theta2*theta2;
 
       beta = (1.0/3.0 + theta2/72.0)/(2.0 + theta2/6.0 + theta4/72.0);
       alpha = 1.0/6.0 + 2.0*beta*(1.0 - theta2/12.0);
 
     } else {
 
-      const double theta3 = theta*theta2;
+      const Real theta3 = theta*theta2;
 
       alpha = sin(0.5*theta);
       alpha *= 2.0*alpha/theta2;
@@ -549,7 +549,7 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
     }
 
-    const double u_cross_v[3] = {u[1]*v[2] - u[2]*v[1], u[2]*v[0] - u[0]*v[2], u[0]*v[1] - u[1]*v[0]};
+    const Real u_cross_v[3] = {u[1]*v[2] - u[2]*v[1], u[2]*v[0] - u[0]*v[2], u[0]*v[1] - u[1]*v[0]};
 
     out[0] = v[0] + alpha*u_cross_v[0] + beta*(u[1]*u_cross_v[2] - u[2]*u_cross_v[1]);
     out[1] = v[1] + alpha*u_cross_v[1] + beta*(u[2]*u_cross_v[0] - u[0]*u_cross_v[2]);
@@ -557,12 +557,12 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
   }
 
-  void dexpinv(double *const out, const double *const u, const double *const v){
+  void dexpinv(Real *const out, const Real *const u, const Real *const v){
 
-    const double theta2 = u[0]*u[0] + u[1]*u[1] + u[2]*u[2];
-    const double theta = sqrt(theta2);
+    const Real theta2 = u[0]*u[0] + u[1]*u[1] + u[2]*u[2];
+    const Real theta = sqrt(theta2);
 
-    double fac;
+    Real fac;
 
     if (theta < SMALL_ANGLE){
 
@@ -574,7 +574,7 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
     }
 
-    const double u_cross_v[3] = {u[1]*v[2] - u[2]*v[1], u[2]*v[0] - u[0]*v[2], u[0]*v[1] - u[1]*v[0]};
+    const Real u_cross_v[3] = {u[1]*v[2] - u[2]*v[1], u[2]*v[0] - u[0]*v[2], u[0]*v[1] - u[1]*v[0]};
 
     out[0] = v[0] - 0.5*u_cross_v[0] - fac*(u[1]*u_cross_v[2] - u[2]*u_cross_v[1]);
     out[1] = v[1] - 0.5*u_cross_v[1] - fac*(u[2]*u_cross_v[0] - u[0]*u_cross_v[2]);
@@ -582,12 +582,12 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
   }
 
-  void dexpinv_transpose(double *const out, const double *const u, const double *const v){
+  void dexpinv_transpose(Real *const out, const Real *const u, const Real *const v){
 
-    const double theta2 = u[0]*u[0] + u[1]*u[1] + u[2]*u[2];
-    const double theta = sqrt(theta2);
+    const Real theta2 = u[0]*u[0] + u[1]*u[1] + u[2]*u[2];
+    const Real theta = sqrt(theta2);
 
-    double fac;
+    Real fac;
 
     if (theta < SMALL_ANGLE){
 
@@ -599,7 +599,7 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
     }
 
-    const double u_cross_v[3] = {u[1]*v[2] - u[2]*v[1], u[2]*v[0] - u[0]*v[2], u[0]*v[1] - u[1]*v[0]};
+    const Real u_cross_v[3] = {u[1]*v[2] - u[2]*v[1], u[2]*v[0] - u[0]*v[2], u[0]*v[1] - u[1]*v[0]};
 
     out[0] = v[0] + 0.5*u_cross_v[0] - fac*(u[1]*u_cross_v[2] - u[2]*u_cross_v[1]);
     out[1] = v[1] + 0.5*u_cross_v[1] - fac*(u[2]*u_cross_v[0] - u[0]*u_cross_v[2]);
@@ -607,15 +607,15 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
   }
 
-  void bch(double *const out, const double *const u, const double *const v){
+  void bch(Real *const out, const Real *const u, const Real *const v){
 
     // Implements the closed-form expression for the BCH formula from Engo (2001).
     // As with everything Lie algebra related, this expression is only valid locally
     // and it's going to hit the fan really quickly if either of these rotations are
     // through more than pi/2.
 
-    const double theta = sqrt(u[0]*u[0] + u[1]*u[1] + u[2]*u[2]);
-    const double phi = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+    const Real theta = sqrt(u[0]*u[0] + u[1]*u[1] + u[2]*u[2]);
+    const Real phi = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
 
     if (theta < SMALL_ANGLE){
 
@@ -631,28 +631,28 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
     } else {
 
-      const double dir_dot = (u[0]*v[0] + u[1]*v[1] + u[2]*v[2])/(theta*phi);
-      const double ang = acos(dir_dot);
+      const Real dir_dot = (u[0]*v[0] + u[1]*v[1] + u[2]*v[2])/(theta*phi);
+      const Real ang = acos(dir_dot);
 
-      const double st = sin(theta);
-      const double sp = sin(phi);
-      const double sa = sin(ang);
+      const Real st = sin(theta);
+      const Real sp = sin(phi);
+      const Real sa = sin(ang);
 
-      double csq_half_phi = cos(0.5*phi);
+      Real csq_half_phi = cos(0.5*phi);
       csq_half_phi *= csq_half_phi;
-      const double ssq_half_phi = 1.0 - csq_half_phi;
-      double csq_half_theta = cos(0.5*theta);
+      const Real ssq_half_phi = 1.0 - csq_half_phi;
+      Real csq_half_theta = cos(0.5*theta);
       csq_half_theta *= csq_half_theta;
-      const double ssq_half_theta = 1.0 - csq_half_theta;
+      const Real ssq_half_theta = 1.0 - csq_half_theta;
 
-      const double a = st*csq_half_phi - sp*ssq_half_theta*dir_dot;
-      const double b = sp*csq_half_theta - st*ssq_half_phi*dir_dot;
-      const double c = 0.5*st*sp - 2.0*ssq_half_theta*ssq_half_phi*dir_dot;
-      const double d = sqrt(a*a + b*b + 2.0*a*b*dir_dot + c*c*sa*sa);
+      const Real a = st*csq_half_phi - sp*ssq_half_theta*dir_dot;
+      const Real b = sp*csq_half_theta - st*ssq_half_phi*dir_dot;
+      const Real c = 0.5*st*sp - 2.0*ssq_half_theta*ssq_half_phi*dir_dot;
+      const Real d = sqrt(a*a + b*b + 2.0*a*b*dir_dot + c*c*sa*sa);
 
-      double alpha = asin(d)/d;
-      double beta = alpha;
-      double gamma = alpha;
+      Real alpha = asin(d)/d;
+      Real beta = alpha;
+      Real gamma = alpha;
       alpha *= a/theta;
       beta *= b/phi;
       gamma *= c/(theta*phi);

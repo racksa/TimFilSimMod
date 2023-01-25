@@ -34,6 +34,8 @@ fcm_mobility_solver::fcm_mobility_solver(){
 
   cufcm_solver = new FCM_solver(pars);
   cufcm_solver->init_aux_for_filament();
+  cufcm_solver->num_seg = NSWIM*NFIL*NSEG;
+  cufcm_solver->num_blob = NSWIM*NBLOB;
 }
 
 
@@ -259,14 +261,12 @@ void fcm_mobility_solver::apply_interparticle_forces(){
     // fclose(pfile);
 
     cufcm_solver->reform_data(x_segs_device[0], f_segs_device[0], v_segs_device[0],
-                            x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0],
-                            num_segs[0], num_blobs[0], true);
+                            x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0], true);
 
-    cufcm_solver->apply_repulsion_for_timcode(num_segs[0], num_blobs[0]);
+    cufcm_solver->apply_repulsion_for_timcode();
 
     cufcm_solver->reform_data_back(x_segs_device[0], f_segs_device[0], v_segs_device[0],
-                                  x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0],
-                                  num_segs[0], num_blobs[0], true);
+                                  x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0], true);
                                 
     // cudaMemcpy(&f_blobs_repulsion_host[0], f_blobs_repulsion_device[0], 3*num_blobs[0]*sizeof(Real), cudaMemcpyDeviceToHost);
     // pfile = fopen("barrier_force_fcm.dat", "w");
@@ -295,26 +295,17 @@ void fcm_mobility_solver::wait_for_device(){
 
 void fcm_mobility_solver::evaluate_segment_segment_mobility(){
 
-    int start_seg = 0;
-
     cudaSetDevice(0);
 
     int num_thread_blocks = (num_segs[0] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
 
-    // Mss_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_segs_device[0], f_segs_device[0], x_segs_device[0], start_seg, num_segs[0]);
-
     cufcm_solver->reform_data(x_segs_device[0], f_segs_device[0], v_segs_device[0],
-                              x_blobs_device[0], f_blobs_device[0], v_blobs_device[0],
-                              num_segs[0], num_blobs[0], false);
+                              x_blobs_device[0], f_blobs_device[0], v_blobs_device[0], false);
                     
     cufcm_solver->Mss();
 
     cufcm_solver->reform_data_back(x_segs_device[0], f_segs_device[0], v_segs_device[0],
-                                  x_blobs_device[0], f_blobs_device[0], v_blobs_device[0],
-                                  num_segs[0], num_blobs[0], false);
-
-    start_seg += num_segs[0];
-
+                                  x_blobs_device[0], f_blobs_device[0], v_blobs_device[0], false);
 
 }
 
@@ -342,15 +333,16 @@ void fcm_mobility_solver::evaluate_blob_blob_mobility(){
 
   int num_thread_blocks = (num_segs[0] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
 
-  cufcm_solver->reform_data(x_segs_device[0], f_segs_device[0], v_segs_device[0],
-                            x_blobs_device[0], f_blobs_device[0], v_blobs_device[0],
-                            num_segs[0], num_blobs[0], false);
+  // Mbb_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_blobs_device[0], f_blobs_device[0], x_blobs_device[0], 0, num_blobs[0]);
 
-  cufcm_solver->Mss();
+
+  cufcm_solver->reform_data(x_segs_device[0], f_segs_device[0], v_segs_device[0],
+                            x_blobs_device[0], f_blobs_device[0], v_blobs_device[0], false);
+
+  cufcm_solver->Mbb();
 
   cufcm_solver->reform_data_back(x_segs_device[0], f_segs_device[0], v_segs_device[0],
-                                  x_blobs_device[0], f_blobs_device[0], v_blobs_device[0],
-                                  num_segs[0], num_blobs[0], false);
+                                  x_blobs_device[0], f_blobs_device[0], v_blobs_device[0], false);
 
 }
 

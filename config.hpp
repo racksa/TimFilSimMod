@@ -84,13 +84,14 @@
 
 #endif
 
-#define BODY_OR_SURFACE_TYPE 4
+#define BODY_OR_SURFACE_TYPE 2
 // Valid options:
 // 0 = An infinite plane wall at z = 0. This choice has some sub-types (see below).
 // 1 = Deformed planes with 2 principal curvatures (partially implemented)
 // 2 = Surface-of-revolution bodies. This choice has some sub-types (see below).
 // 3 = Toroidal bodies (partially implemented)
 // 4 = Rigid Rod
+// 5 = Filament on rigid wall
 
 #define BASE_HEIGHT_ABOVE_SURFACE (0.5*DL)
 
@@ -152,14 +153,14 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define NFIL (0) // The number of filaments attached to the rigid body/surface in each swimmer.
-#define NSEG (1)// The number of segments comprising each filament.
-#define NSWIM (13824) // The number of swimmers.
-#define NBLOB (22) // The number of blobs to use as surface elements in each rigid body.
+#define NFIL (10) // The number of filaments attached to the rigid body/surface in each swimmer.
+#define NSEG (20)// The number of segments comprising each filament.
+#define NSWIM (1) // The number of swimmers.
+#define NBLOB (700) // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
 
-#define RSEG 1.0 // Segment radius.
+#define RSEG 0.7184 // Segment radius.
 #define DL (2.2*RSEG) // Inter-segment distance.
 #define RBLOB 0.7184 //1.4 // Surface blob radius.
 
@@ -168,7 +169,7 @@
 
 #if CILIA_TYPE==0
 
-  #define DIMENSIONLESS_FORCE 10.0
+  #define DIMENSIONLESS_FORCE 220.0
 
 #elif CILIA_TYPE==1
 
@@ -197,7 +198,6 @@
 
 // Threads per block for kernel execution. Should be a multiple of 32, the warp size.
 #define THREADS_PER_BLOCK 64
-#define OMP_THREAD_NUM 4
 
 // This factor avoids over-adjusting during the Broyden's iterations.
 // Setting it to 1 will give standard behaviour, and values smaller than 1 should help with convergence problems by having Broyden's method do more of the heavy lifting.
@@ -240,7 +240,7 @@
 #else
 
   #define STEPS_PER_PERIOD 300
-  #define SAVES_PER_PERIOD 20
+  #define SAVES_PER_PERIOD 100
 
 #endif
 
@@ -259,6 +259,7 @@
 #define SURFACE_OF_REVOLUTION_BODIES (BODY_OR_SURFACE_TYPE==2)
 #define TORUS_BODIES (BODY_OR_SURFACE_TYPE==3)
 #define ROD (BODY_OR_SURFACE_TYPE==4)
+#define RIGIDWALL (BODY_OR_SURFACE_TYPE==5)
 
 #define STOKES_DRAG_MOBILITY (MOBILITY_TYPE==0)
 #define RPY_MOBILITY (MOBILITY_TYPE==1)
@@ -350,7 +351,7 @@
   #define NTOTAL (NFIL*NSEG)
   #define NBROY (6*NFIL*NSEG)
   #define PRESCRIBED_BODY_VELOCITIES true
-  #define RSEG 1.0
+  #define RSEG 0.7184
   #define MU 1.0
 
   #define RECTANGULAR_SEEDING (SEEDING_TYPE==0)

@@ -1704,15 +1704,8 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 #endif // End of section to compile if not using Broyden's method for everything.
 
 void mobility_solver::compute_velocities(std::vector<swimmer>& swimmers, int& num_gmres_iterations, const int nt){
-
-  auto start = std::chrono::system_clock::now();
-  std::chrono::duration<double> elapsed_seconds;
   
-  read_positions_and_forces(swimmers);
-
-  if(DISPLAYTIME){elapsed_seconds = std::chrono::system_clock::now()-start;
-  std::cout<<std::endl<<"\t\t\tread position time"<<elapsed_seconds.count()<<std::endl;}
-  
+  read_positions_and_forces(swimmers);  
 
   #if PRESCRIBED_CILIA
 
@@ -1729,17 +1722,9 @@ void mobility_solver::compute_velocities(std::vector<swimmer>& swimmers, int& nu
 
       #if USE_BROYDEN_FOR_EVERYTHING
 
-          if(DISPLAYTIME) start = std::chrono::system_clock::now();
-
           evaluate_blob_blob_mobility();
 
-          if(DISPLAYTIME){elapsed_seconds = std::chrono::system_clock::now()-start;
-          std::cout<<std::endl<<"\t\t\tfcm mobility time"<<elapsed_seconds.count()<<std::endl;}
-          
-
       #endif
-
-      if(DISPLAYTIME) start = std::chrono::system_clock::now();
 
       #if !ROD
         evaluate_blob_segment_mobility();
@@ -1762,9 +1747,6 @@ void mobility_solver::compute_velocities(std::vector<swimmer>& swimmers, int& nu
     #endif
 
     copy_segment_velocities_to_host();
-
-    if(DISPLAYTIME){elapsed_seconds = std::chrono::system_clock::now()-start;
-    std::cout<<std::endl<<"\t\t\tcopy time"<<elapsed_seconds.count()<<std::endl;}
 
     wait_for_device();
 

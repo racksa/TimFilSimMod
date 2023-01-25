@@ -120,7 +120,7 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
         const int fil_grid_dim_x = int(cbrt(Real(NFIL)));
         const int fil_grid_dim_y = std::max<int>(1, int(sqrt(NFIL/Real(fil_grid_dim_x))));
         const int fil_grid_dim_z = std::max<int>(1, int(ceil(NFIL/Real(fil_grid_dim_x*fil_grid_dim_y))));
-        const Real fil_grid_step_x = 60.0; //(0.1 + SCALED_BEAT_AMPLITUDE)*L; //2.0*L*sqrt(PI/5.6);
+        const Real fil_grid_step_x = 40.0; //(0.1 + SCALED_BEAT_AMPLITUDE)*L; //2.0*L*sqrt(PI/5.6);
         const Real fil_grid_step_y = fil_grid_step_x;
         const Real fil_grid_step_z = fil_grid_step_x;
       #endif
@@ -250,9 +250,9 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
 
             if (fil_id < NFIL){
 
-              filament_references[3*fil_id] = i*fil_grid_step_x + 60;
-              filament_references[3*fil_id + 1] = j*fil_grid_step_y + 60;
-              filament_references[3*fil_id + 2] = k*fil_grid_step_z + 60;
+              filament_references[3*fil_id] = i*fil_grid_step_x + fil_grid_step_x;
+              filament_references[3*fil_id + 1] = j*fil_grid_step_y + fil_grid_step_y;
+              filament_references[3*fil_id + 2] = k*fil_grid_step_z + fil_grid_step_z;
 
               Real *const fil_x_address = &x_segs_address[3*fil_id*NSEG];
               Real *const fil_f_address = &f_segs_address[6*fil_id*NSEG];

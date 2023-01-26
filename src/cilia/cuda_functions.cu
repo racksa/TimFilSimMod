@@ -356,6 +356,8 @@ __device__ void rpy_interaction(Real *const V, const Real *const F, const int i,
 
 }
 
+
+
 __global__ void Mss_mult(Real * __restrict__ V, const Real *const __restrict__ F, const Real *const __restrict__ X, const int start_seg, const int num_segs){
 
   // Calculates the velocities of filament segments given the forces and torques
@@ -631,7 +633,6 @@ __global__ void Msb_mult(Real * __restrict__ V, const Real *const __restrict__ F
   } // End of striding loop over filament segment velocities.
 
 } // End of Msb_mult kernel.
-
 
 __global__ void Mbs_mult(Real * __restrict__ V, const Real *const __restrict__ F, const Real *const __restrict__ Xb, const Real *const __restrict__ Xs, const int start_blob, const int num_blobs){
 

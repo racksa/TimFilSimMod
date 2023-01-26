@@ -260,13 +260,13 @@ void fcm_mobility_solver::apply_interparticle_forces(){
     // fprintf(pfile, "\n#");
     // fclose(pfile);
 
-    cufcm_solver->reform_data(x_segs_device[0], f_segs_device[0], v_segs_device[0],
-                            x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0], true);
+    // cufcm_solver->reform_data(x_segs_device[0], f_segs_device[0], v_segs_device[0],
+    //                         x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0], true);
 
-    cufcm_solver->apply_repulsion_for_timcode();
+    // cufcm_solver->apply_repulsion_for_timcode();
 
-    cufcm_solver->reform_data_back(x_segs_device[0], f_segs_device[0], v_segs_device[0],
-                                  x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0], true);
+    // cufcm_solver->reform_data_back(x_segs_device[0], f_segs_device[0], v_segs_device[0],
+    //                               x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0], true);
                                 
     // cudaMemcpy(&f_blobs_repulsion_host[0], f_blobs_repulsion_device[0], 3*num_blobs[0]*sizeof(Real), cudaMemcpyDeviceToHost);
     // pfile = fopen("barrier_force_fcm.dat", "w");
@@ -295,35 +295,57 @@ void fcm_mobility_solver::wait_for_device(){
 
 void fcm_mobility_solver::evaluate_segment_segment_mobility(){
 
-    cudaSetDevice(0);
+  cudaSetDevice(0);
 
-    int num_thread_blocks = (num_segs[0] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
+  int num_thread_blocks = (num_segs[0] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
 
-    cufcm_solver->reform_data(x_segs_device[0], f_segs_device[0], v_segs_device[0],
-                              x_blobs_device[0], f_blobs_device[0], v_blobs_device[0], false);
-                    
-    cufcm_solver->Mss();
+  cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
+  cufcm_solver->reform_fseg(f_segs_device[0], true);
+  cufcm_solver->Mss();
+  cufcm_solver->reform_vseg(v_segs_device[0], false);
 
-    cufcm_solver->reform_data_back(x_segs_device[0], f_segs_device[0], v_segs_device[0],
-                                  x_blobs_device[0], f_blobs_device[0], v_blobs_device[0], false);
+  // Mss_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_segs_device[0], f_segs_device[0], x_segs_device[0], 0, num_segs[0]);
+
+  auto status = cudaMemcpy(x_blobs_host, x_blobs_device[0], 3*num_blobs[0]*sizeof(double), cudaMemcpyHostToDevice);
+  status = cudaMemcpy(v_segs_host, v_segs_device[0], 6*num_segs[0]*sizeof(double), cudaMemcpyHostToDevice);
+  FILE *pfile;
+  pfile = fopen("sss_data.dat", "w");
+  for(int i = 0; i < num_segs[0]; i++){
+      fprintf(pfile, "(%.4f %.4f %.4f) (%.4f %.4f %.4f)\n",
+      v_segs_host[3*i + 0], v_segs_host[3*i + 1], v_segs_host[3*i + 2],
+      v_segs_host[3*i + 3], v_segs_host[3*i + 4], v_segs_host[3*i + 5]);
+  }
+  fprintf(pfile, "\n#");
+  fclose(pfile);
 
 }
 
 void fcm_mobility_solver::evaluate_segment_blob_mobility(){
 
-  int start_seg = 0;
+  cudaSetDevice(0);
 
-  for (int n = 0; n < num_gpus; n++){
+  int num_thread_blocks = (num_segs[0] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
 
-    cudaSetDevice(n);
+  cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
+  cufcm_solver->reform_fblob(f_blobs_device[0], true);
+  cufcm_solver->Msb();
+  cufcm_solver->reform_vseg(v_segs_device[0], false);
 
-    int num_thread_blocks = (num_segs[n] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
+  //bugged!!!
 
-    Msb_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_segs_device[n], f_blobs_device[n], x_segs_device[n], x_blobs_device[n], start_seg, num_segs[n]);
+  // Msb_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_segs_device[0], f_blobs_device[0], x_segs_device[0], x_blobs_device[0], 0, num_segs[0]);
 
-    start_seg += num_segs[n];
-
+  auto status = cudaMemcpy(x_blobs_host, x_blobs_device[0], 3*num_blobs[0]*sizeof(double), cudaMemcpyHostToDevice);
+  status = cudaMemcpy(v_segs_host, v_segs_device[0], 6*num_segs[0]*sizeof(double), cudaMemcpyHostToDevice);
+  FILE *pfile;
+  pfile = fopen("ssb_data.dat", "w");
+  for(int i = 0; i < num_segs[0]; i++){
+      fprintf(pfile, "(%.4f %.4f %.4f) (%.4f %.4f %.4f)\n",
+      v_segs_host[3*i + 0], v_segs_host[3*i + 1], v_segs_host[3*i + 2],
+      v_segs_host[3*i + 3], v_segs_host[3*i + 4], v_segs_host[3*i + 5]);
   }
+  fprintf(pfile, "\n#");
+  fclose(pfile);
 
 }
 
@@ -333,34 +355,50 @@ void fcm_mobility_solver::evaluate_blob_blob_mobility(){
 
   int num_thread_blocks = (num_segs[0] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
 
+  cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
+  cufcm_solver->reform_fblob(f_blobs_device[0], true);
+  cufcm_solver->Mbb();
+  cufcm_solver->reform_vblob(v_blobs_device[0], false);
+
   // Mbb_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_blobs_device[0], f_blobs_device[0], x_blobs_device[0], 0, num_blobs[0]);
 
-
-  cufcm_solver->reform_data(x_segs_device[0], f_segs_device[0], v_segs_device[0],
-                            x_blobs_device[0], f_blobs_device[0], v_blobs_device[0], false);
-
-  cufcm_solver->Mbb();
-
-  cufcm_solver->reform_data_back(x_segs_device[0], f_segs_device[0], v_segs_device[0],
-                                  x_blobs_device[0], f_blobs_device[0], v_blobs_device[0], false);
-
+  auto status = cudaMemcpy(x_blobs_host, x_blobs_device[0], 3*num_blobs[0]*sizeof(double), cudaMemcpyHostToDevice);
+  status = cudaMemcpy(v_blobs_host, v_blobs_device[0], 3*num_blobs[0]*sizeof(double), cudaMemcpyHostToDevice);
+  FILE *pfile;
+  pfile = fopen("sbb_data.dat", "w");
+  for(int i = 0; i < num_blobs[0]; i++){
+      fprintf(pfile, "(%.4f %.4f %.4f)\n",
+      v_blobs_host[3*i + 0], v_blobs_host[3*i + 1], v_blobs_host[3*i + 2]);
+  }
+  fprintf(pfile, "\n#");
+  fclose(pfile);
 }
 
 void fcm_mobility_solver::evaluate_blob_segment_mobility(){
 
-  int start_blob = 0;
+  cudaSetDevice(0);
 
-  for (int n = 0; n < num_gpus; n++){
+  int num_thread_blocks = (num_blobs[0] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
 
-    cudaSetDevice(n);
+  cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
+  cufcm_solver->reform_fseg(f_segs_device[0], true);
+  cufcm_solver->Mbs();
+  cufcm_solver->reform_vblob(v_blobs_device[0], false);
 
-    const int num_thread_blocks = (num_blobs[n] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
+  //bugged!!
 
-    Mbs_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_blobs_device[n], f_segs_device[n], x_blobs_device[n], x_segs_device[n], start_blob, num_blobs[n]);
+  // Mbs_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_blobs_device[0], f_segs_device[0], x_blobs_device[0], x_segs_device[0], 0, num_blobs[0]);
 
-    start_blob += num_blobs[n];
-
+  auto status = cudaMemcpy(x_blobs_host, x_blobs_device[0], 3*num_blobs[0]*sizeof(double), cudaMemcpyHostToDevice);
+  status = cudaMemcpy(v_blobs_host, v_blobs_device[0], 3*num_blobs[0]*sizeof(double), cudaMemcpyHostToDevice);
+  FILE *pfile;
+  pfile = fopen("sbs_data.dat", "w");
+  for(int i = 0; i < num_blobs[0]; i++){
+      fprintf(pfile, "(%.4f %.4f %.4f)\n",
+      v_blobs_host[3*i + 0], v_blobs_host[3*i + 1], v_blobs_host[3*i + 2]);
   }
+  fprintf(pfile, "\n#");
+  fclose(pfile);
 
 }
 

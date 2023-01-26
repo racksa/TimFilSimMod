@@ -427,18 +427,18 @@
 
 #define DISPLAYTIME false
 
-#define USE_DOUBLE_PRECISION true
+#define FIL_USE_DOUBLE_PRECISION true
 
-#if USE_DOUBLE_PRECISION
+#if FIL_USE_DOUBLE_PRECISION
     typedef double Real;
     typedef long Integer;
-    #define my_rint rint
-    #define my_exp exp
-    #define my_floor floor
-    #define my_fmod fmod
-    #define my_getrf_ dgetrf_
-    #define my_getri_ dgetri_
-    #define my_gemm_ dgemm_
+    #define myfil_rint rint
+    #define myfil_exp exp
+    #define myfil_floor floor
+    #define myfil_fmod fmod
+    #define myfil_getrf_ dgetrf_
+    #define myfil_getri_ dgetri_
+    #define myfil_gemm_ dgemm_
 #else
     typedef float Real;
     typedef int Integer;

@@ -528,10 +528,10 @@ void matrix::divide_row(const int row, const Real block_constant){
 extern "C" {
 
   // LU decomoposition of a general matrix. Overwrites the input with the output.
-  void my_getrf_(int*, int*, Real*, int*, int*, int*);
+  void myfil_getrf_(int*, int*, Real*, int*, int*, int*);
 
   // Generates the inverse of a matrix given its LU decomposition from dgetrf_. Overwrites the input with the output.
-  void my_getri_(int*, Real*, int*, int*, Real*, int*, int*);
+  void myfil_getri_(int*, Real*, int*, int*, Real*, int*, int*);
 
 }
 
@@ -544,7 +544,7 @@ void matrix::invert(){
   int info;
 
   // Call the LAPACK routine:
-  my_getrf_(&N, &N, ptr, &N, pivots, &info);
+  myfil_getrf_(&N, &N, ptr, &N, pivots, &info);
 
   if (info != 0){
 
@@ -558,7 +558,7 @@ void matrix::invert(){
   Real *work = new Real[work_size];
 
   // Call the LAPACK inversion routine:
-  my_getri_(&N, ptr, &N, pivots, work, &work_size, &info);
+  myfil_getri_(&N, ptr, &N, pivots, work, &work_size, &info);
 
   // Clean up:
   delete[] pivots;
@@ -609,7 +609,7 @@ extern "C" {
 
   // Returns C = alpha*op(A)*op(B) + beta*C -- i.e. overwrites C -- where op(X) = X or X^T and can be different for A and B.
   // The special case op(X) = X and beta = 0 gives us C = A*B.
-  void my_gemm_(char*, char*, int*, int*, int*, Real*, const Real*, int*, const Real*, int*, Real*, Real*, int*);
+  void myfil_gemm_(char*, char*, int*, int*, int*, Real*, const Real*, int*, const Real*, int*, Real*, Real*, int*);
 
 }
 
@@ -633,7 +633,7 @@ matrix operator *(const matrix& lhs, const matrix& rhs){
   int ld_soln = num_rows;
 
   // Call the LAPACK routine:
-  my_gemm_(&Nchar, &Nchar, &num_rows, &num_cols, &inner_dim, &alpha, lhs_ptr, &ld_lhs, rhs_ptr, &ld_rhs, &beta, soln_ptr, &ld_soln);
+  myfil_gemm_(&Nchar, &Nchar, &num_rows, &num_cols, &inner_dim, &alpha, lhs_ptr, &ld_lhs, rhs_ptr, &ld_rhs, &beta, soln_ptr, &ld_soln);
 
   // Return the solution:
   return lhs_times_rhs;

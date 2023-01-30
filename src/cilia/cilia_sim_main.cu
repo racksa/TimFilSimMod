@@ -399,12 +399,12 @@ int main(int argc, char** argv){
 
         // if(DISPLAYTIME){ cudaDeviceSynchronize(); std::cout<<"\t\tcompute velocity time"<<(get_time() - time_start)<<std::endl; time_start = get_time();}
 
-        // #if CUFCM
-        //   if(nt%100==0){
-        //     printf("Checking overlap\n");
-        //     mobility.cufcm_solver->check_overlap();
-        //   }
-        // #endif
+        #if CUFCM
+          if(nt%100==0){
+            printf("Checking overlap\n");
+            mobility.cufcm_solver->check_overlap();
+          }
+        #endif
 
         error_is_too_large = mobility.compute_errors(broyden.new_error, swimmers, nt);
 
@@ -414,12 +414,13 @@ int main(int argc, char** argv){
 
           std::cout << DELETE_CURRENT_LINE << std::flush;
           std::cout << "\t\tBroyden's method diverged after " << broyden.iter+1 << " iterations during step " << nt+1 << "." << std::endl;
-          // #if CUFCM
-          //   printf("Checking overlap\n");
-          //   mobility.cufcm_solver->check_overlap();
-          //   mobility.cufcm_solver->write_data_call();
-          //   mobility.write_repulsion();
-          // #endif
+          #if CUFCM
+            printf("Checking overlap\n");
+            mobility.copy_to_fcm();
+            mobility.cufcm_solver->check_overlap();
+            mobility.cufcm_solver->write_data_call();
+            mobility.write_repulsion();
+          #endif
           return 0;
 
         }
@@ -458,12 +459,13 @@ int main(int argc, char** argv){
 
         std::cout << DELETE_CURRENT_LINE << std::flush;
         std::cout << "Broyden's method failed to converge within " << MAX_BROYDEN_ITER << " iterations during step " << nt+1 << "." << std::endl;
-        // #if CUFCM
-        //   printf("Checking overlap\n");
-        //   mobility.cufcm_solver->check_overlap();
-        //   mobility.cufcm_solver->write_data_call();
-        //   mobility.write_repulsion();
-        // #endif
+        #if CUFCM
+          printf("Checking overlap\n");
+          mobility.copy_to_fcm();
+          mobility.cufcm_solver->check_overlap();
+          mobility.cufcm_solver->write_data_call();
+          mobility.write_repulsion();
+        #endif
         return 0;
 
       } else {

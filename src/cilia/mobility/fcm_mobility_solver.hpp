@@ -45,6 +45,8 @@ public:
   void evaluate_blob_blob_mobility();
   void evaluate_blob_segment_mobility();
 
+  void copy_to_fcm();
+
   // =============================================================================
   // Everything unique to this derived class:
 

@@ -20,7 +20,7 @@ simName = 'test_rod'
 superpuntoDatafileName = '../../' + simName + '_superpunto.dat'
 
 boxsize = 128
-
+enable_periodic = True
 
 class VISUAL:
 
@@ -28,14 +28,15 @@ class VISUAL:
         self.pars = myIo.read_pars('../../' + simName + '.par')
         if(self.pars['NBLOB']>0):
             self.blob_references = myIo.read_blob_references('../../' + simName + '_blob_references.dat')
-        self.fil_references = myIo.read_fil_references('../../' + simName + '_fil_references.dat')
+        if(self.pars['NFIL']>0):
+            self.fil_references = myIo.read_fil_references('../../' + simName + '_fil_references.dat')
         self.body_states = myIo.read_body_states('../../' + simName + '_body_states.dat')
         self.seg_states = myIo.read_seg_states('../../' + simName + '_seg_states.dat')
         
         self.frames = len(self.body_states)
 
         self.plot_start_frame = 0
-        self.plot_end_frame = 30
+        self.plot_end_frame = 10
         self.plot_interval = 1
 
         self.output_to_superpunto = False
@@ -78,7 +79,7 @@ class VISUAL:
                     # To find segment position
                     for blob in range(int(self.pars['NBLOB'])):
                         blob_x, blob_y, blob_z = util.blob_point_from_data(self.body_states[i][7*swim : 7*swim+7], self.blob_references[3*blob:3*blob+3])
-                        self.write_data([blob_x, blob_y, blob_z], float(self.pars['RBLOB']), superpuntoDatafileName, False)
+                        self.write_data([blob_x, blob_y, blob_z], float(self.pars['RBLOB']), superpuntoDatafileName, enable_periodic)
 
                     # Robot arm to find segment position (Ignored plane rotation!)
                     for fil in range(int(self.pars['NFIL'])):
@@ -96,7 +97,7 @@ class VISUAL:
                             old_seg_pos = seg_pos
 
                             # ax.scatter(seg_pos[0], seg_pos[1], seg_pos[2])
-                            self.write_data(seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, False)
+                            self.write_data(seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic)
 
                 else:
                     x0, y0, z0 = util.blob_point_from_data(self.body_states[i][7*swim : 7*swim+7], self.blob_references[:3])

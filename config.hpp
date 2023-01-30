@@ -153,10 +153,10 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define NFIL (1) // The number of filaments attached to the rigid body/surface in each swimmer.
+#define NFIL (20) // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG (20)// The number of segments comprising each filament.
 #define NSWIM (1) // The number of swimmers.
-#define NBLOB (100) // The number of blobs to use as surface elements in each rigid body.
+#define NBLOB (700) // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
 
@@ -197,7 +197,7 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // Threads per block for kernel execution. Should be a multiple of 32, the warp size.
-#define THREADS_PER_BLOCK 64
+#define THREADS_PER_BLOCK 32
 
 // This factor avoids over-adjusting during the Broyden's iterations.
 // Setting it to 1 will give standard behaviour, and values smaller than 1 should help with convergence problems by having Broyden's method do more of the heavy lifting.
@@ -306,7 +306,7 @@
 #if INSTABILITY_CILIA
 
   #define END_FORCE_MAGNITUDE (DIMENSIONLESS_FORCE*KB/(DL*DL*NSEG*NSEG))
-  #define REPULSIVE_FORCE_FACTOR 0.5 // How much stronger is the barrier force than the driving force.
+  #define REPULSIVE_FORCE_FACTOR 2.0 // How much stronger is the barrier force than the driving force.
   #define DT (36.3833/STEPS_PER_PERIOD) // Based on the period of a single DIMENSIONLESS_FORCE = 220.0 filament above a no-slip wall.
 
 #elif CONSTANT_BASE_ROTATION

@@ -194,9 +194,9 @@ void rigid_body::initial_setup(const int id, Real *const f_address, const Real *
       #if SURFACE_OF_REVOLUTION_BODIES
         const Real body_spacing = 3.0*(AXIS_DIR_BODY_LENGTH + FIL_LENGTH);
 
-        x[0] = id*body_spacing;
-        x[1] = 0.0;
-        x[2] = 0.0;
+        x[0] = 0.25*body_spacing;
+        x[1] = 0.25*body_spacing;
+        x[2] = 0.25*body_spacing;
         xm1[0] = x[0];
         xm1[1] = x[1];
         xm1[2] = x[2];

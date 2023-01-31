@@ -84,7 +84,7 @@
 
 #endif
 
-#define BODY_OR_SURFACE_TYPE 2
+#define BODY_OR_SURFACE_TYPE 5
 // Valid options:
 // 0 = An infinite plane wall at z = 0. This choice has some sub-types (see below).
 // 1 = Deformed planes with 2 principal curvatures (partially implemented)
@@ -112,13 +112,14 @@
   #define FIL_LATTICE_Y_SPACING (1.8*FIL_LENGTH) // For prescribed-shape cilia, this is the beat-wise separation.
   #define FIL_LATTICE_X_SPACING (2.0*DL) // Leave blank for a regular grid (i.e. squares or regular hexagons (as appropriate) based on FIL_LATTICE_Y_SPACING).
 
-#elif BODY_OR_SURFACE_TYPE==2 or BODY_OR_SURFACE_TYPE==4
+#elif BODY_OR_SURFACE_TYPE==2 or BODY_OR_SURFACE_TYPE==4 or BODY_OR_SURFACE_TYPE==5
 
-  #define SEEDING_TYPE 0
+  #define SEEDING_TYPE 3
   // Valid options:
   // 0 = Filaments are evenly distributed over the surface.
   // 1 = Filaments are seeded in an equatorial band.
   // 2 = Platynereis-style seeding. Most filament are in an equatorial band but some form a small ring at the rear of the swimmer.
+  // 3 = Hexagonal grid seeding.
 
   #define GENERATRIX_FILE_NAME "avg_shape_plus_1.5_first_mode"
   // The code will search for a file called GENERATRIX_FILE_NAME.fourier_modes
@@ -133,7 +134,7 @@
 // Define whether the motion of the rigid bodies is imposed or allowed to evolve dynamically.
 #define PRESCRIBED_BODY_VELOCITIES false
 
-#define MOBILITY_TYPE 4
+#define MOBILITY_TYPE 1
 // Valid options:
 // 0 = Basic Stokes drag. No hydrodynamic interactions between particles.
 // 1 = Rotne-Prager-Yamakawa (RPY) mobility matrices (with the corrections due to Swan and Brady if an infinite plane wall is selected).
@@ -153,7 +154,7 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define NFIL (20) // The number of filaments attached to the rigid body/surface in each swimmer.
+#define NFIL (10) // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG (20)// The number of segments comprising each filament.
 #define NSWIM (1) // The number of swimmers.
 #define NBLOB (700) // The number of blobs to use as surface elements in each rigid body.
@@ -183,13 +184,12 @@
 
 #endif
 
-#if BODY_OR_SURFACE_TYPE==2 or BODY_OR_SURFACE_TYPE==4 // Surface-of-revolution
-
-  #if BODY_OR_SURFACE_TYPE==2
-    #define AXIS_DIR_BODY_LENGTH (0.6496*2.0*FIL_LENGTH) // The length of the body parallel to the axis of rotation for the surface of revolution.
-  #elif BODY_OR_SURFACE_TYPE==4
-    #define AXIS_DIR_BODY_LENGTH (0.5*NBLOB*RBLOB) // The length of the body parallel to the axis of rotation for the surface of revolution.
-  #endif
+#if BODY_OR_SURFACE_TYPE==2
+  #define AXIS_DIR_BODY_LENGTH (0.6496*2.0*FIL_LENGTH) // The length of the body parallel to the axis of rotation for the surface of revolution.
+#elif BODY_OR_SURFACE_TYPE==4
+  #define AXIS_DIR_BODY_LENGTH (0.5*NBLOB*RBLOB) // The length of the body parallel to the axis of rotation for the surface of revolution.
+#elif BODY_OR_SURFACE_TYPE==5
+  #define AXIS_DIR_BODY_LENGTH (NBLOB*RBLOB)
 #endif
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -380,6 +380,7 @@
   #define UNIFORM_SEEDING (SEEDING_TYPE==0)
   #define EQUATORIAL_SEEDING (SEEDING_TYPE==1)
   #define PLATY_SEEDING (SEEDING_TYPE==2)
+  #define HEXAGONAL_WALL_SEEDING (SEEDING_TYPE==3)
 
 #endif
 

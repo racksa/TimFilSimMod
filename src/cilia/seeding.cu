@@ -3,7 +3,7 @@
 #include "seeding.hpp"
 #include "../../config.hpp"
 
-#if SURFACE_OF_REVOLUTION_BODIES or ROD
+#if SURFACE_OF_REVOLUTION_BODIES or ROD or RIGIDWALL
 
   #include <iostream>
   #include <fstream>
@@ -695,24 +695,49 @@
   cudaMallocManaged(&X, 3*NBLOB*sizeof(Real));
 
   ////////////////////////////////////////////////
-  int pair = 0;
+  #if ROD
 
-  for (int n=0; n<NBLOB; n+=2){
+    int pair = 0;
 
-    const Real theta = pair*0.5*PI;
-    const Real x = sqrt(2.0)*RBLOB*(pair - 0.25*NBLOB + 0.5);
+    for (int n=0; n<NBLOB; n+=2){
 
-    X[3*n] = x;
-    X[3*n + 1] = RBLOB*cos(theta);
-    X[3*n + 2] = RBLOB*sin(theta);
+      const Real theta = pair*0.5*PI;
+      const Real x = sqrt(2.0)*RBLOB*(pair - 0.25*NBLOB + 0.5);
 
-    X[3*(n+1)] = x;
-    X[3*(n+1) + 1] = -RBLOB*cos(theta);
-    X[3*(n+1) + 2] = -RBLOB*sin(theta);
+      X[3*n] = x;
+      X[3*n + 1] = RBLOB*cos(theta);
+      X[3*n + 2] = RBLOB*sin(theta);
 
-    pair++;
+      X[3*(n+1)] = x;
+      X[3*(n+1) + 1] = -RBLOB*cos(theta);
+      X[3*(n+1) + 2] = -RBLOB*sin(theta);
 
-  }
+      pair++;
+
+    }
+
+  #elif RIGIDWALL
+
+    const int blob_grid_dim_x = int(sqrt(Real(NBLOB)));
+    const int blob_grid_dim_y = std::max<int>(1, int(ceil(NBLOB/Real(blob_grid_dim_x))));
+    const int blob_grid_step_x = 2.2*RBLOB;
+    const int blob_grid_step_y = 2.2*RBLOB;
+
+    for (int i = 0; i < blob_grid_dim_x; i++){
+      for (int j = 0; j < blob_grid_dim_y; j++){
+
+          const int blob_id = j + i*blob_grid_dim_y;
+
+          if (blob_id < NBLOB){
+
+            X[3*blob_id + 0] = i*blob_grid_step_x + blob_grid_step_x;
+            X[3*blob_id + 1] = j*blob_grid_step_y + blob_grid_step_y;
+            X[3*blob_id + 2] = 0.0;
+          }
+      }
+    }
+
+  #endif
   ////////////////////////////////////////////////
 
   for (int n = 0; n < NBLOB; n++){
@@ -853,6 +878,11 @@
 
       equal_area_seeding(filament_references, polar_dir_refs, azi_dir_refs, normal_refs, NFIL, shape);
 
+    #elif HEXAGONAL_WALL_SEEDING
+    
+        const int fil_grid_dim_x = int(sqrt(Real(NFIL)));
+        const int fil_grid_dim_y = std::max<int>(1, int(ceil(NFIL/Real(fil_grid_dim_x))));
+    
     #endif
 
     std::ofstream fil_ref_file(file_name_trunk + ".seed");

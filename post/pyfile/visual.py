@@ -36,7 +36,7 @@ class VISUAL:
         self.frames = len(self.body_states)
 
         self.plot_start_frame = 0
-        self.plot_end_frame = 10
+        self.plot_end_frame = 60
         self.plot_interval = 1
 
         self.output_to_superpunto = False

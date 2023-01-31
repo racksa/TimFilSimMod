@@ -288,6 +288,33 @@ void rigid_body::initial_setup(const int id, Real *const f_address, const Real *
         }
 
         qm1 = q;
+      #elif RIGIDWALL
+
+        const Real body_spacing = 1.6*(AXIS_DIR_BODY_LENGTH);
+
+        // initialise plane 
+
+        x[0] = 0;
+        x[0] = 0;
+        x[0] = 0;
+
+        xm1[0] = x[0];
+        xm1[1] = x[1];
+        xm1[2] = x[2];
+        xm2[0] = x[0];
+        xm2[1] = x[1];
+        xm2[2] = x[2];
+
+        u[0] = 0.0;
+        u[1] = 0.0;
+        u[2] = 0.0;
+        um1[0] = 0.0;
+        um1[1] = 0.0;
+        um1[2] = 0.0;
+
+        q = quaternion(1.0, 1.0, 0.0, 0.0);
+        q.randomise();
+        
       #endif
 
     #endif
@@ -299,7 +326,7 @@ void rigid_body::initial_setup(const int id, Real *const f_address, const Real *
     std::ifstream azi_file(file_name_trunk + ".azi_dir");
     std::ifstream normal_file(file_name_trunk + ".normal");
 
-    #if ROD
+    #if ROD or RIGIDWALL
 
       seed_rod_blobs(&blob_references[0], &polar_dir_refs[0], &azi_dir_refs[0], &normal_refs[0]);
 

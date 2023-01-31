@@ -276,7 +276,7 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
 
     // NOT YET IMPLEMENTED.
 
-  #elif SURFACE_OF_REVOLUTION_BODIES or ROD
+  #elif SURFACE_OF_REVOLUTION_BODIES or ROD or RIGIDWALL
 
     std::string file_name_trunk = GENERATRIX_FILE_NAME+std::to_string(NFIL);
 

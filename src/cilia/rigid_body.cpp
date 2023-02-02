@@ -187,7 +187,7 @@ void rigid_body::initial_setup(const int id, Real *const f_address, const Real *
       }
     }
 
-  #elif SURFACE_OF_REVOLUTION_BODIES or ROD
+  #elif SURFACE_OF_REVOLUTION_BODIES or ROD or RIGIDWALL
 
     #if !READ_INITIAL_CONDITIONS_FROM_BACKUP
 
@@ -312,8 +312,7 @@ void rigid_body::initial_setup(const int id, Real *const f_address, const Real *
         um1[1] = 0.0;
         um1[2] = 0.0;
 
-        q = quaternion(1.0, 1.0, 0.0, 0.0);
-        q.randomise();
+        q = quaternion(1.0, 0.0, 0.0, 0.0);
         
       #endif
 

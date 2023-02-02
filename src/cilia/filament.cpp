@@ -368,6 +368,9 @@ void filament::initial_setup(const Real *const base_pos,
         seg_pos[1] += DL*dir[1];
         seg_pos[2] += DL*dir[2];
 
+        printf("seg %d (%.4f %.4f %.4f) dir=(%.4f %.4f %.4f) dir_norm=%.4f\n",
+            i, seg_pos[0], seg_pos[1], seg_pos[2], dir[0], dir[1], dir[2], dir_norm);
+
       }
 
       #if CONSTANT_BASE_ROTATION

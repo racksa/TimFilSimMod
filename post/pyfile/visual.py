@@ -36,7 +36,7 @@ class VISUAL:
         self.frames = len(self.body_states)
 
         self.plot_start_frame = 0
-        self.plot_end_frame = 60
+        self.plot_end_frame = 2000
         self.plot_interval = 1
 
         self.output_to_superpunto = False
@@ -84,8 +84,10 @@ class VISUAL:
                     # Robot arm to find segment position (Ignored plane rotation!)
                     for fil in range(int(self.pars['NFIL'])):
                         fil_i = int(4*fil*self.pars['NSEG'])
+                        # print(self.fil_references[3*fil : 3*fil+3])
                         fil_base_x, fil_base_y, fil_base_z = body_pos + np.matmul(R, self.fil_references[3*fil : 3*fil+3])
-                        old_seg_pos = np.array([fil_base_x, fil_base_y, fil_base_z]) + 0.5*self.pars['DL']*util.find_t(self.seg_states[i][fil_i+0 : fil_i+4])     
+                        old_seg_pos = np.array([fil_base_x, fil_base_y, fil_base_z]) #+ 0.5*self.pars['DL']*util.find_t(self.seg_states[i][fil_i+0 : fil_i+4])     
+
                         for seg in range(1, int(self.pars['NSEG'])):
                             q1 = self.seg_states[i][fil_i+4*(seg-1) : fil_i+4*seg]
                             q2 = self.seg_states[i][fil_i+4*seg : fil_i+4*seg+4]

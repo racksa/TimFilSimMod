@@ -132,9 +132,9 @@
 #endif
 
 // Define whether the motion of the rigid bodies is imposed or allowed to evolve dynamically.
-#define PRESCRIBED_BODY_VELOCITIES false
+#define PRESCRIBED_BODY_VELOCITIES true
 
-#define MOBILITY_TYPE 1
+#define MOBILITY_TYPE 4
 // Valid options:
 // 0 = Basic Stokes drag. No hydrodynamic interactions between particles.
 // 1 = Rotne-Prager-Yamakawa (RPY) mobility matrices (with the corrections due to Swan and Brady if an infinite plane wall is selected).
@@ -154,10 +154,10 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define NFIL (10) // The number of filaments attached to the rigid body/surface in each swimmer.
+#define NFIL (16) // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG (20)// The number of segments comprising each filament.
 #define NSWIM (1) // The number of swimmers.
-#define NBLOB (700) // The number of blobs to use as surface elements in each rigid body.
+#define NBLOB (6400) // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
 
@@ -375,7 +375,7 @@
 
 #endif
 
-#if SURFACE_OF_REVOLUTION_BODIES
+#if SURFACE_OF_REVOLUTION_BODIES or RIGIDWALL
 
   #define UNIFORM_SEEDING (SEEDING_TYPE==0)
   #define EQUATORIAL_SEEDING (SEEDING_TYPE==1)

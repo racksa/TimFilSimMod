@@ -312,18 +312,20 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
 
     }
 
-    // The seeding functions work on unit-length bodies, so the scaling must be done after we read or calculate.
-    for (int i = 0; i < NFIL; i++){
+    #if SURFACE_OF_REVOLUTION_BODIES
+      // The seeding functions work on unit-length bodies, so the scaling must be done after we read or calculate.
+      for (int i = 0; i < NFIL; i++){
 
-      filament_references[3*i] *= AXIS_DIR_BODY_LENGTH;
-      filament_references[3*i + 1] *= AXIS_DIR_BODY_LENGTH;
-      filament_references[3*i + 2] *= AXIS_DIR_BODY_LENGTH;
+        filament_references[3*i] *= AXIS_DIR_BODY_LENGTH;
+        filament_references[3*i + 1] *= AXIS_DIR_BODY_LENGTH;
+        filament_references[3*i + 2] *= AXIS_DIR_BODY_LENGTH;
 
-      filament_references[3*i] += (RBLOB + BASE_HEIGHT_ABOVE_SURFACE)*normal_refs[3*i];
-      filament_references[3*i + 1] += (RBLOB + BASE_HEIGHT_ABOVE_SURFACE)*normal_refs[3*i + 1];
-      filament_references[3*i + 2] += (RBLOB + BASE_HEIGHT_ABOVE_SURFACE)*normal_refs[3*i + 2];
+        filament_references[3*i] += (RBLOB + BASE_HEIGHT_ABOVE_SURFACE)*normal_refs[3*i];
+        filament_references[3*i + 1] += (RBLOB + BASE_HEIGHT_ABOVE_SURFACE)*normal_refs[3*i + 1];
+        filament_references[3*i + 2] += (RBLOB + BASE_HEIGHT_ABOVE_SURFACE)*normal_refs[3*i + 2];
 
-    }
+      }
+    #endif
 
     pos_file.close();
     polar_file.close();
@@ -336,10 +338,12 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
 
       Real *const fil_x_address = &x_segs_address[3*i*NSEG];
       Real *const fil_f_address = &f_segs_address[6*i*NSEG];
-
-      const Real *const dir = &normal_refs[3*i];
+      
+      const Real strain_twist[3] = {0.0, 0.0, 0.0};
+      const Real dir[3] = {0.0, 0.0, 1.0};
       const Real pos[3] = {body.x[0] + filament_references[3*i], body.x[1] + filament_references[3*i + 1], body.x[2] + filament_references[3*i + 2]};
 
+      printf("(%.4f %.4f %.4f)\n", pos[0], pos[1], pos[2]);
       #if READ_INITIAL_CONDITIONS_FROM_BACKUP
 
         filaments[i].initial_setup(pos, dir, strain_twist, &data_from_file[i*data_per_fil], fil_x_address, fil_f_address, i);
@@ -449,22 +453,22 @@ void swimmer::forces_and_torques(const int nt, int id){
 
 
       // Fake gravity
-      if(id==0){
-        f(0) += 20;
-        f(1) += 20;
-      }
-      if(id==1){
-        f(0) -= 30;
-        f(1) += 30;
-      }
-      if(id==2){
-        f(0) += 30;
-        f(1) -= 30;
-      }
-      if(id==3){
-        f(0) -= 30;
-        f(1) -= 30;
-      }
+      // if(id==0){
+      //   f(0) += 20;
+      //   f(1) += 20;
+      // }
+      // if(id==1){
+      //   f(0) -= 30;
+      //   f(1) += 30;
+      // }
+      // if(id==2){
+      //   f(0) += 30;
+      //   f(1) -= 30;
+      // }
+      // if(id==3){
+      //   f(0) -= 30;
+      //   f(1) -= 30;
+      // }
 
       // f(2) += DIMENSIONLESS_FORCE;
 

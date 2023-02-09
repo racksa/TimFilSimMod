@@ -194,8 +194,13 @@ void rigid_body::initial_setup(const int id, Real *const f_address, const Real *
       #if SURFACE_OF_REVOLUTION_BODIES
         const Real body_spacing = 3.0*(AXIS_DIR_BODY_LENGTH + FIL_LENGTH);
 
-        x[0] = 0.25*body_spacing;
-        x[1] = 0.25*body_spacing;
+        Real sep;
+        std::ifstream in("separation.dat"); // input
+        in >> sep;
+        std::cout << sep << "\n";
+
+        x[0] = 0.25*body_spacing ;
+        x[1] = 0.25*body_spacing + id*sep;
         x[2] = 0.25*body_spacing;
         xm1[0] = x[0];
         xm1[1] = x[1];
@@ -225,11 +230,19 @@ void rigid_body::initial_setup(const int id, Real *const f_address, const Real *
         // const int i = id - j*NP;
 
         // initialise lattice
-        int NP = ceil(cbrt(NSWIM));
-        const int k = id/(NP*NP);
-        const int j = (id - k*NP*NP)/NP;
-        const int i = id - k*NP*NP - j*NP;
+        int relative_Lx = 1;
+        int relative_Ly = 1;
+        int relative_Lz = 1;
+        int b = relative_Lx/relative_Ly;
+        int c = relative_Lx/relative_Lz;
+        
+        int Nx = ceil(cbrt(NSWIM*b*c));
+        int Ny = Nx/b;
 
+        int k = id/(Nx*Ny);
+        int j = (id - k*Nx*Ny)/Nx;
+        int i = id - k*Nx*Ny - j*Nx;
+        
         x[0] = i*body_spacing + body_spacing;
         x[1] = j*body_spacing + body_spacing;
         x[2] = k*body_spacing + body_spacing;
@@ -251,8 +264,6 @@ void rigid_body::initial_setup(const int id, Real *const f_address, const Real *
         //   x[1] = -body_spacing;
         // }
 
-        // printf("id: %d (x y z)=(%.4f %.4f %.4f) \n", id, x[0], x[1], x[2]);
-
         xm1[0] = x[0];
         xm1[1] = x[1];
         xm1[2] = x[2];
@@ -270,22 +281,22 @@ void rigid_body::initial_setup(const int id, Real *const f_address, const Real *
         q = quaternion(1.0, 1.0, 0.0, 0.0);
         q.randomise();
 
-        if(id==0){
-          q = quaternion(1.0, 0.0, 1.0, 0.0);
-          q.normalise_in_place();
-        }
-        if(id==1){
-          q = quaternion(1.0, 0.0, 0.0, 1.0);
-          q.normalise_in_place();
-        }
-        if(id==2){
-          q = quaternion(1.0, 0.0, 0.0, 1.0);
-          q.normalise_in_place();
-        }
-        if(id==3){
-          q = quaternion(1.0, 0.0, 1.0, 0.0);
-          q.normalise_in_place();
-        }
+        // if(id==0){
+        //   q = quaternion(1.0, 0.0, 1.0, 0.0);
+        //   q.normalise_in_place();
+        // }
+        // if(id==1){
+        //   q = quaternion(1.0, 0.0, 0.0, 1.0);
+        //   q.normalise_in_place();
+        // }
+        // if(id==2){
+        //   q = quaternion(1.0, 0.0, 0.0, 1.0);
+        //   q.normalise_in_place();
+        // }
+        // if(id==3){
+        //   q = quaternion(1.0, 0.0, 1.0, 0.0);
+        //   q.normalise_in_place();
+        // }
 
         qm1 = q;
       #elif RIGIDWALL

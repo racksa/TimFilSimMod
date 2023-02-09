@@ -84,7 +84,7 @@
 
 #endif
 
-#define BODY_OR_SURFACE_TYPE 5
+#define BODY_OR_SURFACE_TYPE 2
 // Valid options:
 // 0 = An infinite plane wall at z = 0. This choice has some sub-types (see below).
 // 1 = Deformed planes with 2 principal curvatures (partially implemented)
@@ -114,14 +114,15 @@
 
 #elif BODY_OR_SURFACE_TYPE==2 or BODY_OR_SURFACE_TYPE==4 or BODY_OR_SURFACE_TYPE==5
 
-  #define SEEDING_TYPE 3
+  #define SEEDING_TYPE 0
   // Valid options:
   // 0 = Filaments are evenly distributed over the surface.
   // 1 = Filaments are seeded in an equatorial band.
   // 2 = Platynereis-style seeding. Most filament are in an equatorial band but some form a small ring at the rear of the swimmer.
   // 3 = Hexagonal grid seeding.
 
-  #define GENERATRIX_FILE_NAME "avg_shape_plus_1.5_first_mode"
+  #define GENERATRIX_FILE_NAME "sphere"
+  // #define GENERATRIX_FILE_NAME "avg_shape_plus_1.5_first_mode"
   // The code will search for a file called GENERATRIX_FILE_NAME.fourier_modes
   // The first entry in this file should be a positive integer N, which is the number of Fourier modes used to describe the surface's generatrix.
   // The remaining 2N entries are the Fourier coefficients, in (cos_coeff, sin_coeff) pairs for each mode in turn.
@@ -132,9 +133,9 @@
 #endif
 
 // Define whether the motion of the rigid bodies is imposed or allowed to evolve dynamically.
-#define PRESCRIBED_BODY_VELOCITIES true
+#define PRESCRIBED_BODY_VELOCITIES false
 
-#define MOBILITY_TYPE 4
+#define MOBILITY_TYPE 1
 // Valid options:
 // 0 = Basic Stokes drag. No hydrodynamic interactions between particles.
 // 1 = Rotne-Prager-Yamakawa (RPY) mobility matrices (with the corrections due to Swan and Brady if an infinite plane wall is selected).
@@ -154,10 +155,10 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define NFIL (16) // The number of filaments attached to the rigid body/surface in each swimmer.
+#define NFIL (0) // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG (20)// The number of segments comprising each filament.
-#define NSWIM (1) // The number of swimmers.
-#define NBLOB (6400) // The number of blobs to use as surface elements in each rigid body.
+#define NSWIM (2) // The number of swimmers.
+#define NBLOB (1400) // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
 
@@ -197,7 +198,7 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // Threads per block for kernel execution. Should be a multiple of 32, the warp size.
-#define THREADS_PER_BLOCK 32
+#define THREADS_PER_BLOCK 64
 
 // This factor avoids over-adjusting during the Broyden's iterations.
 // Setting it to 1 will give standard behaviour, and values smaller than 1 should help with convergence problems by having Broyden's method do more of the heavy lifting.

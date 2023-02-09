@@ -263,14 +263,13 @@ void fcm_mobility_solver::apply_interparticle_forces(){
     // cufcm_solver->reform_data(x_segs_device[0], f_segs_device[0], v_segs_device[0],
     //                         x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0], true);
 
-    barrier_forces<<<num_thread_blocks, THREADS_PER_BLOCK>>>(f_segs_device[0], f_blobs_repulsion_device[0], x_segs_device[0], x_blobs_device[0], 0, num_segs[0], 0, num_blobs[0]);
+    // barrier_forces<<<num_thread_blocks, THREADS_PER_BLOCK>>>(f_segs_device[0], f_blobs_repulsion_device[0], x_segs_device[0], x_blobs_device[0], 0, num_segs[0], 0, num_blobs[0]);
 
-
-    // cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
-    // cufcm_solver->reform_fseg(f_segs_device[0], true);
-    // cufcm_solver->apply_repulsion_for_timcode();
-    // cufcm_solver->reform_fseg(f_segs_device[0], false);
-    // cufcm_solver->reform_fblob(f_blobs_repulsion_device[0], false);
+    cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
+    cufcm_solver->reform_fseg(f_segs_device[0], true);
+    cufcm_solver->apply_repulsion_for_timcode();
+    cufcm_solver->reform_fseg(f_segs_device[0], false);
+    cufcm_solver->reform_fblob(f_blobs_repulsion_device[0], false);
 
     // cufcm_solver->reform_data_back(x_segs_device[0], f_segs_device[0], v_segs_device[0],
     //                               x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0], true);

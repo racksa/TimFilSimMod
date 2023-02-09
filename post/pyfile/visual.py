@@ -19,8 +19,10 @@ color_list.pop(2)
 simName = 'test_rod'
 superpuntoDatafileName = '../../' + simName + '_superpunto.dat'
 
-boxsize = 128
-enable_periodic = True
+Lx = 76.
+Ly = 76.
+Lz = 76.
+enable_periodic = False
 
 class VISUAL:
 
@@ -36,7 +38,7 @@ class VISUAL:
         self.frames = len(self.body_states)
 
         self.plot_start_frame = 0
-        self.plot_end_frame = 2000
+        self.plot_end_frame = 1
         self.plot_interval = 1
 
         self.output_to_superpunto = False
@@ -50,9 +52,9 @@ class VISUAL:
 
     def write_data(self, x, r, filename, box=True):
         if(box):
-            x[0] = util.box(x[0], boxsize)
-            x[1] = util.box(x[1], boxsize)
-            x[2] = util.box(x[2], boxsize)
+            x[0] = util.box(x[0], Lx)
+            x[1] = util.box(x[1], Ly)
+            x[2] = util.box(x[2], Lz)
         myIo.write_line(str(x[0]) + ' ' +\
                         str(x[1]) + ' ' +\
                         str(x[2]) + ' ' +\
@@ -77,11 +79,23 @@ class VISUAL:
                 
                 if(self.output_to_superpunto):
                     # To find segment position
+                    # max_x = 0
+                    # max_y = 0
+                    # max_z = 0
+                    # min_x = 100
+                    # min_y = 100
+                    # min_z = 100
                     for blob in range(int(self.pars['NBLOB'])):
                         blob_x, blob_y, blob_z = util.blob_point_from_data(self.body_states[i][7*swim : 7*swim+7], self.blob_references[3*blob:3*blob+3])
                         self.write_data([blob_x, blob_y, blob_z], float(self.pars['RBLOB']), superpuntoDatafileName, enable_periodic)
-
+                        # max_x = max(blob_x, max_x)
+                        # min_x = min(blob_x, min_x)
+                        # max_y = max(blob_y, max_y)
+                        # min_y = min(blob_y, min_y)
+                        # max_z = max(blob_z, max_z)
+                        # min_z = min(blob_z, min_z)
                     # Robot arm to find segment position (Ignored plane rotation!)
+                    # print(max_x - min_x, max_y-min_y, max_z-min_z)
                     for fil in range(int(self.pars['NFIL'])):
                         fil_i = int(4*fil*self.pars['NSEG'])
                         # print(self.fil_references[3*fil : 3*fil+3])
@@ -105,9 +119,9 @@ class VISUAL:
                     x0, y0, z0 = util.blob_point_from_data(self.body_states[i][7*swim : 7*swim+7], self.blob_references[:3])
                     x1, y1, z1 = util.blob_point_from_data(self.body_states[i][7*swim : 7*swim+7], self.blob_references[-3:])
                     x_diff, y_diff, z_diff = x1-x0, y1-y0, z1-z0
-                    two_points_x = [util.box(x0, boxsize), util.box(x0, boxsize) + x_diff]
-                    two_points_y = [util.box(y0, boxsize), util.box(y0, boxsize) + y_diff]
-                    two_points_z = [util.box(z0, boxsize), util.box(z0, boxsize) + z_diff]
+                    two_points_x = [util.box(x0, Lx), util.box(x0, Lx) + x_diff]
+                    two_points_y = [util.box(y0, Ly), util.box(y0, Ly) + y_diff]
+                    two_points_z = [util.box(z0, Lz), util.box(z0, Lz) + z_diff]
 
                     # two_points_x = [x0, x1]
                     # two_points_y = [y0, y1]

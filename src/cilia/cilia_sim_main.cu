@@ -419,7 +419,7 @@ int main(int argc, char** argv){
 
             std::ofstream seg_state_file(SIMULATION_SEG_STATE_NAME, std::ios::app);
             std::ofstream body_state_file(SIMULATION_BODY_STATE_NAME, std::ios::app);
-            swimmers[0].write_data(seg_state_file, body_state_file);
+            // swimmers[0].write_data(seg_state_file, body_state_file);
 
             mobility.copy_to_fcm();
             mobility.cufcm_solver->check_overlap();
@@ -469,7 +469,7 @@ int main(int argc, char** argv){
 
           std::ofstream seg_state_file(SIMULATION_SEG_STATE_NAME, std::ios::app);
           std::ofstream body_state_file(SIMULATION_BODY_STATE_NAME, std::ios::app);
-          swimmers[0].write_data(seg_state_file, body_state_file);
+          // swimmers[0].write_data(seg_state_file, body_state_file);
 
           mobility.copy_to_fcm();
           mobility.cufcm_solver->check_overlap();

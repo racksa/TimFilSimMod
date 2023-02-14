@@ -473,7 +473,7 @@ void swimmer::forces_and_torques(const int nt, int id){
       //   f(1) -= 30;
       // }
 
-      f(0) += DIMENSIONLESS_FORCE/20;
+      f(0) += DIMENSIONLESS_FORCE;
 
       // Finally, add any external forces on the blobs, and the induced torques on body, to f.
 

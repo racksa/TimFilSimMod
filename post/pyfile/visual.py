@@ -38,7 +38,7 @@ class VISUAL:
         self.frames = len(self.body_states)
 
         self.plot_start_frame = 0
-        self.plot_end_frame = 27
+        self.plot_end_frame = 1
         self.plot_interval = 1
 
         self.output_to_superpunto = False
@@ -79,23 +79,23 @@ class VISUAL:
                 
                 if(self.output_to_superpunto):
                     # To find segment position
-                    # max_x = 0
-                    # max_y = 0
-                    # max_z = 0
-                    # min_x = 100
-                    # min_y = 100
-                    # min_z = 100
+                    max_x = 0
+                    max_y = 0
+                    max_z = 0
+                    min_x = 100
+                    min_y = 100
+                    min_z = 100
                     for blob in range(int(self.pars['NBLOB'])):
                         blob_x, blob_y, blob_z = util.blob_point_from_data(self.body_states[i][7*swim : 7*swim+7], self.blob_references[3*blob:3*blob+3])
                         self.write_data([blob_x, blob_y, blob_z], float(self.pars['RBLOB']), superpuntoDatafileName, enable_periodic)
-                        # max_x = max(blob_x, max_x)
-                        # min_x = min(blob_x, min_x)
-                        # max_y = max(blob_y, max_y)
-                        # min_y = min(blob_y, min_y)
-                        # max_z = max(blob_z, max_z)
-                        # min_z = min(blob_z, min_z)
+                        max_x = max(blob_x, max_x)
+                        min_x = min(blob_x, min_x)
+                        max_y = max(blob_y, max_y)
+                        min_y = min(blob_y, min_y)
+                        max_z = max(blob_z, max_z)
+                        min_z = min(blob_z, min_z)
+                    print(max_x - min_x, max_y-min_y, max_z-min_z)
                     # Robot arm to find segment position (Ignored plane rotation!)
-                    # print(max_x - min_x, max_y-min_y, max_z-min_z)
                     for fil in range(int(self.pars['NFIL'])):
                         fil_i = int(4*fil*self.pars['NSEG'])
                         # print(self.fil_references[3*fil : 3*fil+3])

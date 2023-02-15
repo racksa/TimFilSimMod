@@ -198,8 +198,8 @@ void rigid_body::initial_setup(const int id, Real *const f_address, const Real *
         std::ifstream in("separation.dat"); // input
         in >> sep;
 
-        x[0] = 0.25*body_spacing + (id%8)*sep;
-        x[1] = 0.25*body_spacing + floor(float(id)/8.0)*sep;
+        x[0] = 0.25*body_spacing + id*sep;
+        x[1] = 0.25*body_spacing;
         x[2] = 0.25*body_spacing;
         xm1[0] = x[0];
         xm1[1] = x[1];
@@ -207,8 +207,6 @@ void rigid_body::initial_setup(const int id, Real *const f_address, const Real *
         xm2[0] = x[0];
         xm2[1] = x[1];
         xm2[2] = x[2];
-
-        printf("id=%d (%.4f %.4f %.4f)\n", id, x[0], x[1], x[2]);
 
         u[0] = 0.0;
         u[1] = 0.0;
@@ -218,7 +216,6 @@ void rigid_body::initial_setup(const int id, Real *const f_address, const Real *
         um1[2] = 0.0;
 
         q = quaternion(1.0, 0.0, 0.0, 0.0);
-        q.randomise();
         qm1 = q;
         
       #elif ROD

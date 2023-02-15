@@ -121,7 +121,7 @@
   // 2 = Platynereis-style seeding. Most filament are in an equatorial band but some form a small ring at the rear of the swimmer.
   // 3 = Hexagonal grid seeding.
 
-  #define GENERATRIX_FILE_NAME "spheroid"
+  #define GENERATRIX_FILE_NAME "sphere"
   // #define GENERATRIX_FILE_NAME "avg_shape_plus_1.5_first_mode"
   // The code will search for a file called GENERATRIX_FILE_NAME.fourier_modes
   // The first entry in this file should be a positive integer N, which is the number of Fourier modes used to describe the surface's generatrix.
@@ -135,7 +135,7 @@
 // Define whether the motion of the rigid bodies is imposed or allowed to evolve dynamically.
 #define PRESCRIBED_BODY_VELOCITIES false
 
-#define MOBILITY_TYPE 4
+#define MOBILITY_TYPE 1
 // Valid options:
 // 0 = Basic Stokes drag. No hydrodynamic interactions between particles.
 // 1 = Rotne-Prager-Yamakawa (RPY) mobility matrices (with the corrections due to Swan and Brady if an infinite plane wall is selected).
@@ -157,8 +157,8 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #define NFIL (0) // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG (20)// The number of segments comprising each filament.
-#define NSWIM (16) // The number of swimmers.
-#define NBLOB (800) // The number of blobs to use as surface elements in each rigid body.
+#define NSWIM (2) // The number of swimmers.
+#define NBLOB (1400) // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
 
@@ -229,7 +229,8 @@
 
 #endif
 
-#define TOTAL_TIME_STEPS (1000*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
+#define TOTAL_TIME_STEPS 1
+// #define TOTAL_TIME_STEPS (1000*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
 #define NUM_EULER_STEPS 1 // Number of time-steps to use backwards-Euler before switching to BDF2.
 
 #if CILIA_TYPE==1

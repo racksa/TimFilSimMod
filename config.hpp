@@ -158,7 +158,7 @@
 #define NFIL (0) // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG (20)// The number of segments comprising each filament.
 #define NSWIM (2) // The number of swimmers.
-#define NBLOB (1400) // The number of blobs to use as surface elements in each rigid body.
+#define NBLOB (1536) // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
 
@@ -205,7 +205,7 @@
 // Choosing 0.4 seems to work well when using GMRES, whilst 0.1 appears to be a good choice for a "Broyden's only" simulation.
 #define JACOBIAN_CONFIDENCE_FACTOR 0.1
 
-#define MAX_BROYDEN_ITER 200 // Maximum number of Broyden's method iterations per time-step.
+#define MAX_BROYDEN_ITER 400 // Maximum number of Broyden's method iterations per time-step.
 #define TOL 1e-4 // Tolerance to be reached by the Broyden's method solve.
 
 #define SOLVER_TYPE 0

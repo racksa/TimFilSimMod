@@ -19,9 +19,9 @@ color_list.pop(2)
 simName = 'test_rod'
 superpuntoDatafileName = '../../' + simName + '_superpunto.dat'
 
-Lx = 12800.
-Ly = 1600.
-Lz = 1600.
+Lx = 128.
+Ly = 128.
+Lz = 32.
 enable_periodic = True
 
 class VISUAL:
@@ -38,8 +38,8 @@ class VISUAL:
         self.frames = len(self.body_states)
 
         self.plot_start_frame = 0
-        self.plot_end_frame = 1
-        self.plot_interval = 1
+        self.plot_end_frame = 4000
+        self.plot_interval = 10
 
         self.output_to_superpunto = False
 
@@ -82,9 +82,9 @@ class VISUAL:
                     for blob in range(int(self.pars['NBLOB'])):
                         blob_x, blob_y, blob_z = util.blob_point_from_data(self.body_states[i][7*swim : 7*swim+7], self.blob_references[3*blob:3*blob+3])
                         self.write_data([blob_x, blob_y, blob_z], float(self.pars['RBLOB']), superpuntoDatafileName, enable_periodic)
-                        if(blob==0):
-                            aq = np.sqrt((blob_x-body_pos[0])**2 + (blob_y-body_pos[1])**2 + (blob_z-body_pos[2])**2)
-                    print('radius =', aq)
+                    #     if(blob==0):
+                    #         aq = np.sqrt((blob_x-body_pos[0])**2 + (blob_y-body_pos[1])**2 + (blob_z-body_pos[2])**2)
+                    # print('radius =', aq)
                     # Robot arm to find segment position (Ignored plane rotation!)
                     for fil in range(int(self.pars['NFIL'])):
                         fil_i = int(4*fil*self.pars['NSEG'])

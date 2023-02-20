@@ -93,8 +93,8 @@ vw_prl_batchelor_list = A11(ra_list, 1) + A12(ra_list,1)
 vw_prl_error_list = abs(vw_prl_list - vw_prl_batchelor_list) / vw_prl_batchelor_list
 
 ax2 = plt.figure().add_subplot(1,1,1)
-for i in range(len(num_blob_list)):
-    ax2.plot(ra_list, vw_prl_error_list[i], marker='+', color=random_color(i), label=r'$N_{blob}=$' + str(num_blob_list[i]))
+for i, nb in enumerate(num_blob_list):
+    ax2.plot(ra_list, vw_prl_error_list[i], marker='+', color=random_color(i), label=r'$N_{blob}$' + f'$={nb}$')
 ax2.set_yscale('log')
 ax2.set_xlabel(r'$r/a$')
 ax2.set_ylabel(r'$\frac{|V/W - V/W_{exact}|}{V/W_{exact}}$')

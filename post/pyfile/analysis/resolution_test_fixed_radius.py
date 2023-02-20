@@ -110,11 +110,11 @@ vw_prl_error_list = abs(vw_prl_list - vw_prl_batchelor_list) / vw_prl_batchelor_
 fig2 = plt.figure()
 ax2 = fig2.add_subplot(1,1,1)
 for i, nb in enumerate(num_blob_list):
-    ax2.plot(ra_list, vw_prl_error_list[i], marker='+', color=random_color(i), label=f'$N_blob={nb}$')
+    ax2.plot(ra_list, vw_prl_error_list[i], marker='+', color=random_color(i), label=r'$N_{blob}$' + f'$={nb}$')
 ax2.set_yscale('log')
 ax2.set_xlabel(r'$r/a$')
 ax2.set_ylabel(r'$\frac{|V/W - V/W_{exact}|}{V/W_{exact}}$')
-ax2.set_title('Fixed radius on surface')
+ax2.set_title('Fixed radius')
 ax2.set_xlim(2, 4.5)
 fig2.savefig('resolution_test_fixed_radius.eps', format='eps')
 ax2.legend(ncol=2)

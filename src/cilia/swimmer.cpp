@@ -74,7 +74,7 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
         const int fil_grid_dim_x = std::round(0.25*(3.0 - std::sqrt(3.0) + std::sqrt(4.0 - 2.0*std::sqrt(3.0) + 8.0*std::sqrt(3.0)*NFIL)));
         const int fil_grid_dim_y = std::max<int>(1, int(ceil(NFIL/Real(fil_grid_dim_x-1)))); // Ensure we have enough rows even if all rows were of the shorter type.
       
-      #elif FCM_LATTICE_SEEDING
+      #elif FCM_LATTICE_SEEDING or FCM_RECTANGULAR_SEEDING
 
         const int fil_grid_dim_x = int(cbrt(Real(NFIL)));
         const int fil_grid_dim_y = std::max<int>(1, int(sqrt(NFIL/Real(fil_grid_dim_x))));
@@ -104,7 +104,7 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
 
       // Only the x-size was provided, or both sizes were provided. In case this latter option
       // doesn't account for all filaments, we ignore the provided FIL_LATTICE_Y_NUM and calculate the y-size for ourselves.
-      #if !FCM_LATTICE_SEEDING
+      #if !(FCM_LATTICE_SEEDING or FCM_RECTANGULAR_SEEDING)
         const int fil_grid_dim_x = std::min<int>(NFIL, FIL_LATTICE_X_NUM);
       #endif
       
@@ -115,14 +115,30 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
       #elif HEXAGONAL_SEEDING
 
         const int fil_grid_dim_y = std::max<int>(1, int(ceil(NFIL/Real(fil_grid_dim_x-1))));
-      #elif FCM_LATTICE_SEEDING
+      #elif FCM_LATTICE_SEEDING or FCM_RECTANGULAR_SEEDING
 
-        const int fil_grid_dim_x = int(cbrt(Real(NFIL)));
-        const int fil_grid_dim_y = std::max<int>(1, int(sqrt(NFIL/Real(fil_grid_dim_x))));
-        const int fil_grid_dim_z = std::max<int>(1, int(ceil(NFIL/Real(fil_grid_dim_x*fil_grid_dim_y))));
-        const Real fil_grid_step_x = 40.0; //(0.1 + SCALED_BEAT_AMPLITUDE)*L; //2.0*L*sqrt(PI/5.6);
-        const Real fil_grid_step_y = fil_grid_step_x;
-        const Real fil_grid_step_z = fil_grid_step_x;
+        #if FCM_LATTICE_SEEDING
+          const int fil_grid_dim_x = int(ceil(cbrt(Real(NFIL))));
+          const int fil_grid_dim_y = std::max<int>(1, int(ceil(sqrt(NFIL/Real(fil_grid_dim_x)))));
+          const int fil_grid_dim_z = std::max<int>(1, int(ceil(NFIL/Real(fil_grid_dim_x*fil_grid_dim_y))));
+        #elif FCM_RECTANGULAR_SEEDING
+          const int fil_grid_dim_x = int(ceil(sqrt(Real(NFIL))))  ;
+          const int fil_grid_dim_y = std::max<int>(1, int(ceil(NFIL/Real(fil_grid_dim_x))));
+          const int fil_grid_dim_z = 1;
+          std::cout << fil_grid_dim_x * fil_grid_dim_y * fil_grid_dim_z << std::endl;
+
+          // const int fil_grid_dim_x = 1;
+          // const int fil_grid_dim_y = int(sqrt(Real(NFIL)));
+          // const int fil_grid_dim_z = std::max<int>(1, int(NFIL/Real(fil_grid_dim_y)));
+        
+        #endif
+        
+        Real fil_grid_step_x;
+        std::ifstream in("separation.dat"); // input
+        in >> fil_grid_step_x;
+        Real fil_grid_step_y = fil_grid_step_x;
+        Real fil_grid_step_z = fil_grid_step_x;
+
       #endif
 
     #endif
@@ -137,7 +153,7 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
 
     #endif
 
-    #if !FCM_LATTICE_SEEDING
+    #if !(FCM_LATTICE_SEEDING or FCM_RECTANGULAR_SEEDING)
       Real fil_grid_step_x;
     #endif
 
@@ -160,7 +176,7 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
       #endif
 
     } else {
-      #if !FCM_LATTICE_SEEDING
+      #if !(FCM_LATTICE_SEEDING or FCM_RECTANGULAR_SEEDING)
         fil_grid_step_x = Real(FIL_LATTICE_X_SPACING); // Cast to Real lets it compile even if FIL_LATTICE_X_SPACING is blank.
       #endif
     }
@@ -240,7 +256,7 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
 
       }
 
-    #elif FCM_LATTICE_SEEDING
+    #elif FCM_LATTICE_SEEDING or FCM_RECTANGULAR_SEEDING
 
       for (int i = 0; i < fil_grid_dim_x; i++){
         for (int j = 0; j < fil_grid_dim_y; j++){
@@ -250,9 +266,9 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
 
             if (fil_id < NFIL){
 
-              filament_references[3*fil_id] = i*fil_grid_step_x + fil_grid_step_x;
-              filament_references[3*fil_id + 1] = j*fil_grid_step_y + fil_grid_step_y;
-              filament_references[3*fil_id + 2] = k*fil_grid_step_z + fil_grid_step_z;
+              filament_references[3*fil_id] = i*fil_grid_step_x + 0.5*fil_grid_step_x;
+              filament_references[3*fil_id + 1] = j*fil_grid_step_y + 0.5*fil_grid_step_y;
+              filament_references[3*fil_id + 2] = k*fil_grid_step_z + 0.5*fil_grid_step_z;
 
               Real *const fil_x_address = &x_segs_address[3*fil_id*NSEG];
               Real *const fil_f_address = &f_segs_address[6*fil_id*NSEG];
@@ -457,8 +473,8 @@ void swimmer::forces_and_torques(const int nt, int id){
 
       // Fake gravity
       // if(id==0){
-      //   f(0) += 20;
-      //   f(1) += 20;
+      //   f(0) += 30;
+      //   f(1) += 30;
       // }
       // if(id==1){
       //   f(0) -= 30;
@@ -473,12 +489,14 @@ void swimmer::forces_and_torques(const int nt, int id){
       //   f(1) -= 30;
       // }
 
-      if(id==0){
-        f(0) += DIMENSIONLESS_FORCE/20;
-      }
-      if(id==1){
-        f(0) += DIMENSIONLESS_FORCE/20;
-      }
+      // if(id==0){
+      //   f(0) += DIMENSIONLESS_FORCE/20;
+      // }
+      // if(id==1){
+      //   f(0) += DIMENSIONLESS_FORCE/20;
+      // }
+
+      f(0) += DIMENSIONLESS_FORCE/10;
       
 
       // Finally, add any external forces on the blobs, and the induced torques on body, to f.

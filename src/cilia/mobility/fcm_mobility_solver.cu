@@ -13,7 +13,7 @@ fcm_mobility_solver::fcm_mobility_solver(){
   Real values[100];
   std::string fcm_folder = "../CUFCM/";
   std::vector<std::string> datafile_names{3};
-  read_config(values, datafile_names, "../CUFCM/simulation_info_long");
+  read_config(values, datafile_names, CUFCM_CONFIG_FILE_NAME);
   for(int i = 0; i < 3; i++){
     datafile_names[i] = fcm_folder + datafile_names[i];
   }
@@ -23,10 +23,9 @@ fcm_mobility_solver::fcm_mobility_solver(){
   pars.alpha = values[2];
   pars.beta = values[3];
   pars.eta = values[4];
-  int npts = values[5];
-  pars.nx = npts;
-  pars.ny = npts;
-  pars.nz = npts;
+  pars.nx = values[5];
+  pars.ny = values[6];
+  pars.nz = values[7];
   pars.repeat = values[8];
   pars.prompt = values[9];
   pars.boxsize = values[13];
@@ -260,16 +259,18 @@ void fcm_mobility_solver::apply_interparticle_forces(){
     // fprintf(pfile, "\n#");
     // fclose(pfile);
 
+    // barrier_forces<<<num_thread_blocks, THREADS_PER_BLOCK>>>(f_segs_device[0], f_blobs_repulsion_device[0], x_segs_device[0], x_blobs_device[0], 0, num_segs[0], 0, num_blobs[0]);
+
     // cufcm_solver->reform_data(x_segs_device[0], f_segs_device[0], v_segs_device[0],
     //                         x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0], true);
 
-    // barrier_forces<<<num_thread_blocks, THREADS_PER_BLOCK>>>(f_segs_device[0], f_blobs_repulsion_device[0], x_segs_device[0], x_blobs_device[0], 0, num_segs[0], 0, num_blobs[0]);
-
+    
     cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
     cufcm_solver->reform_fseg(f_segs_device[0], true);
     cufcm_solver->apply_repulsion_for_timcode();
     cufcm_solver->reform_fseg(f_segs_device[0], false);
     cufcm_solver->reform_fblob(f_blobs_repulsion_device[0], false);
+
 
     // cufcm_solver->reform_data_back(x_segs_device[0], f_segs_device[0], v_segs_device[0],
     //                               x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0], true);

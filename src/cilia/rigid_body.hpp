@@ -14,6 +14,7 @@
 #include <iostream>
 #include "matrix.hpp"
 #include "quaternion.hpp"
+#include <random>
 #include "../../config.hpp"
 
 class rigid_body{

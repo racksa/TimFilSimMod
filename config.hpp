@@ -20,7 +20,7 @@
 
 #if CILIA_TYPE==0
 
-  #define CILIA_IC_TYPE 3
+  #define CILIA_IC_TYPE 2
   // Valid options:
   // 0 = All cilia have identical planar perturbations.
   // 1 = All cilia have identical out-of-plane perturbations.
@@ -84,7 +84,7 @@
 
 #endif
 
-#define BODY_OR_SURFACE_TYPE 2
+#define BODY_OR_SURFACE_TYPE 0
 // Valid options:
 // 0 = An infinite plane wall at z = 0. This choice has some sub-types (see below).
 // 1 = Deformed planes with 2 principal curvatures (partially implemented)
@@ -97,7 +97,7 @@
 
 #if BODY_OR_SURFACE_TYPE==0
 
-  #define SEEDING_TYPE 3
+  #define SEEDING_TYPE 2
   // Valid options:
   // 0 = Filaments are placed on a rectangular grid.
   // 1 = Filaments are placed on a hexagonal grid.
@@ -121,8 +121,8 @@
   // 2 = Platynereis-style seeding. Most filament are in an equatorial band but some form a small ring at the rear of the swimmer.
   // 3 = Hexagonal grid seeding.
 
-  #define GENERATRIX_FILE_NAME "sphere"
-  // #define GENERATRIX_FILE_NAME "avg_shape_plus_1.5_first_mode"
+  // #define GENERATRIX_FILE_NAME "sphere"
+  #define GENERATRIX_FILE_NAME "avg_shape_plus_1.5_first_mode"
   // The code will search for a file called GENERATRIX_FILE_NAME.fourier_modes
   // The first entry in this file should be a positive integer N, which is the number of Fourier modes used to describe the surface's generatrix.
   // The remaining 2N entries are the Fourier coefficients, in (cos_coeff, sin_coeff) pairs for each mode in turn.
@@ -135,7 +135,7 @@
 // Define whether the motion of the rigid bodies is imposed or allowed to evolve dynamically.
 #define PRESCRIBED_BODY_VELOCITIES false
 
-#define MOBILITY_TYPE 1
+#define MOBILITY_TYPE 4
 // Valid options:
 // 0 = Basic Stokes drag. No hydrodynamic interactions between particles.
 // 1 = Rotne-Prager-Yamakawa (RPY) mobility matrices (with the corrections due to Swan and Brady if an infinite plane wall is selected).
@@ -152,19 +152,23 @@
 // N.B. Simulations using GMRES can resume/start using backup files from Broyden-only simulations, but the opposite is not true.
 // N.B. For options 0 and 2, whilst the simulation state will be fresh, all saved data will still be appended to any data from a previous simulation of the same name.
 
+#if MOBILITY_TYPE==4
+  #define CUFCM_CONFIG_FILE_NAME "../CUFCM/simulation_info_long"
+#endif
+
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define NFIL (0) // The number of filaments attached to the rigid body/surface in each swimmer.
+#define NFIL (256) // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG (20)// The number of segments comprising each filament.
-#define NSWIM (2) // The number of swimmers.
-#define NBLOB (1536) // The number of blobs to use as surface elements in each rigid body.
+#define NSWIM (8100) // The number of swimmers.
+#define NBLOB (22) // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
 
 #define RSEG 0.7184 // Segment radius.
 #define DL (2.2*RSEG) // Inter-segment distance.
-#define RBLOB 0.7184 //1.4 // Surface blob radius.
+#define RBLOB 0.7184 // Surface blob radius.
 
 #define KB 1800.0 // Bending modulus.
 #define KT 1800.0 // Twist modulus.
@@ -229,8 +233,7 @@
 
 #endif
 
-#define TOTAL_TIME_STEPS 1
-// #define TOTAL_TIME_STEPS (1000*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
+#define TOTAL_TIME_STEPS (1000*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
 #define NUM_EULER_STEPS 1 // Number of time-steps to use backwards-Euler before switching to BDF2.
 
 #if CILIA_TYPE==1
@@ -353,7 +356,8 @@
   #define NTOTAL (NFIL*NSEG)
   #define NBROY (6*NFIL*NSEG)
   #define PRESCRIBED_BODY_VELOCITIES true
-  #define RSEG 0.7184
+  // #define RSEG 0.7184
+  // #define DL (2.2*RSEG) // Inter-segment distance.
   #define MU 1.0
 
   #define RECTANGULAR_SEEDING (SEEDING_TYPE==0)

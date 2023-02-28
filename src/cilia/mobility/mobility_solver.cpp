@@ -2157,7 +2157,7 @@ void mobility_solver::write_data(const int nt, const std::vector<swimmer>& swimm
   #if !INFINITE_PLANE_WALL
 
     std::ofstream body_vel_file(SIMULATION_BODY_VEL_NAME, std::ios::app);
-    body_vel_file << nt << " ";
+    // body_vel_file << nt << " ";
     body_vel_file << std::scientific << std::setprecision(10);
 
     std::ofstream blob_forces_file(SIMULATION_BLOB_FORCES_NAME, std::ios::app);
@@ -2214,8 +2214,11 @@ void mobility_solver::write_data(const int nt, const std::vector<swimmer>& swimm
           }
 
         #endif
-
-        body_vel_file << v[0] << " " << v[1] << " " << v[2] << " " << omega[0] << " " << omega[1] << " " << omega[2] << " ";
+        if(n == 0){
+          body_vel_file << v[0] << ", ";
+        }
+        
+        // body_vel_file << v[0] << " " << v[1] << " " << v[2] << " " << omega[0] << " " << omega[1] << " " << omega[2] << " ";
 
       #else
 

@@ -19,9 +19,20 @@ color_list.pop(2)
 simName = 'test_rod'
 superpuntoDatafileName = '../../' + simName + '_superpunto.dat'
 
-Lx = 128.
-Ly = 128.
-Lz = 32.
+Lx = 640.
+Ly = 640.
+Lz = 80.
+
+# rod_16384
+# Lx = 2048
+# Ly = 2048
+# Lz = 32
+
+# rod_8100
+# Lx = 1440.
+# Ly = 1440.
+# Lz = 22.5
+
 enable_periodic = True
 
 class VISUAL:
@@ -38,8 +49,8 @@ class VISUAL:
         self.frames = len(self.body_states)
 
         self.plot_start_frame = 0
-        self.plot_end_frame = 4000
-        self.plot_interval = 10
+        self.plot_end_frame = 60
+        self.plot_interval = 1
 
         self.output_to_superpunto = False
 
@@ -73,6 +84,9 @@ class VISUAL:
             print("frame ", i, "/", self.frames)
             if(self.output_to_superpunto):
                 myIo.write_line('#', superpuntoDatafileName)
+                
+            # self.write_data(np.array([0,0,0]), float(self.pars['RSEG']), superpuntoDatafileName, False)
+            # self.write_data(np.array([Lx, Lx, Lx]), float(self.pars['RSEG']), superpuntoDatafileName, False)
             for swim in range(int(self.pars['NSWIM'])):
                 body_pos = self.body_states[i][7*swim : 7*swim+3]
                 R = util.rot_mat(self.body_states[i][7*swim+3 : 7*swim+7])
@@ -88,9 +102,9 @@ class VISUAL:
                     # Robot arm to find segment position (Ignored plane rotation!)
                     for fil in range(int(self.pars['NFIL'])):
                         fil_i = int(4*fil*self.pars['NSEG'])
-                        # print(self.fil_references[3*fil : 3*fil+3])
                         fil_base_x, fil_base_y, fil_base_z = body_pos + np.matmul(R, self.fil_references[3*fil : 3*fil+3])
                         old_seg_pos = np.array([fil_base_x, fil_base_y, fil_base_z]) #+ 0.5*self.pars['DL']*util.find_t(self.seg_states[i][fil_i+0 : fil_i+4])     
+                        self.write_data(old_seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic)
 
                         for seg in range(1, int(self.pars['NSEG'])):
                             q1 = self.seg_states[i][fil_i+4*(seg-1) : fil_i+4*seg]
@@ -104,7 +118,6 @@ class VISUAL:
 
                             # ax.scatter(seg_pos[0], seg_pos[1], seg_pos[2])
                             self.write_data(seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic)
-
                 else:
                     x0, y0, z0 = util.blob_point_from_data(self.body_states[i][7*swim : 7*swim+7], self.blob_references[:3])
                     x1, y1, z1 = util.blob_point_from_data(self.body_states[i][7*swim : 7*swim+7], self.blob_references[-3:])

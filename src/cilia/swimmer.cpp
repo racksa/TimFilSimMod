@@ -125,11 +125,10 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
           const int fil_grid_dim_x = int(ceil(sqrt(Real(NFIL))))  ;
           const int fil_grid_dim_y = std::max<int>(1, int(ceil(NFIL/Real(fil_grid_dim_x))));
           const int fil_grid_dim_z = 1;
-          std::cout << fil_grid_dim_x * fil_grid_dim_y * fil_grid_dim_z << std::endl;
 
-          // const int fil_grid_dim_x = 1;
-          // const int fil_grid_dim_y = int(sqrt(Real(NFIL)));
-          // const int fil_grid_dim_z = std::max<int>(1, int(NFIL/Real(fil_grid_dim_y)));
+          // const int fil_grid_dim_x = int(ceil(sqrt(Real(NFIL))));
+          // const int fil_grid_dim_y = 1;
+          // const int fil_grid_dim_z = std::max<int>(1, int(ceil(NFIL/Real(fil_grid_dim_x))));
         
         #endif
         

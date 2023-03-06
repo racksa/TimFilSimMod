@@ -18,12 +18,12 @@ color_list.pop(2)
 
 # color_list = ['#00ffff', '#faebD7', '#838bbb', '#0000ff', '	#8a2be2', '#ff4040', '#7fff00', '#ff6103', '#9932cc', '#ff1493', '#030303']
 
-simName = 'test_rod'
+simName = 'test_rod_1024'
 superpuntoDatafileName = '../../' + simName + '_superpunto.dat'
 
-Lx = 800.
-Ly = 75.
-Lz = 800.
+Lx = 2560.
+Ly = 2560.
+Lz = 2560.
 
 # rod_16384
 # Lx = 2048
@@ -34,6 +34,23 @@ Lz = 800.
 # Lx = 1440.
 # Ly = 1440.
 # Lz = 22.5
+
+# rod_7744
+# Lx = 1760.
+# Ly = 1760.
+# Lz = 10.3125*10
+# 1024*1024*6
+
+# rod_4096 (actually 1024 fils)
+# Lx = 2560.
+# Ly = 2560.
+# Lz = 120.
+
+# rod_1024
+Lx = 640.
+Ly = 640.
+Lz = 10.*10
+# 512*512*8
 
 enable_periodic = True
 
@@ -51,8 +68,8 @@ class VISUAL:
         self.frames = sum(1 for line in open('../../' + simName + '_body_states.dat'))
 
         self.plot_start_frame = 0
-        self.plot_end_frame = 2180
-        self.plot_interval = 2
+        self.plot_end_frame = 3
+        self.plot_interval = 1
 
         self.output_to_superpunto = False
 
@@ -63,11 +80,14 @@ class VISUAL:
         self.output_to_superpunto = True
         myIo.clean_file(superpuntoDatafileName)
 
-    def write_data(self, x, r, filename, box=True):
+    def write_data(self, x, r, filename, box=True, center=True):
         if(box):
             x[0] = util.box(x[0], Lx)
             x[1] = util.box(x[1], Ly)
             x[2] = util.box(x[2], Lz)
+            if(center):
+                x[0] -= 0.5*Lx
+                x[1] -= 0.5*Ly
         myIo.write_line(str(x[0]) + ' ' +\
                         str(x[1]) + ' ' +\
                         str(x[2]) + ' ' +\
@@ -89,74 +109,75 @@ class VISUAL:
         body_states_f = open('../../' + simName + '_body_states.dat', "r")
         print("open body states ",(time.time()-start))
 
-        for i in range(self.plot_start_frame, self.plot_end_frame, self.plot_interval):
-            print("frame ", i, "/", self.frames)
-            if(self.output_to_superpunto):
-                myIo.write_line('#', superpuntoDatafileName)
+        for i in range(self.plot_start_frame, self.plot_end_frame):
             body_states = np.array(body_states_f.readline().split()[1:], dtype=float)
             seg_states = np.array(seg_states_f.readline().split()[1:], dtype=float)
-            for swim in range(int(self.pars['NSWIM'])):
-                body_pos = body_states[7*swim : 7*swim+3]
-                R = util.rot_mat(body_states[7*swim+3 : 7*swim+7])
+            if(i%self.plot_interval==0):
+                print("frame ", i, "/", self.frames, flush=True)
                 if(self.output_to_superpunto):
-                    # To find blob position
-                    for blob in range(int(self.pars['NBLOB'])):
-                        blob_x, blob_y, blob_z = util.blob_point_from_data(body_states[7*swim : 7*swim+7], self.blob_references[3*blob:3*blob+3])
-                        self.write_data([blob_x, blob_y, blob_z], float(self.pars['RBLOB']), superpuntoDatafileName, enable_periodic)
-                    # Robot arm to find segment position (Ignored plane rotation!)
-                    
-                    for fil in range(int(self.pars['NFIL'])):
+                    myIo.write_line('#', superpuntoDatafileName)
+                for swim in range(int(self.pars['NSWIM'])):
+                    body_pos = body_states[7*swim : 7*swim+3]
+                    R = util.rot_mat(body_states[7*swim+3 : 7*swim+7])
+                    if(self.output_to_superpunto):
+                        # To find blob position
+                        for blob in range(int(self.pars['NBLOB'])):
+                            blob_x, blob_y, blob_z = util.blob_point_from_data(body_states[7*swim : 7*swim+7], self.blob_references[3*blob:3*blob+3])
+                            self.write_data([blob_x, blob_y, blob_z], float(self.pars['RBLOB']), superpuntoDatafileName, enable_periodic)
+                        # Robot arm to find segment position (Ignored plane rotation!)
                         
-                        fil_i = int(4*fil*self.pars['NSEG'])
-                        fil_base_x, fil_base_y, fil_base_z = body_pos + np.matmul(R, self.fil_references[3*fil : 3*fil+3])
-                        old_seg_pos = np.array([fil_base_x, fil_base_y, fil_base_z])
-                        self.write_data(old_seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic)
-
-                        for seg in range(1, int(self.pars['NSEG'])):
-                            q1 = seg_states[fil_i+4*(seg-1) : fil_i+4*seg]
-                            q2 = seg_states[fil_i+4*seg : fil_i+4*seg+4]
+                        for fil in range(int(self.pars['NFIL'])):
                             
-                            t1 = util.find_t(q1)
-                            t2 = util.find_t(q2)
-                            
-                            seg_pos = old_seg_pos + 0.5*self.pars['DL']*(t1 + t2)
-                            old_seg_pos = seg_pos
-                            
-                            self.write_data(seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic)
-                else:
-                    x0, y0, z0 = util.blob_point_from_data(body_states[7*swim : 7*swim+7], self.blob_references[:3])
-                    x1, y1, z1 = util.blob_point_from_data(body_states[7*swim : 7*swim+7], self.blob_references[-3:])
-                    x_diff, y_diff, z_diff = x1-x0, y1-y0, z1-z0
-                    two_points_x = [util.box(x0, Lx), util.box(x0, Lx) + x_diff]
-                    two_points_y = [util.box(y0, Ly), util.box(y0, Ly) + y_diff]
-                    two_points_z = [util.box(z0, Lz), util.box(z0, Lz) + z_diff]
+                            fil_i = int(4*fil*self.pars['NSEG'])
+                            fil_base_x, fil_base_y, fil_base_z = body_pos + np.matmul(R, self.fil_references[3*fil : 3*fil+3])
+                            old_seg_pos = np.array([fil_base_x, fil_base_y, fil_base_z])
+                            self.write_data(old_seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic)
 
-                    # two_points_x = [x0, x1]
-                    # two_points_y = [y0, y1]
-                    # two_points_z = [z0, z1]
+                            for seg in range(1, int(self.pars['NSEG'])):
+                                q1 = seg_states[fil_i+4*(seg-1) : fil_i+4*seg]
+                                q2 = seg_states[fil_i+4*seg : fil_i+4*seg+4]
+                                
+                                t1 = util.find_t(q1)
+                                t2 = util.find_t(q2)
+                                
+                                seg_pos = old_seg_pos + 0.5*self.pars['DL']*(t1 + t2)
+                                old_seg_pos = seg_pos
+                                
+                                self.write_data(seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic)
+                    else:
+                        x0, y0, z0 = util.blob_point_from_data(body_states[7*swim : 7*swim+7], self.blob_references[:3])
+                        x1, y1, z1 = util.blob_point_from_data(body_states[7*swim : 7*swim+7], self.blob_references[-3:])
+                        x_diff, y_diff, z_diff = x1-x0, y1-y0, z1-z0
+                        two_points_x = [util.box(x0, Lx), util.box(x0, Lx) + x_diff]
+                        two_points_y = [util.box(y0, Ly), util.box(y0, Ly) + y_diff]
+                        two_points_z = [util.box(z0, Lz), util.box(z0, Lz) + z_diff]
 
-                    # color = (1-0.25*swim/self.pars['NSWIM'], 0.2*swim/self.pars['NSWIM'], 0.55+0.45*swim/self.pars['NSWIM'], (i+1-self.plot_start_frame)/(self.plot_end_frame-self.plot_start_frame) )
-                    random.seed(3*swim)
-                    cr = random.random()
-                    random.seed(3*swim+1)
-                    cg = random.random()
-                    random.seed(3*swim+2)
-                    cb = random.random()
-                    color = (cr, cg, cb, (i+1-self.plot_start_frame)/(self.plot_end_frame-self.plot_start_frame) )
+                        # two_points_x = [x0, x1]
+                        # two_points_y = [y0, y1]
+                        # two_points_z = [z0, z1]
 
-                    if (self.plot_dim == 2):
-                        ax.scatter(two_points_x, two_points_y)
-                        ax.plot(two_points_x, two_points_y, c=color)
-                    if (self.plot_dim == 3):
-                        ax.plot(two_points_x, two_points_y, two_points_z, c=color )
-                 
-        if (self.plot_dim == 3):
-            util.set_axes_equal(ax)
-            ax.set_xlabel("x")
-            ax.set_ylabel("y")
-            ax.set_zlabel("z")
-        # if(not self.output_to_superpunto):
-        # plt.show()
+                        # color = (1-0.25*swim/self.pars['NSWIM'], 0.2*swim/self.pars['NSWIM'], 0.55+0.45*swim/self.pars['NSWIM'], (i+1-self.plot_start_frame)/(self.plot_end_frame-self.plot_start_frame) )
+                        random.seed(3*swim)
+                        cr = random.random()
+                        random.seed(3*swim+1)
+                        cg = random.random()
+                        random.seed(3*swim+2)
+                        cb = random.random()
+                        color = (cr, cg, cb, (i+1-self.plot_start_frame)/(self.plot_end_frame-self.plot_start_frame) )
+
+                        if (self.plot_dim == 2):
+                            ax.scatter(two_points_x, two_points_y)
+                            ax.plot(two_points_x, two_points_y, c=color)
+                        if (self.plot_dim == 3):
+                            ax.plot(two_points_x, two_points_y, two_points_z, c=color )
+                    
+            if (self.plot_dim == 3):
+                util.set_axes_equal(ax)
+                ax.set_xlabel("x")
+                ax.set_ylabel("y")
+                ax.set_zlabel("z")
+            # if(not self.output_to_superpunto):
+            # plt.show()
 
 
 

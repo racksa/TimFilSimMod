@@ -84,7 +84,7 @@
 
 #endif
 
-#define BODY_OR_SURFACE_TYPE 0
+#define BODY_OR_SURFACE_TYPE 4
 // Valid options:
 // 0 = An infinite plane wall at z = 0. This choice has some sub-types (see below).
 // 1 = Deformed planes with 2 principal curvatures (partially implemented)
@@ -159,23 +159,23 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define NFIL (256) // The number of filaments attached to the rigid body/surface in each swimmer.
+#define NFIL (0) // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG (20)// The number of segments comprising each filament.
-#define NSWIM (8100) // The number of swimmers.
+#define NSWIM (1024) // The number of swimmers.
 #define NBLOB (22) // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
 
-#define RSEG 0.7184 // Segment radius.
+#define RSEG 1.0 // Segment radius.
 #define DL (2.2*RSEG) // Inter-segment distance.
-#define RBLOB 0.7184 // Surface blob radius.
+#define RBLOB 1.0 // Surface blob radius.
 
 #define KB 1800.0 // Bending modulus.
 #define KT 1800.0 // Twist modulus.
 
 #if CILIA_TYPE==0
 
-  #define DIMENSIONLESS_FORCE 220.0
+  #define DIMENSIONLESS_FORCE 220.0 
 
 #elif CILIA_TYPE==1
 
@@ -245,7 +245,7 @@
 #else
 
   #define STEPS_PER_PERIOD 300
-  #define SAVES_PER_PERIOD 100
+  #define SAVES_PER_PERIOD 10
 
 #endif
 
@@ -356,7 +356,7 @@
   #define NTOTAL (NFIL*NSEG)
   #define NBROY (6*NFIL*NSEG)
   #define PRESCRIBED_BODY_VELOCITIES true
-  // #define RSEG 0.7184
+  // #define RSEG 1.0
   // #define DL (2.2*RSEG) // Inter-segment distance.
   #define MU 1.0
 

@@ -84,7 +84,7 @@
 
 #endif
 
-#define BODY_OR_SURFACE_TYPE 4
+#define BODY_OR_SURFACE_TYPE 0
 // Valid options:
 // 0 = An infinite plane wall at z = 0. This choice has some sub-types (see below).
 // 1 = Deformed planes with 2 principal curvatures (partially implemented)
@@ -159,7 +159,7 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define NFIL (0) // The number of filaments attached to the rigid body/surface in each swimmer.
+#define NFIL (1) // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG (20)// The number of segments comprising each filament.
 #define NSWIM (1024) // The number of swimmers.
 #define NBLOB (22) // The number of blobs to use as surface elements in each rigid body.
@@ -245,7 +245,7 @@
 #else
 
   #define STEPS_PER_PERIOD 300
-  #define SAVES_PER_PERIOD 10
+  #define SAVES_PER_PERIOD 100
 
 #endif
 
@@ -432,7 +432,7 @@
 
 #endif
 
-#define DISPLAYTIME false
+#define DISPLAYTIME true
 
 #define FIL_USE_DOUBLE_PRECISION true
 
@@ -449,13 +449,13 @@
 #else
     typedef float Real;
     typedef int Integer;
-    #define my_rint rintf
-    #define my_exp expf
-    #define my_floor floorf
-    #define my_fmod fmodf
-    #define my_getrf_ sgetrf_
-    #define my_getri_ sgetri_
-    #define my_gemm_ sgemm_
+    #define myfil_rint rintf
+    #define myfil_exp expf
+    #define myfil_floor floorf
+    #define myfil_fmod fmodf
+    #define myfil_getrf_ sgetrf_
+    #define myfil_getri_ sgetri_
+    #define myfil_gemm_ sgemm_
     
 #endif
 

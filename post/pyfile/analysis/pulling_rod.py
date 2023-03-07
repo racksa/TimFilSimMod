@@ -28,8 +28,8 @@ ax.scatter(blob_sym_list, vh_ratio_sym_list, facecolors='none', edgecolors='r', 
 ax.scatter(blob_asym_list, vh_ratio_asym_list, facecolors='none', edgecolors='b', label='Asymmetric')
 ax.set_xlabel(r'$Blob\ number$')
 ax.set_ylabel(r'$V_{vertical} / V_{horizontal}$')
-ax.set_title('Rod polarisation speed graph')
+# ax.set_title('Rod polarisation speed graph')
 ax.legend()
 
-plt.savefig('rod_polarisation.eps', format='eps')
+plt.savefig('fig/rod_polarisation.eps', format='eps')
 plt.show()

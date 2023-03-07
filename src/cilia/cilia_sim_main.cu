@@ -153,29 +153,13 @@ int main(int argc, char** argv){
   #endif
 
   std::vector<swimmer> swimmers(NSWIM);
-
-  // if(DISPLAYTIME) cudaDeviceSynchronize(); time_start = get_time();
-  // #pragma omp parallel
-  // {
-  //     int swimmer_per_thread = NSWIM/omp_get_num_threads();
-  //     for(int i = 0; i < swimmer_per_thread; i++){
-  //       int n = swimmer_per_thread*omp_get_thread_num() + i;
-  //       swimmers[n].initial_setup(n, &data_from_file[n*data_per_swimmer],
-  //                                       &mobility.x_segs_host[3*n*NFIL*NSEG],
-  //                                       &mobility.f_segs_host[6*n*NFIL*NSEG],
-  //                                       &mobility.f_blobs_host[3*n*NBLOB]);
-  //       }
-  // }
-
+  
   for (int n = 0; n < NSWIM; n++){
     swimmers[n].initial_setup(n, &data_from_file[n*data_per_swimmer],
                                         &mobility.x_segs_host[3*n*NFIL*NSEG],
                                         &mobility.f_segs_host[6*n*NFIL*NSEG],
                                         &mobility.f_blobs_host[3*n*NBLOB]);
   }
-
-  // if(DISPLAYTIME) cudaDeviceSynchronize(); std::cout<<std::endl<<"\t\tinitialise time"<<(get_time() - time_start)<<std::endl; time_start = get_time();
-  
 
   #if READ_INITIAL_CONDITIONS_FROM_BACKUP
 
@@ -360,11 +344,11 @@ int main(int argc, char** argv){
       ////////////////////////////////////////////////////////////
       while (error_is_too_large && (broyden.iter < MAX_BROYDEN_ITER)){
 
-        // if(DISPLAYTIME) cudaDeviceSynchronize(); time_start = get_time();
+        if(DISPLAYTIME) cudaDeviceSynchronize(); time_start = get_time();
 
         broyden.find_update(swimmers, nt);
 
-        // if(DISPLAYTIME){ cudaDeviceSynchronize(); std::cout<<std::endl<<"\t\tbroyden find update time"<<(get_time() - time_start)<<std::endl; time_start = get_time();}
+        if(DISPLAYTIME){ cudaDeviceSynchronize(); std::cout<<std::endl<<"\t\tbroyden find update time = "<<(get_time() - time_start)<<std::endl; time_start = get_time();}
 
         for (int i = 0; i < NSWIM; i++) {
 
@@ -390,11 +374,11 @@ int main(int argc, char** argv){
 
         }
 
-        // if(DISPLAYTIME){ cudaDeviceSynchronize(); std::cout<<std::endl<<"\t\tapply force time"<<(get_time() - time_start)<<std::endl; time_start = get_time();}
+        if(DISPLAYTIME){ cudaDeviceSynchronize(); std::cout<<"\t\tapply force time = "<<(get_time() - time_start)<<std::endl; time_start = get_time();}
 
         mobility.compute_velocities(swimmers, num_gmres_iterations, nt);
 
-        // if(DISPLAYTIME){ cudaDeviceSynchronize(); std::cout<<"\t\tcompute velocity time"<<(get_time() - time_start)<<std::endl; time_start = get_time();}
+        if(DISPLAYTIME){ cudaDeviceSynchronize(); std::cout<<"\t\tcompute velocity time = "<<(get_time() - time_start)<<std::endl; time_start = get_time();}
 
         #if CUFCM
           if(nt%100==0){
@@ -405,7 +389,7 @@ int main(int argc, char** argv){
 
         error_is_too_large = mobility.compute_errors(broyden.new_error, swimmers, nt);
 
-        // if(DISPLAYTIME){ cudaDeviceSynchronize(); std::cout<<"\t\tcompute error time"<<(get_time() - time_start)<<std::endl; time_start = get_time();}
+        if(DISPLAYTIME){ cudaDeviceSynchronize(); std::cout<<"\t\tcompute error time = "<<(get_time() - time_start)<<std::endl; time_start = get_time();}
 
         if (!broyden.new_error.is_finite()){
 
@@ -428,6 +412,9 @@ int main(int argc, char** argv){
         }
 
         broyden.end_of_iter(swimmers, nt, nt_start, error_is_too_large);
+
+        if(DISPLAYTIME){ cudaDeviceSynchronize(); std::cout<<"\t\tend of iter time = "<<(get_time() - time_start)<<std::endl; time_start = get_time();}
+
 
         std::cout << DELETE_CURRENT_LINE << std::flush;
         std::cout << "Step " << nt+1 << ": Completed Broyden iteration " << broyden.iter;

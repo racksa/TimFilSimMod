@@ -100,7 +100,7 @@ ax.annotate('Force in same direction', (2.1, 1.02))
 ax.annotate('Force in opposite direction', (2.1, 0.93))
 ax.set_xlabel(r'$r/a$')
 ax.set_ylabel(r'V/W')
-ax.set_title('Two sphere settling speed')
+# ax.set_title('Two sphere settling speed')
 ax.set_xlim(2, 3.2)
 ax.set_ylim(0, 1.7)
 red_patch = mpatches.Patch(color='r', label='Parallel alignment')
@@ -109,7 +109,7 @@ circle_legend = ax.scatter([], [], facecolors='none', edgecolors='black', label=
 line_legend = mlines.Line2D([], [], c='black', label='Batchelor(1982)')
 ax.legend(handles=[red_patch, blue_patch, circle_legend, line_legend])
 
-plt.savefig('two_sphere.eps', format='eps')
+plt.savefig('fig/two_sphere.eps', format='eps')
 plt.show()
 
 

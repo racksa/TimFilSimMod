@@ -18,7 +18,7 @@ color_list.pop(2)
 
 # color_list = ['#00ffff', '#faebD7', '#838bbb', '#0000ff', '	#8a2be2', '#ff4040', '#7fff00', '#ff6103', '#9932cc', '#ff1493', '#030303']
 
-simName = 'test_rod_1024'
+simName = 'test_rod_7744'
 superpuntoDatafileName = '../../' + simName + '_superpunto.dat'
 
 Lx = 2560.
@@ -36,9 +36,9 @@ Lz = 2560.
 # Lz = 22.5
 
 # rod_7744
-# Lx = 1760.
-# Ly = 1760.
-# Lz = 10.3125*10
+Lx = 1760.
+Ly = 1760.
+Lz = 10.3125*10
 # 1024*1024*6
 
 # rod_4096 (actually 1024 fils)
@@ -47,9 +47,9 @@ Lz = 2560.
 # Lz = 120.
 
 # rod_1024
-Lx = 640.
-Ly = 640.
-Lz = 10.*10
+# Lx = 640.
+# Ly = 640.
+# Lz = 10.*10
 # 512*512*8
 
 enable_periodic = True
@@ -62,13 +62,11 @@ class VISUAL:
             self.blob_references = myIo.read_blob_references('../../' + simName + '_blob_references.dat')
         if(self.pars['NFIL']>0):
             self.fil_references = myIo.read_fil_references('../../' + simName + '_fil_references.dat')
-        # self.body_states = myIo.read_body_states('../../' + simName + '_body_states.dat')
-        # self.seg_states = myIo.read_seg_states('../../' + simName + '_seg_states.dat')
         
         self.frames = sum(1 for line in open('../../' + simName + '_body_states.dat'))
 
         self.plot_start_frame = 0
-        self.plot_end_frame = 3
+        self.plot_end_frame = 471
         self.plot_interval = 1
 
         self.output_to_superpunto = False
@@ -104,10 +102,8 @@ class VISUAL:
 
         start = time.time()
         seg_states_f = open('../../' + simName + '_seg_states.dat', "r")
-        print("open seg states ",(time.time()-start))
-        start = time.time()
         body_states_f = open('../../' + simName + '_body_states.dat', "r")
-        print("open body states ",(time.time()-start))
+        print("open files time = ",(time.time()-start))
 
         for i in range(self.plot_start_frame, self.plot_end_frame):
             body_states = np.array(body_states_f.readline().split()[1:], dtype=float)
@@ -176,30 +172,5 @@ class VISUAL:
                 ax.set_xlabel("x")
                 ax.set_ylabel("y")
                 ax.set_zlabel("z")
-            # if(not self.output_to_superpunto):
-            # plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#
+            if(not self.output_to_superpunto):
+                plt.show()

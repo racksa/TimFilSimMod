@@ -33,11 +33,11 @@ ax.plot(sangani_x_list, sangani_y_list, c='r', label='Sangani & Acrivos(1982)')
 ax.scatter(c_13_list, vw_list, facecolors='none', edgecolors='r', label='Rigid sphere')
 ax.set_xlabel(r'$c^{1/3}$')
 ax.set_ylabel(r'V/W')
-ax.set_title('Single sphere settling speed')
+# ax.set_title('Single sphere settling speed')
 ax.set_xlim(0, 0.8)
 ax.legend()
 
-plt.savefig('single_sphere.eps', format='eps')
+plt.savefig('fig/single_sphere.eps', format='eps')
 plt.show()
 
 

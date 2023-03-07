@@ -89,5 +89,5 @@ ax.plot(np.cos(spheroid_theta_array)*spheroid_r_array, np.sin(spheroid_theta_arr
 ax.set_aspect('equal')
 ax.axis('off')
 
-plt.savefig('spheroid_shape.tif', format='tif')
+plt.savefig('fig/spheroid_shape.tif', format='tif')
 plt.show()

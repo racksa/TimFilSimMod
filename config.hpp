@@ -5,7 +5,7 @@
 #ifndef MY_CONFIG_HEADER_INCLUDED
 #define MY_CONFIG_HEADER_INCLUDED
 
-#define SIMULATION_NAME "test_rod"
+#define SIMULATION_NAME "test_fil"
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Simulation type
@@ -159,7 +159,7 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define NFIL (1) // The number of filaments attached to the rigid body/surface in each swimmer.
+#define NFIL (4096) // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG (20)// The number of segments comprising each filament.
 #define NSWIM (1024) // The number of swimmers.
 #define NBLOB (22) // The number of blobs to use as surface elements in each rigid body.
@@ -245,7 +245,7 @@
 #else
 
   #define STEPS_PER_PERIOD 300
-  #define SAVES_PER_PERIOD 100
+  #define SAVES_PER_PERIOD 30
 
 #endif
 
@@ -432,7 +432,7 @@
 
 #endif
 
-#define DISPLAYTIME true
+#define DISPLAYTIME false
 
 #define FIL_USE_DOUBLE_PRECISION true
 

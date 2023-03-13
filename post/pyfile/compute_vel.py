@@ -18,39 +18,8 @@ color_list.pop(2)
 
 # color_list = ['#00ffff', '#faebD7', '#838bbb', '#0000ff', '	#8a2be2', '#ff4040', '#7fff00', '#ff6103', '#9932cc', '#ff1493', '#030303']
 
-simName = 'test_rod_1024'
+simName = 'test_rod_1024_2'
 # superpuntoDatafileName = '../../' + simName + '_superpunto.dat'
-
-Lx = 2560.
-Ly = 2560.
-Lz = 2560.
-
-# rod_16384
-# Lx = 2048
-# Ly = 2048
-# Lz = 32
-
-# rod_8100
-# Lx = 1440.
-# Ly = 1440.
-# Lz = 22.5
-
-# rod_7744
-# Lx = 1760.
-# Ly = 1760.
-# Lz = 10.3125*10
-# 1024*1024*6
-
-# rod_4096 (actually 1024 fils)
-# Lx = 2560.
-# Ly = 2560.
-# Lz = 120.
-
-# rod_1024
-Lx = 640.
-Ly = 640.
-Lz = 10.*10
-# 512*512*8
 
 enable_periodic = True
 
@@ -65,11 +34,12 @@ class COMPUTEVEL:
         
         self.frames = sum(1 for line in open('../../' + simName + '_body_states.dat'))
         self.dt = self.pars['DT']*self.pars['PLOT_FREQUENCY_IN_STEPS']
+        self.L = 14.14
 
         self.plot_start_frame = 0
-        self.plot_end_frame = 464
+        self.plot_end_frame = self.frames
 
-        self.plot_hist_frame = [10, 50, 100]
+        self.plot_hist_frame = [10, 50, 100, 200, 580]
 
     def compute(self):
         body_states_f = open('../../' + simName + '_body_states.dat', "r")
@@ -95,9 +65,10 @@ class COMPUTEVEL:
         time_array = np.arange(self.plot_start_frame, self.plot_end_frame )
         average_vel /= float(self.pars['NSWIM'])
         ax = plt.figure().add_subplot(1,1,1)
-        ax.set_ylabel(r"<$V_x$>")
+        ax.set_ylabel(r"<$V_x$>/L")
         ax.set_xlabel(r"time")
-        ax.plot(time_array[1:], average_vel[1:,0])
+        ax.plot(time_array[1:], average_vel[1:,0]/self.L)
+        plt.savefig('fig/rod_velocity.eps', format='eps')
         plt.show()
 
     def plot_hist(self):
@@ -107,8 +78,8 @@ class COMPUTEVEL:
 
         ax2 = plt.figure().add_subplot(1,1,1)
         ax2.set_ylabel(r"frequency")
-        ax2.set_xlabel(r"$V_x$")
-        bins = np.linspace(-5, 6, 100)
+        ax2.set_xlabel(r"$V_x$/L")
+        bins = np.linspace(-8/self.L, 10/self.L, 20)
 
         for i in range(max(self.plot_hist_frame) + 1):
             body_states2 = body_states
@@ -118,11 +89,10 @@ class COMPUTEVEL:
                 body_disp = body_states - body_states2
                 for swim in range(int(self.pars['NSWIM'])):
                     body_vel_x[swim] = body_disp[7*swim : 7*swim+1]/self.dt
-                ax2.hist(body_vel_x, bins=bins, label=f'time={i}')
+                ax2.hist(body_vel_x/self.L, bins=bins, label=f'time={i}')
         ax2.legend()
+        plt.savefig('fig/rod_velocity_hist.eps', format='eps')
         plt.show()
-
-
 
 
 

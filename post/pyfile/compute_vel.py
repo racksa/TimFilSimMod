@@ -18,7 +18,7 @@ color_list.pop(2)
 
 # color_list = ['#00ffff', '#faebD7', '#838bbb', '#0000ff', '	#8a2be2', '#ff4040', '#7fff00', '#ff6103', '#9932cc', '#ff1493', '#030303']
 
-simName = 'test_rod_1024_2'
+simName = 'test_fil'
 # superpuntoDatafileName = '../../' + simName + '_superpunto.dat'
 
 enable_periodic = True
@@ -40,6 +40,7 @@ class COMPUTEVEL:
         self.plot_end_frame = self.frames
 
         self.plot_hist_frame = [10, 50, 100, 200, 580]
+        self.plot_seg_frame = self.plot_end_frame-1
 
     def compute(self):
         body_states_f = open('../../' + simName + '_body_states.dat', "r")
@@ -95,6 +96,58 @@ class COMPUTEVEL:
         plt.show()
 
 
+    def plot_seg_height(self):
+        seg_states_f = open('../../' + simName + '_seg_states.dat', "r")
+        seg_vels_f = open('../../' + simName + '_seg_vels.dat', "r")
+        body_states_f = open('../../' + simName + '_body_states.dat', "r")
+
+        ax = plt.figure().add_subplot(1,1,1)
+        end_pos = np.zeros((int(self.pars['NFIL']), 3))
+        end_vel = np.zeros((int(self.pars['NFIL']), 3))
+
+        for i in range(self.plot_end_frame):
+            print("frame ", i, "/", self.frames, flush=True)
+            body_states_str = body_states_f.readline()
+            if(self.pars['NFIL']>0):
+                seg_states_str = seg_states_f.readline()
+                seg_vels_str = seg_vels_f.readline()
+
+            if(i == self.plot_seg_frame):
+                seg_states = np.array(seg_states_str.split()[1:], dtype=float)
+                seg_vels = np.array(seg_vels_str.split()[1:], dtype=float)
+                body_states = np.array(body_states_str.split()[1:], dtype=float)
+
+                R = util.rot_mat(body_states[3 : 7])
+
+                # Robot arm to find segment position (Ignored plane rotation!)
+                for fil in range(int(self.pars['NFIL'])):
+                    fil_i = int(4*fil*self.pars['NSEG'])
+                    fil_base_x, fil_base_y, fil_base_z = np.matmul(R, self.fil_references[3*fil : 3*fil+3])
+                    old_seg_pos = np.array([fil_base_x, fil_base_y, fil_base_z])
+
+                    for seg in range(1, int(self.pars['NSEG'])):
+                        q1 = seg_states[fil_i+4*(seg-1) : fil_i+4*seg]
+                        q2 = seg_states[fil_i+4*seg : fil_i+4*seg+4]
+                        
+                        t1 = util.find_t(q1)
+                        t2 = util.find_t(q2)
+                        
+                        seg_pos = old_seg_pos + 0.5*self.pars['DL']*(t1 + t2)
+                        old_seg_pos = seg_pos
+                    end_pos[fil] = seg_pos
+                    end_vel[fil] = seg_vels[6*int(self.pars['NSEG'])*fil + 6*int(self.pars['NSEG']) - 6 : 6*int(self.pars['NSEG'])*fil + 6*int(self.pars['NSEG']) - 3]
+            
+        ax.scatter(end_pos[:,0], end_pos[:,1])
+        ax.quiver(end_pos[:,0], end_pos[:,1], end_vel[:,0], end_vel[:,1])
+
+        # time_array = np.arange(self.plot_start_frame, self.plot_end_frame )
+        # average_vel /= float(self.pars['NSWIM'])
+        # ax = plt.figure().add_subplot(1,1,1)
+        # ax.set_ylabel(r"<$V_x$>/L")
+        # ax.set_xlabel(r"time")
+        # ax.plot(time_array[1:], average_vel[1:,0]/self.L)
+        plt.savefig('fig/fil_height.eps', format='eps')
+        plt.show()
 
 
 

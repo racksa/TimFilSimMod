@@ -159,7 +159,7 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define NFIL (4096) // The number of filaments attached to the rigid body/surface in each swimmer.
+#define NFIL (64) // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG (20)// The number of segments comprising each filament.
 #define NSWIM (1024) // The number of swimmers.
 #define NBLOB (22) // The number of blobs to use as surface elements in each rigid body.
@@ -356,8 +356,9 @@
   #define NTOTAL (NFIL*NSEG)
   #define NBROY (6*NFIL*NSEG)
   #define PRESCRIBED_BODY_VELOCITIES true
-  // #define RSEG 1.0
-  // #define DL (2.2*RSEG) // Inter-segment distance.
+  #if RPY_MOBILITY
+    #define RSEG 1.0
+  #endif
   #define MU 1.0
 
   #define RECTANGULAR_SEEDING (SEEDING_TYPE==0)

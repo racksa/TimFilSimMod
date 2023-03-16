@@ -24,3 +24,6 @@ if(sys.argv[1] == 'compute_vel'):
 
 if(sys.argv[1] == 'plot_hist'):
     computer.plot_hist()
+
+if(sys.argv[1] == 'plot_seg'):
+    computer.plot_seg_height()

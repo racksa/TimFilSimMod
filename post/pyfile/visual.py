@@ -19,15 +19,15 @@ color_list.pop(2)
 
 # color_list = ['#00ffff', '#faebD7', '#838bbb', '#0000ff', '	#8a2be2', '#ff4040', '#7fff00', '#ff6103', '#9932cc', '#ff1493', '#030303']
 
-simName = 'test_fil_4096'
+simName = 'test_fil'
 superpuntoDatafileName = '../../' + simName + '_superpunto.dat'
 fcmPosfileName = '../../' + simName + '_flow_pos.dat'
 fcmForcefileName = '../../' + simName + '_flow_force.dat'
 fcmTorquefileName = '../../' + simName + '_flow_torque.dat'
 
-Lx = 240.
-Ly = 240.
-Lz = 120.
+Lx = 800.
+Ly = 800.
+Lz = 800.*2
 
 # rod_16384
 # Lx = 2048
@@ -41,9 +41,10 @@ Lz = 120.
 # 1024*1024*6
 
 # fil_4096
-Lx = 3840.
-Ly = 3840.
-Lz = 240.
+# Lx = 3840.
+# Ly = 3840.
+# Lz = 240.
+# 256*256*16
 
 # rod_1024
 # Lx = 640.
@@ -76,11 +77,11 @@ class VISUAL:
         
         self.frames = sum(1 for line in open('../../' + simName + '_body_states.dat'))
 
-        self.plot_start_frame = 0
+        self.plot_start_frame = max(0, self.frames-100)
         self.plot_end_frame = self.frames
         self.plot_interval = 1
 
-        self.fcm_frame = self.frames-1
+        self.fcm_frame = self.plot_end_frame-1
 
         self.output_to_superpunto = False
         self.output_to_fcm = False
@@ -99,15 +100,17 @@ class VISUAL:
         myIo.clean_file(fcmTorquefileName)
 
     def write_data(self, x, r, filename, box=True, center=True, superpunto=True):
-        plot_x = np.zeros(np.shape(x))
+        plot_x = x.copy()
         if(box):
-            plot_x[0] = util.box(x[0], Lx)
-            plot_x[1] = util.box(x[1], Ly)
-            plot_x[2] = util.box(x[2], Lz)
+            plot_x[0] = util.box(plot_x[0], Lx)
+            plot_x[1] = util.box(plot_x[1], Ly)
+            plot_x[2] = util.box(plot_x[2], Lz)
             if(center):
                 plot_x[0] -= 0.5*Lx
                 plot_x[1] -= 0.5*Ly
         if superpunto:
+            plot_x[1] = -plot_x[1]
+            plot_x[2] = -plot_x[2]
             myIo.write_line(str(plot_x[0]) + ' ' +\
                             str(plot_x[1]) + ' ' +\
                             str(plot_x[2]) + ' ' +\
@@ -120,7 +123,6 @@ class VISUAL:
                             str(plot_x[2]),
                             filename)
             
-
     def plot(self):
         if (self.plot_dim == 2):
             ax = plt.figure().add_subplot(1,1,1)
@@ -136,22 +138,30 @@ class VISUAL:
         seg_forces_f = open('../../' + simName + '_seg_forces.dat', "r")
         print("open files time = ",(time.time()-start))
 
-        for i in range(0, self.plot_end_frame):
-            body_states = np.array(body_states_f.readline().split()[1:], dtype=float)
-            seg_states = np.array(seg_states_f.readline().split()[1:], dtype=float)
+        for i in range(self.plot_end_frame):
+            body_states_str = body_states_f.readline().split()[1:]
+            if(self.pars['NFIL']>0):
+                seg_states_str = seg_states_f.readline().split()[1:]
+                seg_forces_str = seg_forces_f.readline().split()[1:]
             if(self.pars['NBLOB']>0):
-                blob_forces = np.array(blob_forces_f.readline().split()[1:], dtype=float)
-            seg_forces = np.array(seg_forces_f.readline().split()[1:], dtype=float)
+                blob_forces_str = blob_forces_f.readline().split()[1:]
 
-            if(i%self.plot_interval==0):
+            if(i%self.plot_interval==0 and i>=self.plot_start_frame):
                 print("frame ", i, "/", self.frames, flush=True)
+                body_states = np.array(body_states_str, dtype=float)
+                if(self.pars['NFIL']>0):
+                    seg_states = np.array(seg_states_str, dtype=float)
+                    seg_forces = np.array(seg_forces_str, dtype=float)
+                if(self.pars['NBLOB']>0):
+                    blob_forces = np.array(blob_forces_str, dtype=float)
+
                 if(self.output_to_superpunto):
                     myIo.write_line('#', superpuntoDatafileName)
                 if((self.output_to_fcm and i == self.fcm_frame) or (self.output_to_superpunto)):
                     for swim in range(int(self.pars['NSWIM'])):
                         body_pos = body_states[7*swim : 7*swim+3]
                         R = util.rot_mat(body_states[7*swim+3 : 7*swim+7])
-                            # To find blob position
+                        # To find blob position
                         for blob in range(int(self.pars['NBLOB'])):
                             blob_x, blob_y, blob_z = util.blob_point_from_data(body_states[7*swim : 7*swim+7], self.blob_references[3*blob:3*blob+3])
                             if(self.output_to_superpunto):
@@ -168,7 +178,13 @@ class VISUAL:
                             fil_i = int(4*fil*self.pars['NSEG'])
                             fil_base_x, fil_base_y, fil_base_z = body_pos + np.matmul(R, self.fil_references[3*fil : 3*fil+3])
                             old_seg_pos = np.array([fil_base_x, fil_base_y, fil_base_z])
-                            self.write_data(old_seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic, False, True)
+                            if(self.output_to_superpunto):
+                                self.write_data(old_seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic, True, True)
+                            if(self.output_to_fcm):
+                                seg_fx, seg_fy, seg_fz, seg_tx, seg_ty, seg_tz = seg_forces[0 : 6]
+                                self.write_data(old_seg_pos, 0, fcmPosfileName, box=True, center=False, superpunto=False)
+                                self.write_data([seg_fx, seg_fy, seg_fz], 0, fcmForcefileName, box=False, center=False, superpunto=False)
+                                self.write_data([seg_tx, seg_ty, seg_tz], 0, fcmTorquefileName, box=False, center=False, superpunto=False)
 
                             for seg in range(1, int(self.pars['NSEG'])):
                                 q1 = seg_states[fil_i+4*(seg-1) : fil_i+4*seg]
@@ -181,9 +197,14 @@ class VISUAL:
                                 old_seg_pos = seg_pos
                                 
                                 if(self.output_to_superpunto):
-                                    self.write_data(seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic, False, True)
+                                    self.write_data(seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic, True, True)
                                 if(self.output_to_fcm):
-                                    pass
+                                    seg_fx, seg_fy, seg_fz, seg_tx, seg_ty, seg_tz = seg_forces[6*seg : 6*seg+6]
+                                    self.write_data(seg_pos, 0, fcmPosfileName, box=True, center=False, superpunto=False)
+                                    self.write_data([seg_fx, seg_fy, seg_fz], 0, fcmForcefileName, box=False, center=False, superpunto=False)
+                                    self.write_data([seg_tx, seg_ty, seg_tz], 0, fcmTorquefileName, box=False, center=False, superpunto=False)
+
+
         if(self.output_to_fcm):
             fcm_directory = "../../../CUFCM/data/flow_data/"
             subprocess.call("cp " + fcmPosfileName + " " + fcm_directory, shell=True)

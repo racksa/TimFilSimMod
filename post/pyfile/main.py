@@ -4,7 +4,7 @@ import compute_vel
 import sys
 
 visualiser = visual.VISUAL()
-computer = compute_vel.COMPUTEVEL()
+# computer = compute_vel.COMPUTEVEL()
 
 if(sys.argv[1] == 'plot2d'):
     visualiser.set_plot_dim(2)
@@ -20,10 +20,15 @@ if(sys.argv[1] == 'plot3d'):
     visualiser.plot()
 
 if(sys.argv[1] == 'compute_vel'):
-    computer.compute()
+    visualiser.compute_rod_vel()
+    # computer.compute()
 
 if(sys.argv[1] == 'plot_hist'):
-    computer.plot_hist()
+    visualiser.plot_hist()
+    # computer.plot_hist()
 
 if(sys.argv[1] == 'plot_seg'):
-    computer.plot_seg_height()
+    visualiser.plot_seg_vel()
+
+if(sys.argv[1] == 'plot_rod'):
+    visualiser.plot_rod_vel()

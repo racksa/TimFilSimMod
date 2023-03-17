@@ -495,7 +495,8 @@ void swimmer::forces_and_torques(const int nt, int id){
       //   f(0) += DIMENSIONLESS_FORCE/20;
       // }
 
-      f(0) += DIMENSIONLESS_FORCE/20;
+      // f(0) += DIMENSIONLESS_FORCE/2;
+      f(0) += Real(NBLOB);
       
 
       // Finally, add any external forces on the blobs, and the induced torques on body, to f.

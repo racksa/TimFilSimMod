@@ -92,7 +92,7 @@ def set_axes_equal(ax):
 
 
 def box(x, box_size):
-    return x - math.floor(x/box_size)*box_size;
+    return x - np.floor(x/box_size)*box_size
 
 def two_points_at_boundary(two_points_x, two_points_y, two_points_z, rod_length):
     points = np.array((two_points_x, two_points_y, two_points_z))

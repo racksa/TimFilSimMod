@@ -5,7 +5,8 @@
 #ifndef MY_CONFIG_HEADER_INCLUDED
 #define MY_CONFIG_HEADER_INCLUDED
 
-#define SIMULATION_NAME "test_fil"
+#define SIMULATION_DIR "data/rod_sims/"
+#define SIMULATION_NAME SIMULATION_DIR "test_rod"
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Simulation type
@@ -84,7 +85,7 @@
 
 #endif
 
-#define BODY_OR_SURFACE_TYPE 0
+#define BODY_OR_SURFACE_TYPE 4
 // Valid options:
 // 0 = An infinite plane wall at z = 0. This choice has some sub-types (see below).
 // 1 = Deformed planes with 2 principal curvatures (partially implemented)
@@ -123,6 +124,7 @@
 
   // #define GENERATRIX_FILE_NAME "sphere"
   #define GENERATRIX_FILE_NAME "avg_shape_plus_1.5_first_mode"
+
   // The code will search for a file called GENERATRIX_FILE_NAME.fourier_modes
   // The first entry in this file should be a positive integer N, which is the number of Fourier modes used to describe the surface's generatrix.
   // The remaining 2N entries are the Fourier coefficients, in (cos_coeff, sin_coeff) pairs for each mode in turn.
@@ -159,10 +161,10 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define NFIL (64) // The number of filaments attached to the rigid body/surface in each swimmer.
+#define NFIL (0) // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG (20)// The number of segments comprising each filament.
-#define NSWIM (1024) // The number of swimmers.
-#define NBLOB (22) // The number of blobs to use as surface elements in each rigid body.
+#define NSWIM (64) // The number of swimmers.
+#define NBLOB (94) // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
 

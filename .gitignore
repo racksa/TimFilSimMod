@@ -39,6 +39,7 @@
 *.exp
 *.lib
 *.pdb
+/bin/*
 
 # ignore .DS_Store from Macs
 .DS_Store

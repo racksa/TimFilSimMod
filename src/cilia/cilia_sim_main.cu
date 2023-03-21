@@ -43,6 +43,10 @@
 int main(int argc, char** argv){
 
   float time_start;
+  float solution_update_time;
+  float jacobian_update_time;
+  float hisolver_time;
+  float eval_error_time;
 
   Real *data_from_file;
 
@@ -342,14 +346,18 @@ int main(int argc, char** argv){
       /////////////////////////parallelise////////////////////////
       ////////////////////////////////////////////////////////////
       ////////////////////////////////////////////////////////////
+      solution_update_time = 0.0;
+      hisolver_time = 0.0;
+      eval_error_time = 0.0;
+      jacobian_update_time = 0.0;
+
       while (error_is_too_large && (broyden.iter < MAX_BROYDEN_ITER)){
 
         if(DISPLAYTIME) cudaDeviceSynchronize(); time_start = get_time();
 
         broyden.find_update(swimmers, nt);
 
-        if(DISPLAYTIME){ cudaDeviceSynchronize(); std::cout<<std::endl<<"\t\tbroyden find update time = "<<(get_time() - time_start)<<std::endl; time_start = get_time();}
-
+        
         for (int i = 0; i < NSWIM; i++) {
 
           #if INFINITE_PLANE_WALL
@@ -374,11 +382,11 @@ int main(int argc, char** argv){
 
         }
 
-        if(DISPLAYTIME){ cudaDeviceSynchronize(); std::cout<<"\t\tapply force time = "<<(get_time() - time_start)<<std::endl; time_start = get_time();}
+        if(DISPLAYTIME && nt%100==0){ cudaDeviceSynchronize(); solution_update_time += (get_time() - time_start); time_start = get_time();}
 
         mobility.compute_velocities(swimmers, num_gmres_iterations, nt);
 
-        if(DISPLAYTIME){ cudaDeviceSynchronize(); std::cout<<"\t\tcompute velocity time = "<<(get_time() - time_start)<<std::endl; time_start = get_time();}
+        if(DISPLAYTIME && nt%100==0){ cudaDeviceSynchronize(); hisolver_time += (get_time() - time_start); time_start = get_time();}
 
         #if CUFCM
           if(nt%100==0){
@@ -389,7 +397,7 @@ int main(int argc, char** argv){
 
         error_is_too_large = mobility.compute_errors(broyden.new_error, swimmers, nt);
 
-        if(DISPLAYTIME){ cudaDeviceSynchronize(); std::cout<<"\t\tcompute error time = "<<(get_time() - time_start)<<std::endl; time_start = get_time();}
+        if(DISPLAYTIME && nt%100==0){ cudaDeviceSynchronize(); eval_error_time += (get_time() - time_start); time_start = get_time();}
 
         if (!broyden.new_error.is_finite()){
 
@@ -413,19 +421,30 @@ int main(int argc, char** argv){
 
         broyden.end_of_iter(swimmers, nt, nt_start, error_is_too_large);
 
-        if(DISPLAYTIME){ cudaDeviceSynchronize(); std::cout<<"\t\tend of iter time = "<<(get_time() - time_start)<<std::endl; time_start = get_time();}
-
+        if(DISPLAYTIME && nt%100==0){ cudaDeviceSynchronize(); jacobian_update_time += (get_time() - time_start); time_start = get_time();}
 
         std::cout << DELETE_CURRENT_LINE << std::flush;
         std::cout << "Step " << nt+1 << ": Completed Broyden iteration " << broyden.iter;
         #if !(INFINITE_PLANE_WALL || USE_BROYDEN_FOR_EVERYTHING)
           std::cout << " in " << num_gmres_iterations << " iterations of the linear system solver." << "\r";
-        #endif
+        #endif        
         std::cout << std::flush;
 
       }
 
-      // mobility.cufcm_solver->write_data_call();
+      if(DISPLAYTIME && nt%100==0){
+          std::ofstream time_file(SIMULATION_TIME_NAME, std::ios::app);
+          time_file << nt << " " << broyden.iter << " ";
+          time_file << std::scientific << std::setprecision(6);
+          
+          time_file<<(solution_update_time/broyden.iter)<<" ";
+          time_file<<(hisolver_time/broyden.iter)<<" ";
+          time_file<<(eval_error_time/broyden.iter)<<" "; 
+          time_file<<(jacobian_update_time/broyden.iter)<<" ";
+
+          time_file << std::endl;
+          time_file.close();
+        }
 
       ////////////////////////////////////////////////////////////
       /////////////////////////parallelise////////////////////////

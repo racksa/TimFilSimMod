@@ -5,8 +5,8 @@
 #ifndef MY_CONFIG_HEADER_INCLUDED
 #define MY_CONFIG_HEADER_INCLUDED
 
-#define SIMULATION_DIR "data/rod_sims/"
-#define SIMULATION_NAME SIMULATION_DIR "test_rod"
+#define SIMULATION_DIR "data/100fil_sims/"
+#define SIMULATION_NAME SIMULATION_DIR "test_fil_1000_1000_1500"
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Simulation type
@@ -85,7 +85,7 @@
 
 #endif
 
-#define BODY_OR_SURFACE_TYPE 4
+#define BODY_OR_SURFACE_TYPE 0
 // Valid options:
 // 0 = An infinite plane wall at z = 0. This choice has some sub-types (see below).
 // 1 = Deformed planes with 2 principal curvatures (partially implemented)
@@ -161,10 +161,10 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define NFIL (0) // The number of filaments attached to the rigid body/surface in each swimmer.
+#define NFIL (100) // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG (20)// The number of segments comprising each filament.
-#define NSWIM (64) // The number of swimmers.
-#define NBLOB (94) // The number of blobs to use as surface elements in each rigid body.
+#define NSWIM (256) // The number of swimmers.
+#define NBLOB (22) // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
 
@@ -289,6 +289,7 @@
 #define SIMULATION_SEG_VEL_NAME SIMULATION_NAME "_seg_vels.dat"
 #define SIMULATION_BLOB_FORCES_NAME SIMULATION_NAME "_blob_forces.dat" // Body forces are recoverable from blob forces.
 #define SIMULATION_SEG_FORCES_NAME SIMULATION_NAME "_seg_forces.dat"
+#define SIMULATION_TIME_NAME SIMULATION_NAME "_time.dat"
 
 #define DELETE_CURRENT_LINE "                                                                                                               " << "\r"
 
@@ -435,7 +436,7 @@
 
 #endif
 
-#define DISPLAYTIME false
+#define DISPLAYTIME true
 
 #define FIL_USE_DOUBLE_PRECISION true
 

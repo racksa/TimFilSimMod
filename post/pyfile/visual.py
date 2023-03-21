@@ -18,18 +18,21 @@ color_list.pop(2)
 
 # color_list = ['#00ffff', '#faebD7', '#838bbb', '#0000ff', '	#8a2be2', '#ff4040', '#7fff00', '#ff6103', '#9932cc', '#ff1493', '#030303']
 
-simDir = 'data/64fils_800_800_200/'
-simDir = 'data/rod_sims/'
-# simDir = ''
-simName = simDir + 'test_rod'
+# simDir = 'data/64fils_800_800_400/'
+simDir = 'data/100fil_sims/'
+simName = simDir + 'test_fil_1000_1000_125'
+
+# simDir = 'data/rod_sims/'
+# simName = simDir + 'test_rod_1024_l'
 superpuntoDatafileName = '../../' + simName + '_superpunto.dat'
 fcmPosfileName = '../../' + simName + '_flow_pos.dat'
 fcmForcefileName = '../../' + simName + '_flow_force.dat'
 fcmTorquefileName = '../../' + simName + '_flow_torque.dat'
 
-Lx = 800.
-Ly = 800.
-Lz = 800.*2
+Lx = 1000.
+Ly = 1000.
+Lz = 1000.*2
+# 128*128*xx
 
 # rod_16384
 # Lx = 2048
@@ -81,7 +84,7 @@ class VISUAL:
 
         self.plot_start_frame = max(0, self.frames-100)
         self.plot_end_frame = self.frames
-        self.plot_interval = 5
+        self.plot_interval = 1
 
         self.plot_hist_frame = np.array([self.frames-1])
         self.plot_seg_frame = self.plot_end_frame-1
@@ -291,9 +294,8 @@ class VISUAL:
         for i in range(self.plot_end_frame):
             print("frame ", i, "/", self.frames, end="\r")
             body_states_str = body_states_f.readline()
-            if(self.pars['NFIL']>0):
-                seg_states_str = seg_states_f.readline()
-                seg_vels_str = seg_vels_f.readline()
+            seg_states_str = seg_states_f.readline()
+            seg_vels_str = seg_vels_f.readline()
 
             if(i == self.plot_seg_frame):
                 seg_states = np.array(seg_states_str.split()[1:], dtype=float)
@@ -322,6 +324,11 @@ class VISUAL:
             
         ax.scatter(end_pos[:,0], end_pos[:,1])
         ax.quiver(end_pos[:,0], end_pos[:,1], end_vel[:,0], end_vel[:,1])
+        ax.set_ylabel(r"y")
+        ax.set_xlabel(r"x")
+        ax.set_xlim(0, Lx)
+        ax.set_ylim(0, Ly)
+        ax.set_aspect('equal')
         plt.savefig('fig/fil_vel.eps', format='eps')
         plt.show()
 

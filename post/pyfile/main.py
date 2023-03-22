@@ -19,16 +19,23 @@ if(sys.argv[1] == 'plot3d'):
     visualiser.set_plot_dim(3)
     visualiser.plot()
 
+if(sys.argv[1] == 'plot_seg'):
+    visualiser.plot_seg_vel()
+
+if(sys.argv[1] == 'plot_pattern'):
+    visualiser.enable_superpunto()
+    visualiser.plot_pattern()
+
+
+
 if(sys.argv[1] == 'compute_vel'):
     visualiser.compute_rod_vel()
-    # computer.compute()
+
+if(sys.argv[1] == 'multi_vel'):
+    visualiser.multi_rod_vel()
 
 if(sys.argv[1] == 'plot_hist'):
     visualiser.plot_hist()
-    # computer.plot_hist()
-
-if(sys.argv[1] == 'plot_seg'):
-    visualiser.plot_seg_vel()
 
 if(sys.argv[1] == 'plot_rod'):
     visualiser.plot_rod_vel()

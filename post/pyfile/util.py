@@ -101,8 +101,7 @@ def two_points_at_boundary(two_points_x, two_points_y, two_points_z, rod_length)
         return [0,0], [0,0], [0,0]
         # two_points_x, two_points_y, two_points_z = [], [], []
     return two_points_x, two_points_y, two_points_z
-
-
+    
 
 
 #

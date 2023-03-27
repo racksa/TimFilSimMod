@@ -33,6 +33,7 @@
 *.tif
 *.tiff
 *.heic
+*.eps
 
 # ignore executables and compiled libraries etc.
 *.exe

@@ -5,10 +5,8 @@
 #ifndef MY_CONFIG_HEADER_INCLUDED
 #define MY_CONFIG_HEADER_INCLUDED
 
-#define SIMULATION_DIR "data/8100rod_sims/"
-// #define SIMULATION_NAME SIMULATION_DIR "test_rod_1800_1800_75"
-// #define SIMULATION_NAME SIMULATION_DIR "test_rod_3600_3600_75"
-#define SIMULATION_NAME SIMULATION_DIR "test_rod_7200_7200_75"
+#define SIMULATION_DIR "data/256fil_sims/"
+#define SIMULATION_NAME SIMULATION_DIR "test_fil_1600_1600_600"
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Simulation type
@@ -87,7 +85,7 @@
 
 #endif
 
-#define BODY_OR_SURFACE_TYPE 4
+#define BODY_OR_SURFACE_TYPE 0
 // Valid options:
 // 0 = An infinite plane wall at z = 0. This choice has some sub-types (see below).
 // 1 = Deformed planes with 2 principal curvatures (partially implemented)
@@ -163,7 +161,7 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define NFIL (0) // The number of filaments attached to the rigid body/surface in each swimmer.
+#define NFIL (256) // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG (20)// The number of segments comprising each filament.
 #define NSWIM (8100) // The number of swimmers.
 #define NBLOB (22) // The number of blobs to use as surface elements in each rigid body.
@@ -237,7 +235,7 @@
 
 #endif
 
-#define TOTAL_TIME_STEPS (1000*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
+#define TOTAL_TIME_STEPS (3000*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
 #define NUM_EULER_STEPS 1 // Number of time-steps to use backwards-Euler before switching to BDF2.
 
 #if CILIA_TYPE==1

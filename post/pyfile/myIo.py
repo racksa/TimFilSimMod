@@ -32,3 +32,12 @@ def write_line(text, fileName):
     
 def clean_file(fileName):
     open(fileName, 'w')
+
+def get_boxsize_from_name(filename):
+    str_list = filename.split('_')
+    try:
+        Lx, Ly, Lz = [float(s) for s in str_list[-3:]]
+        return Lx, Ly, Lz
+    except:
+        print("WARNING: Filename not supported for auto boxing.")
+        return (float('inf'), float('inf'), float('inf'))

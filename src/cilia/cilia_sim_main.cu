@@ -513,9 +513,14 @@ int main(int argc, char** argv){
       body_state_file << save_step << " ";
       body_state_file << std::scientific << std::setprecision(10);
 
+      std::ofstream tether_force_file(SIMULATION_TETHERLAM_NAME, std::ios::app);
+      tether_force_file << save_step << " ";
+      tether_force_file << std::scientific << std::setprecision(10);
+
+
       for (int n = 0; n < NSWIM; n++){
 
-        swimmers[n].write_data(seg_state_file, body_state_file);
+        swimmers[n].write_data(seg_state_file, body_state_file, tether_force_file);
 
       }
 
@@ -524,6 +529,9 @@ int main(int argc, char** argv){
 
       body_state_file << std::endl;
       body_state_file.close();
+
+      tether_force_file << std::endl;
+      tether_force_file.close();
 
       mobility.write_data(nt, swimmers); // Writes all velocity and force data.
 

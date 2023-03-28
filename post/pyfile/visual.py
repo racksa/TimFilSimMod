@@ -19,7 +19,13 @@ color_list.pop(2)
 # color_list = ['#00ffff', '#faebD7', '#838bbb', '#0000ff', '	#8a2be2', '#ff4040', '#7fff00', '#ff6103', '#9932cc', '#ff1493', '#030303']
 
 simDir = 'data/100fil_sims/'
-simName = simDir + 'test_fil_1000_1000_1000'
+simName = simDir + 'test_fil_1000_1000_875'
+
+# simDir = 'data/1rod_sims/'
+# simName = simDir + 'test_rod_960_960_60'
+
+simDir = 'data/1fil_sims/'
+simName = simDir + 'test_fil_100_100_2000'
 
 # simDir = 'data/fil_sims/'
 # simName = simDir + 'test_fil'
@@ -100,14 +106,14 @@ class VISUAL:
             self.fil_references = myIo.read_fil_references('../../' + simName + '_fil_references.dat')
         self.dt = self.pars['DT']*self.pars['PLOT_FREQUENCY_IN_STEPS']
         self.L = 14.14*self.pars['NBLOB']/22.
-        self.frames = min(3000, sum(1 for line in open('../../' + simName + '_body_states.dat')))
+        self.frames = min(30000, sum(1 for line in open('../../' + simName + '_body_states.dat')))
 
         self.plot_end_frame = self.frames
         self.plot_start_frame = max(0, self.plot_end_frame-100)
         self.plot_interval = 1
 
         self.plot_hist_frame = np.array([self.frames-1])
-        self.plot_seg_frames = [self.plot_end_frame-1-2*i for i in range(13)]
+        self.plot_seg_frames = [self.plot_end_frame-1-2*i for i in range(14)]
         self.plot_rod_frame = np.array([self.plot_end_frame-1])
         self.fcm_frame = self.plot_end_frame-1
 
@@ -367,6 +373,45 @@ class VISUAL:
                             
                             self.write_data(seg_pos, float(self.pars['RSEG']), patternDatafileName, enable_periodic, True, True)
     
+    def plot_seg_force(self):
+        seg_forces_f = open('../../' + simName + '_seg_forces.dat', "r")
+        tether_force_f = open('../../' + simName + '_tether_force.dat', "r")
+
+        NF0 = float(self.pars['DIMENSIONLESS_FORCE']) * float(self.pars['NFIL'])
+        T0 = float(self.pars['STEPS_PER_PERIOD']) / float(self.pars['PLOT_FREQUENCY_IN_STEPS'])
+
+        compute_start = self.plot_start_frame
+        compute_start = 0
+
+        # total_base_force = np.zeros((self.plot_end_frame - compute_start))
+        total_tether_force = np.zeros((self.plot_end_frame - compute_start))
+
+        ax = plt.figure().add_subplot(1,1,1)
+        for i in range(self.plot_end_frame):
+            print("frame ", i, "/", self.frames, end="\r")
+            # seg_forces_str = seg_forces_f.readline()
+            tether_forces_str = tether_force_f.readline()
+
+            if(i >= compute_start):
+                # seg_forces = np.array(seg_forces_str.split()[1:], dtype=float)
+                tether_force = np.array(tether_forces_str.split()[1:], dtype=float)
+
+                for fil in range(int(self.pars['NFIL'])):
+
+                    # total_base_force[i-compute_start] += np.linalg.norm(seg_forces[6*fil : 6*fil+3])
+                    total_tether_force[i-compute_start] += np.linalg.norm(tether_force[3*fil : 3*fil+3])
+
+        time_array = np.arange(compute_start, self.plot_end_frame )/T0
+        ax.set_ylabel(r"$<\lambda>/F_0$")
+        ax.set_xlabel(r"$t/T_0$")
+        # ax.plot(time_array[1:], total_base_force[1:])
+        ax.plot(time_array[1:], total_tether_force[1:]/NF0)
+        ax.set_xlim(left=0)
+        ax.set_ylim(bottom=0)
+        plt.savefig('fig/fil_vel.eps', format='eps')
+        plt.savefig('fig/fil_vel.png', format='png')
+        plt.show()
+
     # Rods
     def compute_rod_vel(self):
         body_states_f = open('../../' + simName + '_body_states.dat', "r")
@@ -417,6 +462,9 @@ class VISUAL:
         ls = ['solid', 'dashed', 'dotted']
         ac = 1 - 1./4.*np.pi
         area_fraction = 2304*(48-28*ac) / np.array([(960*960), (1920*1920), (3840*3840)])
+        V0_list = np.array([3.9666615301e-01, 4.1704212613e-01, 4.3713151925e-01])
+        V_terminal_list = np.array([1, 1, 1])
+        T0 = 14.14**2/22.
     
         ax = plt.figure().add_subplot(1,1,1)
         for ni, name in enumerate(simNames):
@@ -430,6 +478,7 @@ class VISUAL:
 
             body_states = np.zeros(7*int(self.pars['NSWIM']))
             average_vel = np.zeros((self.plot_end_frame - compute_start, 3))
+            # average_abs_vel = np.zeros((self.plot_end_frame - compute_start, 3))
 
             for i in range(self.plot_end_frame):
                 print(name, " frame ", i, "/", self.frames, "          ", end="\r")
@@ -444,17 +493,18 @@ class VISUAL:
                     body_disp = body_states - body_states2
                     
                     for swim in range(int(self.pars['NSWIM'])):
-                        body_vel = body_disp[7*swim : 7*swim+3]/self.dt
+                        body_vel = body_disp[7*swim : 7*swim+3]
                         average_vel[i-compute_start] += body_vel
+                        # average_abs_vel[i-compute_start] += np.abs(body_vel)
 
-            time_array = np.arange(compute_start, self.plot_end_frame )
-            average_vel /= float(self.pars['NSWIM'])
+            time_array = np.arange(compute_start, self.plot_end_frame ) / T0
+            average_vel =  average_vel / float(self.pars['NSWIM']) / self.dt
             
-            ax.plot(time_array[1:], average_vel[1:,0]/self.L, c='black', linestyle=ls[ni],label='Area fraction='+'{:.2f}'.format(area_fraction[ni]*100)+'%')
-        
+            ax.plot(time_array[1:], average_vel[1:,0]/ V0_list[ni], c='black', linestyle=ls[ni],label='Area fraction='+'{:.2f}'.format(area_fraction[ni]*100)+'%')
+
         ax.legend()
-        ax.set_ylabel(r"<$V_x$>/L")
-        ax.set_xlabel(r"time")
+        ax.set_ylabel(r"$<V_x>/V_0$")
+        ax.set_xlabel(r"$t/T_0$")
         ax.set_xlim(left=0)
         plt.savefig('fig/multi_velocity.eps', format='eps')
         plt.show()

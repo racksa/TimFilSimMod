@@ -5,8 +5,8 @@
 #ifndef MY_CONFIG_HEADER_INCLUDED
 #define MY_CONFIG_HEADER_INCLUDED
 
-#define SIMULATION_DIR "data/256fil_sims/"
-#define SIMULATION_NAME SIMULATION_DIR "test_fil_1600_1600_600"
+#define SIMULATION_DIR "data/1fil_sims/"
+#define SIMULATION_NAME SIMULATION_DIR "test_fil_100_100_2000"
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Simulation type
@@ -161,9 +161,9 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define NFIL (256) // The number of filaments attached to the rigid body/surface in each swimmer.
+#define NFIL (1) // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG (20)// The number of segments comprising each filament.
-#define NSWIM (8100) // The number of swimmers.
+#define NSWIM (1) // The number of swimmers.
 #define NBLOB (22) // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
@@ -235,7 +235,7 @@
 
 #endif
 
-#define TOTAL_TIME_STEPS (3000*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
+#define TOTAL_TIME_STEPS (1000*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
 #define NUM_EULER_STEPS 1 // Number of time-steps to use backwards-Euler before switching to BDF2.
 
 #if CILIA_TYPE==1
@@ -290,6 +290,7 @@
 #define SIMULATION_BLOB_FORCES_NAME SIMULATION_NAME "_blob_forces.dat" // Body forces are recoverable from blob forces.
 #define SIMULATION_SEG_FORCES_NAME SIMULATION_NAME "_seg_forces.dat"
 #define SIMULATION_TIME_NAME SIMULATION_NAME "_time.dat"
+#define SIMULATION_TETHERLAM_NAME SIMULATION_NAME "_tether_force.dat"
 
 #define DELETE_CURRENT_LINE "                                                                                                               " << "\r"
 

@@ -1100,13 +1100,13 @@ void swimmer::write_reference_positions() const {
 
 }
 
-void swimmer::write_data(std::ofstream& seg_state_file, std::ofstream& body_state_file) const {
+void swimmer::write_data(std::ofstream& seg_state_file, std::ofstream& body_state_file, std::ofstream& tether_force_file) const {
 
   body.write_data(body_state_file);
 
   for (int n = 0; n < NFIL; n++){
 
-    filaments[n].write_data(seg_state_file);
+    filaments[n].write_data(seg_state_file, tether_force_file);
 
   }
 

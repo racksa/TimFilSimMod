@@ -60,7 +60,7 @@ public:
   matrix jacobian_lie_algebra_block(const int nt);
   void invert_approx_jacobian(const int nt);
   void update(const Real *const u);
-  void write_data(std::ofstream& data_file) const;
+  void write_data(std::ofstream& data_file, std::ofstream& tether_force_file) const;
   void write_backup(std::ofstream& data_file) const;
 
   #if INSTABILITY_CILIA

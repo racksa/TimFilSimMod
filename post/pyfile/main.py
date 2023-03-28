@@ -1,6 +1,5 @@
 import os
 import visual
-import compute_vel
 import sys
 
 visualiser = visual.VISUAL()
@@ -21,6 +20,9 @@ if(sys.argv[1] == 'plot3d'):
 
 if(sys.argv[1] == 'plot_seg'):
     visualiser.plot_seg_vel()
+
+if(sys.argv[1] == 'plot_seg_force'):
+    visualiser.plot_seg_force()
 
 if(sys.argv[1] == 'plot_pattern'):
     visualiser.enable_superpunto()

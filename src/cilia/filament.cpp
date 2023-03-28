@@ -1818,7 +1818,7 @@ void filament::update(const Real *const u){
 
 }
 
-void filament::write_data(std::ofstream& data_file) const {
+void filament::write_data(std::ofstream& data_file, std::ofstream& tether_force_file) const {
 
   for (int n = 0; n < NSEG; n++){
 
@@ -1833,6 +1833,8 @@ void filament::write_data(std::ofstream& data_file) const {
     #endif
 
   }
+
+  tether_force_file << tether_lambda[0] << " " << tether_lambda[1] << " " << tether_lambda[2] << " ";
 
 }
 

@@ -40,7 +40,7 @@ public:
   void forces_and_torques(const int nt, int id);
   void end_of_step(const int nt);
   void write_reference_positions() const;
-  void write_data(std::ofstream& seg_state_file, std::ofstream& body_state_file) const;
+  void write_data(std::ofstream& seg_state_file, std::ofstream& body_state_file, std::ofstream& tether_force_file) const;
   void write_backup(std::ofstream& backup_file) const;
 
   #if PRESCRIBED_CILIA

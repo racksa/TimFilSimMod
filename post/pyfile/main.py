@@ -41,3 +41,6 @@ if(sys.argv[1] == 'plot_hist'):
 
 if(sys.argv[1] == 'plot_rod'):
     visualiser.plot_rod_vel()
+
+if(sys.argv[1] == 'plot_rod_multi'):
+    visualiser.plot_rod_vel_multi()

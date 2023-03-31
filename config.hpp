@@ -6,7 +6,7 @@
 #define MY_CONFIG_HEADER_INCLUDED
 
 #define SIMULATION_DIR "data/1fil_sims/"
-#define SIMULATION_NAME SIMULATION_DIR "test_fil_100_100_2000"
+#define SIMULATION_NAME SIMULATION_DIR "test_fil_100_100_1375"
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Simulation type

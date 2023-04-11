@@ -28,7 +28,8 @@ if(sys.argv[1] == 'plot_pattern'):
     visualiser.enable_superpunto()
     visualiser.plot_pattern()
 
-
+if(sys.argv[1] == 'plot_fil3d'):
+    visualiser.plot_fil3d()
 
 if(sys.argv[1] == 'compute_vel'):
     visualiser.compute_rod_vel()

@@ -5,6 +5,7 @@ import util
 import pandas as pd
 import matplotlib.colors as mcolors
 from matplotlib.lines import Line2D
+import matplotlib.patches as patches
 import subprocess
 import random
 import time
@@ -22,7 +23,7 @@ simDir = 'data/100fil_sims/'
 simName = simDir + 'test_fil_1000_1000_2000'
 
 # simDir = 'data/1fil_sims/'
-# simName = simDir + 'test_fil_100_100_1375'
+# simName = simDir + 'test_fil_100_100_1250'
 
 # simDir = 'data/fil_sims/'
 # simName = simDir + 'test_fil'
@@ -33,8 +34,8 @@ simName = simDir + 'test_fil_1000_1000_2000'
 # simDir = 'data/1024fil_sims/'
 # simName = simDir + 'test_fil_3200_3200_1000'
 
-simDir = 'data/2304rod_sims/'
-simName = simDir + 'test_rod_960_960_60'
+# simDir = 'data/2304rod_sims/'
+# simName = simDir + 'test_rod_960_960_60'
 # simName = simDir + 'test_rod_1920_1920_60'
 # simName = simDir + 'test_rod_3840_3840_60'
 
@@ -103,7 +104,7 @@ class VISUAL:
             self.fil_references = myIo.read_fil_references('../../' + simName + '_fil_references.dat')
         self.dt = self.pars['DT']*self.pars['PLOT_FREQUENCY_IN_STEPS']
         self.L = 14.14*self.pars['NBLOB']/22.
-        self.frames = min(10001, sum(1 for line in open('../../' + simName + '_body_states.dat')))
+        self.frames = min(30001, sum(1 for line in open('../../' + simName + '_body_states.dat')))
 
         self.plot_end_frame = self.frames
         self.plot_start_frame = max(0, self.plot_end_frame-1200)
@@ -112,7 +113,8 @@ class VISUAL:
         self.plot_hist_frame = np.array([self.frames-1])
         self.plot_seg_frames = [self.plot_end_frame-1-2*i for i in range(14)]
         self.plot_rod_frame = np.array([self.plot_end_frame-1])
-        self.plot_multi_rod_frames = np.array([2, 300, 10000])
+        self.plot_multi_rod_frames = np.array([100, 1000, 10000])
+        self.plot_single_fil_frames = [self.plot_end_frame-1-2*i for i in range(15)]
         self.fcm_frame = self.plot_end_frame-1
 
         self.output_to_superpunto = False
@@ -172,7 +174,7 @@ class VISUAL:
         print("open files time = ",(time.time()-start))
 
         for i in range(self.plot_end_frame):
-            print(name, " frame ", i, "/", self.frames, "          ", end="\r")
+            print(" frame ", i, "/", self.frames, "          ", end="\r")
             body_states_str = body_states_f.readline()
             if(self.pars['NFIL']>0):
                 seg_states_str = seg_states_f.readline()
@@ -259,7 +261,7 @@ class VISUAL:
         current_time = 0
 
         for i in range(self.plot_end_frame):
-            print(name, " frame ", i, "/", self.frames, "          ", end="\r")
+            print(" frame ", i, "/", self.frames, "          ", end="\r")
             body_states_str = body_states_f.readline()
             seg_states_str = seg_states_f.readline()
             seg_vels_str = seg_vels_f.readline()
@@ -311,7 +313,7 @@ class VISUAL:
         seg_states_f = open('../../' + simName + '_seg_states.dat', "r")
         body_states_f = open('../../' + simName + '_body_states.dat', "r")
         for i in range(self.plot_end_frame):
-            print(name, " frame ", i, "/", self.frames, "          ", end="\r")
+            print(" frame ", i, "/", self.frames, "          ", end="\r")
             body_states_str = body_states_f.readline()
             seg_states_str = seg_states_f.readline()
 
@@ -344,6 +346,59 @@ class VISUAL:
                             
                             self.write_data(seg_pos, float(self.pars['RSEG']), patternDatafileName, enable_periodic, True, True)
     
+    def plot_fil3d(self):
+
+        fig = plt.figure(figsize=(6, 6), dpi=1000)
+        ax = fig.add_subplot(projection='3d')
+        # ax = plt.figure(figsize=(6,6)).add_subplot(projection='3d')
+
+        seg_states_f = open('../../' + simName + '_seg_states.dat', "r")
+        body_states_f = open('../../' + simName + '_body_states.dat', "r")
+        current_frame=0
+        for i in range(self.plot_end_frame):
+            print(" frame ", i, "/", self.frames, "          ", end="\r")
+            body_states_str = body_states_f.readline()
+            seg_states_str = seg_states_f.readline()
+
+            if(i in self.plot_single_fil_frames):
+                body_states = np.array(body_states_str.split()[1:], dtype=float)
+                seg_states = np.array(seg_states_str.split()[1:], dtype=float)
+                for swim in range(int(self.pars['NSWIM'])):
+                    body_pos = body_states[7*swim : 7*swim+3]
+                    R = util.rot_mat(body_states[7*swim+3 : 7*swim+7])
+                    # Robot arm to find segment position (Ignored plane rotation!)
+                    for fil in range(int(self.pars['NFIL'])):
+                        segs_pos = np.zeros((int(self.pars['NSEG']), 3))
+                        fil_i = int(4*fil*self.pars['NSEG'])
+                        fil_base_x, fil_base_y, fil_base_z = np.matmul(R, self.fil_references[3*fil : 3*fil+3])
+                        fil_base_z -= 50
+                        old_seg_pos = np.array([fil_base_x, fil_base_y, fil_base_z])
+                        segs_pos[0] = old_seg_pos
+
+                        for seg in range(1, int(self.pars['NSEG'])):
+                            q1 = seg_states[fil_i+4*(seg-1) : fil_i+4*seg]
+                            q2 = seg_states[fil_i+4*seg : fil_i+4*seg+4]
+                            
+                            t1 = util.find_t(q1)
+                            t2 = util.find_t(q2)
+                            
+                            seg_pos = old_seg_pos + 0.5*self.pars['DL']*(t1 + t2)
+                            old_seg_pos = seg_pos
+                            segs_pos[seg] = seg_pos
+                        ax.plot(segs_pos[:,0], segs_pos[:,1], segs_pos[:,2], c = 'black', alpha=0.1+current_frame*0.06, lw=0.3)
+                current_frame += 1
+        ax.set_xlim(0, Lx)
+        ax.set_ylim(0, Ly)
+        ax.set_zlim(0, 50)
+        ax.set_zticks([0, 50])
+        ax.set_box_aspect(aspect = (1,1,50/Lx))
+        ax.grid(False)
+        ax.axis('off')
+        nfil = int(self.pars['NSWIM'])
+        fig.savefig(f'fig/fil_{nfil}_fil_{int(Lx)}_{int(Ly)}_{int(Lz)}.eps', bbox_inches = 'tight',  format='eps')
+        fig.savefig(f'fig/fil_{nfil}_fil_{int(Lx)}_{int(Ly)}_{int(Lz)}.png', bbox_inches = 'tight',  format='png')
+        plt.show()
+
     def plot_seg_force(self):
         seg_forces_f = open('../../' + simName + '_seg_forces.dat', "r")
         tether_force_f = open('../../' + simName + '_tether_force.dat', "r")
@@ -359,7 +414,7 @@ class VISUAL:
 
         ax = plt.figure().add_subplot(1,1,1)
         for i in range(self.plot_end_frame):
-            print(name, " frame ", i, "/", self.frames, "          ", end="\r")
+            print(" frame ", i, "/", self.frames, "          ", end="\r")
             # seg_forces_str = seg_forces_f.readline()
             tether_forces_str = tether_force_f.readline()
 
@@ -396,7 +451,7 @@ class VISUAL:
         average_vel = np.zeros((self.plot_end_frame - compute_start, 3))
 
         for i in range(self.plot_end_frame):
-            print(name, " frame ", i, "/", self.frames, "          ", end="\r")
+            print(" frame ", i, "/", self.frames, "          ", end="\r")
             body_states_str = body_states_f.readline()
 
             if(i == compute_start-1 or i == 0):
@@ -432,6 +487,7 @@ class VISUAL:
         ac = 1 - 1./4.*np.pi
         T0 = 14.14**2/22.
         ls = ['solid', 'dashed', 'dotted']
+        markers = ["^", "s", "d"]
 
         simDir = 'data/2304rod_sims/'
         simNames = ['test_rod_960_960_60', 'test_rod_1920_1920_60', 'test_rod_3840_3840_60']
@@ -445,7 +501,7 @@ class VISUAL:
         # area_fraction = 8100*(48-28*ac) / np.array([(1800**2), (3600**2), (7200**2)])
         # V0_list = np.array([4.0106966224e-01, 4.1725594718e-01, 4.3356909706e-01])
     
-        fig1 = plt.figure(figsize=(6, 6), dpi=3000)
+        fig1 = plt.figure()
         ax = fig1.add_subplot(1,1,1)
         for ni, name in enumerate(simNames):
             Lx, Ly, Lz = box[ni]
@@ -481,7 +537,14 @@ class VISUAL:
             average_vel =  average_vel / float(self.pars['NSWIM']) / self.dt
             
             ax.plot(time_array[1:], average_vel[1:,0]/ V0_list[ni], c='black', linestyle=ls[ni],label='Area fraction='+'{:.2f}'.format(area_fraction[ni]*100)+'%')
-
+            if(ni>=1):
+                for ti, t in enumerate(self.plot_multi_rod_frames):
+                    if(ni==1):
+                        ax.scatter(time_array[t], average_vel[t, 0]/ V0_list[ni], s=60, marker=markers[ti], facecolors='none', edgecolors='black')
+                    if(ni==2):
+                        ax.scatter(time_array[t], average_vel[t, 0]/ V0_list[ni], s=60, marker=markers[ti], facecolors='black', edgecolors='black')
+        rect = patches.Rectangle((1556, 1.4), 138, 0.2, linewidth=1, edgecolor='black', facecolor='none', ls='dotted')
+        ax.add_patch(rect)
         ax.legend()
         ax.set_ylabel(r"$<V_x>/W$")
         ax.set_xlabel(r"$t/T$")
@@ -502,7 +565,7 @@ class VISUAL:
         bins = np.linspace(-8/self.L, 10/self.L, 20)
 
         for i in range(max(self.plot_hist_frame) + 1):
-            print(name, " frame ", i, "/", self.frames, "          ", end="\r")
+            print(" frame ", i, "/", self.frames, "          ", end="\r")
             if(i>self.frames-1):
                 raise ValueError("Exceeding available frame number")
             body_states_str = body_states_f.readline()
@@ -535,7 +598,7 @@ class VISUAL:
         bins = np.linspace(0, Lx, 15)
 
         for i in range(self.plot_end_frame):
-            print(name, " frame ", i, "/", self.frames, "          ", end="\r")
+            print(" frame ", i, "/", self.frames, "          ", end="\r")
             body_states_str = body_states_f.readline()
 
             if(i in self.plot_rod_frame-1):
@@ -590,9 +653,12 @@ class VISUAL:
         simDir = 'data/2304rod_sims/'
         simNames = ['test_rod_1920_1920_60', 'test_rod_3840_3840_60']
         box = [(1920,1920,960), (3840,3840,3840)]
+        markers = ["^", "s", "d"]
+        marker_string = [r'$\Delta$', r'$square$', r'$\bigcirc$']
+        facecolors = ['none', 'black']
         
         
-        fig, axs = plt.subplots(3, 2, figsize=(6.5, 9))
+        fig, axs = plt.subplots(3, 2, figsize=(8, 9))
         for ni, name in enumerate(simNames):
             Lx, Ly, Lz = box[ni]
             simName = simDir + name
@@ -631,15 +697,27 @@ class VISUAL:
 
                     if self.enable_superpunto:
                         end_pos = util.box(end_pos, np.array([Lx, Ly, Lz]))
-                    
+
+                    axs[current_fig, ni].scatter(-1, -1, marker=markers[current_fig], facecolors=facecolors[ni], edgecolors='black', label=' ')
                     axs[current_fig, ni].quiver(end_pos[:,0], end_pos[:,1], end_vel[:,0], end_vel[:,1], zorder=1)
                     axs[current_fig, ni].set_xlim(0, Lx)
                     axs[current_fig, ni].set_ylim(0, Ly)
                     axs[current_fig, ni].set_aspect('equal')
+                    axs[current_fig, ni].legend(loc='upper left', frameon=False)
                     current_fig +=1
             nswim = int(self.pars['NSWIM'])
         for axi, ax in enumerate(axs.flat):
-            ax.set(ylabel=fr"t={self.plot_multi_rod_frames[int((axi-axi%2)/2)]}")
+            ax.set(ylabel=r"y", xlabel=r"x")
+        
+        T = 14.14**2/22.
+        times = [fr"t={int(self.plot_multi_rod_frames[i]/T)} T" for i in range(3)]
+        pad = 5 # in points
+        for ax, time in zip(axs[:,0], times):
+            ax.annotate(time, xy=(0, 0.5), xytext=(-ax.yaxis.labelpad - pad, 0),
+                        xycoords=ax.yaxis.label, textcoords='offset points',
+                        size='large', ha='right', va='center')
+        fig.tight_layout()
+        fig.subplots_adjust(left=0.21, top=0.95)
         # Hide x labels and tick labels for top plots and y ticks for right plots.
         # for ax in axs.flat:
         #     ax.label_outer()

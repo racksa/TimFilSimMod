@@ -110,4 +110,4 @@ LINK=-lcublas -lcufft -llapacke -lcblas -lcurand -lcuda -lineinfo -lopenblas
 # CUFCM_FILES_SIMPLE = $(CUFCM_ROOT)CUFCM_CELLLIST.cu $(CUFCM_ROOT)CUFCM_FCM.cu $(CUFCM_ROOT)CUFCM_DATA.cu $(CUFCM_ROOT)CUFCM_SOLVER.cu $(CUFCM_ROOT)CUFCM_CORRECTION.cu
 
 cilia_nvidia4_withCUFCM: $(CILIA_CPP) $(CILIA_CUDA)
-	nvcc $^ $(NVCC_FLAGS) $(NVIDIA4_OPTS) $(LINK) $(GEN_FLAGS) -o bin/cilia_1_fil_100_100_1375
+	nvcc $^ $(NVCC_FLAGS) $(NVIDIA4_OPTS) $(LINK) $(GEN_FLAGS) -o bin/cilia

@@ -5,8 +5,8 @@
 #ifndef MY_CONFIG_HEADER_INCLUDED
 #define MY_CONFIG_HEADER_INCLUDED
 
-#define SIMULATION_DIR "data/1fil_sims/"
-#define SIMULATION_NAME SIMULATION_DIR "test_fil_100_100_1375"
+#define SIMULATION_DIR "data/build_a_beat_sims/"
+#define SIMULATION_NAME SIMULATION_DIR "test_fil_6400_6400_800"
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Simulation type
@@ -122,8 +122,10 @@
   // 2 = Platynereis-style seeding. Most filament are in an equatorial band but some form a small ring at the rear of the swimmer.
   // 3 = Hexagonal grid seeding.
 
+  #define FOURIER_DIR "data/fourier_modes/"
   // #define GENERATRIX_FILE_NAME "sphere"
-  #define GENERATRIX_FILE_NAME "avg_shape_plus_1.5_first_mode"
+  // #define GENERATRIX_FILE_NAME FOURIER_DIR "avg_shape_plus_1.5_first_mode"
+  #define GENERATRIX_FILE_NAME FOURIER_DIR "rod_mode"
 
   // The code will search for a file called GENERATRIX_FILE_NAME.fourier_modes
   // The first entry in this file should be a positive integer N, which is the number of Fourier modes used to describe the surface's generatrix.
@@ -161,10 +163,10 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define NFIL (1) // The number of filaments attached to the rigid body/surface in each swimmer.
+#define NFIL (10) // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG (20)// The number of segments comprising each filament.
 #define NSWIM (1) // The number of swimmers.
-#define NBLOB (22) // The number of blobs to use as surface elements in each rigid body.
+#define NBLOB (1000) // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
 

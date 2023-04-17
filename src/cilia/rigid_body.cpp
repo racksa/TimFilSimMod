@@ -222,23 +222,23 @@ void rigid_body::initial_setup(const int id, Real *const f_address, const Real *
         Real body_spacing = 1.8*(AXIS_DIR_BODY_LENGTH);
 
         int relative_Lx = 8;
-        int relative_Ly = 8;
+        int relative_Ly = 1;
         int relative_Lz = 1;
         int b = relative_Lx/relative_Ly;
         int c = relative_Lx/relative_Lz;
 
         // initialise plane 
-        int Nx = ceil(sqrt(NSWIM));
-        const int k = 0;
-        const int j = id/Nx;
-        const int i = id - j*Nx;
+        // int Nx = ceil(sqrt(NSWIM));
+        // const int k = 0;
+        // const int j = id/Nx;
+        // const int i = id - j*Nx;
 
         // initialise lattice        
-        // int Nx = ceil(cbrt(NSWIM*b*c));
-        // int Ny = Nx/b;
-        // int k = id/(Nx*Ny);
-        // int j = (id - k*Nx*Ny)/Nx;
-        // int i = id - k*Nx*Ny - j*Nx;
+        int Nx = ceil(cbrt(NSWIM*b*c));
+        int Ny = Nx/b;
+        int k = id/(Nx*Ny);
+        int j = (id - k*Nx*Ny)/Nx;
+        int i = id - k*Nx*Ny - j*Nx;
         
         std::ifstream in("separation.dat"); // input
         in >> body_spacing;
@@ -278,14 +278,16 @@ void rigid_body::initial_setup(const int id, Real *const f_address, const Real *
         um1[1] = 0.0;
         um1[2] = 0.0;
 
-        q = quaternion(1.0, 0.0, 0.0, 0.0);
-        std::random_device rd{};
-        std::mt19937 gen = std::mt19937{rd()};
-        std::normal_distribution<Real> d(0.0, 1.0);
-        q(3) = d(gen);
-        q.normalise_in_place();
+        // Randomise orientation in 2d
+        // q = quaternion(1.0, 0.0, 0.0, 0.0);
+        // std::random_device rd{};
+        // std::mt19937 gen = std::mt19937{rd()};
+        // std::normal_distribution<Real> d(0.0, 1.0);
+        // q(3) = d(gen);
+        // q.normalise_in_place();
         
-        // q.randomise();
+        // Randomise orientation in 3d
+        q.randomise();
 
         // if(id==0){
         //   q = quaternion(1.0, 0.0, 1.0, 0.0);
@@ -527,10 +529,10 @@ void rigid_body::update(const Real *const body_update){
 
     x[0] += body_update[0];
     x[1] += body_update[1];
-    // x[2] += body_update[2];
+    x[2] += body_update[2];
 
-    // u[0] += body_update[3];
-    // u[1] += body_update[4];
+    u[0] += body_update[3];
+    u[1] += body_update[4];
     u[2] += body_update[5];
 
     lie_exp(q, u);

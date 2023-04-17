@@ -22,11 +22,16 @@ color_list.pop(2)
 simDir = 'data/100fil_sims/'
 simName = simDir + 'test_fil_1000_1000_2000'
 
+simDir = 'data/lloyd/'
+simName = simDir + 'lloyd_N16_3000_375_375'
+
+# simDir = 'data/4096fil_sims/'
+# simName = simDir + 'test_fil_6400_6400_800'
+
+# simName = 'test_fil_4096'
+
 # simDir = 'data/1fil_sims/'
 # simName = simDir + 'test_fil_100_100_1250'
-
-# simDir = 'data/fil_sims/'
-# simName = simDir + 'test_fil'
 
 # simDir = 'data/256fil_sims/'
 # simName = simDir + 'test_fil_1600_1600_1600'
@@ -56,9 +61,9 @@ fcmTorquefileName = '../../' + simName + '_flow_torque.dat'
 Lx, Ly, Lz = myIo.get_boxsize_from_name(simName)
 
 if(np.isinf(np.array([Lx, Ly, Lz])).any()):
-    Lx = 100.
-    Ly = 100.
-    Lz = 100.
+    Lx = 3840.
+    Ly = 3840.
+    Lz = 240.
     print(f"Manually setting the boxsize to ({Lx}, {Ly}, {Lz}).")
 
 # Lz *= 5
@@ -108,7 +113,7 @@ class VISUAL:
 
         self.plot_end_frame = self.frames
         self.plot_start_frame = max(0, self.plot_end_frame-1200)
-        self.plot_interval = 1
+        self.plot_interval = 10
 
         self.plot_hist_frame = np.array([self.frames-1])
         self.plot_seg_frames = [self.plot_end_frame-1-2*i for i in range(14)]
@@ -433,8 +438,8 @@ class VISUAL:
         # ax.plot(time_array[1:], total_base_force[1:])
         ax.plot(time_array[1:], total_tether_force[1:]/NF0)
         ax.set_xlim(left=0)
-        ax.set_ylim(min(total_tether_force[min(self.frames, 100):])/NF0*0.8, \
-                    max(total_tether_force[min(self.frames, 100):])/NF0*1.1)
+        # ax.set_ylim(min(total_tether_force[min(self.frames, 100):])/NF0*0.8, \
+        #             max(total_tether_force[min(self.frames, 100):])/NF0*1.1)
         nfil = int(self.pars['NFIL'])
         plt.savefig(f'fig/tether_force_{nfil}fil_{int(Lx)}_{int(Ly)}_{int(Lz)}.eps', format='eps')
         plt.savefig(f'fig/tether_force_{nfil}fil_{int(Lx)}_{int(Ly)}_{int(Lz)}.png', format='png')

@@ -6,12 +6,12 @@
 #define MY_CONFIG_HEADER_INCLUDED
 
 #define SIMULATION_DIR "data/build_a_beat_sims/"
-#define SIMULATION_NAME SIMULATION_DIR "test_fil_6400_6400_800"
+#define SIMULATION_NAME SIMULATION_DIR "test_bab"
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Simulation type
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define CILIA_TYPE 0
+#define CILIA_TYPE 3
 // Valid options:
 // 0 = Instability-driven cilia. This choice has some sub-types (see below).
 // 1 = Geometrically-switching cilia (partially implemented)
@@ -30,7 +30,7 @@
 
 #elif CILIA_TYPE==3
 
-  #define SHAPE_SEQUENCE 2
+  #define SHAPE_SEQUENCE 0
   // Valid options:
   // 0 = 'Build-a-beat'. This choice has some parameters to set (see below).
   // 1 = The 'Fulford and Blake' beat pattern for mammalian airway cilia. See the data-fitting description in  "A model for the micro-structure in ciliated organisms", Blake (1972).
@@ -50,7 +50,7 @@
   // If true, cilia phase speeds are solved for as part of the dynamics. Note that this requires having run a reference simulation with WRITE_GENERALISED_FORCES=true previously.
   // If false, phase_dot = omega0 is constant for each cilium.
 
-  #define DYNAMIC_SHAPE_ROTATION true
+  #define DYNAMIC_SHAPE_ROTATION false
   // If true, the vertical in the cilia reference configuration can rotate with respect to the surface normal.
   // Essentially, the cilia can 'tip backwards or forwards' in their beat planes.
   // If false, no such rotation ever occurs.
@@ -66,7 +66,7 @@
   // It will also generate reference s-values for shape sequences which don't result in inextensible filaments.
   // NOTE: This will overwrite any existing reference files unless their names have been changed.
 
-  #define CILIA_IC_TYPE 0
+  #define CILIA_IC_TYPE 1
   // Valid options:
   // 0 = All cilia start in-phase with phase 0.
   // 1 = Cilia start with a (uniformly) random initial phase.
@@ -123,9 +123,9 @@
   // 3 = Hexagonal grid seeding.
 
   #define FOURIER_DIR "data/fourier_modes/"
-  // #define GENERATRIX_FILE_NAME "sphere"
+  #define GENERATRIX_FILE_NAME FOURIER_DIR "sphere"
   // #define GENERATRIX_FILE_NAME FOURIER_DIR "avg_shape_plus_1.5_first_mode"
-  #define GENERATRIX_FILE_NAME FOURIER_DIR "rod_mode"
+  // #define GENERATRIX_FILE_NAME FOURIER_DIR "rod_mode"
 
   // The code will search for a file called GENERATRIX_FILE_NAME.fourier_modes
   // The first entry in this file should be a positive integer N, which is the number of Fourier modes used to describe the surface's generatrix.
@@ -137,9 +137,9 @@
 #endif
 
 // Define whether the motion of the rigid bodies is imposed or allowed to evolve dynamically.
-#define PRESCRIBED_BODY_VELOCITIES false
+#define PRESCRIBED_BODY_VELOCITIES true
 
-#define MOBILITY_TYPE 4
+#define MOBILITY_TYPE 1
 // Valid options:
 // 0 = Basic Stokes drag. No hydrodynamic interactions between particles.
 // 1 = Rotne-Prager-Yamakawa (RPY) mobility matrices (with the corrections due to Swan and Brady if an infinite plane wall is selected).
@@ -163,7 +163,7 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define NFIL (10) // The number of filaments attached to the rigid body/surface in each swimmer.
+#define NFIL (16) // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG (20)// The number of segments comprising each filament.
 #define NSWIM (1) // The number of swimmers.
 #define NBLOB (1000) // The number of blobs to use as surface elements in each rigid body.
@@ -216,7 +216,7 @@
 #define MAX_BROYDEN_ITER 400 // Maximum number of Broyden's method iterations per time-step.
 #define TOL 1e-4 // Tolerance to be reached by the Broyden's method solve.
 
-#define SOLVER_TYPE 0
+#define SOLVER_TYPE 1
 // Valid options:
 // 0: Use Broyden's method for absolutely everything. When there is a rigid body with forces (and velocities if they're not prescribed) to solve for,
 //    the associated linear system is embedded in the wider Broyden's solve, rather than being solved for the current iterate at each iteration.
@@ -237,7 +237,7 @@
 
 #endif
 
-#define TOTAL_TIME_STEPS (1000*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
+#define TOTAL_TIME_STEPS (10000*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
 #define NUM_EULER_STEPS 1 // Number of time-steps to use backwards-Euler before switching to BDF2.
 
 #if CILIA_TYPE==1

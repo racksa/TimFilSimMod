@@ -8,6 +8,7 @@
 #include "mobility_solver.hpp"
 #include "swimmer.hpp"
 #include "omp.h"
+#include "util.hpp"
 
 mobility_solver::~mobility_solver(){}
 
@@ -2112,7 +2113,8 @@ bool mobility_solver::compute_errors(matrix& error, const std::vector<swimmer>& 
 
     #if SURFACE_OF_REVOLUTION_BODIES
 
-      if (std::string(GENERATRIX_FILE_NAME) == std::string("sphere")){
+      if(hasEnding(std::string(GENERATRIX_FILE_NAME), std::string("sphere"))){
+      // if (std::string(GENERATRIX_FILE_NAME) == std::string("sphere")){
 
         const Real R = 0.5*AXIS_DIR_BODY_LENGTH;
         matrix Ntrue(6, 6);

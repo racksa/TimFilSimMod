@@ -24,7 +24,7 @@ MOBILITY_OPTS = -arch=sm_75 -std=c++14 -O3 -I../include -lcublas -lcufft -lcblas
 MOBILITY_SOURCE = fcm_mobility_solver.cu $(CUFCM_ROOT)CUFCM_CELLLIST.cu $(CUFCM_ROOT)CUFCM_FCM.cu $(CUFCM_ROOT)CUFCM_DATA.cu $(CUFCM_ROOT)CUFCM_SOLVER.cu $(CUFCM_ROOT)CUFCM_CORRECTION.cu
 endif
 
-CILIA_CPP = matrix.cpp quaternion.cpp segment.cpp filament.cpp broyden_solver.cpp rigid_body.cpp swimmer.cpp mobility_solver.cpp
+CILIA_CPP = matrix.cpp quaternion.cpp util.cpp segment.cpp filament.cpp broyden_solver.cpp rigid_body.cpp swimmer.cpp mobility_solver.cpp
 CILIA_CUDA = cilia_sim_main.cu seeding.cu cuda_functions.cu $(MOBILITY_SOURCE)
 
 FLOW_FIELD_CPP = flow_field_main.cpp matrix.cpp quaternion.cpp

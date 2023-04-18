@@ -118,15 +118,13 @@ int main(int argc, char** argv){
   config_file << DT << " " << "%% DT" << std::endl;
   config_file << PLOT_FREQUENCY_IN_STEPS << " " << "%% PLOT_FREQUENCY_IN_STEPS" << std::endl;
   config_file << STEPS_PER_PERIOD << " " << "%% STEPS_PER_PERIOD" << std::endl;
-
   #if INSTABILITY_CILIA
-
+    config_file << 0 << " " << "%% PRESCRIBED_CILIA" << std::endl;
     config_file << DIMENSIONLESS_FORCE << " " << "%% DIMENSIONLESS_FORCE" << std::endl;
 
   #elif PRESCRIBED_CILIA
-
+    config_file << 1 << " " << "%% PRESCRIBED_CILIA" << std::endl;
     #if DYNAMIC_SHAPE_ROTATION
-
       config_file << TORSIONAL_SPRING_MAGNITUDE_FACTOR << " " << "%% TORSIONAL_SPRING_MAGNITUDE_FACTOR" << std::endl;
 
     #endif
@@ -353,7 +351,9 @@ int main(int argc, char** argv){
 
       while (error_is_too_large && (broyden.iter < MAX_BROYDEN_ITER)){
 
-        if(DISPLAYTIME) cudaDeviceSynchronize(); time_start = get_time();
+        #if DISPLAYTIME && CUFCM
+          cudaDeviceSynchronize(); time_start = get_time();
+        #endif
 
         broyden.find_update(swimmers, nt);
 
@@ -382,11 +382,15 @@ int main(int argc, char** argv){
 
         }
 
-        if(DISPLAYTIME && nt%100==0){ cudaDeviceSynchronize(); solution_update_time += (get_time() - time_start); time_start = get_time();}
+        #if DISPLAYTIME && CUFCM
+          if(nt%100==0){ cudaDeviceSynchronize(); solution_update_time += (get_time() - time_start); time_start = get_time();}
+        #endif
 
         mobility.compute_velocities(swimmers, num_gmres_iterations, nt);
 
-        if(DISPLAYTIME && nt%100==0){ cudaDeviceSynchronize(); hisolver_time += (get_time() - time_start); time_start = get_time();}
+        #if DISPLAYTIME && CUFCM
+          if(nt%100==0){ cudaDeviceSynchronize(); hisolver_time += (get_time() - time_start); time_start = get_time();}
+        #endif
 
         #if CUFCM
           if(nt%100==0){
@@ -397,7 +401,9 @@ int main(int argc, char** argv){
 
         error_is_too_large = mobility.compute_errors(broyden.new_error, swimmers, nt);
 
-        if(DISPLAYTIME && nt%100==0){ cudaDeviceSynchronize(); eval_error_time += (get_time() - time_start); time_start = get_time();}
+        #if DISPLAYTIME && CUFCM
+          if(nt%100==0){ cudaDeviceSynchronize(); eval_error_time += (get_time() - time_start); time_start = get_time();}
+        #endif
 
         if (!broyden.new_error.is_finite()){
 
@@ -421,7 +427,9 @@ int main(int argc, char** argv){
 
         broyden.end_of_iter(swimmers, nt, nt_start, error_is_too_large);
 
-        if(DISPLAYTIME && nt%100==0){ cudaDeviceSynchronize(); jacobian_update_time += (get_time() - time_start); time_start = get_time();}
+        #if DISPLAYTIME && CUFCM
+          if(nt%100==0){ cudaDeviceSynchronize(); jacobian_update_time += (get_time() - time_start); time_start = get_time();}
+        #endif
 
         std::cout << DELETE_CURRENT_LINE << std::flush;
         std::cout << "Step " << nt+1 << ": Completed Broyden iteration " << broyden.iter;
@@ -432,19 +440,21 @@ int main(int argc, char** argv){
 
       }
 
-      if(DISPLAYTIME && nt%100==0){
-          std::ofstream time_file(SIMULATION_TIME_NAME, std::ios::app);
-          time_file << nt << " " << broyden.iter << " ";
-          time_file << std::scientific << std::setprecision(6);
-          
-          time_file<<(solution_update_time/broyden.iter)<<" ";
-          time_file<<(hisolver_time/broyden.iter)<<" ";
-          time_file<<(eval_error_time/broyden.iter)<<" "; 
-          time_file<<(jacobian_update_time/broyden.iter)<<" ";
+      #if DISPLAYTIME && CUFCM
+        if(nt%100==0){
+            std::ofstream time_file(SIMULATION_TIME_NAME, std::ios::app);
+            time_file << nt << " " << broyden.iter << " ";
+            time_file << std::scientific << std::setprecision(6);
+            
+            time_file<<(solution_update_time/broyden.iter)<<" ";
+            time_file<<(hisolver_time/broyden.iter)<<" ";
+            time_file<<(eval_error_time/broyden.iter)<<" "; 
+            time_file<<(jacobian_update_time/broyden.iter)<<" ";
 
-          time_file << std::endl;
-          time_file.close();
-        }
+            time_file << std::endl;
+            time_file.close();
+          }
+        #endif
 
       ////////////////////////////////////////////////////////////
       /////////////////////////parallelise////////////////////////

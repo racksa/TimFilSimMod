@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "swimmer.hpp"
 #include "seeding.hpp"
+#include "util.hpp"
 #include "../general/matrix.hpp"
 #include "../../config.hpp"
 
@@ -496,7 +497,10 @@ void swimmer::forces_and_torques(const int nt, int id){
       // }
 
       // f(0) += DIMENSIONLESS_FORCE/2;
-      f(0) += Real(NBLOB);
+
+      #if ROD
+        f(0) += Real(NBLOB);
+      #endif
       
 
       // Finally, add any external forces on the blobs, and the induced torques on body, to f.
@@ -774,7 +778,8 @@ void swimmer::forces_and_torques(const int nt, int id){
 
             #if SURFACE_OF_REVOLUTION_BODIES or ROD
 
-              if (std::string(GENERATRIX_FILE_NAME) == std::string("sphere")){
+              if(hasEnding(std::string(GENERATRIX_FILE_NAME), std::string("sphere"))){
+              // if (std::string(GENERATRIX_FILE_NAME) == std::string("sphere")){
 
                 // If the body is a sphere, we can make corrections to dependencies on the segment variables
                 // using the RPY expression for interacting spheres of different sizes.

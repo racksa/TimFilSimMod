@@ -19,16 +19,19 @@ color_list.pop(2)
 
 # color_list = ['#00ffff', '#faebD7', '#838bbb', '#0000ff', '	#8a2be2', '#ff4040', '#7fff00', '#ff6103', '#9932cc', '#ff1493', '#030303']
 
+enable_periodic = False
+
 simDir = 'data/100fil_sims/'
 simName = simDir + 'test_fil_1000_1000_2000'
 
 simDir = 'data/lloyd/'
-simName = simDir + 'lloyd_N16_3000_375_375'
+simName = simDir + 'lloyd_N64_3000_375_375'
 
-# simDir = 'data/4096fil_sims/'
-# simName = simDir + 'test_fil_6400_6400_800'
+simDir = 'data/build_a_beat_sims/'
+simName = simDir + 'test_bab'
 
-# simName = 'test_fil_4096'
+simDir = 'data/4096fil_sims/'
+simName = simDir + 'test_fil_6400_6400_800'
 
 # simDir = 'data/1fil_sims/'
 # simName = simDir + 'test_fil_100_100_1250'
@@ -60,7 +63,7 @@ fcmTorquefileName = '../../' + simName + '_flow_torque.dat'
 
 Lx, Ly, Lz = myIo.get_boxsize_from_name(simName)
 
-if(np.isinf(np.array([Lx, Ly, Lz])).any()):
+if(np.isinf(np.array([Lx, Ly, Lz])).any() and enable_periodic):
     Lx = 3840.
     Ly = 3840.
     Lz = 240.
@@ -97,7 +100,6 @@ if(np.isinf(np.array([Lx, Ly, Lz])).any()):
 # Lz = 10.3125*10
 # 1024*1024*6
 
-enable_periodic = True
 
 class VISUAL:
 
@@ -107,13 +109,14 @@ class VISUAL:
             self.blob_references = myIo.read_blob_references('../../' + simName + '_blob_references.dat')
         if(self.pars['NFIL']>0):
             self.fil_references = myIo.read_fil_references('../../' + simName + '_fil_references.dat')
+        self.pars['PRESCRIBED_CILIA'] = 0
         self.dt = self.pars['DT']*self.pars['PLOT_FREQUENCY_IN_STEPS']
         self.L = 14.14*self.pars['NBLOB']/22.
-        self.frames = min(30001, sum(1 for line in open('../../' + simName + '_body_states.dat')))
+        self.frames = min(300001, sum(1 for line in open('../../' + simName + '_body_states.dat')))
 
         self.plot_end_frame = self.frames
         self.plot_start_frame = max(0, self.plot_end_frame-1200)
-        self.plot_interval = 10
+        self.plot_interval = 1
 
         self.plot_hist_frame = np.array([self.frames-1])
         self.plot_seg_frames = [self.plot_end_frame-1-2*i for i in range(14)]
@@ -216,10 +219,14 @@ class VISUAL:
 
                         # Robot arm to find segment position (Ignored plane rotation!)
                         for fil in range(int(self.pars['NFIL'])):
-                            
-                            fil_i = int(4*fil*self.pars['NSEG'])
-                            fil_base_x, fil_base_y, fil_base_z = body_pos + np.matmul(R, self.fil_references[3*fil : 3*fil+3])
-                            old_seg_pos = np.array([fil_base_x, fil_base_y, fil_base_z])
+                            if (self.pars['PRESCRIBED_CILIA'] == 0):
+                                fil_i = int(4*fil*self.pars['NSEG'])
+                                fil_base_x, fil_base_y, fil_base_z = body_pos + np.matmul(R, self.fil_references[3*fil : 3*fil+3])
+                                old_seg_pos = np.array([fil_base_x, fil_base_y, fil_base_z])
+                            elif (self.pars['PRESCRIBED_CILIA'] == 1):
+                                fil_i = int(3*fil*self.pars['NSEG'])
+                                old_seg_pos = seg_states[fil_i : fil_i+3]
+
                             if(self.output_to_superpunto):
                                 self.write_data(old_seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic, True, True)
                             if(self.output_to_fcm):
@@ -229,15 +236,17 @@ class VISUAL:
                                 self.write_data([seg_tx, seg_ty, seg_tz], 0, fcmTorquefileName, box=False, center=False, superpunto=False)
 
                             for seg in range(1, int(self.pars['NSEG'])):
-                                q1 = seg_states[fil_i+4*(seg-1) : fil_i+4*seg]
-                                q2 = seg_states[fil_i+4*seg : fil_i+4*seg+4]
-                                
-                                t1 = util.find_t(q1)
-                                t2 = util.find_t(q2)
-                                
-                                seg_pos = old_seg_pos + 0.5*self.pars['DL']*(t1 + t2)
-                                old_seg_pos = seg_pos
-                                
+                                if self.pars['PRESCRIBED_CILIA'] == 0:
+                                    q1 = seg_states[fil_i+4*(seg-1) : fil_i+4*seg]
+                                    q2 = seg_states[fil_i+4*seg : fil_i+4*seg+4]
+                                    
+                                    t1 = util.find_t(q1)
+                                    t2 = util.find_t(q2)
+                                    
+                                    seg_pos = old_seg_pos + 0.5*self.pars['DL']*(t1 + t2)
+                                    old_seg_pos = seg_pos
+                                elif self.pars['PRESCRIBED_CILIA'] == 1:
+                                    seg_pos = seg_states[fil_i+3*(seg-1) : fil_i+3*seg]
                                 if(self.output_to_superpunto):
                                     self.write_data(seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic, True, True)
                                 if(self.output_to_fcm):
@@ -245,7 +254,6 @@ class VISUAL:
                                     self.write_data(seg_pos, 0, fcmPosfileName, box=True, center=False, superpunto=False)
                                     self.write_data([seg_fx, seg_fy, seg_fz], 0, fcmForcefileName, box=False, center=False, superpunto=False)
                                     self.write_data([seg_tx, seg_ty, seg_tz], 0, fcmTorquefileName, box=False, center=False, superpunto=False)
-
 
         if(self.output_to_fcm):
             fcm_directory = "../../../CUFCM/data/flow_data/"

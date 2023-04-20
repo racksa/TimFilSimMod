@@ -30,8 +30,8 @@ simName = simDir + 'lloyd_N64_3000_375_375'
 simDir = 'data/build_a_beat_sims/'
 simName = simDir + 'test_bab'
 
-simDir = 'data/4096fil_sims/'
-simName = simDir + 'test_fil_6400_6400_800'
+# simDir = 'data/4096fil_sims/'
+# simName = simDir + 'test_fil_6400_6400_800'
 
 # simDir = 'data/1fil_sims/'
 # simName = simDir + 'test_fil_100_100_1250'
@@ -105,17 +105,18 @@ class VISUAL:
 
     def __init__(self):
         self.pars = myIo.read_pars('../../' + simName + '.par')
+        if(not 'PRESCRIBED_CILIA' in self.pars):
+            self.pars['PRESCRIBED_CILIA'] = 0
         if(self.pars['NBLOB']>0):
             self.blob_references = myIo.read_blob_references('../../' + simName + '_blob_references.dat')
         if(self.pars['NFIL']>0):
             self.fil_references = myIo.read_fil_references('../../' + simName + '_fil_references.dat')
-        self.pars['PRESCRIBED_CILIA'] = 0
         self.dt = self.pars['DT']*self.pars['PLOT_FREQUENCY_IN_STEPS']
         self.L = 14.14*self.pars['NBLOB']/22.
         self.frames = min(300001, sum(1 for line in open('../../' + simName + '_body_states.dat')))
 
         self.plot_end_frame = self.frames
-        self.plot_start_frame = max(0, self.plot_end_frame-1200)
+        self.plot_start_frame = max(0, self.plot_end_frame-300)
         self.plot_interval = 1
 
         self.plot_hist_frame = np.array([self.frames-1])
@@ -236,7 +237,7 @@ class VISUAL:
                                 self.write_data([seg_tx, seg_ty, seg_tz], 0, fcmTorquefileName, box=False, center=False, superpunto=False)
 
                             for seg in range(1, int(self.pars['NSEG'])):
-                                if self.pars['PRESCRIBED_CILIA'] == 0:
+                                if (self.pars['PRESCRIBED_CILIA'] == 0):
                                     q1 = seg_states[fil_i+4*(seg-1) : fil_i+4*seg]
                                     q2 = seg_states[fil_i+4*seg : fil_i+4*seg+4]
                                     
@@ -245,7 +246,7 @@ class VISUAL:
                                     
                                     seg_pos = old_seg_pos + 0.5*self.pars['DL']*(t1 + t2)
                                     old_seg_pos = seg_pos
-                                elif self.pars['PRESCRIBED_CILIA'] == 1:
+                                elif (self.pars['PRESCRIBED_CILIA'] == 1):
                                     seg_pos = seg_states[fil_i+3*(seg-1) : fil_i+3*seg]
                                 if(self.output_to_superpunto):
                                     self.write_data(seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic, True, True)

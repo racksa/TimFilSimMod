@@ -30,7 +30,7 @@
 
 #elif CILIA_TYPE==3
 
-  #define SHAPE_SEQUENCE 0
+  #define SHAPE_SEQUENCE 1
   // Valid options:
   // 0 = 'Build-a-beat'. This choice has some parameters to set (see below).
   // 1 = The 'Fulford and Blake' beat pattern for mammalian airway cilia. See the data-fitting description in  "A model for the micro-structure in ciliated organisms", Blake (1972).
@@ -50,7 +50,7 @@
   // If true, cilia phase speeds are solved for as part of the dynamics. Note that this requires having run a reference simulation with WRITE_GENERALISED_FORCES=true previously.
   // If false, phase_dot = omega0 is constant for each cilium.
 
-  #define DYNAMIC_SHAPE_ROTATION false
+  #define DYNAMIC_SHAPE_ROTATION true
   // If true, the vertical in the cilia reference configuration can rotate with respect to the surface normal.
   // Essentially, the cilia can 'tip backwards or forwards' in their beat planes.
   // If false, no such rotation ever occurs.
@@ -85,7 +85,7 @@
 
 #endif
 
-#define BODY_OR_SURFACE_TYPE 0
+#define BODY_OR_SURFACE_TYPE 2
 // Valid options:
 // 0 = An infinite plane wall at z = 0. This choice has some sub-types (see below).
 // 1 = Deformed planes with 2 principal curvatures (partially implemented)
@@ -120,7 +120,8 @@
   // 0 = Filaments are evenly distributed over the surface.
   // 1 = Filaments are seeded in an equatorial band.
   // 2 = Platynereis-style seeding. Most filament are in an equatorial band but some form a small ring at the rear of the swimmer.
-  // 3 = Hexagonal grid seeding.
+  // 3 = Hexagonal grid seeding. (rigidbody plane)
+  // 4 = Meridian seeding
 
   #define FOURIER_DIR "data/fourier_modes/"
   #define GENERATRIX_FILE_NAME FOURIER_DIR "sphere"
@@ -163,10 +164,10 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define NFIL (16) // The number of filaments attached to the rigid body/surface in each swimmer.
+#define NFIL (64) // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG (20)// The number of segments comprising each filament.
 #define NSWIM (1) // The number of swimmers.
-#define NBLOB (1000) // The number of blobs to use as surface elements in each rigid body.
+#define NBLOB (3000) // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
 
@@ -194,7 +195,7 @@
 #endif
 
 #if BODY_OR_SURFACE_TYPE==2
-  #define AXIS_DIR_BODY_LENGTH (0.6496*2.0*FIL_LENGTH) // The length of the body parallel to the axis of rotation for the surface of revolution.
+  #define AXIS_DIR_BODY_LENGTH (1.6496*2.0*FIL_LENGTH) // The length of the body parallel to the axis of rotation for the surface of revolution.
 #elif BODY_OR_SURFACE_TYPE==4
   #define AXIS_DIR_BODY_LENGTH (0.5*NBLOB*RBLOB) // The length of the body parallel to the axis of rotation for the surface of revolution.
 #elif BODY_OR_SURFACE_TYPE==5
@@ -398,6 +399,7 @@
   #define EQUATORIAL_SEEDING (SEEDING_TYPE==1)
   #define PLATY_SEEDING (SEEDING_TYPE==2)
   #define HEXAGONAL_WALL_SEEDING (SEEDING_TYPE==3)
+  #define MERIDIAN_SEEDING (SEEDING_TYPE==4)
 
 #endif
 

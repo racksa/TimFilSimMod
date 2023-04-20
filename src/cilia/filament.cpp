@@ -3,7 +3,7 @@
 #include <random>
 #include <cmath>
 #include "filament.hpp"
-#include "config.hpp"
+#include "../../config.hpp"
 
 matrix body_frame_moment_lie_derivative(const quaternion& q1, const quaternion& q2, const bool upper){
 

@@ -14,7 +14,7 @@
 #include <iostream>
 #include "segment.hpp" // The filament inherits knowledge of quaternions through here
 #include "matrix.hpp"
-#include "config.hpp"
+#include "../../config.hpp"
 
 matrix body_frame_moment_lie_derivative(const quaternion& q1, const quaternion& q2, const bool upper);
 

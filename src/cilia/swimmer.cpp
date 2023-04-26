@@ -1195,9 +1195,9 @@ void swimmer::write_backup(std::ofstream& backup_file) const {
           for (int m = 0; m < NSEG; m++){
 
             matrix k(3,1);
-            k(0) = filaments[n].vel_dir[3*m];
-            k(1) = filaments[n].vel_dir[3*m + 1];
-            k(2) = filaments[n].vel_dir[3*m + 2];
+            k(0) = filaments[n].vel_dir_phase[3*m];
+            k(1) = filaments[n].vel_dir_phase[3*m + 1];
+            k(2) = filaments[n].vel_dir_phase[3*m + 2];
 
             v1 += k;
 

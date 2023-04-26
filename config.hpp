@@ -6,7 +6,7 @@
 #define MY_CONFIG_HEADER_INCLUDED
 
 #define SIMULATION_DIR "data/build_a_beat_sims/"
-#define SIMULATION_NAME SIMULATION_DIR "test_bab"
+#define SIMULATION_NAME SIMULATION_DIR "test_bab_8fil_750blob_1R"
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Simulation type
@@ -138,7 +138,7 @@
 #endif
 
 // Define whether the motion of the rigid bodies is imposed or allowed to evolve dynamically.
-#define PRESCRIBED_BODY_VELOCITIES true
+#define PRESCRIBED_BODY_VELOCITIES false
 
 #define MOBILITY_TYPE 1
 // Valid options:
@@ -164,10 +164,10 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define NFIL (64) // The number of filaments attached to the rigid body/surface in each swimmer.
+#define NFIL (8) // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG (20)// The number of segments comprising each filament.
 #define NSWIM (1) // The number of swimmers.
-#define NBLOB (3000) // The number of blobs to use as surface elements in each rigid body.
+#define NBLOB (750) // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
 
@@ -195,7 +195,7 @@
 #endif
 
 #if BODY_OR_SURFACE_TYPE==2
-  #define AXIS_DIR_BODY_LENGTH (1.6496*2.0*FIL_LENGTH) // The length of the body parallel to the axis of rotation for the surface of revolution.
+  #define AXIS_DIR_BODY_LENGTH (1.6496*FIL_LENGTH) // The length of the body parallel to the axis of rotation for the surface of revolution.
 #elif BODY_OR_SURFACE_TYPE==4
   #define AXIS_DIR_BODY_LENGTH (0.5*NBLOB*RBLOB) // The length of the body parallel to the axis of rotation for the surface of revolution.
 #elif BODY_OR_SURFACE_TYPE==5
@@ -439,11 +439,11 @@
 
 #endif
 
-#if (DYNAMIC_SHAPE_ROTATION && !PRESCRIBED_BODY_VELOCITIES)
+// #if (DYNAMIC_SHAPE_ROTATION && !PRESCRIBED_BODY_VELOCITIES)
 
-  #error "I haven't implemented the preconditioner for free bodies with DYNAMIC_SHAPE_ROTATION enabled yet..."
+//   #error "I haven't implemented the preconditioner for free bodies with DYNAMIC_SHAPE_ROTATION enabled yet..."
 
-#endif
+// #endif
 
 #define DISPLAYTIME true
 

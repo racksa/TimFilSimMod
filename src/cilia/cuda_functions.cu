@@ -1327,78 +1327,63 @@ __global__ void periodic_barrier_forces(Real * __restrict__ f_segs,
                                         const int num_blobs,
                                         const Real boxsize){
 
-  // Work out which particle(s) this thread will compute the force for
-  const int index = threadIdx.x + blockIdx.x*blockDim.x;
-  const int stride = blockDim.x*gridDim.x;
+  #if !(PRESCRIBED_CILIA || NO_CILIA_SQUIRMER)
 
-  Real fx, fy, fz;
-  Real xi, yi, zi;
-  int fili;
+    // Work out which particle(s) this thread will compute the force for
+    const int index = threadIdx.x + blockIdx.x*blockDim.x;
+    const int stride = blockDim.x*gridDim.x;
 
-  /*
-  for (int i = (start_seg + index); (i-threadIdx.x) < (start_seg + num_segs); i+=stride){
+    Real fx, fy, fz;
+    Real xi, yi, zi;
+    int fili;
 
-    if (i < (start_seg + num_segs)){
+    #if !PRESCRIBED_BODY_VELOCITIES
 
-      fx = 0.0;
-      fy = 0.0;
-      fz = 0.0;
+      for (int i = index; i < num_blobs; i+=stride){
 
-      xi = x_segs[3*i];
-      yi = x_segs[3*i + 1];
-      zi = x_segs[3*i + 2];
+        fx = 0.0;
+        fy = 0.0;
+        fz = 0.0;
 
-      fili = i/NSEG;
+        xi = x_blobs[3*i];
+        yi = x_blobs[3*i + 1];
+        zi = x_blobs[3*i + 2];
 
-      #if INFINITE_PLANE_WALL
+        box_images(xi, boxsize);
+        box_images(yi, boxsize);
+        box_images(zi, boxsize);
 
-        if (zi < BASE_HEIGHT_ABOVE_SURFACE){
+        for (int j=0; j < NTOTAL; j++){
 
-          fz = fmin(1.0, 1.0 - (zi - RSEG)/(0.5*DL - RSEG)); // max magnitude one radius from wall
-          fz *= REPULSIVE_FORCE_FACTOR*END_FORCE_MAGNITUDE*fz*fz*fz; // 4th power
+          Real xj = x_blobs[3*j];
+          Real yj = x_blobs[3*j+1];
+          Real zj = x_blobs[3*j+2];
 
-        }
+          box_images(xj, boxsize);
+          box_images(yj, boxsize);
+          box_images(zj, boxsize);
 
-      #endif
-
-    }
-
-    for (int j_start = 0; j_start < NTOTAL; j_start += THREADS_PER_BLOCK){
-
-      const int j_to_read = j_start + threadIdx.x;
-
-      if (j_to_read < NSWIM*NFIL*NSEG){
-
-        x_shared[threadIdx.x] = x_segs[3*j_to_read];
-        y_shared[threadIdx.x] = x_segs[3*j_to_read + 1];
-        z_shared[threadIdx.x] = x_segs[3*j_to_read + 2];
-
-      } else if (j_to_read < NTOTAL){
-
-        x_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG)];
-        y_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG) + 1];
-        z_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG) + 2];
-
-      }
-
-      __syncthreads();
-
-      if (i < (start_seg + num_segs)){
-
-        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NTOTAL); j++){
-
-          const Real a_sum = (j_start + j < NSWIM*NFIL*NSEG) ? 2.0*RSEG : RSEG + RBLOB;
+          const Real a_sum = (j < NSWIM*NFIL*NSEG) ? RBLOB + RSEG : 2.0*RBLOB;
           const Real chi_fac = 10.0/a_sum; // 1.0/(1.1*a_sum - a_sum)
 
-          const Real dx = xi - x_shared[j];
-          const Real dy = yi - y_shared[j];
-          const Real dz = zi - z_shared[j];
+          Real dx = xi - xj;
+          Real dy = yi - yj;
+          Real dz = zi - zj;
+
+          dx -= boxsize * Real(int(dx/(0.5*boxsize)));
+          dy -= boxsize * Real(int(dy/(0.5*boxsize)));
+          dz -= boxsize * Real(int(dz/(0.5*boxsize)));
+
+          // printf("**********xi=%.4f xj=%.4f dx=%.4f ratio=%.4f reset = %.4f\n", 
+          //       xi, xj, dx, dx/(0.5*boxsize), Real(int(dx/(0.5*boxsize))));
+          
+          // if(Real(int(dx/(0.5*boxsize))) != 0){
+          //   printf("**********xi=%.4f xj=%.4f dx=%.4f\n", xi, xj, dx);
+          // }
 
           const Real dist = sqrt(dx*dx + dy*dy + dz*dz);
 
-          int filj = (j_start + j)/NSEG;
-
-          if (!(fili==filj && abs(i -(j_start + j))<=1) && (dist < 1.1*a_sum)){
+          if (((i + NSWIM*NFIL*NSEG) != j) && (dist < 1.1*a_sum)){
 
             Real fac = fmin(1.0, 1.0 - chi_fac*(dist - a_sum));
             fac *= REPULSIVE_FORCE_FACTOR*END_FORCE_MAGNITUDE*fac*fac*fac;
@@ -1413,92 +1398,16 @@ __global__ void periodic_barrier_forces(Real * __restrict__ f_segs,
 
         }
 
-      }
+        __syncthreads();
 
-      __syncthreads();
-
-    }
-
-    if (i < (start_seg + num_segs)){
-
-      f_segs[6*i] += fx; // Don't shift index as f_segs has global size.
-      f_segs[6*i + 1] += fy;
-      f_segs[6*i + 2] += fz;
-
-    }
-
-  }
-  */
-
-  #if !PRESCRIBED_BODY_VELOCITIES
-
-    for (int i = index; i < num_blobs; i+=stride){
-
-      fx = 0.0;
-      fy = 0.0;
-      fz = 0.0;
-
-      xi = x_blobs[3*i];
-      yi = x_blobs[3*i + 1];
-      zi = x_blobs[3*i + 2];
-
-      box_images(xi, boxsize);
-      box_images(yi, boxsize);
-      box_images(zi, boxsize);
-
-      for (int j=0; j < NTOTAL; j++){
-
-        Real xj = x_blobs[3*j];
-        Real yj = x_blobs[3*j+1];
-        Real zj = x_blobs[3*j+2];
-
-        box_images(xj, boxsize);
-        box_images(yj, boxsize);
-        box_images(zj, boxsize);
-
-        const Real a_sum = (j < NSWIM*NFIL*NSEG) ? RBLOB + RSEG : 2.0*RBLOB;
-        const Real chi_fac = 10.0/a_sum; // 1.0/(1.1*a_sum - a_sum)
-
-        Real dx = xi - xj;
-        Real dy = yi - yj;
-        Real dz = zi - zj;
-
-        dx -= boxsize * Real(int(dx/(0.5*boxsize)));
-        dy -= boxsize * Real(int(dy/(0.5*boxsize)));
-        dz -= boxsize * Real(int(dz/(0.5*boxsize)));
-
-        // printf("**********xi=%.4f xj=%.4f dx=%.4f ratio=%.4f reset = %.4f\n", 
-        //       xi, xj, dx, dx/(0.5*boxsize), Real(int(dx/(0.5*boxsize))));
-        
-        // if(Real(int(dx/(0.5*boxsize))) != 0){
-        //   printf("**********xi=%.4f xj=%.4f dx=%.4f\n", xi, xj, dx);
-        // }
-
-        const Real dist = sqrt(dx*dx + dy*dy + dz*dz);
-
-        if (((i + NSWIM*NFIL*NSEG) != j) && (dist < 1.1*a_sum)){
-
-          Real fac = fmin(1.0, 1.0 - chi_fac*(dist - a_sum));
-          fac *= REPULSIVE_FORCE_FACTOR*END_FORCE_MAGNITUDE*fac*fac*fac;
-
-          const Real dm1 = 1.0/dist;
-
-          fx += fac*dx*dm1;
-          fy += fac*dy*dm1;
-          fz += fac*dz*dm1;
-
-        }
+        f_blobs_repulsion[3*i] = fx;
+        f_blobs_repulsion[3*i + 1] = fy;
+        f_blobs_repulsion[3*i + 2] = fz;
 
       }
 
-      __syncthreads();
-
-      f_blobs_repulsion[3*i] = fx;
-      f_blobs_repulsion[3*i + 1] = fy;
-      f_blobs_repulsion[3*i + 2] = fz;
-
-    }
-
+    #endif
+    
   #endif
 
 } // End of barrier forces kernel.

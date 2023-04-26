@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import axes3d
 import myIo
 import util
 import pandas as pd
@@ -28,7 +29,7 @@ simDir = 'data/lloyd/'
 simName = simDir + 'lloyd_N64_3000_375_375'
 
 simDir = 'data/build_a_beat_sims/'
-simName = simDir + 'test_bab'
+simName = simDir + 'test_bab_128fil_6000blob_2.5R'
 
 # simDir = 'data/4096fil_sims/'
 # simName = simDir + 'test_fil_6400_6400_800'
@@ -113,10 +114,10 @@ class VISUAL:
             self.fil_references = myIo.read_fil_references('../../' + simName + '_fil_references.dat')
         self.dt = self.pars['DT']*self.pars['PLOT_FREQUENCY_IN_STEPS']
         self.L = 14.14*self.pars['NBLOB']/22.
-        self.frames = min(300001, sum(1 for line in open('../../' + simName + '_body_states.dat')))
+        self.frames = min(3001, sum(1 for line in open('../../' + simName + '_body_states.dat')))
 
         self.plot_end_frame = self.frames
-        self.plot_start_frame = max(0, self.plot_end_frame-300)
+        self.plot_start_frame = max(0, self.plot_end_frame-2000)
         self.plot_interval = 1
 
         self.plot_hist_frame = np.array([self.frames-1])
@@ -124,6 +125,7 @@ class VISUAL:
         self.plot_rod_frame = np.array([self.plot_end_frame-1])
         self.plot_multi_rod_frames = np.array([100, 1000, 10000])
         self.plot_single_fil_frames = [self.plot_end_frame-1-2*i for i in range(15)]
+        self.plot_single_fil_frames = [self.plot_end_frame-1]
         self.fcm_frame = self.plot_end_frame-1
 
         self.output_to_superpunto = False
@@ -364,8 +366,6 @@ class VISUAL:
 
         fig = plt.figure(figsize=(6, 6), dpi=1000)
         ax = fig.add_subplot(projection='3d')
-        # ax = plt.figure(figsize=(6,6)).add_subplot(projection='3d')
-
         seg_states_f = open('../../' + simName + '_seg_states.dat', "r")
         body_states_f = open('../../' + simName + '_body_states.dat', "r")
         current_frame=0
@@ -401,6 +401,7 @@ class VISUAL:
                             segs_pos[seg] = seg_pos
                         ax.plot(segs_pos[:,0], segs_pos[:,1], segs_pos[:,2], c = 'black', alpha=0.1+current_frame*0.06, lw=0.3)
                 current_frame += 1
+        ax.set_proj_type('persp')  # FOV = 157.4 deg
         ax.set_xlim(0, Lx)
         ax.set_ylim(0, Ly)
         ax.set_zlim(0, 50)

@@ -411,7 +411,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
             const matrix r = R*matrix(3, 1, &swimmers[n].body.blob_references[3*m]);
 
-            const int id = 3*(NSWIM*NFIL*NSEG + n*NBLOB + m);
+            const int id = 3*(NSWIM*NFIL*NSEG + n*NBLOB + m); // Blob id
 
             // K mult
             rhs(id) += v_bodies(6*n) + v_bodies(6*n + 4)*r(2) - v_bodies(6*n + 5)*r(1);
@@ -424,7 +424,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
             for (int k = 0; k < NSEG; k++){
 
-              const int id = 3*(n*NFIL*NSEG + m*NSEG + k);
+              const int id = 3*(n*NFIL*NSEG + m*NSEG + k); // Filament id
 
               matrix r(3,1);
 

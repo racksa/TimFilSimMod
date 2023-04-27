@@ -29,7 +29,7 @@ simDir = 'data/lloyd/'
 simName = simDir + 'lloyd_N64_3000_375_375'
 
 simDir = 'data/build_a_beat_sims/'
-simName = simDir + 'test_bab_128fil_6000blob_2.5R'
+simName = simDir + 'test_bab_64fil_3000blob_1.5R_fixed'
 
 # simDir = 'data/4096fil_sims/'
 # simName = simDir + 'test_fil_6400_6400_800'
@@ -126,6 +126,7 @@ class VISUAL:
         self.plot_multi_rod_frames = np.array([100, 1000, 10000])
         self.plot_single_fil_frames = [self.plot_end_frame-1-2*i for i in range(15)]
         self.plot_single_fil_frames = [self.plot_end_frame-1]
+        self.plot_phase_frames = [self.plot_end_frame-1]
         self.fcm_frame = self.plot_end_frame-1
 
         self.output_to_superpunto = False
@@ -453,6 +454,44 @@ class VISUAL:
         nfil = int(self.pars['NFIL'])
         plt.savefig(f'fig/tether_force_{nfil}fil_{int(Lx)}_{int(Ly)}_{int(Lz)}.eps', format='eps')
         plt.savefig(f'fig/tether_force_{nfil}fil_{int(Lx)}_{int(Ly)}_{int(Lz)}.png', format='png')
+        plt.show()
+
+    # Phase model
+    def plot_phase_heatmap(self):
+        colormap = 'twilight_shifted'
+        fil_phases_f = open('../../' + simName + '_filament_phases.dat', "r")
+        fil_angles_f = open('../../' + simName + '_filament_shape_rotation_angles.dat', "r")
+
+        ax = plt.figure().add_subplot(1,1,1)
+        fil_references_sphpolar = np.zeros((int(self.pars['NFIL']),3))
+
+        for i in range(self.plot_end_frame):
+            print(" frame ", i, "/", self.frames, "          ", end="\r")
+            fil_phases_str = fil_phases_f.readline()
+            fil_angles_str = fil_angles_f.readline()
+
+            if(i in self.plot_phase_frames):
+
+                fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
+                fil_phases = util.box(fil_phases, 2*np.pi)
+                for i in range(int(self.pars['NFIL'])):
+                    fil_references_sphpolar[i] = util.cartesian_to_spherical(self.fil_references[3*i: 3*i+3])
+                    
+                ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=fil_phases, cmap=colormap)
+                
+                from matplotlib.colors import Normalize
+                from matplotlib.cm import ScalarMappable
+                norm = Normalize(vmin=min(fil_phases), vmax=max(fil_phases))
+                sm = ScalarMappable(cmap=colormap, norm=norm)
+                sm.set_array([])
+
+        cbar = plt.colorbar(sm)
+        cbar.set_label(r"phase")
+
+        ax.set_ylabel(r"$\theta$")
+        ax.set_xlabel(r"$\phi$")
+        nfil = int(self.pars['NFIL'])
+        plt.savefig(f'fig/fil_phase_{nfil}fil.eps', bbox_inches = 'tight', format='eps')
         plt.show()
 
     # Rods

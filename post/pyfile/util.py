@@ -102,6 +102,21 @@ def two_points_at_boundary(two_points_x, two_points_y, two_points_z, rod_length)
         # two_points_x, two_points_y, two_points_z = [], [], []
     return two_points_x, two_points_y, two_points_z
     
-
+def cartesian_to_spherical(x):
+    """
+    Convert Cartesian coordinates to spherical polar coordinates.
+    
+    Args:
+        x (float, float, float): cartesian-coordinate.
+    
+    Returns:
+        tuple: (r, theta, phi), where r is the radial distance, theta is the polar angle (azimuthal angle),
+               and phi is the elevation angle (zenith angle).
+    """
+    r = math.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
+    theta = math.atan2(x[1], x[0])
+    phi = math.acos(x[2] / r)
+    
+    return r, theta, phi
 
 #

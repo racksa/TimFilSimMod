@@ -70,6 +70,8 @@ void rpy_mobility_solver::allocate_host_memory(){
   cudaHostAlloc(&f_blobs_host, 3*NSWIM*NBLOB*sizeof(Real), cudaHostAllocPortable);
   cudaHostAlloc(&f_blobs_repulsion_host, 3*NSWIM*NBLOB*sizeof(Real), cudaHostAllocPortable);
 
+  cudaHostAlloc(&v_bb_host, 3*NSWIM*NBLOB*sizeof(Real), cudaHostAllocPortable);
+
   num_segs = new int[num_gpus];
   num_blobs = new int[num_gpus];
 
@@ -325,4 +327,24 @@ void rpy_mobility_solver::evaluate_blob_segment_mobility(){
 
   }
 
+}
+
+void rpy_mobility_solver::evaluate_full_mobility(){
+  evaluate_segment_segment_mobility();
+  evaluate_segment_blob_mobility();
+  copy_segment_velocities_to_host();
+
+  evaluate_blob_blob_mobility();
+  
+  int start_blob = 0;
+  for (int n = 0; n < num_gpus; n++){
+    cudaSetDevice(n);
+    const int num_thread_blocks = (num_blobs[n] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
+    Mbs_mult_add<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_blobs_device[n], f_segs_device[n], x_blobs_device[n], x_segs_device[n], start_blob, num_blobs[n]);
+    start_blob += num_blobs[n];
+  }
+
+  // evaluate_blob_segment_mobility();
+  
+  copy_blob_velocities_to_host();
 }

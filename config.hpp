@@ -6,7 +6,7 @@
 #define MY_CONFIG_HEADER_INCLUDED
 
 #define SIMULATION_DIR "data/build_a_beat_sims/"
-#define SIMULATION_NAME SIMULATION_DIR "test_bab_64fil_3000blob_1.5R_fixed"
+#define SIMULATION_NAME SIMULATION_DIR "test_bab_64fil_3000blob_1.5R_6torsion"
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Simulation type
@@ -57,7 +57,7 @@
 
   #if DYNAMIC_SHAPE_ROTATION
 
-    #define TORSIONAL_SPRING_MAGNITUDE_FACTOR 2.0 // Pre-multiplies the mean generalised driving force magnitude to give the spring constant that resists rigid-body rotations of the shape.
+    #define TORSIONAL_SPRING_MAGNITUDE_FACTOR 6.0 // Pre-multiplies the mean generalised driving force magnitude to give the spring constant that resists rigid-body rotations of the shape.
 
   #endif
 
@@ -138,7 +138,7 @@
 #endif
 
 // Define whether the motion of the rigid bodies is imposed or allowed to evolve dynamically.
-#define PRESCRIBED_BODY_VELOCITIES true
+#define PRESCRIBED_BODY_VELOCITIES false
 
 #define MOBILITY_TYPE 1
 // Valid options:

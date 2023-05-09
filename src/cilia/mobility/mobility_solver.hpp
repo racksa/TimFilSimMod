@@ -43,6 +43,8 @@ public:
   virtual void evaluate_segment_blob_mobility() = 0;
   virtual void evaluate_blob_blob_mobility() = 0;
   virtual void evaluate_blob_segment_mobility() = 0;
+  virtual void evaluate_full_mobility() = 0;
+
         
 
   // =============================================================================
@@ -59,6 +61,8 @@ public:
   Real *f_segs_host;
   Real *f_blobs_host;
   Real *f_blobs_repulsion_host;
+
+  Real *v_bb_host;
 
   ~mobility_solver();
   mobility_solver();
@@ -89,6 +93,7 @@ public:
     void assemble_rhs(const std::vector<swimmer>& swimmers, const int nt);
     matrix apply_preconditioner(const matrix& in, const std::vector<swimmer>& swimmers);
     matrix system_matrix_mult(const matrix& in, const std::vector<swimmer>& swimmers);
+    matrix system_matrix_mult_new(const matrix& in, const std::vector<swimmer>& swimmers);
     int solve_linear_system(std::vector<swimmer>& swimmers);
     void make_body_reference_matrices(std::vector<swimmer>& swimmers);
 

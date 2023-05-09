@@ -39,6 +39,7 @@ public:
   void evaluate_segment_blob_mobility();
   void evaluate_blob_blob_mobility();
   void evaluate_blob_segment_mobility();
+  void evaluate_full_mobility();
 
   // =============================================================================
   // Everything unique to this derived class:

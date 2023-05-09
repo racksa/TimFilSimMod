@@ -362,7 +362,8 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
       #endif
       const Real pos[3] = {body.x[0] + filament_references[3*i], body.x[1] + filament_references[3*i + 1], body.x[2] + filament_references[3*i + 2]};
 
-      printf("(%.4f %.4f %.4f)\n", pos[0], pos[1], pos[2]);
+      // printf("(%.4f %.4f %.4f)\n", pos[0], pos[1], pos[2]);
+      
       #if READ_INITIAL_CONDITIONS_FROM_BACKUP
 
         filaments[i].initial_setup(pos, dir, strain_twist, &data_from_file[i*data_per_fil], fil_x_address, fil_f_address, i);

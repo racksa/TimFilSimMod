@@ -756,8 +756,126 @@ __global__ void Mbs_mult(Real * __restrict__ V, const Real *const __restrict__ F
 } // End of Mbs_mult kernel.
 
 
+__global__ void Mbs_mult_add(Real * __restrict__ V, const Real *const __restrict__ F, const Real *const __restrict__ Xb, const Real *const __restrict__ Xs, const int start_blob, const int num_blobs){
 
+  // Calculates the velocities of blobs given the forces and torques on
+  // filament segments.
 
+  const int index = threadIdx.x + blockIdx.x*blockDim.x;
+  const int stride = blockDim.x*gridDim.x;
+
+  // Declare the shared memory for this thread block
+  __shared__ Real x_shared[THREADS_PER_BLOCK];
+  __shared__ Real y_shared[THREADS_PER_BLOCK];
+  __shared__ Real z_shared[THREADS_PER_BLOCK];
+  __shared__ Real fx_shared[THREADS_PER_BLOCK];
+  __shared__ Real fy_shared[THREADS_PER_BLOCK];
+  __shared__ Real fz_shared[THREADS_PER_BLOCK];
+
+  #if !PRESCRIBED_CILIA
+
+    __shared__ Real taux_shared[THREADS_PER_BLOCK];
+    __shared__ Real tauy_shared[THREADS_PER_BLOCK];
+    __shared__ Real tauz_shared[THREADS_PER_BLOCK];
+
+  #endif
+
+  Real v[3];
+  Real xi, yi, zi;
+
+  // Stay in the loop as long as any thread in the block still needs to compute velocities.
+  for (int i = (start_blob + index); (i-threadIdx.x) < (start_blob + num_blobs); i+=stride){
+
+    if (i < (start_blob + num_blobs)){
+
+      v[0] = 0.0; v[1] = 0.0; v[2] = 0.0;
+      xi = Xb[3*i]; yi = Xb[3*i + 1]; zi = Xb[3*i + 2];
+
+    }
+
+    for (int j_start = 0; j_start < NSWIM*NFIL*NSEG; j_start += THREADS_PER_BLOCK){
+
+      const int j_to_read = j_start + threadIdx.x;
+
+      if (j_to_read < NSWIM*NFIL*NSEG){
+
+        x_shared[threadIdx.x] = Xs[3*j_to_read];
+        y_shared[threadIdx.x] = Xs[3*j_to_read + 1];
+        z_shared[threadIdx.x] = Xs[3*j_to_read + 2];
+        fx_shared[threadIdx.x] = F[6*j_to_read];
+        fy_shared[threadIdx.x] = F[6*j_to_read + 1];
+        fz_shared[threadIdx.x] = F[6*j_to_read + 2];
+
+        #if !PRESCRIBED_CILIA
+
+          taux_shared[threadIdx.x] = F[6*j_to_read + 3];
+          tauy_shared[threadIdx.x] = F[6*j_to_read + 4];
+          tauz_shared[threadIdx.x] = F[6*j_to_read + 5];
+
+        #endif
+
+      }
+
+      __syncthreads();
+
+      if (i < (start_blob + num_blobs)){
+
+        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NSWIM*NFIL*NSEG); j++){
+
+          Real f[6];
+          f[0] = fx_shared[j];
+          f[1] = fy_shared[j];
+          f[2] = fz_shared[j];
+
+          #if !PRESCRIBED_CILIA
+
+            f[3] = taux_shared[j];
+            f[4] = tauy_shared[j];
+            f[5] = tauz_shared[j];
+
+          #endif
+
+          #if PRESCRIBED_CILIA
+
+            rpy_interaction<3,3>(v, f, i, xi, yi, zi, RBLOB, j_start + j, x_shared[j], y_shared[j], z_shared[j], RSEG);
+
+          #else
+
+            rpy_interaction<3,6>(v, f, i, xi, yi, zi, RBLOB, j_start + j, x_shared[j], y_shared[j], z_shared[j], RSEG);
+
+          #endif
+
+        }
+
+      }
+
+      __syncthreads();
+
+    } // End of loop over segment forces and torques.
+
+    if (i < (start_blob + num_blobs)){
+
+      const int p = 3*(i - start_blob);
+
+      #if USE_BROYDEN_FOR_EVERYTHING || PRESCRIBED_CILIA
+
+        V[p] += v[0];
+        V[p + 1] += v[1];
+        V[p + 2] += v[2];
+
+      #else
+
+        V[p] = v[0];
+        V[p + 1] = v[1];
+        V[p + 2] = v[2];
+
+      #endif
+
+    }
+
+  } // End of striding loop over blob velocities.
+
+} // End of Mbs_mult_add kernel.
 
 
 

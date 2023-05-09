@@ -2,6 +2,7 @@
 
 #include <iomanip>
 #include <iostream>
+#include <fstream>
 #include <cmath>
 #include <algorithm>
 #include <string>
@@ -1246,6 +1247,298 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
   }
 
+  matrix mobility_solver::system_matrix_mult_new(const matrix& in, const std::vector<swimmer>& swimmers){
+
+    matrix out(rhs.num_rows, 1);
+
+    #if PRESCRIBED_CILIA
+
+      for (int n = 0; n < NSWIM*NFIL*NSEG; n++){
+
+        // We don't need to be scared that we're writing here because there are no
+        // conventional forces and torques on the segments when the motion is prescribed.
+        f_segs_host[6*n] = in(3*n);
+        f_segs_host[6*n + 1] = in(3*n + 1);
+        f_segs_host[6*n + 2] = in(3*n + 2);
+
+      }
+
+      for (int n = 0; n < 3*NSWIM*NBLOB; n++){
+
+        f_blobs_host[n] = in(n + 3*NSWIM*NFIL*NSEG);
+
+      }
+
+      // Get everything running on the GPUs that we can at this point.
+      #if INFINITE_PLANE_WALL
+        copy_segment_forces_to_device();
+        evaluate_segment_segment_mobility();
+        copy_segment_velocities_to_host();
+      #else
+        copy_segment_forces_to_device();
+        copy_blob_forces_to_device();
+
+        evaluate_full_mobility();
+
+        // evaluate_segment_segment_mobility();
+        // evaluate_segment_blob_mobility();
+
+        // evaluate_blob_blob_mobility();
+        // copy_blob_velocities_to_host();
+        // wait_for_device();
+        // for (int n = 0; n < 3*NSWIM*NBLOB; n++){
+        //   v_bb_host[n] = v_blobs_host[n];
+        // }
+
+        // evaluate_blob_segment_mobility();
+        // copy_blob_velocities_to_host();
+        // wait_for_device();
+        // for (int n = 0; n < 3*NSWIM*NBLOB; n++){
+        //   v_bb_host[n] += v_blobs_host[n];
+        // }
+
+      #endif
+
+      // Do CPU work (i.e. everything involving the geometric matrices) while the GPU kernels run.
+      out.zero();
+
+      #if !PRESCRIBED_BODY_VELOCITIES
+
+        for (int n = 0; n < NSWIM; n++){
+
+          const int swim_id = 3*NSWIM*(NBLOB + NFIL*NSEG) + 6*n;
+
+          for (int m = 0; m < NFIL*NSEG; m++){
+
+            int out_id = 3*(n*NFIL*NSEG + m);
+
+            // -K mult
+            out(out_id) -= in(swim_id);
+            out(out_id + 1) -= in(swim_id + 1);
+            out(out_id + 2) -= in(swim_id + 2);
+
+            const Real diff[3] = {x_segs_host[out_id] - swimmers[n].body.x[0], x_segs_host[out_id + 1] - swimmers[n].body.x[1], x_segs_host[out_id + 2] - swimmers[n].body.x[2]};
+            out(out_id) -= in(swim_id + 4)*diff[2] - in(swim_id + 5)*diff[1];
+            out(out_id + 1) -= in(swim_id + 5)*diff[0] - in(swim_id + 3)*diff[2];
+            out(out_id + 2) -= in(swim_id + 3)*diff[1] - in(swim_id + 4)*diff[0];
+
+            // -K^T mult
+            const Real seg_force[3] = {f_segs_host[2*out_id], f_segs_host[2*out_id + 1], f_segs_host[2*out_id + 2]};
+            out(swim_id) -= seg_force[0];
+            out(swim_id + 1) -= seg_force[1];
+            out(swim_id + 2) -= seg_force[2];
+            out(swim_id + 3) -= diff[1]*seg_force[2] - diff[2]*seg_force[1];
+            out(swim_id + 4) -= diff[2]*seg_force[0] - diff[0]*seg_force[2];
+            out(swim_id + 5) -= diff[0]*seg_force[1] - diff[1]*seg_force[0];
+
+          }
+
+          const matrix R = swimmers[n].body.q.rot_mat();
+
+          for (int m = 0; m < NBLOB; m++){
+
+            const int out_id = 3*(n*NBLOB + NSWIM*NFIL*NSEG + m);
+
+            // -K mult
+            out(out_id) -= in(swim_id);
+            out(out_id + 1) -= in(swim_id + 1);
+            out(out_id + 2) -= in(swim_id + 2);
+
+            const matrix diff = R*matrix(3, 1, &swimmers[n].body.blob_references[3*m]);
+            out(out_id) -= in(swim_id + 4)*diff(2) - in(swim_id + 5)*diff(1);
+            out(out_id + 1) -= in(swim_id + 5)*diff(0) - in(swim_id + 3)*diff(2);
+            out(out_id + 2) -= in(swim_id + 3)*diff(1) - in(swim_id + 4)*diff(0);
+
+            // -K^T mult
+            const Real blob_force[3] = {f_blobs_host[3*(n*NBLOB + m)], f_blobs_host[3*(n*NBLOB + m) + 1], f_blobs_host[3*(n*NBLOB + m) + 2]};
+            out(swim_id) -= blob_force[0];
+            out(swim_id + 1) -= blob_force[1];
+            out(swim_id + 2) -= blob_force[2];
+            out(swim_id + 3) -= diff(1)*blob_force[2] - diff(2)*blob_force[1];
+            out(swim_id + 4) -= diff(2)*blob_force[0] - diff(0)*blob_force[2];
+            out(swim_id + 5) -= diff(0)*blob_force[1] - diff(1)*blob_force[0];
+
+          }
+
+        }
+
+      #endif
+
+      #if DYNAMIC_PHASE_EVOLUTION
+
+        for (int n = 0; n < NSWIM; n++){
+
+          for (int m = 0; m < NFIL; m++){
+
+            const int out_pos = 3*NSEG*(n*NFIL + m);
+
+            #if PRESCRIBED_BODY_VELOCITIES
+
+              const int in_pos = 3*NSWIM*(NFIL*NSEG + NBLOB) + n*NFIL + m;
+
+            #else
+
+              const int in_pos = 3*NSWIM*(NFIL*NSEG + NBLOB + 2) + n*NFIL + m;
+
+            #endif
+
+            const Real phi_dot = in(in_pos);
+
+            #if DYNAMIC_SHAPE_ROTATION
+
+              const Real shape_rotation_angle_dot = in(in_pos + NSWIM*NFIL);
+
+            #endif
+
+            for (int k = 0; k < 3*NSEG; k++){
+
+              // "-K" mult
+              out(out_pos + k) -= phi_dot*swimmers[n].filaments[m].vel_dir_phase[k];
+
+              // "-K^T" mult
+              out(in_pos) -= in(out_pos + k)*swimmers[n].filaments[m].vel_dir_phase[k];
+
+              #if DYNAMIC_SHAPE_ROTATION
+
+                // "-K" mult
+                out(out_pos + k) -= shape_rotation_angle_dot*swimmers[n].filaments[m].vel_dir_angle[k];
+
+                // "-K^T" mult
+                out(in_pos + NSWIM*NFIL) -= in(out_pos + k)*swimmers[n].filaments[m].vel_dir_angle[k];
+
+              #endif
+
+            }
+
+          }
+
+        }
+
+      #elif DYNAMIC_SHAPE_ROTATION
+
+        for (int n = 0; n < NSWIM; n++){
+
+          for (int m = 0; m < NFIL; m++){
+
+            const int out_pos = 3*NSEG*(n*NFIL + m);
+
+            #if PRESCRIBED_BODY_VELOCITIES
+
+              const int in_pos = 3*NSWIM*(NFIL*NSEG + NBLOB) + n*NFIL + m;
+
+            #else
+
+              const int in_pos = 3*NSWIM*(NFIL*NSEG + NBLOB + 2) + n*NFIL + m;
+
+            #endif
+
+            const Real shape_rotation_angle_dot = in(in_pos);
+
+            for (int k = 0; k < 3*NSEG; k++){
+
+              // "-K" mult
+              out(out_pos + k) -= shape_rotation_angle_dot*swimmers[n].filaments[m].vel_dir_angle[k];
+
+              // "-K^T" mult
+              out(in_pos) -= in(out_pos + k)*swimmers[n].filaments[m].vel_dir_angle[k];
+
+            }
+
+          }
+
+        }
+
+      #endif
+
+      // Now we need the results from the GPU. Get the last bit of GPU work running while we use them.
+      wait_for_device();
+
+      for (int n = 0; n < NSWIM*NFIL*NSEG; n++){
+
+        out(3*n) += v_segs_host[6*n];
+        out(3*n + 1) += v_segs_host[6*n + 1];
+        out(3*n + 2) += v_segs_host[6*n + 2];
+
+      }
+
+      #if !INFINITE_PLANE_WALL
+
+        // Retrieve and use the final GPU results.
+        wait_for_device();
+
+        for (int n = 0; n < 3*NSWIM*NBLOB; n++){
+
+          out(3*NSWIM*NFIL*NSEG + n) += v_blobs_host[n];
+
+        }
+
+      #endif
+
+    #else
+
+      #if !INFINITE_PLANE_WALL
+
+        for (int n = 0; n < 3*NSWIM*NBLOB; n++){
+
+          f_blobs_host[n] = in(n);
+
+        }
+
+        copy_blob_forces_to_device();
+        evaluate_blob_blob_mobility();
+        copy_blob_velocities_to_host();
+
+        out.zero();
+
+        #if !PRESCRIBED_BODY_VELOCITIES
+
+          for (int n = 0; n < NSWIM; n++){
+
+            const matrix Q = swimmers[n].body.q.rot_mat();
+
+            const int swim_id = 3*NSWIM*NBLOB + 6*n;
+
+            for (int m = 0; m < NBLOB; m++){
+
+              const matrix diff = Q*matrix(3, 1, &swimmers[n].body.blob_references[3*m]);
+
+              const int blob_id = 3*(n*NBLOB + m);
+
+              // -K^T mult
+              out(swim_id) -= in(blob_id);
+              out(swim_id + 1) -= in(blob_id + 1);
+              out(swim_id + 2) -= in(blob_id + 2);
+              out(swim_id + 3) -= diff(1)*in(blob_id + 2) - diff(2)*in(blob_id + 1);
+              out(swim_id + 4) -= diff(2)*in(blob_id) - diff(0)*in(blob_id + 2);
+              out(swim_id + 5) -= diff(0)*in(blob_id + 1) - diff(1)*in(blob_id);
+
+              // -K mult
+              out(blob_id) -= in(swim_id) - diff(1)*in(swim_id + 5) + diff(2)*in(swim_id + 4);
+              out(blob_id + 1) -= in(swim_id + 1) - diff(2)*in(swim_id + 3) + diff(0)*in(swim_id + 5);
+              out(blob_id + 2) -= in(swim_id + 2) - diff(0)*in(swim_id + 4) + diff(1)*in(swim_id + 3);
+
+            }
+
+          }
+
+        #endif
+
+        wait_for_device();
+
+        for (int n = 0; n < 3*NSWIM*NBLOB; n++){
+
+          out(n) += v_blobs_host[n];
+
+        }
+
+      #endif
+
+    #endif
+
+    return out;
+
+  }
+
   int mobility_solver::solve_linear_system(std::vector<swimmer>& swimmers){
 
     /*
@@ -1453,6 +1746,32 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
       Q.set_col(0, rhs - system_matrix_mult(soln, swimmers));
 
+      matrix origin = system_matrix_mult(soln, swimmers);
+      matrix moded = system_matrix_mult_new(soln, swimmers);
+      origin.set_block(int(3*NFIL*NSEG + 3*NBLOB), 6+2*NFIL, 0);
+      moded.set_block(int(3*NFIL*NSEG + 3*NBLOB), 6+2*NFIL, 0);
+      matrix diffsq = origin;
+      diffsq.zero();
+      for(int i=0; i<Q.num_rows-2*NFIL-6; i++){
+        diffsq(i, 0) = (origin(i, 0) - moded(i, 0))*(origin(i, 0) - moded(i, 0));
+      }
+      std::cout<<"origin="<<norm(origin)<<"\t";
+      std::cout<<"moded="<<norm(moded)<<"\t";
+      std::cout<<"diffsq="<<norm(diffsq)<<std::endl;
+
+      // std::string Qname = "test_Q";
+      // std::ofstream out_file(Qname);
+      // if (out_file.is_open()) {
+      //   for(int i=0; i<Q.num_rows-2*NFIL-6; i++){
+      //     out_file << diffsq(i, 0) << " ";
+      //   }
+      //   out_file << std::endl;
+      //   out_file.close();
+      // }
+      // else{
+      //   std::cerr << "Failed to open input file." << std::endl;
+      // }
+
     #else
 
       Q.set_col(0, rhs - apply_preconditioner(system_matrix_mult(soln, swimmers), swimmers));
@@ -1486,6 +1805,19 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
       #if USE_RIGHT_PRECON
 
         Q.set_col(iter, system_matrix_mult(apply_preconditioner(Q.get_col(iter-1), swimmers), swimmers));
+
+        matrix origin = system_matrix_mult(soln, swimmers);
+        matrix moded = system_matrix_mult_new(soln, swimmers);
+        origin.set_block(int(3*NFIL*NSEG + 3*NBLOB), 6+2*NFIL, 0);
+        moded.set_block(int(3*NFIL*NSEG + 3*NBLOB), 6+2*NFIL, 0);
+        matrix diffsq = origin;
+        diffsq.zero();
+        for(int i=0; i<Q.num_rows-2*NFIL-6; i++){
+          diffsq(i, 0) = (origin(i, 0) - moded(i, 0))*(origin(i, 0) - moded(i, 0));
+        }
+        std::cout<<"origin="<<norm(origin)<<"\t";
+        std::cout<<"moded="<<norm(moded)<<"\t";
+        std::cout<<"diffsq="<<norm(diffsq)<<std::endl;
 
       #else
 

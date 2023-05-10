@@ -335,16 +335,13 @@ void rpy_mobility_solver::evaluate_full_mobility(){
   copy_segment_velocities_to_host();
 
   evaluate_blob_blob_mobility();
-  
-  int start_blob = 0;
-  for (int n = 0; n < num_gpus; n++){
-    cudaSetDevice(n);
-    const int num_thread_blocks = (num_blobs[n] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
-    Mbs_mult_add<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_blobs_device[n], f_segs_device[n], x_blobs_device[n], x_segs_device[n], start_blob, num_blobs[n]);
-    start_blob += num_blobs[n];
-  }
-
-  // evaluate_blob_segment_mobility();
-  
+  evaluate_blob_segment_mobility();
+  // int start_blob = 0;
+  // for (int n = 0; n < num_gpus; n++){
+  //   cudaSetDevice(n);
+  //   const int num_thread_blocks = (num_blobs[n] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
+  //   Mbs_mult_add<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_blobs_device[n], f_segs_device[n], x_blobs_device[n], x_segs_device[n], start_blob, num_blobs[n]);
+  //   start_blob += num_blobs[n];
+  // }
   copy_blob_velocities_to_host();
 }

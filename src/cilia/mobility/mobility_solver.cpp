@@ -1744,37 +1744,11 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
     #if USE_RIGHT_PRECON
 
-      Q.set_col(0, rhs - system_matrix_mult(soln, swimmers));
-
-      matrix origin = system_matrix_mult(soln, swimmers);
-      matrix moded = system_matrix_mult_new(soln, swimmers);
-      origin.set_block(int(3*NFIL*NSEG + 3*NBLOB), 6+2*NFIL, 0);
-      moded.set_block(int(3*NFIL*NSEG + 3*NBLOB), 6+2*NFIL, 0);
-      matrix diffsq = origin;
-      diffsq.zero();
-      for(int i=0; i<Q.num_rows-2*NFIL-6; i++){
-        diffsq(i, 0) = (origin(i, 0) - moded(i, 0))*(origin(i, 0) - moded(i, 0));
-      }
-      std::cout<<"origin="<<norm(origin)<<"\t";
-      std::cout<<"moded="<<norm(moded)<<"\t";
-      std::cout<<"diffsq="<<norm(diffsq)<<std::endl;
-
-      // std::string Qname = "test_Q";
-      // std::ofstream out_file(Qname);
-      // if (out_file.is_open()) {
-      //   for(int i=0; i<Q.num_rows-2*NFIL-6; i++){
-      //     out_file << diffsq(i, 0) << " ";
-      //   }
-      //   out_file << std::endl;
-      //   out_file.close();
-      // }
-      // else{
-      //   std::cerr << "Failed to open input file." << std::endl;
-      // }
+      Q.set_col(0, rhs - system_matrix_mult_new(soln, swimmers));
 
     #else
 
-      Q.set_col(0, rhs - apply_preconditioner(system_matrix_mult(soln, swimmers), swimmers));
+      Q.set_col(0, rhs - apply_preconditioner(system_matrix_mult_new(soln, swimmers), swimmers));
 
     #endif
 
@@ -1804,24 +1778,38 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
       // Produce the new orthonormal vector, using the appropriate values to update H as we do.
       #if USE_RIGHT_PRECON
 
-        Q.set_col(iter, system_matrix_mult(apply_preconditioner(Q.get_col(iter-1), swimmers), swimmers));
+        Q.set_col(iter, system_matrix_mult_new(apply_preconditioner(Q.get_col(iter-1), swimmers), swimmers));
 
-        matrix origin = system_matrix_mult(soln, swimmers);
-        matrix moded = system_matrix_mult_new(soln, swimmers);
-        origin.set_block(int(3*NFIL*NSEG + 3*NBLOB), 6+2*NFIL, 0);
-        moded.set_block(int(3*NFIL*NSEG + 3*NBLOB), 6+2*NFIL, 0);
-        matrix diffsq = origin;
-        diffsq.zero();
-        for(int i=0; i<Q.num_rows-2*NFIL-6; i++){
-          diffsq(i, 0) = (origin(i, 0) - moded(i, 0))*(origin(i, 0) - moded(i, 0));
-        }
-        std::cout<<"origin="<<norm(origin)<<"\t";
-        std::cout<<"moded="<<norm(moded)<<"\t";
-        std::cout<<"diffsq="<<norm(diffsq)<<std::endl;
+        // matrix moded = system_matrix_mult_new(soln, swimmers);
+        // matirx origin = system_matrix_mult_new(soln, swimmers);
+        // origin.set_block(int(3*NFIL*NSEG + 3*NBLOB), 6+2*NFIL, 0);
+        // moded.set_block(int(3*NFIL*NSEG + 3*NBLOB), 6+2*NFIL, 0);
+        // matrix diffsq = origin;
+        // diffsq.zero();
+        // for(int i=0; i<Q.num_rows-2*NFIL-6; i++){
+        //   diffsq(i, 0) = (origin(i, 0) - moded(i, 0))*(origin(i, 0) - moded(i, 0));
+        // }
+        // std::cout<<"origin="<<norm(origin)<<"\t";
+        // std::cout<<"moded="<<norm(moded)<<"\t";
+        // std::cout<<"diffsq="<<norm(diffsq)<<"\t";
+        // std::cout<<std::endl;
+
+        // std::string Qname = "test_Q.dat";
+        // std::ofstream out_file(Qname);
+        // if (out_file.is_open()) {
+        //   for(int i=0; i<Q.num_rows-2*NFIL-6; i++){
+        //     out_file << diffsq(i, 0) << " ";
+        //   }
+        //   out_file << std::endl;
+        //   out_file.close();
+        // }
+        // else{
+        //   std::cerr << "Failed to open input file." << std::endl;
+        // }
 
       #else
 
-        Q.set_col(iter, apply_preconditioner(system_matrix_mult(Q.get_col(iter-1), swimmers), swimmers));
+        Q.set_col(iter, apply_preconditioner(system_matrix_mult_new(Q.get_col(iter-1), swimmers), swimmers));
 
       #endif
 
@@ -1921,7 +1909,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
           // When we use a right preconditioner, the velocity arrays are storing M*M_approx_inv*F
           // rather than M*F (and thus the force arrays store M_approx_inv*F rather than F). We need to
           // have them store the latter so that what we save in the segment velocity and force files is
-          // meaningful, which we can achieve by simply calling system_matrix_mult(...) on the solution.
+          // meaningful, which we can achieve by simply calling system_matrix_mult_new(...) on the solution.
           // We don't want to do that here because then we'd be doing many more matrix multiplications
           // than are required, but rather as and when we want to save data. To do this, we save the
           // solution into the rhs vector, which is persistent storage across function calls.
@@ -2482,7 +2470,7 @@ void mobility_solver::write_data(const int nt, const std::vector<swimmer>& swimm
   #if (!USE_BROYDEN_FOR_EVERYTHING && USE_RIGHT_PRECON && PRESCRIBED_CILIA)
 
     // See solve_linear_system(...)
-    const matrix junk = system_matrix_mult(rhs, swimmers);
+    const matrix junk = system_matrix_mult_new(rhs, swimmers);
 
     // N.B. The use of rhs here means write_data(...) cannot be a const method.
 

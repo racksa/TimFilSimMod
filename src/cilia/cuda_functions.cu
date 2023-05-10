@@ -735,7 +735,7 @@ __global__ void Mbs_mult(Real * __restrict__ V, const Real *const __restrict__ F
 
       const int p = 3*(i - start_blob);
 
-      #if USE_BROYDEN_FOR_EVERYTHING
+      #if USE_BROYDEN_FOR_EVERYTHING || PRESCRIBED_CILIA
 
         V[p] += v[0];
         V[p + 1] += v[1];

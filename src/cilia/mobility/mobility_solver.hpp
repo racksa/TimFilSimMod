@@ -62,7 +62,18 @@ public:
   Real *f_blobs_host;
   Real *f_blobs_repulsion_host;
 
-  Real *v_bb_host;
+  #if DISPLAYTIME
+    float time_start;
+    float read_position_time;
+    float assemble_rhs_time;
+    float solve_linear_system_time;
+      float preconditioned_time;
+      float system_mult_time;
+        float mobility_mult_time;
+        float k_mult_time;
+      float gmres_solve_time;
+      float found_solution_finishing_time;
+  #endif
 
   ~mobility_solver();
   mobility_solver();

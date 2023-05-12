@@ -12,7 +12,7 @@
 // Included dependencies
 #include <iostream>
 #include <vector>
-#include "matrix.hpp"
+#include "../general/matrix.hpp"
 #include "rigid_body.hpp"
 #include "filament.hpp"
 #include "config.hpp"

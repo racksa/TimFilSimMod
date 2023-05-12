@@ -5,8 +5,8 @@
 #ifndef MY_CONFIG_HEADER_INCLUDED
 #define MY_CONFIG_HEADER_INCLUDED
 
-#define SIMULATION_DIR "data/build_a_beat_sims/"
-#define SIMULATION_NAME SIMULATION_DIR "test_bab_64fil_3000blob_1.5R_6torsion"
+#define SIMULATION_DIR "data/phase_model/"
+#define SIMULATION_NAME SIMULATION_DIR "test_bab_64fil_6000blob_2R_2torsion"
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Simulation type
@@ -57,7 +57,7 @@
 
   #if DYNAMIC_SHAPE_ROTATION
 
-    #define TORSIONAL_SPRING_MAGNITUDE_FACTOR 6.0 // Pre-multiplies the mean generalised driving force magnitude to give the spring constant that resists rigid-body rotations of the shape.
+    #define TORSIONAL_SPRING_MAGNITUDE_FACTOR 2.0 // Pre-multiplies the mean generalised driving force magnitude to give the spring constant that resists rigid-body rotations of the shape.
 
   #endif
 
@@ -167,7 +167,7 @@
 #define NFIL (64) // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG (20)// The number of segments comprising each filament.
 #define NSWIM (1) // The number of swimmers.
-#define NBLOB (3000) // The number of blobs to use as surface elements in each rigid body.
+#define NBLOB (6000) // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
 
@@ -195,7 +195,7 @@
 #endif
 
 #if BODY_OR_SURFACE_TYPE==2
-  #define AXIS_DIR_BODY_LENGTH (1.6496*1.5*FIL_LENGTH) // The length of the body parallel to the axis of rotation for the surface of revolution.
+  #define AXIS_DIR_BODY_LENGTH (1.6496*2.0*FIL_LENGTH) // The length of the body parallel to the axis of rotation for the surface of revolution.
 #elif BODY_OR_SURFACE_TYPE==4
   #define AXIS_DIR_BODY_LENGTH (0.5*NBLOB*RBLOB) // The length of the body parallel to the axis of rotation for the surface of revolution.
 #elif BODY_OR_SURFACE_TYPE==5

@@ -70,8 +70,6 @@ void rpy_mobility_solver::allocate_host_memory(){
   cudaHostAlloc(&f_blobs_host, 3*NSWIM*NBLOB*sizeof(Real), cudaHostAllocPortable);
   cudaHostAlloc(&f_blobs_repulsion_host, 3*NSWIM*NBLOB*sizeof(Real), cudaHostAllocPortable);
 
-  cudaHostAlloc(&v_bb_host, 3*NSWIM*NBLOB*sizeof(Real), cudaHostAllocPortable);
-
   num_segs = new int[num_gpus];
   num_blobs = new int[num_gpus];
 

@@ -1,5 +1,6 @@
 // mobility_solver.cpp
 
+#include <cstdlib>
 #include <iomanip>
 #include <iostream>
 #include <fstream>
@@ -7,9 +8,9 @@
 #include <algorithm>
 #include <string>
 #include "mobility_solver.hpp"
-#include "swimmer.hpp"
+#include "../swimmer.hpp"
 #include "omp.h"
-#include "util.hpp"
+#include "../../general/util.hpp"
 
 mobility_solver::~mobility_solver(){}
 
@@ -1283,19 +1284,9 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
         // evaluate_segment_segment_mobility();
         // evaluate_segment_blob_mobility();
 
-        // evaluate_blob_blob_mobility();
-        // copy_blob_velocities_to_host();
-        // wait_for_device();
-        // for (int n = 0; n < 3*NSWIM*NBLOB; n++){
-        //   v_bb_host[n] = v_blobs_host[n];
-        // }
-
-        // evaluate_blob_segment_mobility();
-        // copy_blob_velocities_to_host();
-        // wait_for_device();
-        // for (int n = 0; n < 3*NSWIM*NBLOB; n++){
-        //   v_bb_host[n] += v_blobs_host[n];
-        // }
+        #if DISPLAYTIME
+          { cudaDeviceSynchronize(); mobility_mult_time += (get_time() - time_start); time_start = get_time();}
+        #endif
 
       #endif
 
@@ -1472,6 +1463,10 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
         }
 
+      #endif
+
+      #if DISPLAYTIME
+        { cudaDeviceSynchronize(); k_mult_time += (get_time() - time_start); time_start = get_time();}
       #endif
 
     #else
@@ -1773,12 +1768,27 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
     const int max_iter = std::min<int>(rhs.num_rows, MAX_LINEAR_SYSTEM_ITER);
 
+    #if DISPLAYTIME
+      preconditioned_time = 0;
+      mobility_mult_time = 0;
+      k_mult_time = 0;
+      gmres_solve_time = 0;
+      found_solution_finishing_time = 0;
+      cudaDeviceSynchronize(); time_start = get_time();
+    #endif
+
     for (int iter = 1; iter <= max_iter; iter++){
 
       // Produce the new orthonormal vector, using the appropriate values to update H as we do.
       #if USE_RIGHT_PRECON
 
-        Q.set_col(iter, system_matrix_mult_new(apply_preconditioner(Q.get_col(iter-1), swimmers), swimmers));
+        matrix preconed = apply_preconditioner(Q.get_col(iter-1), swimmers);
+
+        #if DISPLAYTIME
+          { cudaDeviceSynchronize(); preconditioned_time += (get_time() - time_start); time_start = get_time();}
+        #endif
+
+        Q.set_col(iter, system_matrix_mult_new(preconed, swimmers));
 
         // matrix moded = system_matrix_mult_new(soln, swimmers);
         // matirx origin = system_matrix_mult_new(soln, swimmers);
@@ -1872,6 +1882,10 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
       // If it is small enough, or we've reached the maximum number of iterations, we generate the solution and return.
       const Real relative_error = std::abs(beta(iter))/norm_of_rhs;
 
+      #if DISPLAYTIME
+        { cudaDeviceSynchronize(); gmres_solve_time += (get_time() - time_start); time_start = get_time();}
+      #endif
+
       if ((relative_error <= LINEAR_SYSTEM_TOL) || (iter == max_iter)){
 
         matrix y(iter, 1);
@@ -1919,6 +1933,10 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
           soln += temp_soln;
 
+        #endif
+
+        #if DISPLAYTIME
+          { cudaDeviceSynchronize(); found_solution_finishing_time += (get_time() - time_start); time_start = get_time();}
         #endif
 
         // Store the solution back in the separate arrays and vectors
@@ -2013,7 +2031,6 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
         #endif
 
         return iter;
-
       }
 
     }
@@ -2026,11 +2043,26 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
 void mobility_solver::compute_velocities(std::vector<swimmer>& swimmers, int& num_gmres_iterations, const int nt){
   
-  read_positions_and_forces(swimmers);  
+  #if DISPLAYTIME
+    read_position_time = 0;
+    assemble_rhs_time = 0;
+    solve_linear_system_time = 0;
+    cudaDeviceSynchronize(); time_start = get_time();
+  #endif
+
+  read_positions_and_forces(swimmers);
+
+  #if DISPLAYTIME
+    { cudaDeviceSynchronize(); read_position_time += (get_time() - time_start); time_start = get_time();}
+  #endif
 
   #if PRESCRIBED_CILIA
 
     assemble_rhs(swimmers, nt);
+
+    #if DISPLAYTIME
+      { cudaDeviceSynchronize(); assemble_rhs_time += (get_time() - time_start); time_start = get_time();}
+    #endif
 
     num_gmres_iterations = solve_linear_system(swimmers);
 
@@ -2072,6 +2104,27 @@ void mobility_solver::compute_velocities(std::vector<swimmer>& swimmers, int& nu
     wait_for_device();
 
   #endif
+
+    #if DISPLAYTIME
+      system_mult_time = mobility_mult_time + k_mult_time;
+      solve_linear_system_time = system_mult_time + gmres_solve_time + found_solution_finishing_time;
+
+      std::ofstream time_file(SIMULATION_TIME_NAME, std::ios::app);
+      time_file << std::scientific << std::setprecision(6);
+      
+      time_file<<(read_position_time)<<" ";
+      time_file<<(assemble_rhs_time)<<" ";
+      time_file<<(preconditioned_time)<<" ";
+      time_file<<(mobility_mult_time)<<" ";
+      time_file<<(k_mult_time)<<" ";
+      time_file<<(gmres_solve_time)<<" ";
+      time_file<<(found_solution_finishing_time)<<" ";
+
+      time_file<<(num_gmres_iterations)<<" ";
+
+      time_file << std::endl;
+      time_file.close();
+    #endif
 
 }
 

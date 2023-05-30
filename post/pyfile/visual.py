@@ -29,7 +29,7 @@ simName = simDir + 'test_fil_1000_1000_2000'
 # simName = simDir + 'lloyd_N64_3000_375_375'
 
 simDir = 'data/phase_model/'
-simName = simDir + 'test_bab_64fil_6000blob_2R_2torsion'
+simName = simDir + 'test_bab_128fil_12000blob_4R_2torsion'
 # simName = simDir + 'test_bab_64fil_12000blob_4R'
 # simName = simDir + 'test_bab_8fil_750blob_1R'
 

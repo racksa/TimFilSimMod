@@ -103,6 +103,7 @@ public:
 
     void assemble_rhs(const std::vector<swimmer>& swimmers, const int nt);
     matrix apply_preconditioner(const matrix& in, const std::vector<swimmer>& swimmers);
+    matrix apply_preconditioner_new(const matrix& in, const std::vector<swimmer>& swimmers);
     matrix system_matrix_mult(const matrix& in, const std::vector<swimmer>& swimmers);
     matrix system_matrix_mult_new(const matrix& in, const std::vector<swimmer>& swimmers);
     int solve_linear_system(std::vector<swimmer>& swimmers);

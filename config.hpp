@@ -6,7 +6,7 @@
 #define MY_CONFIG_HEADER_INCLUDED
 
 #define SIMULATION_DIR "data/phase_model/"
-#define SIMULATION_NAME SIMULATION_DIR "test_bab_64fil_6000blob_2R_2torsion"
+#define SIMULATION_NAME SIMULATION_DIR "test_bab_128fil_12000blob_4R_2torsion"
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Simulation type
@@ -164,10 +164,10 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define NFIL (64) // The number of filaments attached to the rigid body/surface in each swimmer.
+#define NFIL (128) // The number of filaments attached to the rigid body/surface in each swimmer.
 #define NSEG (20)// The number of segments comprising each filament.
 #define NSWIM (1) // The number of swimmers.
-#define NBLOB (6000) // The number of blobs to use as surface elements in each rigid body.
+#define NBLOB (12000) // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
 
@@ -195,7 +195,7 @@
 #endif
 
 #if BODY_OR_SURFACE_TYPE==2
-  #define AXIS_DIR_BODY_LENGTH (1.6496*2.0*FIL_LENGTH) // The length of the body parallel to the axis of rotation for the surface of revolution.
+  #define AXIS_DIR_BODY_LENGTH (1.6496*4.0*FIL_LENGTH) // The length of the body parallel to the axis of rotation for the surface of revolution.
 #elif BODY_OR_SURFACE_TYPE==4
   #define AXIS_DIR_BODY_LENGTH (0.5*NBLOB*RBLOB) // The length of the body parallel to the axis of rotation for the surface of revolution.
 #elif BODY_OR_SURFACE_TYPE==5

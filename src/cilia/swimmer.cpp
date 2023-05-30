@@ -1178,7 +1178,7 @@ void swimmer::write_backup(std::ofstream& backup_file) const {
 
       KTMinvK_inv.set_block(3, 0, 3, 3, -KTMinvK_inv.get_block(0, 3, 3, 3)); // minus sign for transpose
 
-      #if DYNAMIC_PHASE_EVOLUTION
+      #if DYNAMIC_PHASE_EVOLUTION and !DYNAMIC_SHAPE_ROTATION
 
         // In this case, we're not actually storing KTMinvK_inv anymore, but rather
         // the 6x6 matrix that appears in the Schur complement expression for it.
@@ -1195,27 +1195,101 @@ void swimmer::write_backup(std::ofstream& backup_file) const {
 
           for (int m = 0; m < NSEG; m++){
 
-            matrix k(3,1);
-            k(0) = filaments[n].vel_dir_phase[3*m];
-            k(1) = filaments[n].vel_dir_phase[3*m + 1];
-            k(2) = filaments[n].vel_dir_phase[3*m + 2];
+            matrix k_phi(3,1);
+            k_phi(0) = filaments[n].vel_dir_phase[3*m];
+            k_phi(1) = filaments[n].vel_dir_phase[3*m + 1];
+            k_phi(2) = filaments[n].vel_dir_phase[3*m + 2];
 
-            v1 += k;
+            v1 += k_phi;
 
             matrix diff(3,1);
             diff(0) = filaments[n].segments[m].x[0] - x[0];
             diff(1) = filaments[n].segments[m].x[1] - x[1];
             diff(2) = filaments[n].segments[m].x[2] - x[2];
 
-            v2 += cross(diff, k);
+            v2 += cross(diff, k_phi);
 
-            Knormsq += dot(k,k);
+            Knormsq += dot(k_phi, k_phi);
 
           }
 
           C_Ainv_B.add_to_block(0, 0, 3, 3, v1*transpose(v1)/Knormsq);
           C_Ainv_B.add_to_block(3, 0, 3, 3, v2*transpose(v1)/Knormsq);
           C_Ainv_B.add_to_block(3, 3, 3, 3, v2*transpose(v2)/Knormsq);
+
+        }
+
+        // Use symmetry to finish off the new terms
+        C_Ainv_B.set_block(0, 3, 3, 3, transpose(C_Ainv_B.get_block(3, 0, 3, 3)));
+
+        // Finally, add on the new terms
+        KTMinvK_inv -= seg_mob_fac*C_Ainv_B;
+
+      #endif
+
+      #if DYNAMIC_PHASE_EVOLUTION and DYNAMIC_SHAPE_ROTATION
+
+        // In this case, we're not actually storing KTMinvK_inv anymore, but rather
+        // the 6x6 matrix that appears in the Schur complement expression for it.
+        matrix C_Ainv_B(6,6);
+        C_Ainv_B.zero();
+
+        // Each filament/cilium contributes independently
+        for (int n = 0; n < NFIL; n++){
+
+          Real c11 = 0.0, c22 = 0.0, c12 = 0.0;
+          Real cinv_11 = 0.0, cinv_22 = 0.0, cinv_12 = 0.0;
+          matrix v_phi(3,1), u_phi(3,1), v_theta(3,1), u_theta(3,1);
+          v_phi.zero();
+          u_phi.zero();
+          v_theta.zero();
+          u_theta.zero();
+
+          for (int m = 0; m < NSEG; m++){
+
+            matrix k_phi(3,1);
+            k_phi(0) = filaments[n].vel_dir_phase[3*m];
+            k_phi(1) = filaments[n].vel_dir_phase[3*m + 1];
+            k_phi(2) = filaments[n].vel_dir_phase[3*m + 2];
+            v_phi += k_phi;
+
+            matrix k_theta(3,1);
+            k_theta(0) = filaments[n].vel_dir_angle[3*m];
+            k_theta(1) = filaments[n].vel_dir_angle[3*m + 1];
+            k_theta(2) = filaments[n].vel_dir_angle[3*m + 2];
+            v_theta += k_theta;
+
+            matrix diff(3,1);
+            diff(0) = filaments[n].segments[m].x[0] - x[0];
+            diff(1) = filaments[n].segments[m].x[1] - x[1];
+            diff(2) = filaments[n].segments[m].x[2] - x[2];
+
+            u_phi += cross(diff, k_phi);
+            u_theta += cross(diff, k_theta);
+
+            c11 += dot(k_phi, k_phi);
+            c22 += dot(k_theta, k_theta);
+            c12 += dot(k_phi, k_theta);
+
+          }
+          Real det = c11*c22 - c12*c12;
+          cinv_11 = c22 / det;
+          cinv_22 = c11 / det;
+          cinv_12 = - c12 / det;
+
+          // C_Ainv_B.add_to_block(0, 0, 3, 3, v_phi*transpose(v_phi)/c11);
+          // C_Ainv_B.add_to_block(3, 0, 3, 3, u_phi*transpose(v_phi)/c11);
+          // C_Ainv_B.add_to_block(3, 3, 3, 3, u_phi*transpose(u_phi)/c11);
+
+          matrix C_Ainv_B11 = v_phi*transpose(v_phi)*cinv_11 + v_phi*transpose(v_theta)*cinv_12
+                          + v_theta*transpose(v_phi)*cinv_12 +  v_theta*transpose(v_theta)*cinv_22;
+          matrix C_Ainv_B21 = u_phi*transpose(v_phi)*cinv_11 + u_phi*transpose(v_theta)*cinv_12
+                          + u_theta*transpose(v_phi)*cinv_12 +  u_theta*transpose(v_theta)*cinv_22;
+          matrix C_Ainv_B22 = u_phi*transpose(u_phi)*cinv_11 + u_phi*transpose(u_theta)*cinv_12
+                          + u_theta*transpose(u_phi)*cinv_12 +  u_theta*transpose(u_theta)*cinv_22;
+          C_Ainv_B.add_to_block(0, 0, 3, 3, C_Ainv_B11);
+          C_Ainv_B.add_to_block(3, 0, 3, 3, C_Ainv_B21);
+          C_Ainv_B.add_to_block(3, 3, 3, 3, C_Ainv_B22);
 
         }
 

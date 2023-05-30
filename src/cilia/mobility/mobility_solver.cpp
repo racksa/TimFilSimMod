@@ -834,6 +834,90 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
           #endif
 
+          #if DYNAMIC_SHAPE_ROTATION
+
+            // out.multiply_block(3*NSWIM*(NBLOB + NFIL*NSEG + 2) + NFIL*NSWIM, NFIL*NSWIM, -1.0);
+
+            // for (int m = 0; m < NFIL; m++){
+
+            //   const int angle_id = 3*NSWIM*(NBLOB + NFIL*NSEG + 2) + NSWIM*NFIL + NFIL*n + m;
+
+            //   Real Knormsq = 0.0;
+
+            //   matrix v1(3,1), v2(3,1);
+            //   v1.zero();
+            //   v2.zero();
+
+            //   for (int k = 0; k < NSEG; k++){
+
+            //     const int seg_force_id = 3*(n*NFIL*NSEG + m*NSEG + k);
+
+            //     matrix K(3,1);
+            //     K(0) = swimmers[n].filaments[m].vel_dir_angle[3*k];
+            //     K(1) = swimmers[n].filaments[m].vel_dir_angle[3*k + 1];
+            //     K(2) = swimmers[n].filaments[m].vel_dir_angle[3*k + 2];
+
+            //     // Additional -K^T part
+            //     out(angle_id) -= dot(K, out.get_block(seg_force_id, 3));
+
+            //     Knormsq += dot(K,K);
+            //     v1 += K;
+
+            //     matrix diff(3,1);
+            //     diff(0) = swimmers[n].filaments[m].segments[k].x[0] - swimmers[n].body.x[0];
+            //     diff(1) = swimmers[n].filaments[m].segments[k].x[1] - swimmers[n].body.x[1];
+            //     diff(2) = swimmers[n].filaments[m].segments[k].x[2] - swimmers[n].body.x[2];
+            //     v2 += cross(diff, K);
+
+            //   }
+
+            //   // For the (K^T * M^(-1) * K)^(-1) part
+            //   out(angle_id) /= Knormsq;
+            //   out.subtract_from_block(out_id, 3, out(angle_id)*v1);
+            //   out.subtract_from_block(out_id + 3, 3, out(angle_id)*v2);
+
+            // }
+
+            // // Apply inverse of (K^T * M^(-1) * K)
+            // out.set_block(out_id, 6, swimmers[n].KTMinvK_inv*out.get_block(out_id, 6));
+            // out.divide_block(3*NSWIM*(NBLOB + NFIL*NSEG + 2) + NSWIM*NFIL, NSWIM*NFIL, seg_mob_inv);
+
+            // for (int m = 0; m < NFIL; m++){
+
+            //   const int angle_id = 3*NSWIM*(NBLOB + NFIL*NSEG + 2) + NSWIM*NFIL + NFIL*n + m;
+
+            //   Real Knormsq = 0.0;
+
+            //   matrix v1(3,1), v2(3,1);
+            //   v1.zero();
+            //   v2.zero();
+
+            //   for (int k = 0; k < NSEG; k++){
+
+            //     const int seg_force_id = 3*(n*NFIL*NSEG + m*NSEG + k);
+
+            //     matrix K(3,1);
+            //     K(0) = swimmers[n].filaments[m].vel_dir_angle[3*k];
+            //     K(1) = swimmers[n].filaments[m].vel_dir_angle[3*k + 1];
+            //     K(2) = swimmers[n].filaments[m].vel_dir_angle[3*k + 2];
+
+            //     Knormsq += dot(K,K);
+            //     v1 += K;
+
+            //     matrix diff(3,1);
+            //     diff(0) = swimmers[n].filaments[m].segments[k].x[0] - swimmers[n].body.x[0];
+            //     diff(1) = swimmers[n].filaments[m].segments[k].x[1] - swimmers[n].body.x[1];
+            //     diff(2) = swimmers[n].filaments[m].segments[k].x[2] - swimmers[n].body.x[2];
+            //     v2 += cross(diff, K);
+
+            //   }
+
+            //   out(angle_id) -= (dot(v1, out.get_block(out_id,3)) + dot(v2, out.get_block(out_id+3,3)))/Knormsq;
+
+            // }
+
+          #endif
+
           for (int m = 0; m < NFIL; m++){
 
             const std::vector<segment>& segments = swimmers[n].filaments[m].segments;
@@ -841,6 +925,12 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
             #if DYNAMIC_PHASE_EVOLUTION
 
               const int phase_id = 3*NSWIM*(NBLOB + NFIL*NSEG + 2) + NFIL*n + m;
+
+            #endif
+
+            #if DYNAMIC_SHAPE_ROTATION
+
+              const int angle_id = 3*NSWIM*(NBLOB + NFIL*NSEG + 2) + NSWIM*NFIL + NFIL*n + m;
 
             #endif
 
@@ -858,6 +948,449 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
                 out(seg_force_id) += seg_mob_inv*out(phase_id)*swimmers[n].filaments[m].vel_dir_phase[3*k];
                 out(seg_force_id + 1) += seg_mob_inv*out(phase_id)*swimmers[n].filaments[m].vel_dir_phase[3*k + 1];
                 out(seg_force_id + 2) += seg_mob_inv*out(phase_id)*swimmers[n].filaments[m].vel_dir_phase[3*k + 2];
+
+              #endif
+
+              #if DYNAMIC_SHAPE_ROTATION
+
+                // out(seg_force_id) += seg_mob_inv*out(angle_id)*swimmers[n].filaments[m].vel_dir_angle[3*k];
+                // out(seg_force_id + 1) += seg_mob_inv*out(angle_id)*swimmers[n].filaments[m].vel_dir_angle[3*k + 1];
+                // out(seg_force_id + 2) += seg_mob_inv*out(angle_id)*swimmers[n].filaments[m].vel_dir_angle[3*k + 2];
+
+              #endif
+
+            }
+
+          }
+
+          for (int m = 0; m < NBLOB; m++){
+
+            const int blob_force_id = 3*(NSWIM*NFIL*NSEG + n*NBLOB + m);
+            const matrix diff = Q*matrix(3, 1, &swimmers[n].body.blob_references[3*m]);
+            out(blob_force_id) += blob_mob_inv*(out(out_id) + out(out_id + 4)*diff(2) - out(out_id + 5)*diff(1));
+            out(blob_force_id + 1) += blob_mob_inv*(out(out_id + 1) + out(out_id + 5)*diff(0) - out(out_id + 3)*diff(2));
+            out(blob_force_id + 2) += blob_mob_inv*(out(out_id + 2) + out(out_id + 3)*diff(1) - out(out_id + 4)*diff(0));
+
+          }
+
+        }
+
+      #endif
+
+    #else
+
+      const Real Minv = 6.0*PI*MU*RBLOB; // Diagonal approx.
+
+      #if PRESCRIBED_BODY_VELOCITIES
+
+        matrix out = Minv*in;
+
+      #else
+
+        matrix out(in.num_rows, 1);
+
+        for (int n = 0; n < NSWIM; n++){
+
+          const matrix Q = swimmers[n].body.q.rot_mat();
+          const matrix Qinv = transpose(Q);
+
+          matrix body_mobility = body_mobility_reference;
+          body_mobility.set_block(0, 0, 3, 3, Q*body_mobility.get_block(0, 0, 3, 3)*Qinv);
+          body_mobility.set_block(0, 3, 3, 3, Q*body_mobility.get_block(0, 3, 3, 3)*Qinv);
+          body_mobility.set_block(3, 0, 3, 3, Q*body_mobility.get_block(3, 0, 3, 3)*Qinv);
+          body_mobility.set_block(3, 3, 3, 3, Q*body_mobility.get_block(3, 3, 3, 3)*Qinv);
+
+          matrix KTKinv = KTKinv_reference;
+          KTKinv.set_block(0, 0, 3, 3, Q*KTKinv.get_block(0, 0, 3, 3)*Qinv);
+          KTKinv.set_block(0, 3, 3, 3, Q*KTKinv.get_block(0, 3, 3, 3)*Qinv);
+          KTKinv.set_block(3, 0, 3, 3, Q*KTKinv.get_block(3, 0, 3, 3)*Qinv);
+          KTKinv.set_block(3, 3, 3, 3, Q*KTKinv.get_block(3, 3, 3, 3)*Qinv);
+
+          matrix b(6,1);
+          b.zero();
+
+          for (int m = 0; m < NBLOB; m++){
+
+            const int id = 3*(n*NBLOB + m);
+
+            b(0) -= in(id);
+            b(1) -= in(id + 1);
+            b(2) -= in(id + 2);
+
+            const matrix diff = Q*matrix(3, 1, &swimmers[n].body.blob_references[3*m]);
+
+            b(3) -= diff(1)*in(id + 2) - diff(2)*in(id + 1);
+            b(4) -= diff(2)*in(id) - diff(0)*in(id + 2);
+            b(5) -= diff(0)*in(id + 1) - diff(1)*in(id);
+
+          }
+
+          const int vel_id = 3*NSWIM*NBLOB + 6*n;
+
+          out.set_block(vel_id, 6, KTKinv*b - body_mobility*in.get_block(vel_id, 6));
+
+          for (int m = 0; m < NBLOB; m++){
+
+            const int id = 3*(n*NBLOB + m);
+            const matrix diff = Q*matrix(3, 1, &swimmers[n].body.blob_references[3*m]);
+
+            matrix block = in.get_block(id, 3) + out.get_block(vel_id, 3);
+            block(0) += out(vel_id + 4)*diff(2) - out(vel_id + 5)*diff(1);
+            block(1) += out(vel_id + 5)*diff(0) - out(vel_id + 3)*diff(2);
+            block(2) += out(vel_id + 3)*diff(1) - out(vel_id + 4)*diff(0);
+
+            out.set_block(id, 3, block);
+
+          }
+
+          out.multiply_block(0, 3*NSWIM*NBLOB, Minv);
+
+        }
+
+      #endif
+
+    #endif
+
+    return out;
+
+  }
+
+  matrix mobility_solver::apply_preconditioner_new(const matrix& in, const std::vector<swimmer>& swimmers){
+
+    #if PRESCRIBED_CILIA
+
+      matrix out = in;
+
+      const Real seg_mob_inv = 6.0*PI*MU*RSEG;
+      const Real blob_mob_inv = 6.0*PI*MU*RBLOB;
+
+      out.multiply_block(0, 3*NSWIM*NFIL*NSEG, seg_mob_inv);
+      out.multiply_block(3*NSWIM*NFIL*NSEG, 3*NSWIM*NBLOB, blob_mob_inv);
+
+      #if PRESCRIBED_BODY_VELOCITIES
+
+        #if DYNAMIC_PHASE_EVOLUTION
+
+          out.multiply_block(3*NSWIM*(NBLOB + NFIL*NSEG), NSWIM*NFIL, -1.0);
+
+          #if DYNAMIC_SHAPE_ROTATION
+
+            out.multiply_block(3*NSWIM*(NBLOB + NFIL*NSEG) + NSWIM*NFIL, NSWIM*NFIL, -1.0);
+
+          #endif
+
+          for (int n = 0; n < NSWIM; n++){
+
+            for (int m = 0; m < NFIL; m++){
+
+              Real dot_phase = 0.0;
+              Real Knorm_phase = 0.0;
+
+              #if DYNAMIC_SHAPE_ROTATION
+
+                Real dot_angle = 0.0;
+                Real Knorm_angle = 0.0;
+
+              #endif
+
+              for (int k = 0; k < 3*NSEG; k++){
+
+                dot_phase += swimmers[n].filaments[m].vel_dir_phase[k]*out(3*NSEG*(n*NFIL + m) + k);
+                Knorm_phase += swimmers[n].filaments[m].vel_dir_phase[k]*swimmers[n].filaments[m].vel_dir_phase[k];
+
+                #if DYNAMIC_SHAPE_ROTATION
+
+                  dot_angle += swimmers[n].filaments[m].vel_dir_angle[k]*out(3*NSEG*(n*NFIL + m) + k);
+                  Knorm_angle += swimmers[n].filaments[m].vel_dir_angle[k]*swimmers[n].filaments[m].vel_dir_angle[k];
+
+                #endif
+
+              }
+
+              out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m) -= dot_phase;
+              out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m) /= Knorm_phase*seg_mob_inv;
+
+              #if DYNAMIC_SHAPE_ROTATION
+
+                out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m + NSWIM*NFIL) -= dot_angle;
+                out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m + NSWIM*NFIL) /= Knorm_angle*seg_mob_inv;
+
+              #endif
+
+              for (int k = 0; k < 3*NSEG; k++){
+
+                out(3*NSEG*(n*NFIL + m) + k) += seg_mob_inv*out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m)*swimmers[n].filaments[m].vel_dir_phase[k];
+
+                #if DYNAMIC_SHAPE_ROTATION
+
+                  out(3*NSEG*(n*NFIL + m) + k) += seg_mob_inv*out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m + NSWIM*NFIL)*swimmers[n].filaments[m].vel_dir_angle[k];
+
+                #endif
+
+              }
+
+            }
+
+          }
+
+        #elif DYNAMIC_SHAPE_ROTATION
+
+          out.multiply_block(3*NSWIM*(NBLOB + NFIL*NSEG), NSWIM*NFIL, -1.0);
+
+          for (int n = 0; n < NSWIM; n++){
+
+            for (int m = 0; m < NFIL; m++){
+
+              Real dot_angle = 0.0;
+              Real Knorm_angle = 0.0;
+
+              for (int k = 0; k < 3*NSEG; k++){
+
+                dot_angle += swimmers[n].filaments[m].vel_dir_angle[k]*out(3*NSEG*(n*NFIL + m) + k);
+                Knorm_angle += swimmers[n].filaments[m].vel_dir_angle[k]*swimmers[n].filaments[m].vel_dir_angle[k];
+
+              }
+
+              out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m) -= dot_angle;
+              out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m) /= Knorm_angle*seg_mob_inv;
+
+              for (int k = 0; k < 3*NSEG; k++){
+
+                out(3*NSEG*(n*NFIL + m) + k) += seg_mob_inv*out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m)*swimmers[n].filaments[m].vel_dir_angle[k];
+
+              }
+
+            }
+
+          }
+
+        #endif
+
+      #else
+
+        out.multiply_block(3*NSWIM*(NBLOB + NFIL*NSEG), 6*NSWIM, -1.0);
+
+        for (int n = 0; n < NSWIM; n++){
+
+          const int out_id = 3*NSWIM*(NBLOB + NFIL*NSEG) + 6*n;
+
+          for (int m = 0; m < NFIL; m++){
+
+            const std::vector<segment>& segments = swimmers[n].filaments[m].segments;
+
+            for (int k = 0; k < NSEG; k++){
+
+              const int seg_force_id = 3*(n*NFIL*NSEG + m*NSEG + k);
+
+              out(out_id) -= out(seg_force_id);
+              out(out_id + 1) -= out(seg_force_id + 1);
+              out(out_id + 2) -= out(seg_force_id + 2);
+
+              const Real diff[3] = {segments[k].x[0] - swimmers[n].body.x[0], segments[k].x[1] - swimmers[n].body.x[1], segments[k].x[2] - swimmers[n].body.x[2]};
+              out(out_id + 3) -= diff[1]*out(seg_force_id + 2) - diff[2]*out(seg_force_id + 1);
+              out(out_id + 4) -= diff[2]*out(seg_force_id) - diff[0]*out(seg_force_id + 2);
+              out(out_id + 5) -= diff[0]*out(seg_force_id + 1) - diff[1]*out(seg_force_id);
+
+            }
+
+          }
+
+          const matrix Q = swimmers[n].body.q.rot_mat();
+
+          for (int m = 0; m < NBLOB; m++){
+
+            const int blob_force_id = 3*(NSWIM*NFIL*NSEG + n*NBLOB + m);
+
+            out(out_id) -= out(blob_force_id);
+            out(out_id + 1) -= out(blob_force_id + 1);
+            out(out_id + 2) -= out(blob_force_id + 2);
+
+            const matrix diff = Q*matrix(3, 1, &swimmers[n].body.blob_references[3*m]);
+            out(out_id + 3) -= diff(1)*out(blob_force_id + 2) - diff(2)*out(blob_force_id + 1);
+            out(out_id + 4) -= diff(2)*out(blob_force_id) - diff(0)*out(blob_force_id + 2);
+            out(out_id + 5) -= diff(0)*out(blob_force_id + 1) - diff(1)*out(blob_force_id + 0);
+
+          }
+
+          #if DYNAMIC_PHASE_EVOLUTION
+
+            out.multiply_block(3*NSWIM*(NBLOB + NFIL*NSEG + 2), 2*NFIL*NSWIM, -1.0);
+
+            for (int m = 0; m < NFIL; m++){
+
+              const int phase_id = 3*NSWIM*(NBLOB + NFIL*NSEG + 2) + NFIL*n + m;
+              const int angle_id = 3*NSWIM*(NBLOB + NFIL*NSEG + 2) + NFIL*n + m + NSWIM*NFIL;
+
+              Real c11 = 0.0, c22 = 0.0, c12 = 0.0;
+              Real cinv_11 = 0.0, cinv_22 = 0.0, cinv_12 = 0.0;
+              matrix v_phi(3,1), u_phi(3,1), v_theta(3,1), u_theta(3,1);
+              v_phi.zero(); u_phi.zero(); v_theta.zero(); u_theta.zero();
+
+              for (int k = 0; k < NSEG; k++){
+
+                const int seg_force_id = 3*(n*NFIL*NSEG + m*NSEG + k);
+
+                matrix k_phi(3,1);
+                k_phi(0) = swimmers[n].filaments[m].vel_dir_phase[3*k];
+                k_phi(1) = swimmers[n].filaments[m].vel_dir_phase[3*k + 1];
+                k_phi(2) = swimmers[n].filaments[m].vel_dir_phase[3*k + 2];
+
+                matrix k_theta(3,1);
+                k_theta(0) = swimmers[n].filaments[m].vel_dir_angle[3*k];
+                k_theta(1) = swimmers[n].filaments[m].vel_dir_angle[3*k + 1];
+                k_theta(2) = swimmers[n].filaments[m].vel_dir_angle[3*k + 2];
+
+                // Additional -K^T part
+                out(phase_id) -= dot(k_phi, out.get_block(seg_force_id, 3));
+                out(angle_id) -= dot(k_theta, out.get_block(seg_force_id, 3));
+
+                matrix diff(3,1);
+                diff(0) = swimmers[n].filaments[m].segments[k].x[0] - swimmers[n].body.x[0];
+                diff(1) = swimmers[n].filaments[m].segments[k].x[1] - swimmers[n].body.x[1];
+                diff(2) = swimmers[n].filaments[m].segments[k].x[2] - swimmers[n].body.x[2];
+
+                v_phi += k_phi;
+                v_theta += k_theta;
+                u_phi += cross(diff, k_phi);
+                u_theta += cross(diff, k_theta);
+
+                c11 += dot(k_phi, k_phi);
+                c22 += dot(k_theta, k_theta);
+                c12 += dot(k_phi, k_theta);
+
+              }
+
+              // For the (K^T * M^(-1) * K)^(-1) part
+              // out(phase_id) /= c11;
+              // out.subtract_from_block(out_id, 3, out(phase_id)*v_phi);
+              // out.subtract_from_block(out_id + 3, 3, out(phase_id)*u_phi);
+
+              // For the (K^T * M^(-1) * K)^(-1) part
+              // [I 0] [0 Cinv]
+              Real det = c11*c22 - c12*c12;
+              cinv_11 = c22 / det;
+              cinv_22 = c11 / det;
+              cinv_12 = - c12 / det;
+              /*NEED TO CHECK!!!!*/
+              /*ORDER MATTERS*/
+              Real new_phi = cinv_11*out(phase_id) + cinv_12*out(phase_id);
+              Real new_theta = cinv_12*out(angle_id) + cinv_22*out(angle_id);
+              out(phase_id) = new_phi;
+              out(angle_id) = new_theta;
+
+              // [I -B] [0 I]
+              out.subtract_from_block(out_id, 3, out(phase_id)*v_phi);
+              out.subtract_from_block(out_id + 3, 3, out(phase_id)*u_phi);
+
+            }
+
+            // Apply inverse of (K^T * M^(-1) * K)
+            out.set_block(out_id, 6, swimmers[n].KTMinvK_inv*out.get_block(out_id, 6));
+            out.divide_block(3*NSWIM*(NBLOB + NFIL*NSEG + 2), 2*NSWIM*NFIL, seg_mob_inv);
+
+            for (int m = 0; m < NFIL; m++){
+
+              const int phase_id = 3*NSWIM*(NBLOB + NFIL*NSEG + 2) + NFIL*n + m;
+              const int angle_id = 3*NSWIM*(NBLOB + NFIL*NSEG + 2) + NFIL*n + m + NSWIM*NFIL;
+
+              Real c11 = 0.0, c22 = 0.0, c12 = 0.0;
+              Real cinv_11 = 0.0, cinv_22 = 0.0, cinv_12 = 0.0;
+              matrix v_phi(3,1), u_phi(3,1), v_theta(3,1), u_theta(3,1);
+              v_phi.zero(); u_phi.zero(); v_theta.zero(); u_theta.zero();
+
+              for (int k = 0; k < NSEG; k++){
+
+                matrix k_phi(3,1);
+                k_phi(0) = swimmers[n].filaments[m].vel_dir_phase[3*k];
+                k_phi(1) = swimmers[n].filaments[m].vel_dir_phase[3*k + 1];
+                k_phi(2) = swimmers[n].filaments[m].vel_dir_phase[3*k + 2];
+
+                matrix k_theta(3,1);
+                k_theta(0) = swimmers[n].filaments[m].vel_dir_angle[3*k];
+                k_theta(1) = swimmers[n].filaments[m].vel_dir_angle[3*k + 1];
+                k_theta(2) = swimmers[n].filaments[m].vel_dir_angle[3*k + 2];
+
+                matrix diff(3,1);
+                diff(0) = swimmers[n].filaments[m].segments[k].x[0] - swimmers[n].body.x[0];
+                diff(1) = swimmers[n].filaments[m].segments[k].x[1] - swimmers[n].body.x[1];
+                diff(2) = swimmers[n].filaments[m].segments[k].x[2] - swimmers[n].body.x[2];
+
+                v_phi += k_phi;
+                v_theta += k_theta;
+                u_phi += cross(diff, k_phi);
+                u_theta += cross(diff, k_theta);
+
+                c11 += dot(k_phi, k_phi);
+                c22 += dot(k_theta, k_theta);
+                c12 += dot(k_phi, k_theta);
+
+              }
+
+              // [I 0] [-C_invB^T]
+              // out(phase_id) -= (dot(v_phi, out.get_block(out_id,3)) + dot(u_phi, out.get_block(out_id+3,3)))/c11;
+
+              Real det = c11*c22 - c12*c12;
+              cinv_11 = c22 / det;
+              cinv_22 = c11 / det;
+              cinv_12 = - c12 / det;
+              out(phase_id) -= cinv_11 * dot(v_phi, out.get_block(out_id,3))
+                             + cinv_12 * dot(v_theta, out.get_block(out_id,3))
+                             + cinv_11 * dot(u_phi, out.get_block(out_id+3,3))
+                             + cinv_12 * dot(u_theta, out.get_block(out_id+3,3));
+
+              out(angle_id) -= cinv_12 * dot(v_phi, out.get_block(out_id,3))
+                             + cinv_22 * dot(v_theta, out.get_block(out_id,3))
+                             + cinv_12 * dot(u_phi, out.get_block(out_id+3,3))
+                             + cinv_22 * dot(u_theta, out.get_block(out_id+3,3));
+
+
+            }
+
+          #else
+
+            out.set_block(out_id, 6, swimmers[n].KTMinvK_inv*out.get_block(out_id, 6));
+
+          #endif
+  
+          // Compute s1 = M_inv(r1 + Ks2)
+          for (int m = 0; m < NFIL; m++){
+
+            const std::vector<segment>& segments = swimmers[n].filaments[m].segments;
+
+            #if DYNAMIC_PHASE_EVOLUTION
+
+              const int phase_id = 3*NSWIM*(NBLOB + NFIL*NSEG + 2) + NFIL*n + m;
+
+            #endif
+
+            #if DYNAMIC_SHAPE_ROTATION
+
+              const int angle_id = 3*NSWIM*(NBLOB + NFIL*NSEG + 2) + NFIL*n + m + NSWIM*NFIL;
+
+            #endif
+
+            for (int k = 0; k < NSEG; k++){
+
+              const int seg_force_id = 3*(n*NFIL*NSEG + m*NSEG + k);
+              const Real diff[3] = {segments[k].x[0] - swimmers[n].body.x[0], segments[k].x[1] - swimmers[n].body.x[1], segments[k].x[2] - swimmers[n].body.x[2]};
+              out(seg_force_id) += seg_mob_inv*(out(out_id) + out(out_id + 4)*diff[2] - out(out_id + 5)*diff[1]);
+              out(seg_force_id + 1) += seg_mob_inv*(out(out_id + 1) + out(out_id + 5)*diff[0] - out(out_id + 3)*diff[2]);
+              out(seg_force_id + 2) += seg_mob_inv*(out(out_id + 2) + out(out_id + 3)*diff[1] - out(out_id + 4)*diff[0]);
+
+              #if DYNAMIC_PHASE_EVOLUTION
+
+                // Additional K mult part
+                out(seg_force_id) += seg_mob_inv*out(phase_id)*swimmers[n].filaments[m].vel_dir_phase[3*k];
+                out(seg_force_id + 1) += seg_mob_inv*out(phase_id)*swimmers[n].filaments[m].vel_dir_phase[3*k + 1];
+                out(seg_force_id + 2) += seg_mob_inv*out(phase_id)*swimmers[n].filaments[m].vel_dir_phase[3*k + 2];
+
+              #endif
+
+              #if DYNAMIC_SHAPE_ROTATION
+
+                out(seg_force_id) += seg_mob_inv*out(angle_id)*swimmers[n].filaments[m].vel_dir_angle[3*k];
+                out(seg_force_id + 1) += seg_mob_inv*out(angle_id)*swimmers[n].filaments[m].vel_dir_angle[3*k + 1];
+                out(seg_force_id + 2) += seg_mob_inv*out(angle_id)*swimmers[n].filaments[m].vel_dir_angle[3*k + 2];
 
               #endif
 
@@ -1007,7 +1540,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
             int out_id = 3*(n*NFIL*NSEG + m);
 
-            // -K mult
+            // -K mult V, Omega
             out(out_id) -= in(swim_id);
             out(out_id + 1) -= in(swim_id + 1);
             out(out_id + 2) -= in(swim_id + 2);
@@ -1017,7 +1550,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
             out(out_id + 1) -= in(swim_id + 5)*diff[0] - in(swim_id + 3)*diff[2];
             out(out_id + 2) -= in(swim_id + 3)*diff[1] - in(swim_id + 4)*diff[0];
 
-            // -K^T mult
+            // -K^T mult lambda_s
             const Real seg_force[3] = {f_segs_host[2*out_id], f_segs_host[2*out_id + 1], f_segs_host[2*out_id + 2]};
             out(swim_id) -= seg_force[0];
             out(swim_id + 1) -= seg_force[1];
@@ -1034,7 +1567,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
             const int out_id = 3*(n*NBLOB + NSWIM*NFIL*NSEG + m);
 
-            // -K mult
+            // -K mult V, Omega
             out(out_id) -= in(swim_id);
             out(out_id + 1) -= in(swim_id + 1);
             out(out_id + 2) -= in(swim_id + 2);
@@ -1044,7 +1577,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
             out(out_id + 1) -= in(swim_id + 5)*diff(0) - in(swim_id + 3)*diff(2);
             out(out_id + 2) -= in(swim_id + 3)*diff(1) - in(swim_id + 4)*diff(0);
 
-            // -K^T mult
+            // -K^T mult lambda_b
             const Real blob_force[3] = {f_blobs_host[3*(n*NBLOB + m)], f_blobs_host[3*(n*NBLOB + m) + 1], f_blobs_host[3*(n*NBLOB + m) + 2]};
             out(swim_id) -= blob_force[0];
             out(swim_id + 1) -= blob_force[1];
@@ -1087,7 +1620,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
             for (int k = 0; k < 3*NSEG; k++){
 
-              // "-K" mult
+              // "-K" mult K_phi*phi
               out(out_pos + k) -= phi_dot*swimmers[n].filaments[m].vel_dir_phase[k];
 
               // "-K^T" mult
@@ -1095,7 +1628,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
               #if DYNAMIC_SHAPE_ROTATION
 
-                // "-K" mult
+                // "-K" mult K_theta*theta
                 out(out_pos + k) -= shape_rotation_angle_dot*swimmers[n].filaments[m].vel_dir_angle[k];
 
                 // "-K^T" mult
@@ -1303,7 +1836,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
             int out_id = 3*(n*NFIL*NSEG + m);
 
-            // -K mult
+            // -K mult lambda_fil -= K*V_body
             out(out_id) -= in(swim_id);
             out(out_id + 1) -= in(swim_id + 1);
             out(out_id + 2) -= in(swim_id + 2);
@@ -1782,13 +2315,15 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
       // Produce the new orthonormal vector, using the appropriate values to update H as we do.
       #if USE_RIGHT_PRECON
 
-        matrix preconed = apply_preconditioner(Q.get_col(iter-1), swimmers);
+        matrix preconed = apply_preconditioner_new(Q.get_col(iter-1), swimmers);
 
         #if DISPLAYTIME
           { cudaDeviceSynchronize(); preconditioned_time += (get_time() - time_start); time_start = get_time();}
         #endif
 
-        Q.set_col(iter, system_matrix_mult_new(preconed, swimmers));
+        matrix new_soln = system_matrix_mult_new(preconed, swimmers);
+
+        Q.set_col(iter, new_soln);
 
         // matrix moded = system_matrix_mult_new(soln, swimmers);
         // matirx origin = system_matrix_mult_new(soln, swimmers);
@@ -1804,18 +2339,19 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
         // std::cout<<"diffsq="<<norm(diffsq)<<"\t";
         // std::cout<<std::endl;
 
-        // std::string Qname = "test_Q.dat";
-        // std::ofstream out_file(Qname);
+        // std::string Qname = "soln.dat";
+        // std::ofstream out_file(Qname, std::ios::app);
         // if (out_file.is_open()) {
-        //   for(int i=0; i<Q.num_rows-2*NFIL-6; i++){
-        //     out_file << diffsq(i, 0) << " ";
+        //   for(int i=0; i<Q.num_rows; i++){
+        //     out_file << new_soln(i, 0) << " ";
         //   }
-        //   out_file << std::endl;
+        //   out_file << std::endl << std::endl;
         //   out_file.close();
         // }
         // else{
         //   std::cerr << "Failed to open input file." << std::endl;
         // }
+        
 
       #else
 
@@ -1918,7 +2454,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
         #if USE_RIGHT_PRECON
 
-          soln += apply_preconditioner(temp_soln, swimmers);
+          soln += apply_preconditioner_new(temp_soln, swimmers);
 
           // When we use a right preconditioner, the velocity arrays are storing M*M_approx_inv*F
           // rather than M*F (and thus the force arrays store M_approx_inv*F rather than F). We need to

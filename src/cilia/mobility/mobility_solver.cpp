@@ -1214,7 +1214,10 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
           #if DYNAMIC_PHASE_EVOLUTION
 
-            out.multiply_block(3*NSWIM*(NBLOB + NFIL*NSEG + 2), 2*NFIL*NSWIM, -1.0);
+            out.multiply_block(3*NSWIM*(NBLOB + NFIL*NSEG + 2), NFIL*NSWIM, -1.0);
+            #if DYNAMIC_SHAPE_ROTATION
+              out.multiply_block(3*NSWIM*(NBLOB + NFIL*NSEG + 2) + NFIL*NSWIM, NFIL*NSWIM, -1.0);
+            #endif
 
             for (int m = 0; m < NFIL; m++){
 
@@ -1261,32 +1264,38 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
               }
 
               // For the (K^T * M^(-1) * K)^(-1) part
-              // out(phase_id) /= c11;
-              // out.subtract_from_block(out_id, 3, out(phase_id)*v_phi);
-              // out.subtract_from_block(out_id + 3, 3, out(phase_id)*u_phi);
+              #if !DYNAMIC_SHAPE_ROTATION
+                out(phase_id) /= c11;
+                out.subtract_from_block(out_id, 3, out(phase_id)*v_phi);
+                out.subtract_from_block(out_id + 3, 3, out(phase_id)*u_phi);
+              #else
+                // [I 0] [0 Cinv]
+                Real det = c11*c22 - c12*c12;
+                cinv_11 = c22 / det;
+                cinv_22 = c11 / det;
+                cinv_12 = - c12 / det;
+                /*NEED TO CHECK!!!!*/
+                /*ORDER MATTERS*/
+                Real new_phi = cinv_11*out(phase_id) + cinv_12*out(angle_id);
+                Real new_theta = cinv_12*out(phase_id) + cinv_22*out(angle_id);
+                out(phase_id) = new_phi;
+                out(angle_id) = new_theta;
 
-              // For the (K^T * M^(-1) * K)^(-1) part
-              // [I 0] [0 Cinv]
-              Real det = c11*c22 - c12*c12;
-              cinv_11 = c22 / det;
-              cinv_22 = c11 / det;
-              cinv_12 = - c12 / det;
-              /*NEED TO CHECK!!!!*/
-              /*ORDER MATTERS*/
-              Real new_phi = cinv_11*out(phase_id) + cinv_12*out(phase_id);
-              Real new_theta = cinv_12*out(angle_id) + cinv_22*out(angle_id);
-              out(phase_id) = new_phi;
-              out(angle_id) = new_theta;
-
-              // [I -B] [0 I]
-              out.subtract_from_block(out_id, 3, out(phase_id)*v_phi);
-              out.subtract_from_block(out_id + 3, 3, out(phase_id)*u_phi);
+                // [I -B] [0 I]
+                out.subtract_from_block(out_id, 3, out(phase_id)*v_phi);
+                out.subtract_from_block(out_id + 3, 3, out(phase_id)*u_phi);
+                out.subtract_from_block(out_id, 3, out(angle_id)*v_theta);
+                out.subtract_from_block(out_id + 3, 3, out(angle_id)*u_theta);
+              #endif
 
             }
 
             // Apply inverse of (K^T * M^(-1) * K)
             out.set_block(out_id, 6, swimmers[n].KTMinvK_inv*out.get_block(out_id, 6));
-            out.divide_block(3*NSWIM*(NBLOB + NFIL*NSEG + 2), 2*NSWIM*NFIL, seg_mob_inv);
+            out.divide_block(3*NSWIM*(NBLOB + NFIL*NSEG + 2), NSWIM*NFIL, seg_mob_inv);
+            #if DYNAMIC_SHAPE_ROTATION
+              out.divide_block(3*NSWIM*(NBLOB + NFIL*NSEG + 2) + NSWIM*NFIL, NSWIM*NFIL, seg_mob_inv);
+            #endif
 
             for (int m = 0; m < NFIL; m++){
 
@@ -1327,22 +1336,23 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
               }
 
               // [I 0] [-C_invB^T]
-              // out(phase_id) -= (dot(v_phi, out.get_block(out_id,3)) + dot(u_phi, out.get_block(out_id+3,3)))/c11;
+              #if !DYNAMIC_SHAPE_ROTATION
+                out(phase_id) -= (dot(v_phi, out.get_block(out_id,3)) + dot(u_phi, out.get_block(out_id+3,3)))/c11;
+              #else
+                Real det = c11*c22 - c12*c12;
+                cinv_11 = c22 / det;
+                cinv_22 = c11 / det;
+                cinv_12 = - c12 / det;
+                out(phase_id) -= cinv_11 * dot(v_phi, out.get_block(out_id,3))
+                              + cinv_12 * dot(v_theta, out.get_block(out_id,3))
+                              + cinv_11 * dot(u_phi, out.get_block(out_id+3,3))
+                              + cinv_12 * dot(u_theta, out.get_block(out_id+3,3));
 
-              Real det = c11*c22 - c12*c12;
-              cinv_11 = c22 / det;
-              cinv_22 = c11 / det;
-              cinv_12 = - c12 / det;
-              out(phase_id) -= cinv_11 * dot(v_phi, out.get_block(out_id,3))
-                             + cinv_12 * dot(v_theta, out.get_block(out_id,3))
-                             + cinv_11 * dot(u_phi, out.get_block(out_id+3,3))
-                             + cinv_12 * dot(u_theta, out.get_block(out_id+3,3));
-
-              out(angle_id) -= cinv_12 * dot(v_phi, out.get_block(out_id,3))
-                             + cinv_22 * dot(v_theta, out.get_block(out_id,3))
-                             + cinv_12 * dot(u_phi, out.get_block(out_id+3,3))
-                             + cinv_22 * dot(u_theta, out.get_block(out_id+3,3));
-
+                out(angle_id) -= cinv_12 * dot(v_phi, out.get_block(out_id,3))
+                              + cinv_22 * dot(v_theta, out.get_block(out_id,3))
+                              + cinv_12 * dot(u_phi, out.get_block(out_id+3,3))
+                              + cinv_22 * dot(u_theta, out.get_block(out_id+3,3));
+              #endif
 
             }
 

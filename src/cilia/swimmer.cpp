@@ -1240,10 +1240,7 @@ void swimmer::write_backup(std::ofstream& backup_file) const {
           Real c11 = 0.0, c22 = 0.0, c12 = 0.0;
           Real cinv_11 = 0.0, cinv_22 = 0.0, cinv_12 = 0.0;
           matrix v_phi(3,1), u_phi(3,1), v_theta(3,1), u_theta(3,1);
-          v_phi.zero();
-          u_phi.zero();
-          v_theta.zero();
-          u_theta.zero();
+          v_phi.zero(); u_phi.zero(); v_theta.zero(); u_theta.zero();
 
           for (int m = 0; m < NSEG; m++){
 
@@ -1271,25 +1268,28 @@ void swimmer::write_backup(std::ofstream& backup_file) const {
             c22 += dot(k_theta, k_theta);
             c12 += dot(k_phi, k_theta);
 
-          }
-          Real det = c11*c22 - c12*c12;
-          cinv_11 = c22 / det;
-          cinv_22 = c11 / det;
-          cinv_12 = - c12 / det;
+          }          
+          #if !DYNAMIC_SHAPE_ROTATION
+            C_Ainv_B.add_to_block(0, 0, 3, 3, v_phi*transpose(v_phi)/c11);
+            C_Ainv_B.add_to_block(3, 0, 3, 3, u_phi*transpose(v_phi)/c11);
+            C_Ainv_B.add_to_block(3, 3, 3, 3, u_phi*transpose(u_phi)/c11);
+          #else
+            Real det = c11*c22 - c12*c12;
+            cinv_11 = c22 / det;
+            cinv_22 = c11 / det;
+            cinv_12 = - c12 / det;
 
-          // C_Ainv_B.add_to_block(0, 0, 3, 3, v_phi*transpose(v_phi)/c11);
-          // C_Ainv_B.add_to_block(3, 0, 3, 3, u_phi*transpose(v_phi)/c11);
-          // C_Ainv_B.add_to_block(3, 3, 3, 3, u_phi*transpose(u_phi)/c11);
+            matrix C_Ainv_B11 = v_phi*transpose(v_phi)*cinv_11 + v_phi*transpose(v_theta)*cinv_12
+                            + v_theta*transpose(v_phi)*cinv_12 +  v_theta*transpose(v_theta)*cinv_22;
+            matrix C_Ainv_B21 = u_phi*transpose(v_phi)*cinv_11 + u_phi*transpose(v_theta)*cinv_12
+                            + u_theta*transpose(v_phi)*cinv_12 +  u_theta*transpose(v_theta)*cinv_22;
+            matrix C_Ainv_B22 = u_phi*transpose(u_phi)*cinv_11 + u_phi*transpose(u_theta)*cinv_12
+                            + u_theta*transpose(u_phi)*cinv_12 +  u_theta*transpose(u_theta)*cinv_22;
+            C_Ainv_B.add_to_block(0, 0, 3, 3, C_Ainv_B11);
+            C_Ainv_B.add_to_block(3, 0, 3, 3, C_Ainv_B21);
+            C_Ainv_B.add_to_block(3, 3, 3, 3, C_Ainv_B22);
 
-          matrix C_Ainv_B11 = v_phi*transpose(v_phi)*cinv_11 + v_phi*transpose(v_theta)*cinv_12
-                          + v_theta*transpose(v_phi)*cinv_12 +  v_theta*transpose(v_theta)*cinv_22;
-          matrix C_Ainv_B21 = u_phi*transpose(v_phi)*cinv_11 + u_phi*transpose(v_theta)*cinv_12
-                          + u_theta*transpose(v_phi)*cinv_12 +  u_theta*transpose(v_theta)*cinv_22;
-          matrix C_Ainv_B22 = u_phi*transpose(u_phi)*cinv_11 + u_phi*transpose(u_theta)*cinv_12
-                          + u_theta*transpose(u_phi)*cinv_12 +  u_theta*transpose(u_theta)*cinv_22;
-          C_Ainv_B.add_to_block(0, 0, 3, 3, C_Ainv_B11);
-          C_Ainv_B.add_to_block(3, 0, 3, 3, C_Ainv_B21);
-          C_Ainv_B.add_to_block(3, 3, 3, 3, C_Ainv_B22);
+          #endif
 
         }
 

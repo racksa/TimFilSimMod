@@ -305,10 +305,10 @@ void fcm_mobility_solver::evaluate_segment_segment_mobility(){
   cudaSetDevice(0);
   int num_thread_blocks = (num_segs[0] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
 
-  cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
-  cufcm_solver->reform_fseg(f_segs_device[0], true);
-  cufcm_solver->Mss();
-  cufcm_solver->reform_vseg(v_segs_device[0], false);
+  // cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
+  // cufcm_solver->reform_fseg(f_segs_device[0], true);
+  // cufcm_solver->Mss();
+  // cufcm_solver->reform_vseg(v_segs_device[0], false);
 
   // Mss_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_segs_device[0], f_segs_device[0], x_segs_device[0], 0, num_segs[0]);
 }
@@ -318,10 +318,10 @@ void fcm_mobility_solver::evaluate_blob_blob_mobility(){
   cudaSetDevice(0);
   int num_thread_blocks = (num_blobs[0] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
 
-  cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
-  cufcm_solver->reform_fblob(f_blobs_device[0], true);
-  cufcm_solver->Mbb();
-  cufcm_solver->reform_vblob(v_blobs_device[0], false);
+  // cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
+  // cufcm_solver->reform_fblob(f_blobs_device[0], true);
+  // cufcm_solver->Mbb();
+  // cufcm_solver->reform_vblob(v_blobs_device[0], false);
 
   // Mbb_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_blobs_device[0], f_blobs_device[0], x_blobs_device[0], 0, num_blobs[0]);
 }
@@ -331,11 +331,11 @@ void fcm_mobility_solver::evaluate_segment_blob_mobility(){
   cudaSetDevice(0);
   int num_thread_blocks = (num_segs[0] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
 
-  cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
-  cufcm_solver->reform_fblob(f_blobs_device[0], true);
-  cufcm_solver->reform_vseg(v_segs_device[0], true);
-  cufcm_solver->Msb();
-  cufcm_solver->reform_vseg(v_segs_device[0], false);
+  // cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
+  // cufcm_solver->reform_fblob(f_blobs_device[0], true);
+  // cufcm_solver->reform_vseg(v_segs_device[0], true);
+  // cufcm_solver->Msb();
+  // cufcm_solver->reform_vseg(v_segs_device[0], false);
 
   // Msb_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_segs_device[0], f_blobs_device[0], x_segs_device[0], x_blobs_device[0], 0, num_segs[0]);
 }
@@ -345,11 +345,11 @@ void fcm_mobility_solver::evaluate_blob_segment_mobility(){
   cudaSetDevice(0);
   int num_thread_blocks = (num_blobs[0] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
 
-  cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
-  cufcm_solver->reform_fseg(f_segs_device[0], true);
-  cufcm_solver->reform_vblob(v_blobs_device[0], true);
-  cufcm_solver->Mbs();
-  cufcm_solver->reform_vblob(v_blobs_device[0], false);
+  // cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
+  // cufcm_solver->reform_fseg(f_segs_device[0], true);
+  // cufcm_solver->reform_vblob(v_blobs_device[0], true);
+  // cufcm_solver->Mbs();
+  // cufcm_solver->reform_vblob(v_blobs_device[0], false);
 
   // Mbs_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_blobs_device[0], f_segs_device[0], x_blobs_device[0], x_segs_device[0], 0, num_blobs[0]);
 }
@@ -368,9 +368,28 @@ void fcm_mobility_solver::write_repulsion(){
 }
 
 void fcm_mobility_solver::copy_to_fcm(){
+  // cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
+  // cufcm_solver->reform_fblob(f_blobs_device[0], true);
+  // cufcm_solver->reform_fseg(f_segs_device[0], true);
+  // cufcm_solver->reform_vblob(v_blobs_device[0], true);
+  // cufcm_solver->reform_vseg(v_segs_device[0], true);
+}
+
+void fcm_mobility_solver::evaluate_full_mobility(){
+  cudaSetDevice(0);
+  int num_thread_blocks = (num_segs[0] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
+  // Mss_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_segs_device[0], f_segs_device[0], x_segs_device[0], 0, num_segs[0]);
+  // Mbb_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_blobs_device[0], f_blobs_device[0], x_blobs_device[0], 0, num_blobs[0]);
+
   cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
-  cufcm_solver->reform_fblob(f_blobs_device[0], true);
   cufcm_solver->reform_fseg(f_segs_device[0], true);
-  cufcm_solver->reform_vblob(v_blobs_device[0], true);
-  cufcm_solver->reform_vseg(v_segs_device[0], true);
+  cufcm_solver->reform_fblob(f_blobs_device[0], true);
+  cufcm_solver->evaluate_mobility_cilia();
+  cufcm_solver->reform_vseg(v_segs_device[0], false);
+  cufcm_solver->reform_vblob(v_blobs_device[0], false);
+
+  // cufcm_solver->write_data_call();
+  
+  copy_segment_velocities_to_host();
+  copy_blob_velocities_to_host();
 }

@@ -1,6 +1,6 @@
 VPATH = src/general src/flow_field src/cilia src/cilia/mobility
 GEN_FLAGS = -I. -Isrc/general -Isrc/flow_field -Isrc/cilia -Isrc/cilia/mobility -g -w -O3 -lineinfo
-CUFCM_ROOT = ../CUFCM/
+CUFCM_ROOT = ../CUFCM/src/
 
 # We only compile the mobility solver that the user has selected.
 # This is particularly important when using UAMMD, which takes a long time to compile
@@ -110,4 +110,4 @@ LINK=-lcublas -lcufft -llapacke -lcblas -lcurand -lcuda -lineinfo -lopenblas
 # CUFCM_FILES_SIMPLE = $(CUFCM_ROOT)CUFCM_CELLLIST.cu $(CUFCM_ROOT)CUFCM_FCM.cu $(CUFCM_ROOT)CUFCM_DATA.cu $(CUFCM_ROOT)CUFCM_SOLVER.cu $(CUFCM_ROOT)CUFCM_CORRECTION.cu
 
 cilia_nvidia4_withCUFCM: $(CILIA_CPP) $(CILIA_CUDA)
-	nvcc $^ $(NVCC_FLAGS) $(NVIDIA4_OPTS) $(LINK) $(GEN_FLAGS) -o bin/cilia_64fil_6000blob_2R_2torsion
+	nvcc $^ -DUSE_DOUBLE_PRECISION $(NVCC_FLAGS) $(NVIDIA4_OPTS) $(LINK) $(GEN_FLAGS) -o bin/cilia_161fil_6000blob_6R_2torsion

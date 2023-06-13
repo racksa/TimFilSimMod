@@ -645,9 +645,6 @@
   };
 
 
-
-
-
   void seed_blobs(Real *const blob_references, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs){
 
     const std::string file_name_trunk = GENERATRIX_FILE_NAME+std::to_string(NBLOB);
@@ -684,113 +681,111 @@
 
 
   void seed_rod_blobs(Real *const blob_references, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs){
+  
+  
+    const std::string file_name_trunk = GENERATRIX_FILE_NAME+std::to_string(NBLOB);
 
-  const std::string file_name_trunk = GENERATRIX_FILE_NAME+std::to_string(NBLOB);
+    // std::cout << "Seeding the blobs for rods..." << std::endl;
 
-  // std::cout << "Seeding the blobs for rods..." << std::endl;
+    shape_fourier_description shape;
 
-  shape_fourier_description shape;
+    Real* X;
+    cudaMallocManaged(&X, 3*NBLOB*sizeof(Real));
 
-  Real* X;
-  cudaMallocManaged(&X, 3*NBLOB*sizeof(Real));
+    ////////////////////////////////////////////////
+    #if ROD
 
-  ////////////////////////////////////////////////
-  #if ROD
+      int pair = 0;
 
-    int pair = 0;
+      for (int n=0; n<NBLOB; n+=2){
 
-    for (int n=0; n<NBLOB; n+=2){
+        const Real theta = pair*0.5*PI;
+        const Real x = sqrt(2.0)*RBLOB*(pair - 0.25*NBLOB + 0.5);
 
-      const Real theta = pair*0.5*PI;
-      const Real x = sqrt(2.0)*RBLOB*(pair - 0.25*NBLOB + 0.5);
+        X[3*n] = x;
+        X[3*n + 1] = RBLOB*cos(theta);
+        X[3*n + 2] = RBLOB*sin(theta);
 
-      X[3*n] = x;
-      X[3*n + 1] = RBLOB*cos(theta);
-      X[3*n + 2] = RBLOB*sin(theta);
+        X[3*(n+1)] = x;
+        X[3*(n+1) + 1] = -RBLOB*cos(theta);
+        X[3*(n+1) + 2] = -RBLOB*sin(theta);
 
-      X[3*(n+1)] = x;
-      X[3*(n+1) + 1] = -RBLOB*cos(theta);
-      X[3*(n+1) + 2] = -RBLOB*sin(theta);
+        pair++;
 
-      pair++;
+      }
 
-    }
+    #elif RIGIDWALL
 
-  #elif RIGIDWALL
+      const int blob_grid_dim_x = int(sqrt(Real(NBLOB)));
+      const int blob_grid_dim_y = std::max<int>(1, int(ceil(NBLOB/Real(blob_grid_dim_x))));
+      const double blob_grid_step_x = 2.2*RBLOB;
+      const double blob_grid_step_y = 2.2*RBLOB;
 
-    const int blob_grid_dim_x = int(sqrt(Real(NBLOB)));
-    const int blob_grid_dim_y = std::max<int>(1, int(ceil(NBLOB/Real(blob_grid_dim_x))));
-    const double blob_grid_step_x = 2.2*RBLOB;
-    const double blob_grid_step_y = 2.2*RBLOB;
+      for (int i = 0; i < blob_grid_dim_x; i++){
+        for (int j = 0; j < blob_grid_dim_y; j++){
 
-    for (int i = 0; i < blob_grid_dim_x; i++){
-      for (int j = 0; j < blob_grid_dim_y; j++){
+          const int blob_id = j + i*blob_grid_dim_y;
 
-        const int blob_id = j + i*blob_grid_dim_y;
+          if (blob_id < NBLOB){
 
-        if (blob_id < NBLOB){
-
-          X[3*blob_id + 0] = i*blob_grid_step_x + blob_grid_step_x;
-          X[3*blob_id + 1] = j*blob_grid_step_y + blob_grid_step_y;
-          X[3*blob_id + 2] = 0.0;
+            X[3*blob_id + 0] = i*blob_grid_step_x + blob_grid_step_x;
+            X[3*blob_id + 1] = j*blob_grid_step_y + blob_grid_step_y;
+            X[3*blob_id + 2] = 0.0;
+          }
         }
       }
+
+    #endif
+    ////////////////////////////////////////////////
+
+    for (int n = 0; n < NBLOB; n++){
+
+      blob_references[3*n] = X[3*n];
+      blob_references[3*n + 1] = X[3*n + 1];
+      blob_references[3*n + 2] = X[3*n + 2];
+
+      const Real theta = std::atan2(std::sqrt(X[3*n]*X[3*n] + X[3*n + 1]*X[3*n + 1]), X[3*n + 2]);
+      const Real phi = std::atan2(X[3*n + 1], X[3*n]);
+
+      matrix frame = shape.full_frame(theta, phi);
+
+      polar_dir_refs[3*n] = frame(0);
+      polar_dir_refs[3*n + 1] = frame(1);
+      polar_dir_refs[3*n + 2] = frame(2);
+
+      azi_dir_refs[3*n] = frame(3);
+      azi_dir_refs[3*n + 1] = frame(4);
+      azi_dir_refs[3*n + 2] = frame(5);
+
+      normal_refs[3*n] = frame(6);
+      normal_refs[3*n + 1] = frame(7);
+      normal_refs[3*n + 2] = frame(8);
+
     }
 
-  #endif
-  ////////////////////////////////////////////////
 
-  for (int n = 0; n < NBLOB; n++){
+    std::ofstream blob_ref_file(file_name_trunk + ".seed");
+    std::ofstream polar_file(file_name_trunk + ".polar_dir");
+    std::ofstream azi_file(file_name_trunk + ".azi_dir");
+    std::ofstream normal_file(file_name_trunk + ".normal");
 
-    blob_references[3*n] = X[3*n];
-    blob_references[3*n + 1] = X[3*n + 1];
-    blob_references[3*n + 2] = X[3*n + 2];
+    for (int n = 0; n < 3*NBLOB; n++){
 
-    const Real theta = std::atan2(std::sqrt(X[3*n]*X[3*n] + X[3*n + 1]*X[3*n + 1]), X[3*n + 2]);
-    const Real phi = std::atan2(X[3*n + 1], X[3*n]);
+      blob_ref_file << blob_references[n] << " ";
+      polar_file << polar_dir_refs[n] << " ";
+      azi_file << azi_dir_refs[n] << " ";
+      normal_file << normal_refs[n] << " ";
 
-    matrix frame = shape.full_frame(theta, phi);
+    }
 
-    polar_dir_refs[3*n] = frame(0);
-    polar_dir_refs[3*n + 1] = frame(1);
-    polar_dir_refs[3*n + 2] = frame(2);
+    blob_ref_file.close();
+    polar_file.close();
+    azi_file.close();
+    normal_file.close();
 
-    azi_dir_refs[3*n] = frame(3);
-    azi_dir_refs[3*n + 1] = frame(4);
-    azi_dir_refs[3*n + 2] = frame(5);
-
-    normal_refs[3*n] = frame(6);
-    normal_refs[3*n + 1] = frame(7);
-    normal_refs[3*n + 2] = frame(8);
-
-  }
-
-
-  std::ofstream blob_ref_file(file_name_trunk + ".seed");
-  std::ofstream polar_file(file_name_trunk + ".polar_dir");
-  std::ofstream azi_file(file_name_trunk + ".azi_dir");
-  std::ofstream normal_file(file_name_trunk + ".normal");
-
-  for (int n = 0; n < 3*NBLOB; n++){
-
-    blob_ref_file << blob_references[n] << " ";
-    polar_file << polar_dir_refs[n] << " ";
-    azi_file << azi_dir_refs[n] << " ";
-    normal_file << normal_refs[n] << " ";
-
-  }
-
-  blob_ref_file.close();
-  polar_file.close();
-  azi_file.close();
-  normal_file.close();
-
-  // std::cout << "...done!" << std::endl;
+    // std::cout << "...done!" << std::endl;
 
   };
-
-
-
 
 
   void seed_filaments(Real *const filament_references, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs){
@@ -811,11 +806,11 @@
 
     shape_fourier_description shape;
 
-    #if EQUATORIAL_SEEDING
-
-    // TODO: Make this work for non-spheres.
+    #if EQUATORIAL_SEEDING // TODO: Make this work for non-spheres.
 
       std::cout << "Seeding locations according to a spiral pattern..." << std::endl;
+
+      
 
       const Real theta_max = 0.5/Real(R_OVER_L); // = 0.5 * 2*PI*L/(2*PI*R), meaning the width of the band is L as measured across the sphere surface.
       const Real h = 2.0*std::sin(theta_max);
@@ -835,9 +830,9 @@
 
       }
 
-    #elif PLATY_SEEDING
+    #elif PLATY_SEEDING // TODO: Make this work for non-spheres.
 
-    // TODO: Make this work for non-spheres.
+    
 
       std::cout << "Seeding..." << std::endl;
 
@@ -899,6 +894,46 @@
           }
         }
       }
+    
+    #elif ICOSA_SEEDING
+
+      Real *X;
+      cudaMallocManaged(&X, 3*NFIL*sizeof(Real));
+
+      std::ifstream pos_file(file_name_trunk + ".seed");
+      if (pos_file.good()){
+        for (int i = 0; i < 3*NFIL; i++){
+          pos_file >> X[i];
+        }
+      } else {
+        printf("ERROR: Icosahedron file missing.");
+      }
+
+      for (int n = 0; n < NFIL; n++){
+
+        filament_references[3*n] = X[3*n];
+        filament_references[3*n + 1] = X[3*n + 1];
+        filament_references[3*n + 2] = X[3*n + 2];
+
+        const Real theta = std::atan2(std::sqrt(X[3*n]*X[3*n] + X[3*n + 1]*X[3*n + 1]), X[3*n + 2]);
+        const Real phi = std::atan2(X[3*n + 1], X[3*n]);
+
+        matrix frame = shape.full_frame(theta, phi);
+
+        polar_dir_refs[3*n] = frame(0);
+        polar_dir_refs[3*n + 1] = frame(1);
+        polar_dir_refs[3*n + 2] = frame(2);
+
+        azi_dir_refs[3*n] = frame(3);
+        azi_dir_refs[3*n + 1] = frame(4);
+        azi_dir_refs[3*n + 2] = frame(5);
+
+        normal_refs[3*n] = frame(6);
+        normal_refs[3*n + 1] = frame(7);
+        normal_refs[3*n + 2] = frame(8);
+
+      }
+      pos_file.close();
     
     #endif
 

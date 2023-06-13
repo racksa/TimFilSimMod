@@ -248,7 +248,21 @@ void filament::initial_setup(const Real *const base_pos,
           std::random_device rd{};
           std::mt19937 gen{rd()};
           std::uniform_real_distribution<Real> distribution(0.0, 2.0*PI);
-          phase = distribution(gen);
+
+          #if (INITIAL_PHASE==0)
+            phase = distribution(gen);
+          #elif (INITIAL_PHASE==1)
+          #elif (INITIAL_PHASE==2)
+
+            // WARNING this is incorrect if the body is not initialised at the origin!!
+            const Real theta = acos(base_pos[2]/(sqrt(base_pos[0]*base_pos[0]+
+                                                      base_pos[1]*base_pos[1]+
+                                                      base_pos[2]*base_pos[2])));
+            phase = theta;
+
+            // printf("fil %d (%.4f %.4f %.4f) theta=%.4f\n",
+            // fil_id, base_pos[0], base_pos[1], base_pos[2], theta);
+          #endif
 
         #elif (CILIA_IC_TYPE==2)
 

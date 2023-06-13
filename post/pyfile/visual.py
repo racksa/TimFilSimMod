@@ -23,15 +23,13 @@ color_list.pop(2)
 enable_periodic = False
 
 simDir = 'data/100fil_sims/'
-simName = simDir + 'test_fil_1000_1000_2000'
+simName = simDir + 'test_fil_1000_1000_125'
 
 # simDir = 'data/lloyd/'
 # simName = simDir + 'lloyd_N64_3000_375_375'
 
 simDir = 'data/phase_model/'
-simName = simDir + 'test_bab_256fil_24000blob_5R_2torsion'
-# simName = simDir + 'test_bab_64fil_12000blob_4R'
-# simName = simDir + 'test_bab_8fil_750blob_1R'
+simName = simDir + 'test_bab_162fil_6000blob_6R_2torsion'
 
 # simDir = 'data/4096fil_sims/'
 # simName = simDir + 'test_fil_6400_6400_800'
@@ -67,9 +65,9 @@ fcmTorquefileName = '../../' + simName + '_flow_torque.dat'
 Lx, Ly, Lz = myIo.get_boxsize_from_name(simName)
 
 if(np.isinf(np.array([Lx, Ly, Lz])).any() and enable_periodic):
-    Lx = 3840.
-    Ly = 3840.
-    Lz = 240.
+    Lx = 1000.
+    Ly = 1000.
+    Lz = 1000.
     print(f"Manually setting the boxsize to ({Lx}, {Ly}, {Lz}).")
 
 # Lz *= 5
@@ -116,7 +114,7 @@ class VISUAL:
             self.fil_references = myIo.read_fil_references('../../' + simName + '_fil_references.dat')
         self.dt = self.pars['DT']*self.pars['PLOT_FREQUENCY_IN_STEPS']
         self.L = 14.14*self.pars['NBLOB']/22.
-        self.frames = min(2601, sum(1 for line in open('../../' + simName + '_body_states.dat')))
+        self.frames = min(201, sum(1 for line in open('../../' + simName + '_body_states.dat')))
 
         self.plot_end_frame = self.frames
         self.plot_start_frame = max(0, self.plot_end_frame-2000)
@@ -402,9 +400,12 @@ class VISUAL:
                             seg_pos = old_seg_pos + 0.5*self.pars['DL']*(t1 + t2)
                             old_seg_pos = seg_pos
                             segs_pos[seg] = seg_pos
-                        ax.plot(segs_pos[:,0], segs_pos[:,1], segs_pos[:,2], c = 'black', alpha=0.1+current_frame*0.06, lw=0.3)
-                current_frame += 1
-        ax.set_proj_type('persp')  # FOV = 157.4 deg
+                        
+                        ax.plot(segs_pos[:,0], segs_pos[:,1], segs_pos[:,2], c = 'black', alpha=1, lw=0.3)
+                current_frame += 1  
+        ax.set_proj_type('persp', 0.05)  # FOV = 157.4 deg
+        ax.view_init(elev=5., azim=45)
+        ax.dist=20
         ax.set_xlim(0, Lx)
         ax.set_ylim(0, Ly)
         ax.set_zlim(0, 50)
@@ -415,6 +416,7 @@ class VISUAL:
         nfil = int(self.pars['NSWIM'])
         fig.savefig(f'fig/fil_{nfil}_fil_{int(Lx)}_{int(Ly)}_{int(Lz)}.eps', bbox_inches = 'tight',  format='eps')
         fig.savefig(f'fig/fil_{nfil}_fil_{int(Lx)}_{int(Ly)}_{int(Lz)}.png', bbox_inches = 'tight',  format='png')
+        fig.savefig(f'fig/fil_{nfil}_fil_{int(Lx)}_{int(Ly)}_{int(Lz)}.pdf', bbox_inches = 'tight',  format='pdf')
         plt.show()
 
     def plot_seg_force(self):

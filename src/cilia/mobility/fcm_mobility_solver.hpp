@@ -11,11 +11,11 @@
 // =============================================================================
 // Included dependencies
 #include "mobility_solver.hpp"
-#include "../../../../CUFCM/config.hpp"
-#include "../../../../CUFCM/CUFCM_DATA.cuh"
-#include "../../../../CUFCM/CUFCM_SOLVER.cuh"
-#include "../../../../CUFCM/util/cuda_util.hpp"
-#include "../../../../CUFCM/CUFCM_CELLLIST.cuh"
+#include "../../../../CUFCM/src/config.hpp"
+#include "../../../../CUFCM/src/CUFCM_DATA.cuh"
+#include "../../../../CUFCM/src/CUFCM_SOLVER.cuh"
+#include "../../../../CUFCM/src/util/cuda_util.hpp"
+#include "../../../../CUFCM/src/CUFCM_CELLLIST.cuh"
 
 class fcm_mobility_solver : public mobility_solver{
 
@@ -44,6 +44,7 @@ public:
   void evaluate_segment_blob_mobility();
   void evaluate_blob_blob_mobility();
   void evaluate_blob_segment_mobility();
+  void evaluate_full_mobility();
 
   void copy_to_fcm();
 

@@ -5,8 +5,14 @@
 #ifndef MY_CONFIG_HEADER_INCLUDED
 #define MY_CONFIG_HEADER_INCLUDED
 
-#define SIMULATION_DIR "data/phase_model/"
-#define SIMULATION_NAME SIMULATION_DIR "test_bab_161fil_6000blob_6R_2torsion"
+
+// Only define it if it is not defined in the makefile
+#ifndef SIMULATION_NAME
+  #define SIMULATION_DIR "data/phase_model/fixed_filament/"
+  #define SIMULATION_FILE "test_bab_64fil_4000blob_5R_2torsion"
+  #define SIMULATION_NAME SIMULATION_DIR SIMULATION_FILE
+#endif
+
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Simulation type
@@ -46,16 +52,16 @@
 
   #endif
 
-  #define DYNAMIC_PHASE_EVOLUTION false
+  #define DYNAMIC_PHASE_EVOLUTION true
   // If true, cilia phase speeds are solved for as part of the dynamics. Note that this requires having run a reference simulation with WRITE_GENERALISED_FORCES=true previously.
   // If false, phase_dot = omega0 is constant for each cilium.
 
-  #define DYNAMIC_SHAPE_ROTATION false
+  #define DYNAMIC_SHAPE_ROTATION true
   // If true, the vertical in the cilia reference configuration can rotate with respect to the surface normal.
   // Essentially, the cilia can 'tip backwards or forwards' in their beat planes.
   // If false, no such rotation ever occurs.
 
-  #define INITIAL_PHASE 2
+  #define INITIAL_PHASE 0
   // 0 = Random
   // 1 = All zeros
   // 2 = Ishikawa
@@ -170,10 +176,23 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define NFIL (161) // The number of filaments attached to the rigid body/surface in each swimmer.
+#ifdef CNFIL
+  #define NFIL (CNFIL)
+#else
+  #define NFIL (64) // The number of filaments attached to the rigid body/surface in each swimmer
+#endif
+#ifdef CNBLOB
+  #define NBLOB (CNBLOB)
+#else
+  #define NBLOB (4000) // The number of blobs to use as surface elements in each rigid body.
+#endif
+#ifdef CAR
+  #define AR CAR
+#else
+  #define AR 5.0
+#endif
 #define NSEG (20)// The number of segments comprising each filament.
 #define NSWIM (1) // The number of swimmers.
-#define NBLOB (6000) // The number of blobs to use as surface elements in each rigid body.
 
 #define MU 1.0 // Fluid viscosity.
 
@@ -201,7 +220,7 @@
 #endif
 
 #if BODY_OR_SURFACE_TYPE==2
-  #define AXIS_DIR_BODY_LENGTH (6.0*FIL_LENGTH)
+  #define AXIS_DIR_BODY_LENGTH (AR*FIL_LENGTH)
   // #define AXIS_DIR_BODY_LENGTH (1.6496*2.0*FIL_LENGTH) // The length of the body parallel to the axis of rotation for the surface of revolution.
 #elif BODY_OR_SURFACE_TYPE==4
   #define AXIS_DIR_BODY_LENGTH (0.5*NBLOB*RBLOB) // The length of the body parallel to the axis of rotation for the surface of revolution.

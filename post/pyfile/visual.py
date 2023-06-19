@@ -28,8 +28,16 @@ simName = simDir + 'test_fil_1000_1000_125'
 # simDir = 'data/lloyd/'
 # simName = simDir + 'lloyd_N64_3000_375_375'
 
-simDir = 'data/phase_model/'
-simName = simDir + 'test_bab_162fil_6000blob_6R_2torsion'
+simDir = 'data/phase_model/fixed_density2/'
+simName = simDir + 'test_bab_64fil_2000blob_2R_2torsion'
+simName = simDir + 'test_bab_256fil_8000blob_4R_2torsion'
+# simName = simDir + 'test_bab_1024fil_32000blob_8R_2torsion'
+
+
+simName = simDir + 'test_bab_64fil_2500blob_3R_2torsion'
+
+simDir = 'data/phase_model/fixed_filament/'
+simName = simDir + 'test_bab_64fil_4000blob_4R_2torsion'
 
 # simDir = 'data/4096fil_sims/'
 # simName = simDir + 'test_fil_6400_6400_800'
@@ -114,7 +122,7 @@ class VISUAL:
             self.fil_references = myIo.read_fil_references('../../' + simName + '_fil_references.dat')
         self.dt = self.pars['DT']*self.pars['PLOT_FREQUENCY_IN_STEPS']
         self.L = 14.14*self.pars['NBLOB']/22.
-        self.frames = min(201, sum(1 for line in open('../../' + simName + '_body_states.dat')))
+        self.frames = min(801, sum(1 for line in open('../../' + simName + '_body_states.dat')))
 
         self.plot_end_frame = self.frames
         self.plot_start_frame = max(0, self.plot_end_frame-2000)
@@ -611,6 +619,118 @@ class VISUAL:
         nswim = int(self.pars['NSWIM'])
         plt.savefig(f'fig/multi_velocity_{nswim}rods.eps', format='eps')
         plt.savefig(f'fig/multi_velocity_{nswim}rods.png', format='png')
+        plt.show()
+
+    def body_vel(self):
+        self.frames = 31
+        self.plot_end_frame = self.frames
+        simDir = 'data/phase_model/ishikawa/'
+        simNames = ['test_bab_160fil_6000blob_6R_2torsion_k0v0',
+                    'test_bab_160fil_6000blob_6R_2torsion_k0.5v0',
+                    'test_bab_160fil_6000blob_6R_2torsion_k1v0',
+                    'test_bab_160fil_6000blob_6R_2torsion_k1.5v0',
+                    'test_bab_160fil_6000blob_6R_2torsion_k2v0']
+        ls = ['solid', 'dashed', 'dotted']
+        markers = ["^", "s", "d"]
+        labels = ["k=0","k=0.5","k=1","k=1.5","k=2",]
+        colors = ["black","red","green","blue","purple"]
+        
+        ax = plt.figure().add_subplot(1,1,1)
+        ax.set_xlim(0, 1)
+        ax.set_ylabel(r"$V_zT/L$")
+        ax.set_xlabel(r"t/T")
+
+        for ni, name in enumerate(simNames):
+            simName = simDir + name
+            print(simName)
+
+            body_states_f = open('../../' + simName + '_body_states.dat', "r")
+            body_vels_f = open('../../' + simName + '_body_vels.dat', "r")
+
+            compute_start = self.plot_start_frame
+            compute_start = 0
+
+            L = 2.2*(20-1)
+            
+
+            body_states = np.zeros(7*int(self.pars['NSWIM']))
+            body_vel_array = np.zeros((self.plot_end_frame - compute_start, 3))
+            body_disp_array = np.zeros((self.plot_end_frame - compute_start, 7))
+
+            for i in range(self.plot_end_frame):
+                print(" frame ", i, "/", self.frames, "          ", end="\r")
+                body_states_str = body_states_f.readline()
+                body_vels_str = body_vels_f.readline()
+
+                if(i >= compute_start):
+                    body_states = np.array(body_states_str.split()[1:], dtype=float)
+                    body_vels = np.array(body_vels_str.split(), dtype=float)
+                    body_vel_array[i-compute_start] = body_vels[:3]
+                    body_disp_array[i-compute_start] = body_states
+
+            time_array = np.arange(compute_start, self.plot_end_frame )
+            ax.plot(time_array/30., body_vel_array[:,2]/L, label=labels[ni], c=colors[ni])
+        ax.legend()
+        plt.savefig('fig/swimmer_velocity.pdf', format='pdf')
+        plt.show()
+    
+    def avg_body_vel(self):
+        self.frames = 31
+        self.plot_end_frame = self.frames
+        simDir = 'data/phase_model/ishikawa/'
+        simNames = ['test_bab_160fil_6000blob_6R_2torsion_k-2v0',
+                    'test_bab_160fil_6000blob_6R_2torsion_k-1.5v0',
+                    'test_bab_160fil_6000blob_6R_2torsion_k-1.1v0',
+                    'test_bab_160fil_6000blob_6R_2torsion_k-0.9v0',
+                    'test_bab_160fil_6000blob_6R_2torsion_k-0.4v0',
+                    'test_bab_160fil_6000blob_6R_2torsion_k0v0',
+                    'test_bab_160fil_6000blob_6R_2torsion_k0.3v0',
+                    'test_bab_160fil_6000blob_6R_2torsion_k0.5v0',
+                    'test_bab_160fil_6000blob_6R_2torsion_k0.7v0',
+                    'test_bab_160fil_6000blob_6R_2torsion_k0.8v0',
+                    'test_bab_160fil_6000blob_6R_2torsion_k1v0',
+                    'test_bab_160fil_6000blob_6R_2torsion_k1.1v0',
+                    'test_bab_160fil_6000blob_6R_2torsion_k1.5v0',
+                    'test_bab_160fil_6000blob_6R_2torsion_k2v0']
+        ks = [-2, -1.5, -1.1, -0.9, -.4, 0, .3, 0.5, .7, .8, 1, 1.1, 1.5, 2]
+        avg_vel_array = np.zeros(len(ks))
+        
+        ax = plt.figure().add_subplot(1,1,1)
+        ax.set_ylabel(r"$V_zT/L$")
+        ax.set_xlabel(r"k")
+
+        for ni, name in enumerate(simNames):
+            simName = simDir + name
+            print(simName)
+
+            body_states_f = open('../../' + simName + '_body_states.dat', "r")
+            body_vels_f = open('../../' + simName + '_body_vels.dat', "r")
+
+            compute_start = self.plot_start_frame
+            compute_start = 0
+
+            L = 2.2*(20-1)
+            
+
+            body_states = np.zeros(7*int(self.pars['NSWIM']))
+            body_vel_array = np.zeros((self.plot_end_frame - compute_start, 3))
+            body_disp_array = np.zeros((self.plot_end_frame - compute_start, 7))
+
+            for i in range(self.plot_end_frame):
+                print(" frame ", i, "/", self.frames, "          ", end="\r")
+                body_states_str = body_states_f.readline()
+                body_vels_str = body_vels_f.readline()
+
+                if(i >= compute_start):
+                    body_states = np.array(body_states_str.split()[1:], dtype=float)
+                    body_vels = np.array(body_vels_str.split(), dtype=float)
+                    body_vel_array[i-compute_start] = body_vels[:3]
+                    body_disp_array[i-compute_start] = body_states
+                
+                avg_vel_array[ni] += body_vels[2]/L
+
+        ax.plot(ks, avg_vel_array/30)
+        plt.savefig('fig/velocity_vs_k.pdf', format='pdf')
         plt.show()
 
     def plot_hist(self):

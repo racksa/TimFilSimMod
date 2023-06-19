@@ -254,14 +254,17 @@ void filament::initial_setup(const Real *const base_pos,
           #elif (INITIAL_PHASE==1)
           #elif (INITIAL_PHASE==2)
 
-            // WARNING this is incorrect if the body is not initialised at the origin!!
+            // WARNING this is only correct if a spherical body is initialised at the origin!!
+            const Real phi = atan2(base_pos[1], base_pos[0]);
             const Real theta = acos(base_pos[2]/(sqrt(base_pos[0]*base_pos[0]+
                                                       base_pos[1]*base_pos[1]+
                                                       base_pos[2]*base_pos[2])));
-            phase = theta;
+            const Real k = -2.0;
+            const Real v = 0.0;
+            phase = Real(2.0)*PI*( sin(k*theta/2.0) + cos(v*phi/4.0) );
+            // printf("fil %d (%.4f %.4f %.4f) theta=%.4f phase=%.4f\n",
+            // fil_id, base_pos[0], base_pos[1], base_pos[2], theta, phase);
 
-            // printf("fil %d (%.4f %.4f %.4f) theta=%.4f\n",
-            // fil_id, base_pos[0], base_pos[1], base_pos[2], theta);
           #endif
 
         #elif (CILIA_IC_TYPE==2)

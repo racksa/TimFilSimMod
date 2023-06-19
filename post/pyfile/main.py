@@ -34,11 +34,17 @@ if(sys.argv[1] == 'plot_fil3d'):
 if(sys.argv[1] == 'plot_phase'):
     visualiser.plot_phase_heatmap()
 
-if(sys.argv[1] == 'compute_vel'):
+if(sys.argv[1] == 'compute_rod_vel'):
     visualiser.compute_rod_vel()
 
 if(sys.argv[1] == 'multi_vel'):
     visualiser.multi_rod_vel()
+
+if(sys.argv[1] == 'body_vel'):
+    visualiser.body_vel()
+
+if(sys.argv[1] == 'avg_body_vel'):
+    visualiser.avg_body_vel()
 
 if(sys.argv[1] == 'plot_hist'):
     visualiser.plot_hist()

@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib.colors as mcolors
 from matplotlib.lines import Line2D
 import matplotlib.patches as patches
+import matplotlib.animation as animation
 import subprocess
 import random
 import time
@@ -21,29 +22,32 @@ color_list.pop(2)
 # color_list = ['#00ffff', '#faebD7', '#838bbb', '#0000ff', '	#8a2be2', '#ff4040', '#7fff00', '#ff6103', '#9932cc', '#ff1493', '#030303']
 
 enable_periodic = False
+big_sphere = False
 
 simDir = 'data/100fil_sims/'
-simName = simDir + 'test_fil_1000_1000_125'
-
-# simDir = 'data/lloyd/'
-# simName = simDir + 'lloyd_N64_3000_375_375'
-
-simDir = 'data/phase_model/fixed_density2/'
-simName = simDir + 'test_bab_64fil_2000blob_2R_2torsion'
-simName = simDir + 'test_bab_256fil_8000blob_4R_2torsion'
-# simName = simDir + 'test_bab_1024fil_32000blob_8R_2torsion'
+simName = simDir + 'test_fil_1000_1000_2000'
 
 
-simName = simDir + 'test_bab_64fil_2500blob_3R_2torsion'
+simDir = 'data/phase_model/fixed_density/'
+# simName = simDir + 'test_bab_64fil_2000blob_2R_2torsion'
+# simName = simDir + 'test_bab_256fil_8000blob_4R_2torsion'
+simName = simDir + 'test_bab_1024fil_32000blob_8R_2torsion'
 
-simDir = 'data/phase_model/fixed_filament/'
-simName = simDir + 'test_bab_64fil_4000blob_4R_2torsion'
+# simDir = 'data/phase_model/'
+# simName = simDir + 'test_bab_1024fil_40000blob_6R_2torsion'
+
+# simDir = 'data/phase_model/fixed_filament/'
+# simName = simDir + 'test_bab_128fil_6000blob_4R_2torsion'
+# simName = simDir + 'test_bab_128fil_12000blob_6R_2torsion'
+
+simDir = 'data/phase_model/single_fil/'
+simName = simDir + 'test_bab_1fil'
 
 # simDir = 'data/4096fil_sims/'
 # simName = simDir + 'test_fil_6400_6400_800'
 
 # simDir = 'data/1fil_sims/'
-# simName = simDir + 'test_fil_100_100_1250'
+# simName = simDir + 'test_fil_100_100_1375'
 
 # simDir = 'data/256fil_sims/'
 # simName = simDir + 'test_fil_1600_1600_1600'
@@ -122,10 +126,10 @@ class VISUAL:
             self.fil_references = myIo.read_fil_references('../../' + simName + '_fil_references.dat')
         self.dt = self.pars['DT']*self.pars['PLOT_FREQUENCY_IN_STEPS']
         self.L = 14.14*self.pars['NBLOB']/22.
-        self.frames = min(801, sum(1 for line in open('../../' + simName + '_body_states.dat')))
+        self.frames = min(31, sum(1 for line in open('../../' + simName + '_body_states.dat')))
 
         self.plot_end_frame = self.frames
-        self.plot_start_frame = max(0, self.plot_end_frame-2000)
+        self.plot_start_frame = max(0, self.plot_end_frame-60)
         self.plot_interval = 1
 
         self.plot_hist_frame = np.array([self.frames-1])
@@ -133,9 +137,12 @@ class VISUAL:
         self.plot_rod_frame = np.array([self.plot_end_frame-1])
         self.plot_multi_rod_frames = np.array([100, 1000, 10000])
         self.plot_single_fil_frames = [self.plot_end_frame-1-2*i for i in range(15)]
-        self.plot_single_fil_frames = [self.plot_end_frame-1]
+        # self.plot_single_fil_frames = [self.plot_end_frame-1]
         self.plot_phase_frames = [self.plot_end_frame-1]
         self.fcm_frame = self.plot_end_frame-1
+
+        self.phase_video = False
+        self.ciliate_video = False
 
         self.output_to_superpunto = False
         self.output_to_fcm = False
@@ -192,6 +199,11 @@ class VISUAL:
             blob_forces_f = open('../../' + simName + '_blob_forces.dat', "r")
         seg_forces_f = open('../../' + simName + '_seg_forces.dat', "r")
         print("open files time = ",(time.time()-start))
+        if (self.pars['PRESCRIBED_CILIA'] == 1):
+            fil_phases_f = open('../../' + simName + '_filament_phases.dat', "r")
+            fil_angles_f = open('../../' + simName + '_filament_shape_rotation_angles.dat', "r")
+            AR, torsion = myIo.get_ciliate_data_from_name(simName)
+            radius = 0.5*AR*2.2*int(self.pars['NSEG'])
 
         for i in range(self.plot_end_frame):
             print(" frame ", i, "/", self.frames, "          ", end="\r")
@@ -200,6 +212,12 @@ class VISUAL:
                 seg_states_str = seg_states_f.readline()
                 if(self.output_to_fcm):
                     seg_forces_str = seg_forces_f.readline()
+                if (self.pars['PRESCRIBED_CILIA'] == 1):
+                    fil_phases_str = fil_phases_f.readline()
+                    # fil_angles_str = fil_angles_f.readline()
+
+                    fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
+                    fil_phases = util.box(fil_phases, 2*np.pi)
             if(self.pars['NBLOB']>0 and self.output_to_fcm):
                 blob_forces_str = blob_forces_f.readline()
 
@@ -212,6 +230,8 @@ class VISUAL:
                 if(self.pars['NBLOB']>0 and self.output_to_fcm):
                     blob_forces = np.array(blob_forces_str.split()[1:], dtype=float)
 
+                
+
                 if(self.output_to_superpunto):
                     myIo.write_line('#', superpuntoDatafileName)
                 if((self.output_to_fcm and i == self.fcm_frame) or (self.output_to_superpunto)):
@@ -219,10 +239,13 @@ class VISUAL:
                         body_pos = body_states[7*swim : 7*swim+3]
                         R = util.rot_mat(body_states[7*swim+3 : 7*swim+7])
                         # To find blob position
+                        if(big_sphere):
+                            self.write_data(body_pos, radius, superpuntoDatafileName, enable_periodic, color=16777215)
                         for blob in range(int(self.pars['NBLOB'])):
                             blob_x, blob_y, blob_z = util.blob_point_from_data(body_states[7*swim : 7*swim+7], self.blob_references[3*blob:3*blob+3])
                             if(self.output_to_superpunto):
-                                self.write_data([blob_x, blob_y, blob_z], float(self.pars['RBLOB']), superpuntoDatafileName, enable_periodic)
+                                if(not big_sphere):
+                                    self.write_data([blob_x, blob_y, blob_z], float(self.pars['RBLOB']), superpuntoDatafileName, enable_periodic, color=16777215)
                             if(self.output_to_fcm and i == self.fcm_frame):
                                 blob_fx, blob_fy, blob_fz = blob_forces[3*blob : 3*blob+3]
                                 self.write_data([blob_x, blob_y, blob_z], 0, fcmPosfileName, box=True, center=False, superpunto=False)
@@ -238,9 +261,18 @@ class VISUAL:
                             elif (self.pars['PRESCRIBED_CILIA'] == 1):
                                 fil_i = int(3*fil*self.pars['NSEG'])
                                 old_seg_pos = seg_states[fil_i : fil_i+3]
+                                
+                                # WRITE A FUNCTION FOR THIS!!
+                                cmap_name = 'hsv'
+                                cmap = plt.get_cmap(cmap_name)
+                                rgb_color = cmap(fil_phases[fil]/(2*np.pi))[:3]  # Get the RGB color tuple
+                                rgb_hex = mcolors.rgb2hex(rgb_color)[1:]  # Convert RGB to BGR hexadecimal format
+                                bgr_hex = rgb_hex[4:]+rgb_hex[2:4]+rgb_hex[:2]
+                                fil_color = int(bgr_hex, base=16)
+                                # print(bgr_hex, fil_color)
 
                             if(self.output_to_superpunto):
-                                self.write_data(old_seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic, True, True)
+                                self.write_data(old_seg_pos-[50,50,50], float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic, True, True, color=fil_color)
                             if(self.output_to_fcm):
                                 seg_fx, seg_fy, seg_fz, seg_tx, seg_ty, seg_tz = seg_forces[0 : 6]
                                 self.write_data(old_seg_pos, 0, fcmPosfileName, box=True, center=False, superpunto=False)
@@ -258,9 +290,9 @@ class VISUAL:
                                     seg_pos = old_seg_pos + 0.5*self.pars['DL']*(t1 + t2)
                                     old_seg_pos = seg_pos
                                 elif (self.pars['PRESCRIBED_CILIA'] == 1):
-                                    seg_pos = seg_states[fil_i+3*(seg-1) : fil_i+3*seg]
+                                    seg_pos = seg_states[fil_i+3*(seg-1) : fil_i+3*seg] 
                                 if(self.output_to_superpunto):
-                                    self.write_data(seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic, True, True)
+                                    self.write_data(seg_pos-[50,50,50], float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic, True, True, color=fil_color)
                                 if(self.output_to_fcm):
                                     seg_fx, seg_fy, seg_fz, seg_tx, seg_ty, seg_tz = seg_forces[6*seg : 6*seg+6]
                                     self.write_data(seg_pos, 0, fcmPosfileName, box=True, center=False, superpunto=False)
@@ -300,19 +332,27 @@ class VISUAL:
 
                 # Robot arm to find segment position (Ignored plane rotation!)
                 for fil in range(int(self.pars['NFIL'])):
-                    fil_i = int(4*fil*self.pars['NSEG'])
-                    fil_base_x, fil_base_y, fil_base_z = np.matmul(R, self.fil_references[3*fil : 3*fil+3])
-                    old_seg_pos = np.array([fil_base_x, fil_base_y, fil_base_z])
+                    if (self.pars['PRESCRIBED_CILIA'] == 0):
+                        fil_i = int(4*fil*self.pars['NSEG'])
+                        fil_base_x, fil_base_y, fil_base_z = np.matmul(R, self.fil_references[3*fil : 3*fil+3])
+                        old_seg_pos = np.array([fil_base_x, fil_base_y, fil_base_z])
+                    elif (self.pars['PRESCRIBED_CILIA'] == 1):
+                        fil_i = int(3*fil*self.pars['NSEG'])
+                        old_seg_pos = seg_states[fil_i : fil_i+3]
 
                     for seg in range(1, int(self.pars['NSEG'])):
-                        q1 = seg_states[fil_i+4*(seg-1) : fil_i+4*seg]
-                        q2 = seg_states[fil_i+4*seg : fil_i+4*seg+4]
-                        
-                        t1 = util.find_t(q1)
-                        t2 = util.find_t(q2)
-                        
-                        seg_pos = old_seg_pos + 0.5*self.pars['DL']*(t1 + t2)
-                        old_seg_pos = seg_pos
+                        if (self.pars['PRESCRIBED_CILIA'] == 0):
+                            q1 = seg_states[fil_i+4*(seg-1) : fil_i+4*seg]
+                            q2 = seg_states[fil_i+4*seg : fil_i+4*seg+4]
+                            
+                            t1 = util.find_t(q1)
+                            t2 = util.find_t(q2)
+                            
+                            seg_pos = old_seg_pos + 0.5*self.pars['DL']*(t1 + t2)
+                            old_seg_pos = seg_pos
+                        elif (self.pars['PRESCRIBED_CILIA'] == 1):
+                            seg_pos = seg_states[fil_i+3*(seg-1) : fil_i+3*seg]
+
                     end_pos[fil] = seg_pos
                     end_vel[fil] = seg_vels[6*int(self.pars['NSEG'])*fil + 6*int(self.pars['NSEG']) - 6 : 6*int(self.pars['NSEG'])*fil + 6*int(self.pars['NSEG']) - 3]
                     tip_traj[current_time][fil] = seg_pos
@@ -326,11 +366,21 @@ class VISUAL:
         ax.set_xlabel(r"x")
         ax.set_xlim(0, Lx)
         ax.set_ylim(0, Ly)
+
+        L = 2.2*self.pars['NSEG']
+        x_ticks = np.linspace(0, Lx, 6)
+        x_ticks_label = ["{:.2f}L".format(x/L) for x in x_ticks]
+        ax.set_xticks(x_ticks, x_ticks_label)
+        y_ticks = np.linspace(0, Ly, 6)
+        y_ticks_label = ["{:.2f}L".format(y/L) for y in y_ticks]
+        ax.set_yticks(y_ticks, y_ticks_label)
+
         ax.set_aspect('equal')
         nfil = int(self.pars['NFIL'])
         # ax.legend(title=rf'{int(Lx)}$\times${int(Ly)}$\times${int(Lz)}', loc='upper left')
         plt.savefig(f'fig/fil_vel_{nfil}fil_{int(Lx)}_{int(Ly)}_{int(Lz)}.eps', bbox_inches = 'tight', format='eps')
         plt.savefig(f'fig/fil_vel_{nfil}fil_{int(Lx)}_{int(Ly)}_{int(Lz)}.png', bbox_inches = 'tight', format='png')
+        plt.savefig(f'fig/fil_vel_{nfil}fil_{int(Lx)}_{int(Ly)}_{int(Lz)}.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
     def plot_pattern(self):
@@ -372,8 +422,7 @@ class VISUAL:
                             self.write_data(seg_pos, float(self.pars['RSEG']), patternDatafileName, enable_periodic, True, True)
     
     def plot_fil3d(self):
-
-        fig = plt.figure(figsize=(6, 6), dpi=1000)
+        fig = plt.figure(figsize=(6, 3), dpi=400)
         ax = fig.add_subplot(projection='3d')
         seg_states_f = open('../../' + simName + '_seg_states.dat', "r")
         body_states_f = open('../../' + simName + '_body_states.dat', "r")
@@ -390,41 +439,70 @@ class VISUAL:
                     body_pos = body_states[7*swim : 7*swim+3]
                     R = util.rot_mat(body_states[7*swim+3 : 7*swim+7])
                     # Robot arm to find segment position (Ignored plane rotation!)
-                    for fil in range(int(self.pars['NFIL'])):
+                    for fil in range(int(self.pars['NFIL'])):                    
                         segs_pos = np.zeros((int(self.pars['NSEG']), 3))
-                        fil_i = int(4*fil*self.pars['NSEG'])
-                        fil_base_x, fil_base_y, fil_base_z = np.matmul(R, self.fil_references[3*fil : 3*fil+3])
-                        fil_base_z -= 50
-                        old_seg_pos = np.array([fil_base_x, fil_base_y, fil_base_z])
+                        if (self.pars['PRESCRIBED_CILIA'] == 0):
+                            fil_i = int(4*fil*self.pars['NSEG'])
+                            fil_base_x, fil_base_y, fil_base_z = np.matmul(R, self.fil_references[3*fil : 3*fil+3])
+                            fil_base_z -= 50
+                            old_seg_pos = np.array([fil_base_x, fil_base_y, fil_base_z])
+                        elif (self.pars['PRESCRIBED_CILIA'] == 1):
+                            fil_i = int(3*fil*self.pars['NSEG'])
+                            old_seg_pos = seg_states[fil_i : fil_i+3]
                         segs_pos[0] = old_seg_pos
 
                         for seg in range(1, int(self.pars['NSEG'])):
-                            q1 = seg_states[fil_i+4*(seg-1) : fil_i+4*seg]
-                            q2 = seg_states[fil_i+4*seg : fil_i+4*seg+4]
-                            
-                            t1 = util.find_t(q1)
-                            t2 = util.find_t(q2)
-                            
-                            seg_pos = old_seg_pos + 0.5*self.pars['DL']*(t1 + t2)
-                            old_seg_pos = seg_pos
+                            if (self.pars['PRESCRIBED_CILIA'] == 0):
+                                q1 = seg_states[fil_i+4*(seg-1) : fil_i+4*seg]
+                                q2 = seg_states[fil_i+4*seg : fil_i+4*seg+4]
+                                
+                                t1 = util.find_t(q1)
+                                t2 = util.find_t(q2)
+                                
+                                seg_pos = old_seg_pos + 0.5*self.pars['DL']*(t1 + t2)
+                                old_seg_pos = seg_pos
+                            elif (self.pars['PRESCRIBED_CILIA'] == 1):
+                                seg_pos = seg_states[fil_i+3*(seg-1) : fil_i+3*seg]
                             segs_pos[seg] = seg_pos
                         
-                        ax.plot(segs_pos[:,0], segs_pos[:,1], segs_pos[:,2], c = 'black', alpha=1, lw=0.3)
-                current_frame += 1  
-        ax.set_proj_type('persp', 0.05)  # FOV = 157.4 deg
-        ax.view_init(elev=5., azim=45)
-        ax.dist=20
+                        ax.plot(segs_pos[:,0], segs_pos[:,1], segs_pos[:,2], c = 'black', alpha=0.1+current_frame*0.06, lw=0.3)
+                current_frame += 1
+        
+        ax.set_proj_type('ortho')
+        # ax.set_proj_type('persp', 0.05)  # FOV = 157.4 deg
+        ax.view_init(elev=0., azim=0)
+        # ax.dist=20
+        ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        ax.xaxis._axinfo["grid"]['color'] =  (1,1,1,0)
+        ax.yaxis._axinfo["grid"]['color'] =  (1,1,1,0)
+        ax.zaxis._axinfo["grid"]['color'] =  (1,1,1,0)
+        # ax.axis('off')
+        # ax.grid(False)
+
+        L = 2.2*self.pars['NSEG']
+        x_ticks = np.arange(0, Lx, step=33.3)
+        x_ticks_label = ["{:.2f}L".format(x/L) for x in x_ticks]
+        ax.set_xticks(x_ticks, x_ticks_label)
+        y_ticks = np.arange(0, Ly, step=33.3)
+        y_ticks_label = ["{:.2f}L".format(y/L) for y in y_ticks]
+        ax.set_yticks(y_ticks, y_ticks_label)
+        # z_ticks = np.arange(0, Lz, step=50)
+        # z_ticks_label = ["{:.2f}L".format(z/L) for z in z_ticks]
+        # ax.set_zticks(z_ticks, z_ticks_label)
+
+        ax.text(100, 50, 80, "H={:.2f}L".format(Lz/L))
+        ax.set_zticks([], [])
+
         ax.set_xlim(0, Lx)
         ax.set_ylim(0, Ly)
         ax.set_zlim(0, 50)
-        ax.set_zticks([0, 50])
-        ax.set_box_aspect(aspect = (1,1,50/Lx))
-        ax.grid(False)
-        ax.axis('off')
+        ax.set_box_aspect(aspect = (1,1,50/Lx))        
         nfil = int(self.pars['NSWIM'])
         fig.savefig(f'fig/fil_{nfil}_fil_{int(Lx)}_{int(Ly)}_{int(Lz)}.eps', bbox_inches = 'tight',  format='eps')
         fig.savefig(f'fig/fil_{nfil}_fil_{int(Lx)}_{int(Ly)}_{int(Lz)}.png', bbox_inches = 'tight',  format='png')
-        fig.savefig(f'fig/fil_{nfil}_fil_{int(Lx)}_{int(Ly)}_{int(Lz)}.pdf', bbox_inches = 'tight',  format='pdf')
+        fig.savefig(f'fig/fil_{nfil}_fil_{int(Lx)}_{int(Ly)}_{int(Lz)}.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
     def plot_seg_force(self):
@@ -475,37 +553,189 @@ class VISUAL:
         fil_phases_f = open('../../' + simName + '_filament_phases.dat', "r")
         fil_angles_f = open('../../' + simName + '_filament_shape_rotation_angles.dat', "r")
 
-        ax = plt.figure().add_subplot(1,1,1)
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
         fil_references_sphpolar = np.zeros((int(self.pars['NFIL']),3))
 
-        for i in range(self.plot_end_frame):
-            print(" frame ", i, "/", self.frames, "          ", end="\r")
-            fil_phases_str = fil_phases_f.readline()
-            fil_angles_str = fil_angles_f.readline()
-
-            if(i in self.plot_phase_frames):
-
-                fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
-                fil_phases = util.box(fil_phases, 2*np.pi)
-                for i in range(int(self.pars['NFIL'])):
-                    fil_references_sphpolar[i] = util.cartesian_to_spherical(self.fil_references[3*i: 3*i+3])
-                    
-                ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=fil_phases, cmap=colormap)
-                
-                from matplotlib.colors import Normalize
-                from matplotlib.cm import ScalarMappable
-                norm = Normalize(vmin=min(fil_phases), vmax=max(fil_phases))
-                sm = ScalarMappable(cmap=colormap, norm=norm)
-                sm.set_array([])
-
+        from matplotlib.colors import Normalize
+        from matplotlib.cm import ScalarMappable
+        norm = Normalize(vmin=0, vmax=2*np.pi)
+        sm = ScalarMappable(cmap=colormap, norm=norm)
+        sm.set_array([])
         cbar = plt.colorbar(sm)
+        cbar.ax.set_yticklabels(['0', 'π/3', '2π/3', 'π', '4π/3', '5π/3', '2π'])
         cbar.set_label(r"phase")
 
         ax.set_ylabel(r"$\theta$")
         ax.set_xlabel(r"$\phi$")
+        ax.set_xlim(-np.pi, np.pi)
+        phi = np.arange(-np.pi, np.pi+np.pi/2, step=(np.pi / 2))
+        ax.set_xticks(phi, ['-π', '-π/2', '0', 'π/2', 'π'])
+        theta = np.arange(0, np.pi+np.pi/4, step=(np.pi / 4))
+        ax.set_yticks(theta, ['0', 'π/4', 'π/2', '3π/4', 'π'])
         nfil = int(self.pars['NFIL'])
-        plt.savefig(f'fig/fil_phase_{nfil}fil.eps', bbox_inches = 'tight', format='eps')
-        plt.show()
+
+        def animation_func(t):
+            print(t)
+            ax.cla()
+            fil_phases_str = fil_phases_f.readline()
+            # fil_angles_str = fil_angles_f.readline()
+
+            fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
+            fil_phases = util.box(fil_phases, 2*np.pi)
+            for i in range(int(self.pars['NFIL'])):
+                fil_references_sphpolar[i] = util.cartesian_to_spherical(self.fil_references[3*i: 3*i+3])
+                
+            ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=fil_phases, cmap=colormap)
+
+        if(self.phase_video):
+            plt.rcParams['animation.ffmpeg_path'] = '/usr/bin/ffmpeg'
+            print("video")
+            ani = animation.FuncAnimation(fig, animation_func, frames=500, interval=10, repeat=False)
+            # plt.show()
+            FFwriter = animation.FFMpegWriter(fps=10)
+            ani.save(f'fig/fil_phase_{nfil}fil_anim.mp4', writer=FFwriter)
+            
+            
+        else:
+            for t in range(self.plot_end_frame):
+                print(" frame ", t, "/", self.frames, "          ", end="\r")
+                fil_phases_str = fil_phases_f.readline()
+                fil_angles_str = fil_angles_f.readline()
+
+                if(t in self.plot_phase_frames):
+
+                    fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
+                    fil_phases = util.box(fil_phases, 2*np.pi)
+                    for i in range(int(self.pars['NFIL'])):
+                        fil_references_sphpolar[i] = util.cartesian_to_spherical(self.fil_references[3*i: 3*i+3])
+                        
+                    ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=fil_phases, cmap=colormap)
+                
+            plt.savefig(f'fig/fil_phase_{nfil}fil.png', bbox_inches = 'tight', format='png')
+            plt.savefig(f'fig/fil_phase_{nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+            plt.show()
+
+    def plot_ciliate(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(projection='3d')
+
+        start = time.time()
+        seg_states_f = open('../../' + simName + '_seg_states.dat', "r")
+        body_states_f = open('../../' + simName + '_body_states.dat', "r")
+        print("open files time = ",(time.time()-start))
+
+        AR, torsion = myIo.get_ciliate_data_from_name(simName)
+        nfil = int(self.pars['NFIL'])
+        # Set the radius of the sphere
+        radius = 0.5*AR*2.2*int(self.pars['NSEG'])
+        num_points = 300
+
+        ax.set_proj_type('ortho')
+        # ax.set_proj_type('persp', 0.05)  # FOV = 157.4 deg
+        # ax.view_init(elev=5., azim=45)
+        # ax.dist=20
+        ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        ax.xaxis._axinfo["grid"]['color'] =  (1,1,1,0)
+        ax.yaxis._axinfo["grid"]['color'] =  (1,1,1,0)
+        ax.zaxis._axinfo["grid"]['color'] =  (1,1,1,0)
+        # ax.axis('off')
+        # ax.grid(False)
+
+        def animation_func(t):
+            print(t)
+            ax.cla()
+            ax.set_xlim(-100, 100)
+            ax.set_ylim(-100, 100)
+            ax.set_zlim(-100, 100)
+
+            body_states_str = body_states_f.readline()
+            seg_states_str = seg_states_f.readline()
+
+            body_states = np.array(body_states_str.split()[1:], dtype=float)
+            seg_states = np.array(seg_states_str.split()[1:], dtype=float)
+            
+            for swim in range(int(self.pars['NSWIM'])):
+                # blob_data = np.zeros((int(self.pars['NBLOB']), 3))
+                body_pos = body_states[7*swim : 7*swim+3]
+                # R = util.rot_mat(body_states[7*swim+3 : 7*swim+7])
+                # # To find blob position
+                # for blob in range(int(self.pars['NBLOB'])):
+                #     blob_x, blob_y, blob_z = util.blob_point_from_data(body_states[7*swim : 7*swim+7], self.blob_references[3*blob:3*blob+3])
+                #     # ax.scatter(blob_x, blob_y, blob_z)
+
+                # Create the sphere data points
+                u = np.linspace(0, 2 * np.pi, num_points)
+                v = np.linspace(0, np.pi, num_points)
+                x = radius * np.outer(np.cos(u), np.sin(v))
+                y = radius * np.outer(np.sin(u), np.sin(v))
+                z = radius * np.outer(np.ones(np.size(u)), np.cos(v))
+
+                # Plot the sphere
+                ax.plot_surface(x+body_pos[0], y+body_pos[1], z+body_pos[2], color='grey', alpha=0.5)
+
+                # Robot arm to find segment position (Ignored plane rotation!)
+                for fil in range(int(self.pars['NFIL'])):
+                    fil_data = np.zeros((int(self.pars['NSEG']), 3))
+                    fil_i = int(3*fil*self.pars['NSEG'])
+                    fil_data[0] = seg_states[fil_i : fil_i+3]
+
+                    for seg in range(1, int(self.pars['NSEG'])):
+                        seg_pos = seg_states[fil_i+3*(seg-1) : fil_i+3*seg]
+                        fil_data[seg] = seg_pos
+                    ax.plot(fil_data[:,0], fil_data[:,1], fil_data[:,2], c='black', zorder = 100)
+
+        if(self.ciliate_video):
+            plt.rcParams['animation.ffmpeg_path'] = '/usr/bin/ffmpeg'
+            ani = animation.FuncAnimation(fig, animation_func, frames=500, interval=10, repeat=False)
+            plt.show()
+            # FFwriter = animation.FFMpegWriter(fps=10)
+            # ani.save(f'fig/ciliate_{nfil}fil_anim.mp4', writer=FFwriter)
+    
+        else:
+            for i in range(self.plot_end_frame):
+                print(" frame ", i, "/", self.frames, "          ", end="\r")
+                body_states_str = body_states_f.readline()
+                seg_states_str = seg_states_f.readline()
+                if(i==self.plot_end_frame-1):
+                    # if(i%self.plot_interval==0 and i>=self.plot_start_frame):
+                    body_states = np.array(body_states_str.split()[1:], dtype=float)
+                    seg_states = np.array(seg_states_str.split()[1:], dtype=float)
+                    
+                    for swim in range(int(self.pars['NSWIM'])):
+                        blob_data = np.zeros((int(self.pars['NBLOB']), 3))
+                        body_pos = body_states[7*swim : 7*swim+3]
+                        R = util.rot_mat(body_states[7*swim+3 : 7*swim+7])
+                        # To find blob position
+                        for blob in range(int(self.pars['NBLOB'])):
+                            blob_x, blob_y, blob_z = util.blob_point_from_data(body_states[7*swim : 7*swim+7], self.blob_references[3*blob:3*blob+3])
+                            # ax.scatter(blob_x, blob_y, blob_z)
+
+                        # Create the sphere data points
+                        u = np.linspace(0, 2 * np.pi, num_points)
+                        v = np.linspace(0, np.pi, num_points)
+                        x = radius * np.outer(np.cos(u), np.sin(v))
+                        y = radius * np.outer(np.sin(u), np.sin(v))
+                        z = radius * np.outer(np.ones(np.size(u)), np.cos(v))
+
+                        # Plot the sphere
+                        ax.plot_surface(x, y, z, color='grey', alpha=0.5)
+
+                        # Robot arm to find segment position (Ignored plane rotation!)
+                        for fil in range(int(self.pars['NFIL'])):
+                            fil_data = np.zeros((int(self.pars['NSEG']), 3))
+                            fil_i = int(3*fil*self.pars['NSEG'])
+                            fil_data[0] = seg_states[fil_i : fil_i+3]
+
+                            for seg in range(1, int(self.pars['NSEG'])):
+                                seg_pos = seg_states[fil_i+3*(seg-1) : fil_i+3*seg]
+                                fil_data[seg] = seg_pos
+                            ax.plot(fil_data[:,0], fil_data[:,1], fil_data[:,2], c='black', zorder = 100)
+
+            plt.savefig(f'fig/ciliate_{nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+            plt.show()
 
     # Rods
     def compute_rod_vel(self):
@@ -818,7 +1048,7 @@ class VISUAL:
         # ax.axis('off')
         nswim = int(self.pars['NSWIM'])
         fig1.savefig(f'fig/rod_displacement_{nswim}rods_{int(Lx)}_{int(Ly)}_{int(Lz)}_{int(self.plot_end_frame)}.eps', bbox_inches = 'tight',  format='eps')
-        fig1.savefig(f'fig/rod_displacement_{nswim}rods_{int(Lx)}_{int(Ly)}_{int(Lz)}_{int(self.plot_end_frame)}.png', bbox_inches = 'tight',  format='png')
+        fig1.savefig(f'fig/rod_displacement_{nswim}rods_{int(Lx)}_{int(Ly)}_{int(Lz)}_{int(self.plot_end_frame)}.pdf', bbox_inches = 'tight',  format='pdf')
 
         ax2.set_ylabel(r"frequency")
         ax2.set_xlabel(r"$y$")
@@ -835,7 +1065,6 @@ class VISUAL:
         markers = ["^", "s", "d"]
         marker_string = [r'$\Delta$', r'$square$', r'$\bigcirc$']
         facecolors = ['none', 'black']
-        
         
         fig, axs = plt.subplots(3, 2, figsize=(8, 9))
         for ni, name in enumerate(simNames):
@@ -905,6 +1134,6 @@ class VISUAL:
         # fig.supylabel(r"y")
 
         fig.savefig(f'fig/rod_displacement_{nswim}rods_multi.eps', bbox_inches = 'tight',  format='eps')
-        fig.savefig(f'fig/rod_displacement_{nswim}rods_multi.png', bbox_inches = 'tight',  format='png')
+        fig.savefig(f'fig/rod_displacement_{nswim}rods_multi.pdf', bbox_inches = 'tight',  format='pdf')
 
         plt.show()

@@ -13,5 +13,5 @@
 # as I run through cygwin anyway.
 #
 export OPENBLAS_NUM_THREADS=1
-export CUDA_VISIBLE_DEVICES=0
-./bin/test_bab_10fil_1000blob_2R_2torsion
+export CUDA_VISIBLE_DEVICES=3
+./bin/test_bab_1fil

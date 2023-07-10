@@ -8,8 +8,8 @@
 
 // Only define it if it is not defined in the makefile
 #ifndef SIMULATION_NAME
-  #define SIMULATION_DIR "data/phase_model/fixed_filament/"
-  #define SIMULATION_FILE "test_bab_64fil_4000blob_5R_2torsion"
+  #define SIMULATION_DIR "data/phase_model/single_fil/"
+  #define SIMULATION_FILE "test_bab_1fil"
   #define SIMULATION_NAME SIMULATION_DIR SIMULATION_FILE
 #endif
 
@@ -96,7 +96,7 @@
 
 #endif
 
-#define BODY_OR_SURFACE_TYPE 2
+#define BODY_OR_SURFACE_TYPE 0
 // Valid options:
 // 0 = An infinite plane wall at z = 0. This choice has some sub-types (see below).
 // 1 = Deformed planes with 2 principal curvatures (partially implemented)
@@ -179,7 +179,7 @@
 #ifdef CNFIL
   #define NFIL (CNFIL)
 #else
-  #define NFIL (64) // The number of filaments attached to the rigid body/surface in each swimmer
+  #define NFIL (1) // The number of filaments attached to the rigid body/surface in each swimmer
 #endif
 #ifdef CNBLOB
   #define NBLOB (CNBLOB)

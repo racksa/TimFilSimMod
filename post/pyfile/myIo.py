@@ -41,3 +41,18 @@ def get_boxsize_from_name(filename):
     except:
         print("WARNING: Filename not supported for auto boxing.")
         return (float('inf'), float('inf'), float('inf'))
+    
+def get_ciliate_data_from_name(filename):
+    str_list = filename.split('_')
+    try:
+        R, Tor = 0, 0
+        for s in str_list[-2:]:
+            print(s)
+            if(s.endswith('R')):
+                R = float(s[:-1])
+            if(s.endswith('torsion')):
+                Tor = float(s[:-7])
+        return R, Tor
+    except:
+        print("WARNING: Filename not supported for auto ciliating.")
+        return (float('inf'), float('inf'), float('inf'))

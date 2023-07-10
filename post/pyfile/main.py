@@ -32,7 +32,16 @@ if(sys.argv[1] == 'plot_fil3d'):
     visualiser.plot_fil3d()
 
 if(sys.argv[1] == 'plot_phase'):
+    if(len(sys.argv) > 2):
+        if(sys.argv[2] == 'video'):
+            visualiser.phase_video = True
     visualiser.plot_phase_heatmap()
+
+if(sys.argv[1] == 'plot_ciliate'):
+    if(len(sys.argv) > 2):
+        if(sys.argv[2] == 'video'):
+            visualiser.ciliate_video = True
+    visualiser.plot_ciliate()
 
 if(sys.argv[1] == 'compute_rod_vel'):
     visualiser.compute_rod_vel()

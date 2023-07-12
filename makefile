@@ -114,7 +114,7 @@ CNBLOB=12000
 CAR=6
 CTORSION=2
 CSIMULATION_DIR = data/phase_model/single_fil/
-CSIMULATION_NAME = test_bab_$(CNFIL)fil#_$(CNBLOB)blob_$(CAR)R_2torsion
+CSIMULATION_NAME = test_bab_$(CNFIL)fil_white#_$(CNBLOB)blob_$(CAR)R_2torsion
 CFLAGS=-DSIMULATION_NAME="\"$(CSIMULATION_DIR)$(CSIMULATION_NAME)\"" -DCNFIL=$(CNFIL) -DCNBLOB=$(CNBLOB) -DCAR=$(CAR)
 
 cilia_nvidia4_withCUFCM: $(CILIA_CPP) $(CILIA_CUDA)

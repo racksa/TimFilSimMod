@@ -42,6 +42,7 @@ simName = simDir + 'test_bab_1024fil_32000blob_8R_2torsion'
 
 simDir = 'data/phase_model/single_fil/'
 simName = simDir + 'test_bab_1fil'
+simName = simDir + 'test_bab_1fil_white'
 
 # simDir = 'data/4096fil_sims/'
 # simName = simDir + 'test_fil_6400_6400_800'
@@ -126,10 +127,10 @@ class VISUAL:
             self.fil_references = myIo.read_fil_references('../../' + simName + '_fil_references.dat')
         self.dt = self.pars['DT']*self.pars['PLOT_FREQUENCY_IN_STEPS']
         self.L = 14.14*self.pars['NBLOB']/22.
-        self.frames = min(31, sum(1 for line in open('../../' + simName + '_body_states.dat')))
+        self.frames = min(30001, sum(1 for line in open('../../' + simName + '_body_states.dat')))
 
         self.plot_end_frame = self.frames
-        self.plot_start_frame = max(0, self.plot_end_frame-60)
+        self.plot_start_frame = max(0, self.plot_end_frame-30)
         self.plot_interval = 1
 
         self.plot_hist_frame = np.array([self.frames-1])
@@ -238,6 +239,8 @@ class VISUAL:
                     for swim in range(int(self.pars['NSWIM'])):
                         body_pos = body_states[7*swim : 7*swim+3]
                         R = util.rot_mat(body_states[7*swim+3 : 7*swim+7])
+                        R = np.linalg.inv(R)
+                        R = np.eye(3)
                         # To find blob position
                         if(big_sphere):
                             self.write_data(body_pos, radius, superpuntoDatafileName, enable_periodic, color=16777215)
@@ -245,7 +248,7 @@ class VISUAL:
                             blob_x, blob_y, blob_z = util.blob_point_from_data(body_states[7*swim : 7*swim+7], self.blob_references[3*blob:3*blob+3])
                             if(self.output_to_superpunto):
                                 if(not big_sphere):
-                                    self.write_data([blob_x, blob_y, blob_z], float(self.pars['RBLOB']), superpuntoDatafileName, enable_periodic, color=16777215)
+                                    self.write_data(np.matmul(R, [blob_x, blob_y, blob_z]), float(self.pars['RBLOB']), superpuntoDatafileName, enable_periodic, color=16777215)
                             if(self.output_to_fcm and i == self.fcm_frame):
                                 blob_fx, blob_fy, blob_fz = blob_forces[3*blob : 3*blob+3]
                                 self.write_data([blob_x, blob_y, blob_z], 0, fcmPosfileName, box=True, center=False, superpunto=False)
@@ -254,6 +257,7 @@ class VISUAL:
 
                         # Robot arm to find segment position (Ignored plane rotation!)
                         for fil in range(int(self.pars['NFIL'])):
+                            fil_color = int("000000", base=16)
                             if (self.pars['PRESCRIBED_CILIA'] == 0):
                                 fil_i = int(4*fil*self.pars['NSEG'])
                                 fil_base_x, fil_base_y, fil_base_z = body_pos + np.matmul(R, self.fil_references[3*fil : 3*fil+3])
@@ -269,10 +273,10 @@ class VISUAL:
                                 rgb_hex = mcolors.rgb2hex(rgb_color)[1:]  # Convert RGB to BGR hexadecimal format
                                 bgr_hex = rgb_hex[4:]+rgb_hex[2:4]+rgb_hex[:2]
                                 fil_color = int(bgr_hex, base=16)
-                                # print(bgr_hex, fil_color)
+                                # print("\n", bgr_hex, fil_color, "\t")
 
                             if(self.output_to_superpunto):
-                                self.write_data(old_seg_pos-[50,50,50], float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic, True, True, color=fil_color)
+                                self.write_data(np.matmul(R, old_seg_pos-[50,50,50]), float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic, True, True, color=fil_color)
                             if(self.output_to_fcm):
                                 seg_fx, seg_fy, seg_fz, seg_tx, seg_ty, seg_tz = seg_forces[0 : 6]
                                 self.write_data(old_seg_pos, 0, fcmPosfileName, box=True, center=False, superpunto=False)
@@ -292,7 +296,7 @@ class VISUAL:
                                 elif (self.pars['PRESCRIBED_CILIA'] == 1):
                                     seg_pos = seg_states[fil_i+3*(seg-1) : fil_i+3*seg] 
                                 if(self.output_to_superpunto):
-                                    self.write_data(seg_pos-[50,50,50], float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic, True, True, color=fil_color)
+                                    self.write_data(np.matmul(R, seg_pos-[50,50,50]), float(self.pars['RSEG']), superpuntoDatafileName, enable_periodic, True, True, color=fil_color)
                                 if(self.output_to_fcm):
                                     seg_fx, seg_fy, seg_fz, seg_tx, seg_ty, seg_tz = seg_forces[6*seg : 6*seg+6]
                                     self.write_data(seg_pos, 0, fcmPosfileName, box=True, center=False, superpunto=False)

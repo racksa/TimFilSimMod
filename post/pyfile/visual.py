@@ -25,24 +25,24 @@ enable_periodic = False
 big_sphere = False
 
 simDir = 'data/100fil_sims/'
-simName = simDir + 'test_fil_1000_1000_2000'
+simName = simDir + 'test_fil_1000_1000_1375'
 
 
-simDir = 'data/phase_model/fixed_density/'
-# simName = simDir + 'test_bab_64fil_2000blob_2R_2torsion'
-# simName = simDir + 'test_bab_256fil_8000blob_4R_2torsion'
-simName = simDir + 'test_bab_1024fil_32000blob_8R_2torsion'
+# simDir = 'data/phase_model/fixed_density/'
+# # simName = simDir + 'test_bab_64fil_2000blob_2R_2torsion'
+# # simName = simDir + 'test_bab_256fil_8000blob_4R_2torsion'
+# simName = simDir + 'test_bab_1024fil_32000blob_8R_2torsion'
 
-# simDir = 'data/phase_model/'
-# simName = simDir + 'test_bab_1024fil_40000blob_6R_2torsion'
+# # simDir = 'data/phase_model/'
+# # simName = simDir + 'test_bab_1024fil_40000blob_6R_2torsion'
 
-# simDir = 'data/phase_model/fixed_filament/'
-# simName = simDir + 'test_bab_128fil_6000blob_4R_2torsion'
-# simName = simDir + 'test_bab_128fil_12000blob_6R_2torsion'
+# # simDir = 'data/phase_model/fixed_filament/'
+# # simName = simDir + 'test_bab_128fil_6000blob_4R_2torsion'
+# # simName = simDir + 'test_bab_128fil_12000blob_6R_2torsion'
 
-simDir = 'data/phase_model/single_fil/'
-simName = simDir + 'test_bab_1fil'
-simName = simDir + 'test_bab_1fil_white'
+# simDir = 'data/phase_model/single_fil/'
+# simName = simDir + 'test_bab_1fil'
+# simName = simDir + 'test_bab_1fil_white'
 
 # simDir = 'data/4096fil_sims/'
 # simName = simDir + 'test_fil_6400_6400_800'
@@ -426,7 +426,7 @@ class VISUAL:
                             self.write_data(seg_pos, float(self.pars['RSEG']), patternDatafileName, enable_periodic, True, True)
     
     def plot_fil3d(self):
-        fig = plt.figure(figsize=(6, 3), dpi=400)
+        fig = plt.figure(figsize=(16,4),dpi=400)
         ax = fig.add_subplot(projection='3d')
         seg_states_f = open('../../' + simName + '_seg_states.dat', "r")
         body_states_f = open('../../' + simName + '_body_states.dat', "r")
@@ -473,23 +473,25 @@ class VISUAL:
                 current_frame += 1
         
         ax.set_proj_type('ortho')
-        # ax.set_proj_type('persp', 0.05)  # FOV = 157.4 deg
-        ax.view_init(elev=0., azim=0)
-        # ax.dist=20
+        ax.set_proj_type('persp', 0.08)  # FOV = 157.4 deg
+        ax.view_init(elev=15, azim=90)
+        ax.dist=10
+        ax.axis('off')
+        ax.grid(False)
+
         ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
         ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
         ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
         ax.xaxis._axinfo["grid"]['color'] =  (1,1,1,0)
         ax.yaxis._axinfo["grid"]['color'] =  (1,1,1,0)
         ax.zaxis._axinfo["grid"]['color'] =  (1,1,1,0)
-        # ax.axis('off')
-        # ax.grid(False)
+        
 
         L = 2.2*self.pars['NSEG']
-        x_ticks = np.arange(0, Lx, step=33.3)
+        x_ticks = np.linspace(0, Lx, 6)
         x_ticks_label = ["{:.2f}L".format(x/L) for x in x_ticks]
         ax.set_xticks(x_ticks, x_ticks_label)
-        y_ticks = np.arange(0, Ly, step=33.3)
+        y_ticks = np.linspace(0, Ly, 6)
         y_ticks_label = ["{:.2f}L".format(y/L) for y in y_ticks]
         ax.set_yticks(y_ticks, y_ticks_label)
         # z_ticks = np.arange(0, Lz, step=50)
@@ -503,8 +505,8 @@ class VISUAL:
         ax.set_ylim(0, Ly)
         ax.set_zlim(0, 50)
         ax.set_box_aspect(aspect = (1,1,50/Lx))        
-        nfil = int(self.pars['NSWIM'])
-        fig.savefig(f'fig/fil_{nfil}_fil_{int(Lx)}_{int(Ly)}_{int(Lz)}.eps', bbox_inches = 'tight',  format='eps')
+        nfil = int(self.pars['NFIL'])
+        # fig.savefig(f'fig/fil_{nfil}_fil_{int(Lx)}_{int(Ly)}_{int(Lz)}.eps', bbox_inches = 'tight',  format='eps')
         fig.savefig(f'fig/fil_{nfil}_fil_{int(Lx)}_{int(Ly)}_{int(Lz)}.png', bbox_inches = 'tight',  format='png')
         fig.savefig(f'fig/fil_{nfil}_fil_{int(Lx)}_{int(Ly)}_{int(Lz)}.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()

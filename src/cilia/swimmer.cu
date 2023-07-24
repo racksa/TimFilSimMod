@@ -329,6 +329,7 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
     }
 
     #if SURFACE_OF_REVOLUTION_BODIES
+
       // The seeding functions work on unit-length bodies, so the scaling must be done after we read or calculate.
       for (int i = 0; i < NFIL; i++){
 

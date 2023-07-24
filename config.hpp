@@ -5,11 +5,10 @@
 #ifndef MY_CONFIG_HEADER_INCLUDED
 #define MY_CONFIG_HEADER_INCLUDED
 
-
 // Only define it if it is not defined in the makefile
 #ifndef SIMULATION_NAME
-  #define SIMULATION_DIR "data/phase_model/single_fil/"
-  #define SIMULATION_FILE "test_bab_1fil"
+  #define SIMULATION_DIR "data/expr_sims/global/"
+  #define SIMULATION_FILE "cilia"
   #define SIMULATION_NAME SIMULATION_DIR SIMULATION_FILE
 #endif
 
@@ -176,21 +175,32 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#ifdef CNFIL
-  #define NFIL (CNFIL)
-#else
-  #define NFIL (1) // The number of filaments attached to the rigid body/surface in each swimmer
-#endif
-#ifdef CNBLOB
-  #define NBLOB (CNBLOB)
-#else
-  #define NBLOB (4000) // The number of blobs to use as surface elements in each rigid body.
-#endif
-#ifdef CAR
-  #define AR CAR
-#else
-  #define AR 5.0
-#endif
+// #ifdef CNFIL
+//   #define NFIL (CNFIL)
+// #else
+//   #define NFIL (1) // The number of filaments attached to the rigid body/surface in each swimmer
+// #endif
+// #ifdef CNBLOB
+//   #define NBLOB (CNBLOB)
+// #else
+//   #define NBLOB (4000) // The number of blobs to use as surface elements in each rigid body.
+// #endif
+// #ifdef CAR
+//   #define AR CAR
+// #else
+//   #define AR 5.0
+// #endif
+
+extern int NFIL;
+extern int NBLOB;
+extern float AR;
+extern float AXIS_DIR_BODY_LENGTH;
+
+__managed__ int NFIL_managed = 0;
+__managed__ int NBLOB_managed = 0;
+__managed__ float AR_managed = 0.0;
+__managed__ float AXIS_DIR_BODY_LENGTH_managed = 0.0;
+
 #define NSEG (20)// The number of segments comprising each filament.
 #define NSWIM (1) // The number of swimmers.
 
@@ -202,6 +212,15 @@
 
 #define KB 1800.0 // Bending modulus.
 #define KT 1800.0 // Twist modulus.
+
+// #if BODY_OR_SURFACE_TYPE==2
+//   #define AXIS_DIR_BODY_LENGTH (AR*FIL_LENGTH)
+//   // #define AXIS_DIR_BODY_LENGTH (1.6496*2.0*FIL_LENGTH) // The length of the body parallel to the axis of rotation for the surface of revolution.
+// #elif BODY_OR_SURFACE_TYPE==4
+//   #define AXIS_DIR_BODY_LENGTH (0.5*NBLOB*RBLOB) // The length of the body parallel to the axis of rotation for the surface of revolution.
+// #elif BODY_OR_SURFACE_TYPE==5
+//   #define AXIS_DIR_BODY_LENGTH (NBLOB*RBLOB)
+// #endif
 
 #if CILIA_TYPE==0
 
@@ -217,15 +236,6 @@
 
   #define BASE_ROTATION_RATE 0.1
 
-#endif
-
-#if BODY_OR_SURFACE_TYPE==2
-  #define AXIS_DIR_BODY_LENGTH (AR*FIL_LENGTH)
-  // #define AXIS_DIR_BODY_LENGTH (1.6496*2.0*FIL_LENGTH) // The length of the body parallel to the axis of rotation for the surface of revolution.
-#elif BODY_OR_SURFACE_TYPE==4
-  #define AXIS_DIR_BODY_LENGTH (0.5*NBLOB*RBLOB) // The length of the body parallel to the axis of rotation for the surface of revolution.
-#elif BODY_OR_SURFACE_TYPE==5
-  #define AXIS_DIR_BODY_LENGTH (NBLOB*RBLOB)
 #endif
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

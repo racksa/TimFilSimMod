@@ -45,14 +45,15 @@ def get_boxsize_from_name(filename):
 def get_ciliate_data_from_name(filename):
     str_list = filename.split('_')
     try:
-        R, Tor = 0, 0
-        for s in str_list[-2:]:
-            print(s)
-            if(s.endswith('R')):
-                R = float(s[:-1])
-            if(s.endswith('torsion')):
-                Tor = float(s[:-7])
+        R, Tor = float(str_list[-2][:-1]), float(str_list[-1][:-7])
+        # for s in str_list[-2:]:
+        #     print(s)
+        #     if(s.endswith('R')):
+        #         R = float(s[:-1])
+        #     if(s.endswith('torsion')):
+        #         Tor = float(s[:-7])
         return R, Tor
     except:
         print("WARNING: Filename not supported for auto ciliating.")
-        return (float('inf'), float('inf'), float('inf'))
+        print("Error could be incurred by default values.")
+        return 5.0, 2.0

@@ -32,5 +32,8 @@ __global__ void periodic_barrier_forces(Real *f_segs, Real *f_blobs_repulsion, c
 __host__ __device__
 void box_images(Real &x, Real box_size);
 
+__global__
+void sync_var(int nfil, int nblob,
+               float ar, float body_length);
 
 #endif // MY_CUDA_FUNCTIONS_HEADER_INCLUDED

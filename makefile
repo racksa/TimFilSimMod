@@ -1,5 +1,5 @@
 VPATH = src/general src/flow_field src/cilia src/cilia/mobility
-GEN_FLAGS = -I. -Isrc/general -Isrc/flow_field -Isrc/cilia -Isrc/cilia/mobility -g -w -O3 -lineinfo
+GEN_FLAGS = -I. -Isrc/general -Isrc/flow_field -Isrc/cilia -Isrc/cilia/mobility config.cu -g -w -O3 -lineinfo
 CUFCM_ROOT = ../CUFCM/src/
 
 # We only compile the mobility solver that the user has selected.
@@ -24,7 +24,9 @@ MOBILITY_OPTS = -arch=sm_75 -std=c++14 -O3 -I../include -lcublas -lcufft -lcblas
 MOBILITY_SOURCE = fcm_mobility_solver.cu $(CUFCM_ROOT)CUFCM_CELLLIST.cu $(CUFCM_ROOT)CUFCM_FCM.cu $(CUFCM_ROOT)CUFCM_DATA.cu $(CUFCM_ROOT)CUFCM_SOLVER.cu $(CUFCM_ROOT)CUFCM_CORRECTION.cu
 endif
 
-CILIA_CPP = matrix.cpp quaternion.cpp util.cpp segment.cpp filament.cpp broyden_solver.cpp rigid_body.cpp swimmer.cpp mobility_solver.cpp
+# CILIA_CPP = matrix.cpp quaternion.cpp util.cpp segment.cpp filament.cpp broyden_solver.cpp rigid_body.cpp swimmer.cpp mobility_solver.cpp
+CILIA_CPP = matrix.cu quaternion.cu util.cu segment.cu filament.cu broyden_solver.cu rigid_body.cu swimmer.cu mobility_solver.cu
+
 CILIA_CUDA = cilia_sim_main.cu seeding.cu cuda_functions.cu $(MOBILITY_SOURCE)
 
 FLOW_FIELD_CPP = flow_field_main.cpp matrix.cpp quaternion.cpp
@@ -109,13 +111,16 @@ LINK=-lcublas -lcufft -llapacke -lcblas -lcurand -lcuda -lineinfo -lopenblas
 
 # CUFCM_FILES_SIMPLE = $(CUFCM_ROOT)CUFCM_CELLLIST.cu $(CUFCM_ROOT)CUFCM_FCM.cu $(CUFCM_ROOT)CUFCM_DATA.cu $(CUFCM_ROOT)CUFCM_SOLVER.cu $(CUFCM_ROOT)CUFCM_CORRECTION.cu
 
-CNFIL=1
-CNBLOB=12000
-CAR=6
-CTORSION=2
-CSIMULATION_DIR = data/phase_model/single_fil/
-CSIMULATION_NAME = test_bab_$(CNFIL)fil_white#_$(CNBLOB)blob_$(CAR)R_2torsion
-CFLAGS=-DSIMULATION_NAME="\"$(CSIMULATION_DIR)$(CSIMULATION_NAME)\"" -DCNFIL=$(CNFIL) -DCNBLOB=$(CNBLOB) -DCAR=$(CAR)
+# CNFIL = 24
+# CNBLOB = 5000
+# CAR = 6
+# CTORSION = 2
+# CSIMULATION_DIR = data/expr_sims/global/
+# CSIMULATION_NAME = test_bab_$(CNFIL)fil_$(CNBLOB)blob_$(CAR)R_$(CTORSION)torsion
+# CFLAGS=-DSIMULATION_NAME="\"$(CSIMULATION_DIR)$(CSIMULATION_NAME)\"" -DCNFIL=$(CNFIL) -DCNBLOB=$(CNBLOB) -DCAR=$(CAR)
 
-cilia_nvidia4_withCUFCM: $(CILIA_CPP) $(CILIA_CUDA)
+cilia_nvidia4_CUFCM: $(CILIA_CPP) $(CILIA_CUDA)
+	nvcc $^ -DUSE_DOUBLE_PRECISION $(CFLAGS) $(NVCC_FLAGS) $(NVIDIA4_OPTS) $(LINK) $(GEN_FLAGS) -o bin/cilia
+
+cilia_auto: $(CILIA_CPP) $(CILIA_CUDA)
 	nvcc $^ -DUSE_DOUBLE_PRECISION $(CFLAGS) $(NVCC_FLAGS) $(NVIDIA4_OPTS) $(LINK) $(GEN_FLAGS) -o bin/$(CSIMULATION_NAME)

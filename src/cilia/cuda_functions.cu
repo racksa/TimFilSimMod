@@ -395,11 +395,11 @@ __global__ void Mss_mult(Real * __restrict__ V, const Real *const __restrict__ F
 
     }
 
-    for (int j_start = 0; j_start < NSWIM*NFIL*NSEG; j_start += THREADS_PER_BLOCK){
+    for (int j_start = 0; j_start < NSWIM*NFIL_managed*NSEG; j_start += THREADS_PER_BLOCK){
 
       const int j_to_read = j_start + threadIdx.x;
 
-      if (j_to_read < NSWIM*NFIL*NSEG){
+      if (j_to_read < NSWIM*NFIL_managed*NSEG){
 
         x_shared[threadIdx.x] = X[3*j_to_read];
         y_shared[threadIdx.x] = X[3*j_to_read + 1];
@@ -422,7 +422,7 @@ __global__ void Mss_mult(Real * __restrict__ V, const Real *const __restrict__ F
 
       if (i < (start_seg + num_segs)){
 
-        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NSWIM*NFIL*NSEG); j++){
+        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NSWIM*NFIL_managed*NSEG); j++){
 
           Real f[6];
           f[0] = fx_shared[j];
@@ -500,11 +500,11 @@ __global__ void Mbb_mult(Real * __restrict__ V, const Real *const __restrict__ F
 
     }
 
-    for (int j_start = 0; j_start < NSWIM*NBLOB; j_start += THREADS_PER_BLOCK){
+    for (int j_start = 0; j_start < NSWIM*NBLOB_managed; j_start += THREADS_PER_BLOCK){
 
       const int j_to_read = j_start + threadIdx.x;
 
-      if (j_to_read < NSWIM*NBLOB){
+      if (j_to_read < NSWIM*NBLOB_managed){
 
         x_shared[threadIdx.x] = X[3*j_to_read];
         y_shared[threadIdx.x] = X[3*j_to_read + 1];
@@ -519,7 +519,7 @@ __global__ void Mbb_mult(Real * __restrict__ V, const Real *const __restrict__ F
 
       if (i < (start_blob + num_blobs)){
 
-        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NSWIM*NBLOB); j++){
+        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NSWIM*NBLOB_managed); j++){
 
           const Real f[3] = {fx_shared[j], fy_shared[j], fz_shared[j]};
 
@@ -576,11 +576,11 @@ __global__ void Msb_mult(Real * __restrict__ V, const Real *const __restrict__ F
 
     }
 
-    for (int j_start = 0; j_start < NSWIM*NBLOB; j_start += THREADS_PER_BLOCK){
+    for (int j_start = 0; j_start < NSWIM*NBLOB_managed; j_start += THREADS_PER_BLOCK){
 
       const int j_to_read = j_start + threadIdx.x;
 
-      if (j_to_read < NSWIM*NBLOB){
+      if (j_to_read < NSWIM*NBLOB_managed){
 
         x_shared[threadIdx.x] = Xb[3*j_to_read];
         y_shared[threadIdx.x] = Xb[3*j_to_read + 1];
@@ -595,7 +595,7 @@ __global__ void Msb_mult(Real * __restrict__ V, const Real *const __restrict__ F
 
       if (i < (start_seg + num_segs)){
 
-        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NSWIM*NBLOB); j++){
+        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NSWIM*NBLOB_managed); j++){
 
           const Real f[3] = {fx_shared[j], fy_shared[j], fz_shared[j]};
 
@@ -671,11 +671,11 @@ __global__ void Mbs_mult(Real * __restrict__ V, const Real *const __restrict__ F
 
     }
 
-    for (int j_start = 0; j_start < NSWIM*NFIL*NSEG; j_start += THREADS_PER_BLOCK){
+    for (int j_start = 0; j_start < NSWIM*NFIL_managed*NSEG; j_start += THREADS_PER_BLOCK){
 
       const int j_to_read = j_start + threadIdx.x;
 
-      if (j_to_read < NSWIM*NFIL*NSEG){
+      if (j_to_read < NSWIM*NFIL_managed*NSEG){
 
         x_shared[threadIdx.x] = Xs[3*j_to_read];
         y_shared[threadIdx.x] = Xs[3*j_to_read + 1];
@@ -698,7 +698,7 @@ __global__ void Mbs_mult(Real * __restrict__ V, const Real *const __restrict__ F
 
       if (i < (start_blob + num_blobs)){
 
-        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NSWIM*NFIL*NSEG); j++){
+        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NSWIM*NFIL_managed*NSEG); j++){
 
           Real f[6];
           f[0] = fx_shared[j];
@@ -793,11 +793,11 @@ __global__ void Mbs_mult_add(Real * __restrict__ V, const Real *const __restrict
 
     }
 
-    for (int j_start = 0; j_start < NSWIM*NFIL*NSEG; j_start += THREADS_PER_BLOCK){
+    for (int j_start = 0; j_start < NSWIM*NFIL_managed*NSEG; j_start += THREADS_PER_BLOCK){
 
       const int j_to_read = j_start + threadIdx.x;
 
-      if (j_to_read < NSWIM*NFIL*NSEG){
+      if (j_to_read < NSWIM*NFIL_managed*NSEG){
 
         x_shared[threadIdx.x] = Xs[3*j_to_read];
         y_shared[threadIdx.x] = Xs[3*j_to_read + 1];
@@ -820,7 +820,7 @@ __global__ void Mbs_mult_add(Real * __restrict__ V, const Real *const __restrict
 
       if (i < (start_blob + num_blobs)){
 
-        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NSWIM*NFIL*NSEG); j++){
+        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NSWIM*NFIL_managed*NSEG); j++){
 
           Real f[6];
           f[0] = fx_shared[j];
@@ -995,7 +995,7 @@ __global__ void reset_mean_fil_posns(Real *Z){
   const int index = threadIdx.x + blockIdx.x*blockDim.x;
   const int stride = blockDim.x*gridDim.x;
 
-  for (int i = index; i < 3*NSWIM*NFIL; i += stride){
+  for (int i = index; i < 3*NSWIM*NFIL_managed; i += stride){
 
       Z[i] = 0.0;
 
@@ -1010,7 +1010,7 @@ __global__ void write_mean_fil_posns(Real * __restrict__ Z, const Real *const __
   const int index = threadIdx.x + blockIdx.x*blockDim.x;
   const int stride = blockDim.x*gridDim.x;
 
-  for (int i = index; i < NSWIM*NFIL*NSEG; i += stride){
+  for (int i = index; i < NSWIM*NFIL_managed*NSEG; i += stride){
 
       const int fil_id = i/NSEG;
 
@@ -1029,7 +1029,7 @@ __global__ void reset_mean_fil_force_and_moment(Real * __restrict__ F, Real * __
   const int index = threadIdx.x + blockIdx.x*blockDim.x;
   const int stride = blockDim.x*gridDim.x;
 
-  for (int i = index; i < 3*NSWIM*NFIL; i += stride){
+  for (int i = index; i < 3*NSWIM*NFIL_managed; i += stride){
 
       F[i] = 0.0;
 
@@ -1049,7 +1049,7 @@ __global__ void find_total_fil_force_and_first_moment(Real * __restrict__ F, Rea
   const int index = threadIdx.x + blockIdx.x*blockDim.x;
   const int stride = blockDim.x*gridDim.x;
 
-  for (int i = index; i < NSWIM*NFIL*NSEG; i += stride){
+  for (int i = index; i < NSWIM*NFIL_managed*NSEG; i += stride){
 
     const int fil_id = i/NSEG;
 
@@ -1141,7 +1141,7 @@ __global__ void Msf_mult(Real *V, const Real *const F, const Real *const Ftot, c
     Real v[3] = {0.0, 0.0, 0.0};
     Real xi = X[3*i], yi = X[3*i + 1], zi = X[3*i + 2];
 
-    for (int j = 0; j < NSWIM*NFIL; j++){
+    for (int j = 0; j < NSWIM*NFIL_managed; j++){
 
       if (fil_id == j){
 
@@ -1284,7 +1284,7 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
 
         const int j_to_read = j_start + threadIdx.x;
 
-        if (j_to_read < NSWIM*NFIL*NSEG){
+        if (j_to_read < NSWIM*NFIL_managed*NSEG){
 
           x_shared[threadIdx.x] = x_segs[3*j_to_read];
           y_shared[threadIdx.x] = x_segs[3*j_to_read + 1];
@@ -1292,9 +1292,9 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
 
         } else if (j_to_read < NTOTAL){
 
-          x_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG)];
-          y_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG) + 1];
-          z_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG) + 2];
+          x_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL_managed*NSEG)];
+          y_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL_managed*NSEG) + 1];
+          z_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL_managed*NSEG) + 2];
 
         }
 
@@ -1304,7 +1304,7 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
 
           for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NTOTAL); j++){
 
-            const Real a_sum = (j_start + j < NSWIM*NFIL*NSEG) ? 2.0*RSEG : RSEG + RBLOB;
+            const Real a_sum = (j_start + j < NSWIM*NFIL_managed*NSEG) ? 2.0*RSEG : RSEG + RBLOB;
             const Real chi_fac = 10.0/a_sum; // 1.0/(1.1*a_sum - a_sum)
 
             const Real dx = xi - x_shared[j];
@@ -1366,7 +1366,7 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
 
           const int j_to_read = j_start + threadIdx.x;
 
-          if (j_to_read < NSWIM*NFIL*NSEG){
+          if (j_to_read < NSWIM*NFIL_managed*NSEG){
 
             x_shared[threadIdx.x] = x_segs[3*j_to_read];
             y_shared[threadIdx.x] = x_segs[3*j_to_read + 1];
@@ -1374,9 +1374,9 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
 
           } else if (j_to_read < NTOTAL){
 
-            x_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG)];
-            y_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG) + 1];
-            z_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL*NSEG) + 2];
+            x_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL_managed*NSEG)];
+            y_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL_managed*NSEG) + 1];
+            z_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL_managed*NSEG) + 2];
 
           }
 
@@ -1386,7 +1386,7 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
 
             for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NTOTAL); j++){
 
-              const Real a_sum = (j_start + j < NSWIM*NFIL*NSEG) ? RBLOB + RSEG : 2.0*RBLOB;
+              const Real a_sum = (j_start + j < NSWIM*NFIL_managed*NSEG) ? RBLOB + RSEG : 2.0*RBLOB;
               const Real chi_fac = 10.0/a_sum; // 1.0/(1.1*a_sum - a_sum)
 
               const Real dx = xi - x_shared[j];
@@ -1395,7 +1395,7 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
 
               const Real dist = sqrt(dx*dx + dy*dy + dz*dz);
 
-              if (((i + NSWIM*NFIL*NSEG) != (j_start + j)) && (dist < 1.1*a_sum)){
+              if (((i + NSWIM*NFIL_managed*NSEG) != (j_start + j)) && (dist < 1.1*a_sum)){
 
                 Real fac = fmin(1.0, 1.0 - chi_fac*(dist - a_sum));
                 fac *= REPULSIVE_FORCE_FACTOR*END_FORCE_MAGNITUDE*fac*fac*fac;
@@ -1481,7 +1481,7 @@ __global__ void periodic_barrier_forces(Real * __restrict__ f_segs,
           box_images(yj, boxsize);
           box_images(zj, boxsize);
 
-          const Real a_sum = (j < NSWIM*NFIL*NSEG) ? RBLOB + RSEG : 2.0*RBLOB;
+          const Real a_sum = (j < NSWIM*NFIL_managed*NSEG) ? RBLOB + RSEG : 2.0*RBLOB;
           const Real chi_fac = 10.0/a_sum; // 1.0/(1.1*a_sum - a_sum)
 
           Real dx = xi - xj;
@@ -1501,7 +1501,7 @@ __global__ void periodic_barrier_forces(Real * __restrict__ f_segs,
 
           const Real dist = sqrt(dx*dx + dy*dy + dz*dz);
 
-          if (((i + NSWIM*NFIL*NSEG) != j) && (dist < 1.1*a_sum)){
+          if (((i + NSWIM*NFIL_managed*NSEG) != j) && (dist < 1.1*a_sum)){
 
             Real fac = fmin(1.0, 1.0 - chi_fac*(dist - a_sum));
             fac *= REPULSIVE_FORCE_FACTOR*END_FORCE_MAGNITUDE*fac*fac*fac;
@@ -1534,4 +1534,13 @@ __global__ void periodic_barrier_forces(Real * __restrict__ f_segs,
 __host__ __device__
 void box_images(Real &x, Real box_size){
     x -= floor(x/box_size)*box_size;
+}
+
+__global__
+void sync_var(int nfil, int nblob,
+              float ar, float body_length){
+  NFIL_managed = nfil;
+  NBLOB_managed = nblob;
+  AR_managed = ar;
+  AXIS_DIR_BODY_LENGTH_managed = body_length;
 }

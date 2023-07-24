@@ -3,7 +3,6 @@
 #include <algorithm>
 #include "broyden_solver.hpp"
 #include "swimmer.hpp"
-#include "omp.h"
 
 broyden_solver::~broyden_solver(){}
 

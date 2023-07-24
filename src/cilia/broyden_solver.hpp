@@ -12,7 +12,8 @@ class swimmer;
 // =============================================================================
 // Included dependencies
 #include <vector>
-#include "matrix.hpp"
+#include "../general/matrix.hpp"
+#include "../../config.hpp"
 
 class broyden_solver {
 

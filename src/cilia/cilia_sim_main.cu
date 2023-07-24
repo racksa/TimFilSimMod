@@ -4,6 +4,9 @@
 #include <vector>
 #include "swimmer.hpp"
 #include <omp.h>
+#include "cuda_functions.hpp"
+
+
 
 #if STOKES_DRAG_MOBILITY
 
@@ -38,10 +41,20 @@
 
 #endif
 
-#include "config.hpp"
+#include "../../config.hpp"
 
 
 int main(int argc, char** argv){
+
+  NFIL = 16;
+  NBLOB = 4000;
+  AR = 5;
+  AXIS_DIR_BODY_LENGTH = AR*44;
+  sync_var<<<1, 1>>>(NFIL, NBLOB, AR, AXIS_DIR_BODY_LENGTH);
+  cudaDeviceSynchronize();
+
+  std::cout << "main" << NFIL << " " << "%% NFIL" << std::endl;
+  std::cout << "main" << NBLOB << " " << "%% NBLOB" << std::endl;
 
   float time_start;
   float solution_update_time;
@@ -156,6 +169,8 @@ int main(int argc, char** argv){
   #endif
 
   std::vector<swimmer> swimmers(NSWIM);
+
+  std::cout << "pass1" << std::endl;
   
   for (int n = 0; n < NSWIM; n++){
     swimmers[n].initial_setup(n, &data_from_file[n*data_per_swimmer],
@@ -163,6 +178,8 @@ int main(int argc, char** argv){
                                         &mobility.f_segs_host[6*n*NFIL*NSEG],
                                         &mobility.f_blobs_host[3*n*NBLOB]);
   }
+
+  std::cout << "pass initialisation" << std::endl;
 
   #if READ_INITIAL_CONDITIONS_FROM_BACKUP
 
@@ -340,11 +357,6 @@ int main(int argc, char** argv){
 
       broyden.iter = 0;
       
-
-      ////////////////////////////////////////////////////////////
-      /////////////////////////parallelise////////////////////////
-      ////////////////////////////////////////////////////////////
-      ////////////////////////////////////////////////////////////
       solution_update_time = 0.0;
       hisolver_time = 0.0;
       eval_error_time = 0.0;

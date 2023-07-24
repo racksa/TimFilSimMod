@@ -24,9 +24,11 @@ color_list.pop(2)
 enable_periodic = False
 big_sphere = False
 
-simDir = 'data/100fil_sims/'
+simDir = 'data/box_height_sim/100fil_sims/'
 simName = simDir + 'test_fil_1000_1000_1375'
 
+simDir = 'data/expr_sims/global/'
+simName = simDir + 'cilia'
 
 # simDir = 'data/phase_model/fixed_density/'
 # # simName = simDir + 'test_bab_64fil_2000blob_2R_2torsion'
@@ -47,33 +49,31 @@ simName = simDir + 'test_fil_1000_1000_1375'
 # simDir = 'data/4096fil_sims/'
 # simName = simDir + 'test_fil_6400_6400_800'
 
-# simDir = 'data/1fil_sims/'
+# simDir = 'data/box_height_sim/1fil_sims/'
 # simName = simDir + 'test_fil_100_100_1375'
-
-# simDir = 'data/256fil_sims/'
+# simDir = 'data/box_height_sim/256fil_sims/'
 # simName = simDir + 'test_fil_1600_1600_1600'
-
-# simDir = 'data/1024fil_sims/'
+# simDir = 'data/box_height_sim/1024fil_sims/'
 # simName = simDir + 'test_fil_3200_3200_1000'
 
-# simDir = 'data/2304rod_sims/'
+# simDir = 'data/rod_sims/2304rod_sims/'
 # simName = simDir + 'test_rod_960_960_60'
 # simName = simDir + 'test_rod_1920_1920_60'
 # simName = simDir + 'test_rod_3840_3840_60'
 
-# simDir = 'data/8100rod_sims/'
+# simDir = 'data/rod_sims/8100rod_sims/'
 # simName = simDir + 'test_rod_1800_1800_75'
 # simName = simDir + 'test_rod_3600_3600_75'
 # simName = simDir + 'test_rod_7200_7200_75'
 
-# simDir = 'data/rod7744/'
+# simDir = 'data/rod_sims/rod7744/'
 # simName = simDir + 'test_rod_7744'
 
-patternDatafileName = '../../' + simName + '_pattern.dat'
-superpuntoDatafileName = '../../' + simName + '_superpunto.dat'
-fcmPosfileName = '../../' + simName + '_flow_pos.dat'
-fcmForcefileName = '../../' + simName + '_flow_force.dat'
-fcmTorquefileName = '../../' + simName + '_flow_torque.dat'
+patternDatafileName = simName + '_pattern.dat'
+superpuntoDatafileName = simName + '_superpunto.dat'
+fcmPosfileName = simName + '_flow_pos.dat'
+fcmForcefileName = simName + '_flow_force.dat'
+fcmTorquefileName = simName + '_flow_torque.dat'
 
 Lx, Ly, Lz = myIo.get_boxsize_from_name(simName)
 
@@ -118,16 +118,16 @@ if(np.isinf(np.array([Lx, Ly, Lz])).any() and enable_periodic):
 class VISUAL:
 
     def __init__(self):
-        self.pars = myIo.read_pars('../../' + simName + '.par')
+        self.pars = myIo.read_pars(simName + '.par')
         if(not 'PRESCRIBED_CILIA' in self.pars):
             self.pars['PRESCRIBED_CILIA'] = 0
         if(self.pars['NBLOB']>0):
-            self.blob_references = myIo.read_blob_references('../../' + simName + '_blob_references.dat')
+            self.blob_references = myIo.read_blob_references(simName + '_blob_references.dat')
         if(self.pars['NFIL']>0):
-            self.fil_references = myIo.read_fil_references('../../' + simName + '_fil_references.dat')
+            self.fil_references = myIo.read_fil_references(simName + '_fil_references.dat')
         self.dt = self.pars['DT']*self.pars['PLOT_FREQUENCY_IN_STEPS']
         self.L = 14.14*self.pars['NBLOB']/22.
-        self.frames = min(30001, sum(1 for line in open('../../' + simName + '_body_states.dat')))
+        self.frames = min(30001, sum(1 for line in open(simName + '_body_states.dat')))
 
         self.plot_end_frame = self.frames
         self.plot_start_frame = max(0, self.plot_end_frame-30)
@@ -194,15 +194,15 @@ class VISUAL:
             ax = plt.figure().add_subplot(projection='3d')
 
         start = time.time()
-        seg_states_f = open('../../' + simName + '_seg_states.dat', "r")
-        body_states_f = open('../../' + simName + '_body_states.dat', "r")
+        seg_states_f = open(simName + '_seg_states.dat', "r")
+        body_states_f = open(simName + '_body_states.dat', "r")
         if(self.pars['NBLOB']>0):
-            blob_forces_f = open('../../' + simName + '_blob_forces.dat', "r")
-        seg_forces_f = open('../../' + simName + '_seg_forces.dat', "r")
+            blob_forces_f = open(simName + '_blob_forces.dat', "r")
+        seg_forces_f = open(simName + '_seg_forces.dat', "r")
         print("open files time = ",(time.time()-start))
         if (self.pars['PRESCRIBED_CILIA'] == 1):
-            fil_phases_f = open('../../' + simName + '_filament_phases.dat', "r")
-            fil_angles_f = open('../../' + simName + '_filament_shape_rotation_angles.dat', "r")
+            fil_phases_f = open(simName + '_filament_phases.dat', "r")
+            fil_angles_f = open(simName + '_filament_shape_rotation_angles.dat', "r")
             AR, torsion = myIo.get_ciliate_data_from_name(simName)
             radius = 0.5*AR*2.2*int(self.pars['NSEG'])
 
@@ -304,16 +304,16 @@ class VISUAL:
                                     self.write_data([seg_tx, seg_ty, seg_tz], 0, fcmTorquefileName, box=False, center=False, superpunto=False)
 
         if(self.output_to_fcm):
-            fcm_directory = "../../../CUFCM/data/flow_data/"
+            fcm_directory = "../CUFCM/data/flow_data/"
             subprocess.call("cp " + fcmPosfileName + " " + fcm_directory, shell=True)
             subprocess.call("cp " + fcmForcefileName + " " + fcm_directory, shell=True)
             subprocess.call("cp " + fcmTorquefileName + " " + fcm_directory, shell=True)
 
     # Filaments
     def plot_seg_vel(self):
-        seg_states_f = open('../../' + simName + '_seg_states.dat', "r")
-        seg_vels_f = open('../../' + simName + '_seg_vels.dat', "r")
-        body_states_f = open('../../' + simName + '_body_states.dat', "r")
+        seg_states_f = open(simName + '_seg_states.dat', "r")
+        seg_vels_f = open(simName + '_seg_vels.dat', "r")
+        body_states_f = open(simName + '_body_states.dat', "r")
 
         ax = plt.figure().add_subplot(1,1,1)
         end_pos = np.zeros((int(self.pars['NFIL']), 3))
@@ -389,8 +389,8 @@ class VISUAL:
 
     def plot_pattern(self):
 
-        seg_states_f = open('../../' + simName + '_seg_states.dat', "r")
-        body_states_f = open('../../' + simName + '_body_states.dat', "r")
+        seg_states_f = open(simName + '_seg_states.dat', "r")
+        body_states_f = open(simName + '_body_states.dat', "r")
         for i in range(self.plot_end_frame):
             print(" frame ", i, "/", self.frames, "          ", end="\r")
             body_states_str = body_states_f.readline()
@@ -428,8 +428,8 @@ class VISUAL:
     def plot_fil3d(self):
         fig = plt.figure(figsize=(16,4),dpi=400)
         ax = fig.add_subplot(projection='3d')
-        seg_states_f = open('../../' + simName + '_seg_states.dat', "r")
-        body_states_f = open('../../' + simName + '_body_states.dat', "r")
+        seg_states_f = open(simName + '_seg_states.dat', "r")
+        body_states_f = open(simName + '_body_states.dat', "r")
         current_frame=0
         for i in range(self.plot_end_frame):
             print(" frame ", i, "/", self.frames, "          ", end="\r")
@@ -512,8 +512,8 @@ class VISUAL:
         plt.show()
 
     def plot_seg_force(self):
-        seg_forces_f = open('../../' + simName + '_seg_forces.dat', "r")
-        tether_force_f = open('../../' + simName + '_tether_force.dat', "r")
+        seg_forces_f = open(simName + '_seg_forces.dat', "r")
+        tether_force_f = open(simName + '_tether_force.dat', "r")
 
         NF0 = float(self.pars['DIMENSIONLESS_FORCE']) * float(self.pars['NFIL'])
         T0 = float(self.pars['STEPS_PER_PERIOD']) / float(self.pars['PLOT_FREQUENCY_IN_STEPS'])
@@ -556,8 +556,8 @@ class VISUAL:
     def plot_phase_heatmap(self):
         colormap = 'cividis'
         colormap = 'twilight_shifted'
-        fil_phases_f = open('../../' + simName + '_filament_phases.dat', "r")
-        fil_angles_f = open('../../' + simName + '_filament_shape_rotation_angles.dat', "r")
+        fil_phases_f = open(simName + '_filament_phases.dat', "r")
+        fil_angles_f = open(simName + '_filament_shape_rotation_angles.dat', "r")
 
         fig = plt.figure()
         ax = fig.add_subplot(1,1,1)
@@ -627,8 +627,8 @@ class VISUAL:
         ax = fig.add_subplot(projection='3d')
 
         start = time.time()
-        seg_states_f = open('../../' + simName + '_seg_states.dat', "r")
-        body_states_f = open('../../' + simName + '_body_states.dat', "r")
+        seg_states_f = open(simName + '_seg_states.dat', "r")
+        body_states_f = open(simName + '_body_states.dat', "r")
         print("open files time = ",(time.time()-start))
 
         AR, torsion = myIo.get_ciliate_data_from_name(simName)
@@ -670,7 +670,7 @@ class VISUAL:
                 # # To find blob position
                 # for blob in range(int(self.pars['NBLOB'])):
                 #     blob_x, blob_y, blob_z = util.blob_point_from_data(body_states[7*swim : 7*swim+7], self.blob_references[3*blob:3*blob+3])
-                #     # ax.scatter(blob_x, blob_y, blob_z)
+                #     ax.scatter(blob_x, blob_y, blob_z)
 
                 # Create the sphere data points
                 u = np.linspace(0, 2 * np.pi, num_points)
@@ -745,7 +745,7 @@ class VISUAL:
 
     # Rods
     def compute_rod_vel(self):
-        body_states_f = open('../../' + simName + '_body_states.dat', "r")
+        body_states_f = open(simName + '_body_states.dat', "r")
 
         compute_start = self.plot_start_frame
         compute_start = 0
@@ -810,7 +810,7 @@ class VISUAL:
             Lx, Ly, Lz = box[ni]
             simName = simDir + name
         
-            body_states_f = open('../../' + simName + '_body_states.dat', "r")
+            body_states_f = open(simName + '_body_states.dat', "r")
 
             compute_start = self.plot_start_frame
             compute_start = 0
@@ -880,8 +880,8 @@ class VISUAL:
             simName = simDir + name
             print(simName)
 
-            body_states_f = open('../../' + simName + '_body_states.dat', "r")
-            body_vels_f = open('../../' + simName + '_body_vels.dat', "r")
+            body_states_f = open(simName + '_body_states.dat', "r")
+            body_vels_f = open(simName + '_body_vels.dat', "r")
 
             compute_start = self.plot_start_frame
             compute_start = 0
@@ -939,8 +939,8 @@ class VISUAL:
             simName = simDir + name
             print(simName)
 
-            body_states_f = open('../../' + simName + '_body_states.dat', "r")
-            body_vels_f = open('../../' + simName + '_body_vels.dat', "r")
+            body_states_f = open(simName + '_body_states.dat', "r")
+            body_vels_f = open(simName + '_body_vels.dat', "r")
 
             compute_start = self.plot_start_frame
             compute_start = 0
@@ -970,7 +970,7 @@ class VISUAL:
         plt.show()
 
     def plot_hist(self):
-        body_states_f = open('../../' + simName + '_body_states.dat', "r")
+        body_states_f = open(simName + '_body_states.dat', "r")
         body_states = np.zeros(7*int(self.pars['NSWIM']))
         body_vel_x = np.zeros(int(self.pars['NSWIM']))
 
@@ -1001,7 +1001,7 @@ class VISUAL:
 
     def plot_rod_vel(self):
 
-        body_states_f = open('../../' + simName + '_body_states.dat', "r")
+        body_states_f = open(simName + '_body_states.dat', "r")
 
         end_pos = np.zeros((int(self.pars['NSWIM']), 3))
         end_vel = np.zeros((int(self.pars['NSWIM']), 3))
@@ -1076,7 +1076,7 @@ class VISUAL:
         for ni, name in enumerate(simNames):
             Lx, Ly, Lz = box[ni]
             simName = simDir + name
-            body_states_f = open('../../' + simName + '_body_states.dat', "r")
+            body_states_f = open(simName + '_body_states.dat', "r")
 
             end_pos = np.zeros((int(self.pars['NSWIM']), 3))
             end_vel = np.zeros((int(self.pars['NSWIM']), 3))

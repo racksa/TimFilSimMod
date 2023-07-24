@@ -12,8 +12,8 @@
 // Included dependencies
 #include <vector>
 #include <iostream>
-#include "matrix.hpp"
-#include "quaternion.hpp"
+#include "../general/matrix.hpp"
+#include "../general/quaternion.hpp"
 #include <random>
 #include "../../config.hpp"
 

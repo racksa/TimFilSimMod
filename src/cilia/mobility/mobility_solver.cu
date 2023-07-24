@@ -26,6 +26,9 @@ void mobility_solver::finalise(){
 
 void mobility_solver::initialise(){
 
+  std::cout << "mobility" << NFIL << " " << "%% NFIL" << std::endl;
+  std::cout << "mobility" << NBLOB << " " << "%% NBLOB" << std::endl;
+
   allocate_host_memory();
 
   allocate_device_memory();

@@ -1,8 +1,8 @@
 // segment.cpp
 
 #include "segment.hpp"
-#include "matrix.hpp"
-#include "config.hpp"
+#include "../general/matrix.hpp"
+#include "../../config.hpp"
 
 segment::~segment(){}
 

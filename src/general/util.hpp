@@ -5,16 +5,17 @@
 #ifndef MY_UTIL_HEADER_INCLUDED
 #define MY_UTIL_HEADER_INCLUDED
 
-#include <chrono>
-
-#include "../../config.hpp"
-
 // =============================================================================
 // Forward declared dependencies
 
 // =============================================================================
 // Included dependencies
+#include <chrono>
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <unordered_map>
 #include "../../config.hpp"
 
 bool hasEnding (std::string const &fullString, std::string const &ending);
@@ -26,5 +27,9 @@ static Real get_time() {
     static auto start_time = clock_type::now();
     return duration_type(clock_type::now()-start_time).count();
 }
+
+std::unordered_map<std::string, std::unordered_map<std::string, std::string>> parseINI(const std::string& filename);
+
+std::string data_from_ini(std::string section, std::string variable);
 
 #endif

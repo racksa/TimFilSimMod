@@ -15,7 +15,7 @@
 #include "../general/matrix.hpp"
 #include "rigid_body.hpp"
 #include "filament.hpp"
-#include "config.hpp"
+#include "../../config.hpp"
 
 class swimmer{
 

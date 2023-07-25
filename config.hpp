@@ -1,4 +1,5 @@
 // config.hpp
+#include <string>
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Include guard
@@ -6,11 +7,26 @@
 #define MY_CONFIG_HEADER_INCLUDED
 
 // Only define it if it is not defined in the makefile
-#ifndef SIMULATION_NAME
-  #define SIMULATION_DIR "data/expr_sims/global/"
-  #define SIMULATION_FILE "cilia"
-  #define SIMULATION_NAME SIMULATION_DIR SIMULATION_FILE
-#endif
+// #ifndef SIMULATION_NAME
+//   #define SIMULATION_DIR "data/expr_sims/global/"
+//   #define SIMULATION_FILE "cilia"
+//   #define SIMULATION_NAME SIMULATION_DIR SIMULATION_FILE
+// #endif
+
+extern std::string SIMULATION_DIR;
+extern std::string SIMULATION_FILE;
+extern std::string SIMULATION_NAME;
+
+extern std::string SIMULATION_CONFIG_NAME;
+extern std::string SIMULATION_BACKUP_NAME;
+extern std::string SIMULATION_BODY_STATE_NAME; // Blob states are recoverable from body states.
+extern std::string SIMULATION_SEG_STATE_NAME;
+extern std::string SIMULATION_BODY_VEL_NAME; // Blob velocities are recoverable from body velocities.
+extern std::string SIMULATION_SEG_VEL_NAME;
+extern std::string SIMULATION_BLOB_FORCES_NAME; // Body forces are recoverable from blob forces.
+extern std::string SIMULATION_SEG_FORCES_NAME;
+extern std::string SIMULATION_TIME_NAME;
+extern std::string SIMULATION_TETHERLAM_NAME;
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -64,12 +80,6 @@
   // 0 = Random
   // 1 = All zeros
   // 2 = Ishikawa
-
-  #if DYNAMIC_SHAPE_ROTATION
-
-    #define TORSIONAL_SPRING_MAGNITUDE_FACTOR 2.0 // Pre-multiplies the mean generalised driving force magnitude to give the spring constant that resists rigid-body rotations of the shape.
-
-  #endif
 
   #define WRITE_GENERALISED_FORCES false
   // If true, this simulation will save its generalised forces to file for use as the reference values.
@@ -195,11 +205,8 @@ extern int NFIL;
 extern int NBLOB;
 extern float AR;
 extern float AXIS_DIR_BODY_LENGTH;
+extern float TORSIONAL_SPRING_MAGNITUDE_FACTOR; // Pre-multiplies the mean generalised driving force magnitude to give the spring constant that resists rigid-body rotations of the shape.
 
-__managed__ int NFIL_managed = 0;
-__managed__ int NBLOB_managed = 0;
-__managed__ float AR_managed = 0.0;
-__managed__ float AXIS_DIR_BODY_LENGTH_managed = 0.0;
 
 #define NSEG (20)// The number of segments comprising each filament.
 #define NSWIM (1) // The number of swimmers.
@@ -320,16 +327,16 @@ __managed__ float AXIS_DIR_BODY_LENGTH_managed = 0.0;
 
 #define PI 3.14159265358979323846264338327950288
 
-#define SIMULATION_CONFIG_NAME SIMULATION_NAME ".par"
-#define SIMULATION_BACKUP_NAME SIMULATION_NAME ".backup"
-#define SIMULATION_BODY_STATE_NAME SIMULATION_NAME "_body_states.dat" // Blob states are recoverable from body states.
-#define SIMULATION_SEG_STATE_NAME SIMULATION_NAME "_seg_states.dat"
-#define SIMULATION_BODY_VEL_NAME SIMULATION_NAME "_body_vels.dat" // Blob velocities are recoverable from body velocities.
-#define SIMULATION_SEG_VEL_NAME SIMULATION_NAME "_seg_vels.dat"
-#define SIMULATION_BLOB_FORCES_NAME SIMULATION_NAME "_blob_forces.dat" // Body forces are recoverable from blob forces.
-#define SIMULATION_SEG_FORCES_NAME SIMULATION_NAME "_seg_forces.dat"
-#define SIMULATION_TIME_NAME SIMULATION_NAME "_time.dat"
-#define SIMULATION_TETHERLAM_NAME SIMULATION_NAME "_tether_force.dat"
+// #define SIMULATION_CONFIG_NAME SIMULATION_NAME ".par"
+// #define SIMULATION_BACKUP_NAME SIMULATION_NAME ".backup"
+// #define SIMULATION_BODY_STATE_NAME SIMULATION_NAME "_body_states.dat" // Blob states are recoverable from body states.
+// #define SIMULATION_SEG_STATE_NAME SIMULATION_NAME "_seg_states.dat"
+// #define SIMULATION_BODY_VEL_NAME SIMULATION_NAME "_body_vels.dat" // Blob velocities are recoverable from body velocities.
+// #define SIMULATION_SEG_VEL_NAME SIMULATION_NAME "_seg_vels.dat"
+// #define SIMULATION_BLOB_FORCES_NAME SIMULATION_NAME "_blob_forces.dat" // Body forces are recoverable from blob forces.
+// #define SIMULATION_SEG_FORCES_NAME SIMULATION_NAME "_seg_forces.dat"
+// #define SIMULATION_TIME_NAME SIMULATION_NAME "_time.dat"
+// #define SIMULATION_TETHERLAM_NAME SIMULATION_NAME "_tether_force.dat"
 
 #define DELETE_CURRENT_LINE "                                                                                                               " << "\r"
 

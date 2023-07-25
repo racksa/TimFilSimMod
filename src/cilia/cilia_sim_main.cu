@@ -1,10 +1,14 @@
 #include <string>
+#include <fstream>
+#include <sstream>
+#include <unordered_map>
 #include <iostream>
 #include <iomanip>
 #include <vector>
 #include "swimmer.hpp"
 #include <omp.h>
 #include "cuda_functions.hpp"
+#include "../general/util.hpp"
 
 
 
@@ -42,19 +46,35 @@
 #endif
 
 #include "../../config.hpp"
+#include "../../globals.hpp"
 
 
 int main(int argc, char** argv){
 
-  NFIL = 16;
-  NBLOB = 4000;
-  AR = 5;
-  AXIS_DIR_BODY_LENGTH = AR*44;
-  sync_var<<<1, 1>>>(NFIL, NBLOB, AR, AXIS_DIR_BODY_LENGTH);
-  cudaDeviceSynchronize();
+  // Read global variables from .ini
+  NFIL = std::stoi(data_from_ini("Parameters", "nfil"));
+  NBLOB = std::stoi(data_from_ini("Parameters", "nblob"));
+  AR = std::stof(data_from_ini("Parameters", "ar"));
+  TORSIONAL_SPRING_MAGNITUDE_FACTOR = std::stof(data_from_ini("Parameters", "spring_factor"));
+  SIMULATION_DIR = data_from_ini("Parameters", "simulation_dir");
+  SIMULATION_FILE = data_from_ini("Parameters", "simulation_file");
 
-  std::cout << "main" << NFIL << " " << "%% NFIL" << std::endl;
-  std::cout << "main" << NBLOB << " " << "%% NBLOB" << std::endl;
+  // Derive other global variables
+  AXIS_DIR_BODY_LENGTH = AR*44;
+  SIMULATION_NAME = SIMULATION_DIR+SIMULATION_FILE;
+  SIMULATION_CONFIG_NAME = SIMULATION_NAME + ".par";
+  SIMULATION_BACKUP_NAME = SIMULATION_NAME + ".backup";
+  SIMULATION_BODY_STATE_NAME = SIMULATION_NAME + "_body_states.dat"; // Blob states are recoverable from body states.
+  SIMULATION_SEG_STATE_NAME = SIMULATION_NAME + "_seg_states.dat";
+  SIMULATION_BODY_VEL_NAME = SIMULATION_NAME + "_body_vels.dat"; // Blob velocities are recoverable from body velocities.
+  SIMULATION_SEG_VEL_NAME = SIMULATION_NAME + "_seg_vels.dat";
+  SIMULATION_BLOB_FORCES_NAME = SIMULATION_NAME + "_blob_forces.dat"; // Body forces are recoverable from blob forces.
+  SIMULATION_SEG_FORCES_NAME = SIMULATION_NAME + "_seg_forces.dat";
+  SIMULATION_TIME_NAME = SIMULATION_NAME + "_time.dat";
+  SIMULATION_TETHERLAM_NAME = SIMULATION_NAME + "_tether_force.dat";
+
+  sync_var<<<1, 1>>>(NFIL, NBLOB);
+  cudaDeviceSynchronize();
 
   float time_start;
   float solution_update_time;
@@ -170,16 +190,12 @@ int main(int argc, char** argv){
 
   std::vector<swimmer> swimmers(NSWIM);
 
-  std::cout << "pass1" << std::endl;
-  
   for (int n = 0; n < NSWIM; n++){
     swimmers[n].initial_setup(n, &data_from_file[n*data_per_swimmer],
                                         &mobility.x_segs_host[3*n*NFIL*NSEG],
                                         &mobility.f_segs_host[6*n*NFIL*NSEG],
                                         &mobility.f_blobs_host[3*n*NBLOB]);
   }
-
-  std::cout << "pass initialisation" << std::endl;
 
   #if READ_INITIAL_CONDITIONS_FROM_BACKUP
 

@@ -2,6 +2,7 @@
 
 #include "seeding.hpp"
 #include "../../config.hpp"
+#include "../../globals.hpp"
 
 #if SURFACE_OF_REVOLUTION_BODIES or ROD or RIGIDWALL
 
@@ -10,7 +11,7 @@
   #include <cmath>
   #include <random>
   #include <string>
-  #include "matrix.hpp"
+  #include "../general/matrix.hpp"
 
   __global__ void find_nearest_neighbours(int *const ids, const Real *const samples, const int num_samples, const Real *const X, const int N){
 

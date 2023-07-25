@@ -33,7 +33,6 @@ __host__ __device__
 void box_images(Real &x, Real box_size);
 
 __global__
-void sync_var(int nfil, int nblob,
-               float ar, float body_length);
+void sync_var(int nfil, int nblob);
 
 #endif // MY_CUDA_FUNCTIONS_HEADER_INCLUDED

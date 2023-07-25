@@ -56,8 +56,8 @@ int main(int argc, char** argv){
   NBLOB = std::stoi(data_from_ini("Parameters", "nblob"));
   AR = std::stof(data_from_ini("Parameters", "ar"));
   TORSIONAL_SPRING_MAGNITUDE_FACTOR = std::stof(data_from_ini("Parameters", "spring_factor"));
-  SIMULATION_DIR = data_from_ini("Parameters", "simulation_dir");
-  SIMULATION_FILE = data_from_ini("Parameters", "simulation_file");
+  SIMULATION_DIR = data_from_ini("Filenames", "simulation_dir");
+  SIMULATION_FILE = data_from_ini("Filenames", "simulation_file");
 
   // Derive other global variables
   AXIS_DIR_BODY_LENGTH = AR*44;

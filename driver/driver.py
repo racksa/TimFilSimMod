@@ -2,7 +2,7 @@ import numpy as np
 import func
 
 driver = func.DRIVER('config.ini')
-driver.compile_all()
+driver.run()
 
 # commands = [
 #         "ls -l",

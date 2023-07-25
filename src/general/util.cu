@@ -48,7 +48,7 @@ std::string data_from_ini(std::string section, std::string variable){
 
     // Access and use the parameters
     if (iniData.find(section) != iniData.end()) {
-        std::cout << section << ": " << iniData[section][variable] << std::endl;
+        std::cout << section << " " << variable << ": " << iniData[section][variable] << std::endl;
         return iniData[section][variable];        
     } else {
         std::cout << "Section " << section << " not found in the INI file." << std::endl;

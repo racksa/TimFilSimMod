@@ -27,8 +27,8 @@ big_sphere = False
 simDir = 'data/box_height_sim/100fil_sims/'
 simName = simDir + 'test_fil_1000_1000_1375'
 
-simDir = 'data/expr_sims/global/'
-simName = simDir + 'cilia'
+simDir = 'data/expr_sims/fixed_number_density/'
+simName = simDir + 'ciliate_64fil_1000blob_3.00R_2.00torsion'
 
 # simDir = 'data/phase_model/fixed_density/'
 # # simName = simDir + 'test_bab_64fil_2000blob_2R_2torsion'

@@ -27,8 +27,15 @@ big_sphere = False
 simDir = 'data/box_height_sim/100fil_sims/'
 simName = simDir + 'test_fil_1000_1000_1375'
 
-simDir = 'data/expr_sims/fixed_number_density/'
-simName = simDir + 'ciliate_64fil_1000blob_3.00R_2.00torsion'
+
+selection = 1
+for i in range(selection, selection+1):
+    nfil = int(64 * (1+0.2*i)**2)
+    nblob = int(1000 * (1+0.2*i)**2)
+    ar = 3 * (1+0.2*i)
+    print(f"nfil={nfil} nblob={nblob} ar={ar:.2f}")
+    simDir = 'data/expr_sims/fixed_number_density/'
+    simName = simDir + f'ciliate_{nfil}fil_{nblob}blob_{ar:.2f}R_2.00torsion'
 
 # simDir = 'data/phase_model/fixed_density/'
 # # simName = simDir + 'test_bab_64fil_2000blob_2R_2torsion'
@@ -127,7 +134,7 @@ class VISUAL:
             self.fil_references = myIo.read_fil_references(simName + '_fil_references.dat')
         self.dt = self.pars['DT']*self.pars['PLOT_FREQUENCY_IN_STEPS']
         self.L = 14.14*self.pars['NBLOB']/22.
-        self.frames = min(30001, sum(1 for line in open(simName + '_body_states.dat')))
+        self.frames = min(301, sum(1 for line in open(simName + '_body_states.dat')))
 
         self.plot_end_frame = self.frames
         self.plot_start_frame = max(0, self.plot_end_frame-30)

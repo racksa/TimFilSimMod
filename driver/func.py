@@ -32,10 +32,12 @@ class DRIVER:
             config.write(configfile, space_around_delimiters=False)
 
     def run(self):
-        for i in range(3):
-            self.nfil = int(64 * (1*i)**2)
-            self.nblob = int(1000 * (1*i)**2)
-            self.ar = 3 * (1*i)
+        self.cuda_device = 2
+
+        for i in range(5):
+            self.nfil = int(64 * (1+0.2*i)**2)
+            self.nblob = int(1000 * (1+0.2*i)**2)
+            self.ar = 3 * (1+0.2*i)
 
             self.write_pars("Parameters", "nfil", int(self.nfil))
             self.write_pars("Parameters", "nblob", int(self.nblob))
@@ -43,9 +45,9 @@ class DRIVER:
             self.write_pars("Parameters", "spring_factor", int(self.spring_factor))
             self.write_pars("Filenames", "simulation_dir", "data/expr_sims/fixed_number_density/")
             self.write_pars("Filenames", "simulation_file", f"ciliate_{self.nfil}fil_{self.nblob}blob_{self.ar:.2f}R_{self.spring_factor:.2f}torsion")
-
+            
             command = f"export OPENBLAS_NUM_THREADS=1; \
-                        export CUDA_VISIBLE_DEVICES=4; \
+                        export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
                         ./bin/cilia"
             
             os.system(command)

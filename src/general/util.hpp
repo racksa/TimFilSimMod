@@ -23,7 +23,7 @@ bool hasEnding (std::string const &fullString, std::string const &ending);
 
 using clock_type    = std::chrono::high_resolution_clock;
 using duration_type = std::chrono::duration<Real>;
-static Real get_time() {
+static Real get_time_cilia() {
     static auto start_time = clock_type::now();
     return duration_type(clock_type::now()-start_time).count();
 }

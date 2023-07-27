@@ -103,7 +103,7 @@ flow_field_pc: $(FLOW_FIELD_CPP) $(FLOW_FIELD_CUDA)
 
 
 # With cuFCM
-NVCC_FLAGS=-arch=sm_75 -std=c++14 -O3 -I../include -Xcompiler -fopenmp
+NVCC_FLAGS=-arch=sm_75 -std=c++17 -O3 -I../include -Xcompiler -fopenmp
 
 LINK=-lcublas -lcufft -llapacke -lcblas -lcurand -lcuda -lineinfo -lopenblas
 
@@ -111,16 +111,5 @@ LINK=-lcublas -lcufft -llapacke -lcblas -lcurand -lcuda -lineinfo -lopenblas
 
 # CUFCM_FILES_SIMPLE = $(CUFCM_ROOT)CUFCM_CELLLIST.cu $(CUFCM_ROOT)CUFCM_FCM.cu $(CUFCM_ROOT)CUFCM_DATA.cu $(CUFCM_ROOT)CUFCM_SOLVER.cu $(CUFCM_ROOT)CUFCM_CORRECTION.cu
 
-# CNFIL = 24
-# CNBLOB = 5000
-# CAR = 6
-# CTORSION = 2
-# CSIMULATION_DIR = data/expr_sims/global/
-# CSIMULATION_NAME = test_bab_$(CNFIL)fil_$(CNBLOB)blob_$(CAR)R_$(CTORSION)torsion
-# CFLAGS=-DSIMULATION_NAME="\"$(CSIMULATION_DIR)$(CSIMULATION_NAME)\"" -DCNFIL=$(CNFIL) -DCNBLOB=$(CNBLOB) -DCAR=$(CAR)
-
 cilia_nvidia4_CUFCM: $(CILIA_CPP) $(CILIA_CUDA)
 	nvcc $^ -DUSE_DOUBLE_PRECISION $(CFLAGS) $(NVCC_FLAGS) $(NVIDIA4_OPTS) $(LINK) $(GEN_FLAGS) -o bin/cilia
-
-cilia_auto: $(CILIA_CPP) $(CILIA_CUDA)
-	nvcc $^ -DUSE_DOUBLE_PRECISION $(CFLAGS) $(NVCC_FLAGS) $(NVIDIA4_OPTS) $(LINK) $(GEN_FLAGS) -o bin/$(CSIMULATION_NAME)

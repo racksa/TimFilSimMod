@@ -31,6 +31,7 @@ if(sys.argv[1] == 'plot_pattern'):
 if(sys.argv[1] == 'plot_fil3d'):
     visualiser.plot_fil3d()
 
+# Phase model
 if(sys.argv[1] == 'plot_phase'):
     if(len(sys.argv) > 2):
         if(sys.argv[2] == 'video'):
@@ -43,6 +44,13 @@ if(sys.argv[1] == 'plot_ciliate'):
             visualiser.ciliate_video = True
     visualiser.plot_ciliate()
 
+if(sys.argv[1] == 'plot_multi_ciliate'):
+    if(len(sys.argv) > 2):
+        if(sys.argv[2] == 'video'):
+            visualiser.ciliate_video = True
+    visualiser.plot_multi_ciliate()
+
+# Rods
 if(sys.argv[1] == 'compute_rod_vel'):
     visualiser.compute_rod_vel()
 

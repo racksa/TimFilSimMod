@@ -28,22 +28,23 @@ simDir = 'data/box_height_sim/100fil_sims/'
 simName = simDir + 'test_fil_1000_1000_1375'
 
 
-selection = 1
+selection = 9
 for i in range(selection, selection+1):
     nfil = int(64 * (1+0.2*i)**2)
     nblob = int(1000 * (1+0.2*i)**2)
     ar = 3 * (1+0.2*i)
-    print(f"nfil={nfil} nblob={nblob} ar={ar:.2f}")
+    spring_factor = 2
+    print(f" nfil={nfil}\n nblob={nblob}\n ar={ar:.2f}")
     simDir = 'data/expr_sims/fixed_number_density/'
-    simName = simDir + f'ciliate_{nfil}fil_{nblob}blob_{ar:.2f}R_2.00torsion'
+    simName = simDir + f'ciliate_{nfil}fil_{nblob}blob_{ar:.2f}R_{spring_factor:.2f}torsion'
 
 # simDir = 'data/phase_model/fixed_density/'
 # # simName = simDir + 'test_bab_64fil_2000blob_2R_2torsion'
 # # simName = simDir + 'test_bab_256fil_8000blob_4R_2torsion'
 # simName = simDir + 'test_bab_1024fil_32000blob_8R_2torsion'
 
-# # simDir = 'data/phase_model/'
-# # simName = simDir + 'test_bab_1024fil_40000blob_6R_2torsion'
+# simDir = 'data/phase_model/'
+# simName = simDir + 'test_bab_1024fil_40000blob_6R_2torsion'
 
 # # simDir = 'data/phase_model/fixed_filament/'
 # # simName = simDir + 'test_bab_128fil_6000blob_4R_2torsion'
@@ -134,7 +135,7 @@ class VISUAL:
             self.fil_references = myIo.read_fil_references(simName + '_fil_references.dat')
         self.dt = self.pars['DT']*self.pars['PLOT_FREQUENCY_IN_STEPS']
         self.L = 14.14*self.pars['NBLOB']/22.
-        self.frames = min(301, sum(1 for line in open(simName + '_body_states.dat')))
+        self.frames = min(300001, sum(1 for line in open(simName + '_body_states.dat')))
 
         self.plot_end_frame = self.frames
         self.plot_start_frame = max(0, self.plot_end_frame-30)
@@ -576,16 +577,15 @@ class VISUAL:
         sm = ScalarMappable(cmap=colormap, norm=norm)
         sm.set_array([])
         cbar = plt.colorbar(sm)
-        cbar.ax.set_yticklabels(['0', 'π/3', '2π/3', 'π', '4π/3', '5π/3', '2π'])
+        cbar.ax.set_yticks(np.linspace(0, 2*np.pi, 7), ['0', 'π/3', '2π/3', 'π', '4π/3', '5π/3', '2π'])
         cbar.set_label(r"phase")
 
         ax.set_ylabel(r"$\theta$")
         ax.set_xlabel(r"$\phi$")
         ax.set_xlim(-np.pi, np.pi)
-        phi = np.arange(-np.pi, np.pi+np.pi/2, step=(np.pi / 2))
-        ax.set_xticks(phi, ['-π', '-π/2', '0', 'π/2', 'π'])
-        theta = np.arange(0, np.pi+np.pi/4, step=(np.pi / 4))
-        ax.set_yticks(theta, ['0', 'π/4', 'π/2', '3π/4', 'π'])
+        ax.set_ylim(0, np.pi)
+        ax.set_xticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0', 'π/2', 'π'])
+        ax.set_yticks(np.linspace(0, np.pi, 5), ['0', 'π/4', 'π/2', '3π/4', 'π'])
         nfil = int(self.pars['NFIL'])
 
         def animation_func(t):
@@ -605,9 +605,9 @@ class VISUAL:
             plt.rcParams['animation.ffmpeg_path'] = '/usr/bin/ffmpeg'
             print("video")
             ani = animation.FuncAnimation(fig, animation_func, frames=500, interval=10, repeat=False)
-            # plt.show()
-            FFwriter = animation.FFMpegWriter(fps=10)
-            ani.save(f'fig/fil_phase_{nfil}fil_anim.mp4', writer=FFwriter)
+            plt.show()
+            # FFwriter = animation.FFMpegWriter(fps=10)
+            # ani.save(f'fig/fil_phase_{nfil}fil_anim.mp4', writer=FFwriter)
             
             
         else:
@@ -750,6 +750,128 @@ class VISUAL:
             plt.savefig(f'fig/ciliate_{nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
             plt.show()
 
+    def plot_multi_ciliate(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(projection='3d')
+
+        start = time.time()
+        seg_states_f = open(simName + '_seg_states.dat', "r")
+        body_states_f = open(simName + '_body_states.dat', "r")
+        print("open files time = ",(time.time()-start))
+
+        AR, torsion = myIo.get_ciliate_data_from_name(simName)
+        nfil = int(self.pars['NFIL'])
+        # Set the radius of the sphere
+        radius = 0.5*AR*2.2*int(self.pars['NSEG'])
+        num_points = 300
+
+        ax.set_proj_type('ortho')
+        # ax.set_proj_type('persp', 0.05)  # FOV = 157.4 deg
+        # ax.view_init(elev=5., azim=45)
+        # ax.dist=20
+        ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        ax.xaxis._axinfo["grid"]['color'] =  (1,1,1,0)
+        ax.yaxis._axinfo["grid"]['color'] =  (1,1,1,0)
+        ax.zaxis._axinfo["grid"]['color'] =  (1,1,1,0)
+        # ax.axis('off')
+        # ax.grid(False)
+
+        def animation_func(t):
+            print(t)
+            ax.cla()
+            ax.set_xlim(-100, 100)
+            ax.set_ylim(-100, 100)
+            ax.set_zlim(-100, 100)
+
+            body_states_str = body_states_f.readline()
+            seg_states_str = seg_states_f.readline()
+
+            body_states = np.array(body_states_str.split()[1:], dtype=float)
+            seg_states = np.array(seg_states_str.split()[1:], dtype=float)
+            
+            for swim in range(int(self.pars['NSWIM'])):
+                # blob_data = np.zeros((int(self.pars['NBLOB']), 3))
+                body_pos = body_states[7*swim : 7*swim+3]
+                # R = util.rot_mat(body_states[7*swim+3 : 7*swim+7])
+                # # To find blob position
+                # for blob in range(int(self.pars['NBLOB'])):
+                #     blob_x, blob_y, blob_z = util.blob_point_from_data(body_states[7*swim : 7*swim+7], self.blob_references[3*blob:3*blob+3])
+                #     ax.scatter(blob_x, blob_y, blob_z)
+
+                # Create the sphere data points
+                u = np.linspace(0, 2 * np.pi, num_points)
+                v = np.linspace(0, np.pi, num_points)
+                x = radius * np.outer(np.cos(u), np.sin(v))
+                y = radius * np.outer(np.sin(u), np.sin(v))
+                z = radius * np.outer(np.ones(np.size(u)), np.cos(v))
+
+                # Plot the sphere
+                ax.plot_surface(x+body_pos[0], y+body_pos[1], z+body_pos[2], color='grey', alpha=0.5)
+
+                # Robot arm to find segment position (Ignored plane rotation!)
+                for fil in range(int(self.pars['NFIL'])):
+                    fil_data = np.zeros((int(self.pars['NSEG']), 3))
+                    fil_i = int(3*fil*self.pars['NSEG'])
+                    fil_data[0] = seg_states[fil_i : fil_i+3]
+
+                    for seg in range(1, int(self.pars['NSEG'])):
+                        seg_pos = seg_states[fil_i+3*(seg-1) : fil_i+3*seg]
+                        fil_data[seg] = seg_pos
+                    ax.plot(fil_data[:,0], fil_data[:,1], fil_data[:,2], c='black', zorder = 100)
+
+        if(self.ciliate_video):
+            plt.rcParams['animation.ffmpeg_path'] = '/usr/bin/ffmpeg'
+            ani = animation.FuncAnimation(fig, animation_func, frames=500, interval=10, repeat=False)
+            plt.show()
+            # FFwriter = animation.FFMpegWriter(fps=10)
+            # ani.save(f'fig/ciliate_{nfil}fil_anim.mp4', writer=FFwriter)
+    
+        else:
+            for i in range(self.plot_end_frame):
+                print(" frame ", i, "/", self.frames, "          ", end="\r")
+                body_states_str = body_states_f.readline()
+                seg_states_str = seg_states_f.readline()
+                if(i==self.plot_end_frame-1):
+                    # if(i%self.plot_interval==0 and i>=self.plot_start_frame):
+                    body_states = np.array(body_states_str.split()[1:], dtype=float)
+                    seg_states = np.array(seg_states_str.split()[1:], dtype=float)
+                    
+                    for swim in range(int(self.pars['NSWIM'])):
+                        blob_data = np.zeros((int(self.pars['NBLOB']), 3))
+                        body_pos = body_states[7*swim : 7*swim+3]
+                        R = util.rot_mat(body_states[7*swim+3 : 7*swim+7])
+                        # To find blob position
+                        for blob in range(int(self.pars['NBLOB'])):
+                            blob_x, blob_y, blob_z = util.blob_point_from_data(body_states[7*swim : 7*swim+7], self.blob_references[3*blob:3*blob+3])
+                            # ax.scatter(blob_x, blob_y, blob_z)
+
+                        # Create the sphere data points
+                        u = np.linspace(0, 2 * np.pi, num_points)
+                        v = np.linspace(0, np.pi, num_points)
+                        x = radius * np.outer(np.cos(u), np.sin(v))
+                        y = radius * np.outer(np.sin(u), np.sin(v))
+                        z = radius * np.outer(np.ones(np.size(u)), np.cos(v))
+
+                        # Plot the sphere
+                        ax.plot_surface(x, y, z, color='grey', alpha=0.5)
+
+                        # Robot arm to find segment position (Ignored plane rotation!)
+                        for fil in range(int(self.pars['NFIL'])):
+                            fil_data = np.zeros((int(self.pars['NSEG']), 3))
+                            fil_i = int(3*fil*self.pars['NSEG'])
+                            fil_data[0] = seg_states[fil_i : fil_i+3]
+
+                            for seg in range(1, int(self.pars['NSEG'])):
+                                seg_pos = seg_states[fil_i+3*(seg-1) : fil_i+3*seg]
+                                fil_data[seg] = seg_pos
+                            ax.plot(fil_data[:,0], fil_data[:,1], fil_data[:,2], c='black', zorder = 100)
+
+            plt.savefig(f'fig/ciliate_{nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+            plt.show()
+    
+    
     # Rods
     def compute_rod_vel(self):
         body_states_f = open(simName + '_body_states.dat', "r")

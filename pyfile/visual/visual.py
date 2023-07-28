@@ -36,6 +36,7 @@ for i in range(selection, selection+1):
     spring_factor = 2
     print(f" nfil={nfil}\n nblob={nblob}\n ar={ar:.2f}")
     simDir = 'data/expr_sims/fixed_number_density/'
+    
     simName = simDir + f'ciliate_{nfil}fil_{nblob}blob_{ar:.2f}R_{spring_factor:.2f}torsion'
 
 # simDir = 'data/phase_model/fixed_density/'

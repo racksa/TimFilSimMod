@@ -59,8 +59,22 @@ int main(int argc, char** argv){
   SIMULATION_DIR = data_from_ini("Filenames", "simulation_dir");
   SIMULATION_FILE = data_from_ini("Filenames", "simulation_file");
 
+  #if INFINITE_PLANE_WALL
+    #define NSWIM 1
+    NBLOB = 0;
+  #endif
+
+  #if WRITE_GENERALISED_FORCES
+    #define NSWIM 1
+    NFIL = 1;
+    NBLOB = 0;
+  #endif
+
   // Derive other global variables
+  NTOTAL = (NSWIM*(NFIL*NSEG + NBLOB));
   AXIS_DIR_BODY_LENGTH = AR*44;
+
+  // Filenames 
   SIMULATION_NAME = SIMULATION_DIR+SIMULATION_FILE;
   SIMULATION_CONFIG_NAME = SIMULATION_NAME + ".par";
   SIMULATION_BACKUP_NAME = SIMULATION_NAME + ".backup";

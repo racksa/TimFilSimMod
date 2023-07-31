@@ -162,7 +162,7 @@ extern std::string SIMULATION_TETHERLAM_NAME;
 // Define whether the motion of the rigid bodies is imposed or allowed to evolve dynamically.
 #define PRESCRIBED_BODY_VELOCITIES false
 
-#define MOBILITY_TYPE 4
+#define MOBILITY_TYPE 1
 // Valid options:
 // 0 = Basic Stokes drag. No hydrodynamic interactions between particles.
 // 1 = Rotne-Prager-Yamakawa (RPY) mobility matrices (with the corrections due to Swan and Brady if an infinite plane wall is selected).
@@ -186,28 +186,12 @@ extern std::string SIMULATION_TETHERLAM_NAME;
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// #ifdef CNFIL
-//   #define NFIL (CNFIL)
-// #else
-//   #define NFIL (1) // The number of filaments attached to the rigid body/surface in each swimmer
-// #endif
-// #ifdef CNBLOB
-//   #define NBLOB (CNBLOB)
-// #else
-//   #define NBLOB (4000) // The number of blobs to use as surface elements in each rigid body.
-// #endif
-// #ifdef CAR
-//   #define AR CAR
-// #else
-//   #define AR 5.0
-// #endif
-
 extern int NFIL;
 extern int NBLOB;
 extern float AR;
 extern float AXIS_DIR_BODY_LENGTH;
 extern float TORSIONAL_SPRING_MAGNITUDE_FACTOR; // Pre-multiplies the mean generalised driving force magnitude to give the spring constant that resists rigid-body rotations of the shape.
-
+extern int NTOTAL;
 
 #define NSEG (20)// The number of segments comprising each filament.
 #define NSWIM (1) // The number of swimmers.
@@ -341,8 +325,6 @@ extern float TORSIONAL_SPRING_MAGNITUDE_FACTOR; // Pre-multiplies the mean gener
 
 #define DELETE_CURRENT_LINE "                                                                                                               " << "\r"
 
-#define NTOTAL (NSWIM*(NFIL*NSEG + NBLOB))
-
 #if USE_BROYDEN_FOR_EVERYTHING
 
   #define NBROY (3*NSWIM*(NBLOB + 2*(NFIL*NSEG + 1)))
@@ -383,10 +365,9 @@ extern float TORSIONAL_SPRING_MAGNITUDE_FACTOR; // Pre-multiplies the mean gener
 
   #if WRITE_GENERALISED_FORCES
 
+    #define PRESCRIBED_BODY_VELOCITIES true
     #define DYNAMIC_PHASE_EVOLUTION false
     #define DYNAMIC_SHAPE_ROTATION false
-    #define NSWIM 1
-    #define NFIL 1
     #define TOTAL_TIME_STEPS STEPS_PER_PERIOD
     #define INITIAL_CONDITIONS_TYPE 0
 
@@ -401,10 +382,6 @@ extern float TORSIONAL_SPRING_MAGNITUDE_FACTOR; // Pre-multiplies the mean gener
 #endif
 
 #if INFINITE_PLANE_WALL
-
-  #define NSWIM 1
-  #define NBLOB 0
-  #define NTOTAL (NFIL*NSEG)
   #define NBROY (6*NFIL*NSEG)
   #define PRESCRIBED_BODY_VELOCITIES true
   #if RPY_MOBILITY

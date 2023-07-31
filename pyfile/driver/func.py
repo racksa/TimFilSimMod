@@ -13,7 +13,7 @@ class DRIVER:
                      "ar": [],
                      "spring_factor": []}
         
-        self.sweep_shape = (6, 1, 1, 1)
+        self.sweep_shape = (12, 1, 1, 1)
 
         self.num_sim = 0
 
@@ -38,9 +38,9 @@ class DRIVER:
                 for k in range(self.sweep_shape[2]):
                     for l in range(self.sweep_shape[3]):
                         nfil = int(128)
-                        nblob = int(3000)
-                        ar = round(3)
-                        spring_factor = round(0.1*2**i, 2)
+                        nblob = int(1000*1.1**i)
+                        ar = round(3*1.1**i)
+                        spring_factor = round(2)
 
                         self.pars["nfil"].append(nfil)
                         self.pars["nblob"].append(nblob)

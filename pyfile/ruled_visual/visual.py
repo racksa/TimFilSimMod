@@ -15,7 +15,7 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20230728/"
+        self.dir = "data/expr_sims/20230731/"
         self.pars_list = {"nfil": [],
                      "nblob": [],
                      "ar": [],
@@ -267,13 +267,13 @@ class VISUAL:
         # ax.axis('off')
         # ax.grid(False)
 
-        # ax.set_xlim(-100, 100)
-        # ax.set_ylim(-100, 100)
-        # ax.set_zlim(-100, 100)
-
         def animation_func(t):
             print(t)
             ax.cla()
+
+            ax.set_xlim(-100, 100)
+            ax.set_ylim(-100, 100)
+            ax.set_zlim(-100, 100)
 
             body_states_str = body_states_f.readline()
             seg_states_str = seg_states_f.readline()
@@ -347,7 +347,7 @@ class VISUAL:
         plt.show()
 
     
-    def ciliate_swim_speed(self):
+    def ciliate_speed(self):
         self.select_sim()
 
         # seg_states_f = open(self.simName + '_seg_states.dat', "r")
@@ -383,4 +383,66 @@ class VISUAL:
         plt.show()
 
 
+    def plot_fil(self):
+        self.select_sim()
+
+        seg_states_f = open(self.simName + '_seg_states.dat', "r")
+        body_states_f = open(self.simName + '_body_states.dat', "r")
+        
+        # Plotting
+        fig = plt.figure()
+        ax = fig.add_subplot(projection='3d')
+        ax.set_proj_type('ortho')
+        # ax.set_proj_type('persp', 0.05)  # FOV = 157.4 deg
+        # ax.view_init(elev=5., azim=45)
+        # ax.dist=20
+        ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+        ax.xaxis._axinfo["grid"]['color'] =  (1,1,1,0)
+        ax.yaxis._axinfo["grid"]['color'] =  (1,1,1,0)
+        ax.zaxis._axinfo["grid"]['color'] =  (1,1,1,0)
+        # ax.axis('off')
+        # ax.grid(False)
+
+
+        def animation_func(t):
+            print(t)
+            ax.cla()
+
+            ax.set_xlim(-100, 300)
+            ax.set_ylim(-100, 300)
+            ax.set_zlim(-100, 300)
+
+            seg_states_str = seg_states_f.readline()
+
+            seg_states = np.array(seg_states_str.split()[1:], dtype=float)
+
+            # Robot arm to find segment position (Ignored plane rotation!)
+            for fil in range(self.nfil):
+                fil_data = np.zeros((self.nseg, 3))
+                fil_i = int(3*fil*self.nseg)
+                fil_data[0] = seg_states[fil_i : fil_i+3]
+
+                for seg in range(1, self.nseg):
+                    seg_pos = seg_states[fil_i+3*(seg-1) : fil_i+3*seg]
+                    fil_data[seg] = seg_pos
+                ax.plot(fil_data[:,0], fil_data[:,1], fil_data[:,2], c='black', zorder = 100)
+
+        if(self.video):
+            plt.rcParams['animation.ffmpeg_path'] = '/usr/bin/ffmpeg'
+            ani = animation.FuncAnimation(fig, animation_func, frames=500, interval=10, repeat=False)
+            plt.show()
+            # FFwriter = animation.FFMpegWriter(fps=10)
+            # ani.save(f'fig/ciliate_{nfil}fil_anim.mp4', writer=FFwriter)
+        else:
+            for i in range(self.plot_end_frame):
+                print(" frame ", i, "/", self.frames, "          ", end="\r")
+                if(i==self.plot_end_frame-1):
+                    animation_func(i)
+                else:
+                    seg_states_str = seg_states_f.readline()
+                
+            plt.savefig(f'fig/ciliate_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+            plt.show()
 #

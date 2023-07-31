@@ -12,6 +12,7 @@ if(len(sys.argv) > 1):
         driver.create_rules()
 
     if(sys.argv[1] == 'run'):
+        driver.create_rules()
         if(len(sys.argv) > 4):
             driver.current_thread = int(sys.argv[2])
             driver.num_thread = int(sys.argv[3])

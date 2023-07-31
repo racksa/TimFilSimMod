@@ -9,6 +9,7 @@ int NFIL = 16;
 int NBLOB = 4000;
 float AR = 5;
 float TORSIONAL_SPRING_MAGNITUDE_FACTOR = 2.0;
+int NTOTAL = (NSWIM*(NFIL_d*NSEG + NBLOB_d));
 std::string SIMULATION_DIR = "data/expr_sims/global/";
 std::string SIMULATION_FILE = "cilia";
 

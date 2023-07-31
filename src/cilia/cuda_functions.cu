@@ -1281,7 +1281,7 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
 
       }
 
-      for (int j_start = 0; j_start < NTOTAL; j_start += THREADS_PER_BLOCK){
+      for (int j_start = 0; j_start < NTOTAL_d; j_start += THREADS_PER_BLOCK){
 
         const int j_to_read = j_start + threadIdx.x;
 
@@ -1291,7 +1291,7 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
           y_shared[threadIdx.x] = x_segs[3*j_to_read + 1];
           z_shared[threadIdx.x] = x_segs[3*j_to_read + 2];
 
-        } else if (j_to_read < NTOTAL){
+        } else if (j_to_read < NTOTAL_d){
 
           x_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL_d*NSEG)];
           y_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL_d*NSEG) + 1];
@@ -1303,7 +1303,7 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
 
         if (i < (start_seg + num_segs)){
 
-          for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NTOTAL); j++){
+          for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NTOTAL_d); j++){
 
             const Real a_sum = (j_start + j < NSWIM*NFIL_d*NSEG) ? 2.0*RSEG : RSEG + RBLOB;
             const Real chi_fac = 10.0/a_sum; // 1.0/(1.1*a_sum - a_sum)
@@ -1363,7 +1363,7 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
 
         }
 
-        for (int j_start = 0; j_start < NTOTAL; j_start += THREADS_PER_BLOCK){
+        for (int j_start = 0; j_start < NTOTAL_d; j_start += THREADS_PER_BLOCK){
 
           const int j_to_read = j_start + threadIdx.x;
 
@@ -1373,7 +1373,7 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
             y_shared[threadIdx.x] = x_segs[3*j_to_read + 1];
             z_shared[threadIdx.x] = x_segs[3*j_to_read + 2];
 
-          } else if (j_to_read < NTOTAL){
+          } else if (j_to_read < NTOTAL_d){
 
             x_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL_d*NSEG)];
             y_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL_d*NSEG) + 1];
@@ -1385,7 +1385,7 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
 
           if (i < (start_blob + num_blobs)){
 
-            for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NTOTAL); j++){
+            for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NTOTAL_d); j++){
 
               const Real a_sum = (j_start + j < NSWIM*NFIL_d*NSEG) ? RBLOB + RSEG : 2.0*RBLOB;
               const Real chi_fac = 10.0/a_sum; // 1.0/(1.1*a_sum - a_sum)
@@ -1472,7 +1472,7 @@ __global__ void periodic_barrier_forces(Real * __restrict__ f_segs,
         box_images(yi, boxsize);
         box_images(zi, boxsize);
 
-        for (int j=0; j < NTOTAL; j++){
+        for (int j=0; j < NTOTAL_d; j++){
 
           Real xj = x_blobs[3*j];
           Real yj = x_blobs[3*j+1];
@@ -1492,13 +1492,6 @@ __global__ void periodic_barrier_forces(Real * __restrict__ f_segs,
           dx -= boxsize * Real(int(dx/(0.5*boxsize)));
           dy -= boxsize * Real(int(dy/(0.5*boxsize)));
           dz -= boxsize * Real(int(dz/(0.5*boxsize)));
-
-          // printf("**********xi=%.4f xj=%.4f dx=%.4f ratio=%.4f reset = %.4f\n", 
-          //       xi, xj, dx, dx/(0.5*boxsize), Real(int(dx/(0.5*boxsize))));
-          
-          // if(Real(int(dx/(0.5*boxsize))) != 0){
-          //   printf("**********xi=%.4f xj=%.4f dx=%.4f\n", xi, xj, dx);
-          // }
 
           const Real dist = sqrt(dx*dx + dy*dy + dz*dz);
 
@@ -1539,7 +1532,12 @@ void box_images(Real &x, Real box_size){
 
 __global__
 void sync_var(int nfil, int nblob){
+  
   NFIL_d = nfil;
   NBLOB_d = nblob;
+  NTOTAL_d = (NSWIM*(nfil*NSEG + nblob));
+
+  printf("%d\n", NTOTAL_d);
+
 }
 

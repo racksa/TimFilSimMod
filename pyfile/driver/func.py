@@ -7,13 +7,13 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20230728/"
+        self.dir = "data/expr_sims/20230731/"
         self.pars = {"nfil": [],
                      "nblob": [],
                      "ar": [],
                      "spring_factor": []}
         
-        self.sweep_shape = (10, 1, 1, 1)
+        self.sweep_shape = (6, 1, 1, 1)
 
         self.num_sim = 0
 
@@ -40,7 +40,7 @@ class DRIVER:
                         nfil = int(128)
                         nblob = int(3000)
                         ar = round(3)
-                        spring_factor = round(i, 2)
+                        spring_factor = round(0.1*2**i, 2)
 
                         self.pars["nfil"].append(nfil)
                         self.pars["nblob"].append(nblob)

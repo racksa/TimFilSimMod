@@ -7,13 +7,13 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20230731/"
-        self.pars = {"nfil": [],
+        self.dir = "data/expr_sims/20230801/"
+        self.pars_list = {"nfil": [],
                      "nblob": [],
                      "ar": [],
                      "spring_factor": []}
         
-        self.sweep_shape = (12, 1, 1, 1)
+        self.sweep_shape = (8, 8, 1, 1)
 
         self.num_sim = 0
 
@@ -37,15 +37,15 @@ class DRIVER:
             for j in range(self.sweep_shape[1]):
                 for k in range(self.sweep_shape[2]):
                     for l in range(self.sweep_shape[3]):
-                        nfil = int(128)
-                        nblob = int(1000*1.1**i)
-                        ar = round(3*1.1**i)
-                        spring_factor = round(2)
+                        nfil = int(16*(i+1))
+                        nblob = int(1000*1.3**j)
+                        ar = round(3*1.3**j, 2)
+                        spring_factor = round(2, 2)
 
-                        self.pars["nfil"].append(nfil)
-                        self.pars["nblob"].append(nblob)
-                        self.pars["ar"].append(ar)
-                        self.pars["spring_factor"].append(spring_factor)
+                        self.pars_list["nfil"].append(nfil)
+                        self.pars_list["nblob"].append(nblob)
+                        self.pars_list["ar"].append(ar)
+                        self.pars_list["spring_factor"].append(spring_factor)
         # Write rules to sim list file
         self.write_rules()
 
@@ -55,7 +55,7 @@ class DRIVER:
     def write_rules(self):
         sim = configparser.ConfigParser()
         sim.add_section('Parameter list')
-        for key, value in self.pars.items():
+        for key, value in self.pars_list.items():
             sim['Parameter list'][key] = ', '.join(map(str, value))
         with open(self.dir+"rules.ini", 'w') as configfile:
             sim.write(configfile, space_around_delimiters=False)
@@ -63,8 +63,9 @@ class DRIVER:
     def read_rules(self):
         sim = configparser.ConfigParser()
         sim.read(self.dir+"rules.ini")
-        for key, value in self.pars.items():
-            self.pars[key] = [float(x) for x in sim["Parameter list"][key].split(', ')]
+        for key, value in self.pars_list.items():
+            self.pars_list[key] = [float(x) for x in sim["Parameter list"][key].split(', ')]
+        self.num_sim = len(self.pars_list["nfil"])
 
     def run(self):
         
@@ -72,7 +73,6 @@ class DRIVER:
 
         # Read rules from the sim list file
         self.read_rules()
-        self.num_sim = len(self.pars["nfil"])
 
         thread_list = util.even_list_index(self.num_sim, self.num_thread)
 
@@ -86,9 +86,9 @@ class DRIVER:
 
         # Iterate through the sim list and write to .ini file and execute
         for i in range(sim_index_start, sim_index_end):
-            for key, value in self.pars.items():
-                self.write_ini("Parameters", key, float(self.pars[key][i]))
-            self.write_ini("Filenames", "simulation_file", f"ciliate_{self.pars['nfil'][i]:.0f}fil_{self.pars['nblob'][i]:.0f}blob_{self.pars['ar'][i]:.2f}R_{self.pars['spring_factor'][i]:.2f}torsion")
+            for key, value in self.pars_list.items():
+                self.write_ini("Parameters", key, float(self.pars_list[key][i]))
+            self.write_ini("Filenames", "simulation_file", f"ciliate_{self.pars_list['nfil'][i]:.0f}fil_{self.pars_list['nblob'][i]:.0f}blob_{self.pars_list['ar'][i]:.2f}R_{self.pars_list['spring_factor'][i]:.2f}torsion")
 
             command = f"export OPENBLAS_NUM_THREADS=1; \
                         export CUDA_VISIBLE_DEVICES={self.cuda_device}; \

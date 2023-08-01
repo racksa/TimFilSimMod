@@ -11,11 +11,13 @@ import matplotlib.animation as animation
 import subprocess
 import time
 import configparser
+import math
+
 class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20230731/"
+        self.dir = "data/expr_sims/20230801/"
         self.pars_list = {"nfil": [],
                      "nblob": [],
                      "ar": [],
@@ -26,7 +28,7 @@ class VISUAL:
         self.periodic = False
         self.big_sphere = True
 
-        self.frames = 3000
+        self.frames = 30
 
         self.Lx = 100
         self.Ly = 100
@@ -60,11 +62,16 @@ class VISUAL:
 
     def read_rules(self):
         sim = configparser.ConfigParser()
-        sim.read(self.dir+"rules.ini")
-        for key, value in self.pars_list.items():
-            self.pars_list[key] = [float(x) for x in sim["Parameter list"][key].split(', ')]
+        try:
+            sim.read(self.dir+"rules.ini")
+            for key, value in self.pars_list.items():
+                self.pars_list[key] = [float(x) for x in sim["Parameter list"][key].split(', ')]
+            self.num_sim = len(self.pars_list["nfil"])
+        except:
+            print("WARNING: " + self.dir + "rules.ini not found.")
 
     def select_sim(self):
+        
         self.nseg = 20
         self.nswim = 1
         self.nfil = int(self.pars_list['nfil'][self.index])
@@ -88,6 +95,7 @@ class VISUAL:
         self.plot_end_frame = self.frames
         self.plot_start_frame = max(0, self.plot_end_frame-300)
         self.plot_interval = 1
+        
 
 
     def plot(self):
@@ -237,6 +245,63 @@ class VISUAL:
             plt.show()
 
 
+    def plot_multi_phase(self):
+        # Plotting
+        colormap = 'cividis'
+        colormap = 'twilight_shifted'
+
+        nrow = int(self.num_sim**.5)
+        ncol = nrow + (1 if nrow**2 < self.num_sim else 0)
+        fig, axs = plt.subplots(nrow, ncol, figsize=(15, 15), sharex=True, sharey=True)
+        # cax = fig.add_axes([0.92, 0.1, 0.02, 0.8])  # [left, bottom, width, height] for the colorbar
+
+        axs_flat = axs.ravel()
+
+        for ind, ax in enumerate(axs_flat):
+            if (ind < self.num_sim):
+                try:
+                    self.index = ind
+                    self.select_sim()
+
+                    fil_references_sphpolar = np.zeros((self.nfil,3))
+                    fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
+                    fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
+                    for i in range(self.plot_end_frame):
+                        print(" frame ", i, "/", self.frames, "          ", end="\r")
+                        fil_phases_str = fil_phases_f.readline()
+                        # fil_angles_str = fil_angles_f.readline()
+                        if(i==self.plot_end_frame-1):
+                            fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
+                            fil_phases = util.box(fil_phases, 2*np.pi)
+                            for i in range(self.nfil):
+                                fil_references_sphpolar[i] = util.cartesian_to_spherical(self.fil_references[3*i: 3*i+3])
+                                
+                            ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=fil_phases, cmap=colormap)
+                    ax.set_ylabel(r"$\theta$")
+                    ax.set_xlabel(r"$\phi$")
+                    ax.set_xlim(-np.pi, np.pi)
+                    ax.set_ylim(0, np.pi)
+                    ax.set_xticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0', 'π/2', 'π'])
+                    ax.set_yticks(np.linspace(0, np.pi, 5), ['0', 'π/4', 'π/2', '3π/4', 'π'])
+                    ax.set_title(f"nfil={self.nfil}AR={self.ar}")
+                except:
+                    print("WARNING: " + self.simName + " not found.")
+
+        # from matplotlib.colors import Normalize
+        # from matplotlib.cm import ScalarMappable
+        # norm = Normalize(vmin=0, vmax=2*np.pi)
+        # sm = ScalarMappable(cmap=colormap, norm=norm)
+        # sm.set_array([])
+        # cbar = plt.colorbar(sm)
+        # cbar.ax.set_yticks(np.linspace(0, 2*np.pi, 7), ['0', 'π/3', '2π/3', 'π', '4π/3', '5π/3', '2π'])
+        # cbar.set_label(r"phase")
+
+        plt.tight_layout()
+        plt.savefig(f'fig/fil_multi_phase.pdf', bbox_inches = 'tight', format='pdf')
+        plt.show()
+
+
+
     def plot_ciliate(self):
         self.select_sim()
 
@@ -326,13 +391,12 @@ class VISUAL:
         self.select_sim()
 
         body_states_f = open(self.simName + '_body_states.dat', "r")
+        time_array = np.arange(0, self.plot_end_frame )
+        body_pos_array = np.zeros((len(time_array), 3))
 
         # Plotting
         fig = plt.figure()
         ax = fig.add_subplot(projection='3d')
-
-        time_array = np.arange(0, self.plot_end_frame )
-        body_pos_array = np.zeros((len(time_array), 3))
 
         for i in range(self.plot_end_frame):
             print(" frame ", i, "/", self.frames, "          ", end="\r")
@@ -344,6 +408,41 @@ class VISUAL:
 
         ax.plot(body_pos_array[:,0], body_pos_array[:,1], body_pos_array[:,2])
         plt.savefig(f'fig/ciliate_traj_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        plt.show()
+
+    def ciliate_multi_traj(self):
+        # Plotting
+        nrow = int(self.num_sim**.5)
+        ncol = nrow + (1 if nrow**2 < self.num_sim else 0)
+        fig, axs = plt.subplots(nrow, ncol, figsize=(15, 15), subplot_kw={'projection': '3d'})
+        axs_flat = axs.ravel()
+
+        for ind, ax in enumerate(axs_flat):
+            ax.set_proj_type('ortho')
+            if (ind < self.num_sim):
+                try:
+                    self.index = ind
+                    self.select_sim()
+
+                    body_states_f = open(self.simName + '_body_states.dat', "r")
+                    time_array = np.arange(0, self.plot_end_frame )
+                    body_pos_array = np.zeros((len(time_array), 3))
+
+                    for i in range(self.plot_end_frame):
+                        print(" frame ", i, "/", self.frames, "          ", end="\r")
+                        body_states_str = body_states_f.readline()
+
+                        body_states = np.array(body_states_str.split()[1:], dtype=float)
+
+                        body_pos_array[i] = body_states[0 : 3]
+
+                    ax.plot(body_pos_array[:,0], body_pos_array[:,1], body_pos_array[:,2])
+                    ax.set_title(f"AR={self.ar}")
+                except:
+                    print("WARNING: " + self.simName + " not found.")
+
+        plt.tight_layout()
+        plt.savefig(f'fig/ciliate_multi_traj.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
     

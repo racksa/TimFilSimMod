@@ -35,6 +35,10 @@ if(sys.argv[1] == 'timing'):
     visualiser.read_rules()
     visualiser.timing()
 
+if(sys.argv[1] == 'timing'):
+    visualiser.read_rules()
+    visualiser.multi_timing_summary()
+
 
 
 if(sys.argv[1] == 'plot_fil'):
@@ -57,3 +61,17 @@ if(sys.argv[1] == 'plot_multi_ciliate'):
 if(sys.argv[1] == 'ciliate_multi_traj'):
     visualiser.read_rules()
     visualiser.ciliate_multi_traj()
+
+if(sys.argv[1] == 'multi_timing'):
+    visualiser.read_rules()
+    visualiser.multi_timing()
+
+if(sys.argv[1] == 'multi_timing_summary'):
+    visualiser.read_rules()
+    visualiser.multi_timing_summary()
+
+
+
+
+
+#

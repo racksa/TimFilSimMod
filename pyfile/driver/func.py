@@ -13,7 +13,7 @@ class DRIVER:
                      "ar": [],
                      "spring_factor": []}
         
-        self.sweep_shape = (1, 1, 1, 1)
+        self.sweep_shape = (8, 8, 1, 1)
 
         self.num_sim = 0
 
@@ -37,9 +37,9 @@ class DRIVER:
             for j in range(self.sweep_shape[1]):
                 for k in range(self.sweep_shape[2]):
                     for l in range(self.sweep_shape[3]):
-                        nfil = int(16*(i+1))
-                        nblob = int(1000*1.3**j)
-                        ar = round(3*1.3**j, 2)
+                        nfil = int(48*(i+1))
+                        nblob = int(2000*1.2**j)
+                        ar = round(3*1.2**j, 2)
                         spring_factor = round(2, 2)
 
                         self.pars_list["nfil"].append(nfil)
@@ -92,5 +92,5 @@ class DRIVER:
 
             command = f"export OPENBLAS_NUM_THREADS=1; \
                         export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
-                        ./bin/cilia_single"
+                        ./bin/cilia"
             os.system(command)

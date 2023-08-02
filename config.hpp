@@ -162,7 +162,7 @@ extern std::string SIMULATION_TETHERLAM_NAME;
 // Define whether the motion of the rigid bodies is imposed or allowed to evolve dynamically.
 #define PRESCRIBED_BODY_VELOCITIES false
 
-#define MOBILITY_TYPE 1
+#define MOBILITY_TYPE 4
 // Valid options:
 // 0 = Basic Stokes drag. No hydrodynamic interactions between particles.
 // 1 = Rotne-Prager-Yamakawa (RPY) mobility matrices (with the corrections due to Swan and Brady if an infinite plane wall is selected).
@@ -469,7 +469,7 @@ extern int NTOTAL;
 
 #define DISPLAYTIME true
 
-#define FIL_USE_DOUBLE_PRECISION true
+#define FIL_USE_DOUBLE_PRECISION false
 
 #if FIL_USE_DOUBLE_PRECISION
     typedef double Real;

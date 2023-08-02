@@ -26,7 +26,7 @@ class VISUAL:
         self.periodic = False
         self.big_sphere = True
 
-        self.frames = 300
+        self.frames = 3
 
         self.Lx = 100
         self.Ly = 100
@@ -455,8 +455,6 @@ class VISUAL:
 
         with open(self.simName + '_time.dat', 'r') as file:
             plot_time_frame = len(file.readlines())
-
-        # seg_states_f = open(self.simName + '_seg_states.dat', "r")
         timings_f = open(self.simName + '_time.dat', "r")
 
         # Plotting
@@ -486,9 +484,9 @@ class VISUAL:
             total_timing_array += timings_array[:,i]
         ax.plot(time_array, total_timing_array, label='Total')
 
-        ax.axvline(299, c='black')
-        plt.annotate('Double precision', (50, 0.055),fontsize=12)
-        plt.annotate('Single precision', (350, 0.035), fontsize=12)
+        # ax.axvline(299, c='black')
+        # plt.annotate('Double precision', (50, 0.055),fontsize=12)
+        # plt.annotate('Single precision', (350, 0.035), fontsize=12)
         
         ax.set_ylabel("Computation time/s")
         ax.set_xlabel("Time step")
@@ -671,14 +669,82 @@ class VISUAL:
         plt.savefig(f'fig/ciliate_multi_traj.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
-    # def multi_timing(self):
-    #     nrow = int(self.num_sim**.5)
-    #     ncol = nrow + (1 if nrow**2 < self.num_sim else 0)
-    #     fig, axs = plt.subplots(nrow, ncol, figsize=(18, 18), sharex=True, sharey=True)
-    #     axs_flat = axs.ravel()
+    def multi_timing(self):
+        # Plotting
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+
+        for ind in range(self.num_sim):
+            try:
+                self.index = ind
+                self.select_sim()
+
+                with open(self.simName + '_time.dat', 'r') as file:
+                    plot_time_frame = min(300, len(file.readlines()))
+                timings_f = open(self.simName + '_time.dat', "r")
+
+                time_array = np.arange(0, plot_time_frame)
+                timings_array = np.zeros((len(time_array), 7))
+                total_timing_array = np.zeros(len(time_array))
+
+                for i in range(plot_time_frame):
+                    print(" frame ", i, "/", plot_time_frame, "          ", end="\r")
+                    timings_str = timings_f.readline()
+
+                    timings = np.array(timings_str.split(), dtype=float)
+
+                    timings_array[i] = timings[:7]
+                for i in range(len(timings_array[0])):
+                    # ax.plot(time_array, timings_array[:,i], label=labels[i])
+                    total_timing_array += timings_array[:,i]
+                ax.plot(time_array, total_timing_array, label='Total')
+            except:
+                print("WARNING: " + self.simName + " not found.")
+
+        plt.tight_layout()
+        plt.savefig(f'fig/multi_timing.png', bbox_inches = 'tight', format='png')
+        plt.savefig(f'fig/multi_timing.pdf', bbox_inches = 'tight', format='pdf')
+        plt.show()
 
     def multi_timing_summary(self):
-        return 0
+        # Plotting
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+
+        num_particle_list = np.array(self.pars_list['nfil'])*20 + np.array(self.pars_list['nblob'])
+        total_timing_list = np.zeros((self.num_sim, 7))
+
+        for ind in range(self.num_sim):
+            try:
+                self.index = ind
+                self.select_sim()
+
+                with open(self.simName + '_time.dat', 'r') as file:
+                    plot_time_frame = min(300, len(file.readlines()))
+                timings_f = open(self.simName + '_time.dat', "r")
+
+                for i in range(plot_time_frame):
+                    print(" frame ", i, "/", plot_time_frame, "          ", end="\r")
+                    timings_str = timings_f.readline()
+
+                    timings = np.array(timings_str.split()[:-1], dtype=float)
+
+                    total_timing_list[ind] += timings
+            except:
+                print("WARNING: " + self.simName + " not found.")
+
+
+        ax.scatter(num_particle_list, total_timing_list[:,3]/plot_time_frame, label="HI solver")
+        ax.scatter(num_particle_list, np.sum(total_timing_list, axis=1)/plot_time_frame, label="Total")
+        # ax.set_ylim(0)
+        # ax.set_yscale('log')
+        ax.set_ylabel("Compute time per time step/s")
+        ax.set_xlabel("Number of particles")
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(f'fig/multi_timing_summary.png', bbox_inches = 'tight', format='png')
+        plt.savefig(f'fig/multi_timing_summary.pdf', bbox_inches = 'tight', format='pdf')
+        plt.show()
 
 
 

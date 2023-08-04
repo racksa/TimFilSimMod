@@ -15,7 +15,7 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20230802/"
+        self.dir = "data/expr_sims/20230804/"
         self.pars_list = {"nfil": [],
                      "nblob": [],
                      "ar": [],
@@ -26,7 +26,7 @@ class VISUAL:
         self.periodic = False
         self.big_sphere = True
 
-        self.frames = 3
+        self.frames = 3000
 
         self.Lx = 100
         self.Ly = 100
@@ -247,7 +247,7 @@ class VISUAL:
 
 #### Ciliates
 # Single sim
-    def plot_phase(self):
+    def phase(self):
         self.select_sim()
         
         fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
@@ -308,7 +308,7 @@ class VISUAL:
             plt.savefig(f'fig/fil_phase_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
             plt.show()
 
-    def plot_ciliate(self):
+    def ciliate(self):
         self.select_sim()
 
         seg_states_f = open(self.simName + '_seg_states.dat', "r")
@@ -342,9 +342,9 @@ class VISUAL:
             print(t)
             ax.cla()
 
-            ax.set_xlim(-100, 100)
-            ax.set_ylim(-100, 100)
-            ax.set_zlim(-100, 100)
+            # ax.set_xlim(-100, 100)
+            # ax.set_ylim(-100, 100)
+            # ax.set_zlim(-100, 100)
 
             body_states_str = body_states_f.readline()
             seg_states_str = seg_states_f.readline()
@@ -497,7 +497,7 @@ class VISUAL:
         plt.show()
 
 # Multi sims
-    def plot_multi_phase(self):
+    def multi_phase(self):
         # Plotting
         colormap = 'cividis'
         colormap = 'twilight_shifted'
@@ -519,7 +519,7 @@ class VISUAL:
                     fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
                     fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
                     for i in range(self.plot_end_frame):
-                        print(" frame ", i, "/", self.frames, "          ", end="\r")
+                        # print(" frame ", i, "/", self.frames, "          ", end="\r")
                         fil_phases_str = fil_phases_f.readline()
                         # fil_angles_str = fil_angles_f.readline()
                         if(i==self.plot_end_frame-1):
@@ -553,7 +553,7 @@ class VISUAL:
         plt.savefig(f'fig/ciliate_multi_phase.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
-    def plot_multi_ciliate(self):
+    def multi_ciliate(self):
         # Plotting
         nrow = int(self.num_sim**.5)
         ncol = nrow + (1 if nrow**2 < self.num_sim else 0)
@@ -633,7 +633,7 @@ class VISUAL:
         plt.savefig(f'fig/ciliate_multi.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
-    def ciliate_multi_traj(self):
+    def multi_ciliate_traj(self):
         # Plotting
         nrow = int(self.num_sim**.5)
         ncol = nrow + (1 if nrow**2 < self.num_sim else 0)

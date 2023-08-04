@@ -381,12 +381,38 @@ void fcm_mobility_solver::evaluate_full_mobility(){
   // Mss_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_segs_device[0], f_segs_device[0], x_segs_device[0], 0, num_segs[0]);
   // Mbb_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_blobs_device[0], f_blobs_device[0], x_blobs_device[0], 0, num_blobs[0]);
 
+  cudaError_t err = cudaGetLastError();
+  
   cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
+  err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "CUDA error reform_xsegblob: %s\n", cudaGetErrorString(err));
+    }
   cufcm_solver->reform_fseg(f_segs_device[0], true);
+  err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "CUDA error reform_fseg: %s\n", cudaGetErrorString(err));
+    }
   cufcm_solver->reform_fblob(f_blobs_device[0], true);
+  err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "CUDA error reform_fblob: %s\n", cudaGetErrorString(err));
+    }
   cufcm_solver->evaluate_mobility_cilia();
+  err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "CUDA error evaluate_mobility_cilia: %s\n", cudaGetErrorString(err));
+    }
   cufcm_solver->reform_vseg(v_segs_device[0], false);
+  err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "CUDA error reform_vseg: %s\n", cudaGetErrorString(err));
+    }
   cufcm_solver->reform_vblob(v_blobs_device[0], false);
+  err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "CUDA error reform_vblob: %s\n", cudaGetErrorString(err));
+    }
 
   // cufcm_solver->write_data_call();
   

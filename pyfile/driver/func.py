@@ -7,7 +7,7 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20230802/"
+        self.dir = "data/expr_sims/20230804/"
         self.pars_list = {"nfil": [],
                      "nblob": [],
                      "ar": [],
@@ -20,10 +20,18 @@ class DRIVER:
         self.current_thread = 0
         self.num_thread = 1
         self.cuda_device = 0
+    
+    def create_ini(self):
+        ini = configparser.ConfigParser()
+        ini.add_section('Parameters')
+        ini.add_section('Filenames')
+        with open(self.globals_name, 'w') as configfile:
+            ini.write(configfile, space_around_delimiters=False)
+        
 
     def write_ini(self, section, variable, value):
         ini = configparser.ConfigParser()
-        ini.read('globals.ini')
+        ini.read(self.globals_name)
 
         ini.set(section, variable, f'{value}')
 
@@ -68,14 +76,13 @@ class DRIVER:
         self.num_sim = len(self.pars_list["nfil"])
 
     def run(self):
-        
+        self.create_ini()
         self.write_ini("Filenames", "simulation_dir", self.dir)
 
         # Read rules from the sim list file
         self.read_rules()
 
         thread_list = util.even_list_index(self.num_sim, self.num_thread)
-
         sim_index_start = thread_list[self.current_thread]
         sim_index_end = thread_list[self.current_thread+1]
 
@@ -92,5 +99,5 @@ class DRIVER:
 
             command = f"export OPENBLAS_NUM_THREADS=1; \
                         export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
-                        ./bin/cilia"
+                        ./bin/cilia > terminal_outputs/output_{i}.out"
             os.system(command)

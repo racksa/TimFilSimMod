@@ -26,7 +26,7 @@ class VISUAL:
         self.periodic = False
         self.big_sphere = True
 
-        self.frames = 3000
+        self.frames = 300
 
         self.Lx = 100
         self.Ly = 100
@@ -82,6 +82,7 @@ class VISUAL:
         self.fil_references = myIo.read_fil_references(self.simName + '_fil_references.dat')
 
         self.pars = myIo.read_pars(self.simName + '.par')
+        self.dt = self.pars['DT']*self.pars['PLOT_FREQUENCY_IN_STEPS']
         if(not 'PRESCRIBED_CILIA' in self.pars):
             self.pars['PRESCRIBED_CILIA'] = 0
         if(self.pars['NBLOB']>0):
@@ -91,7 +92,7 @@ class VISUAL:
 
         self.frames = min(self.frames, sum(1 for line in open(self.simName + '_body_states.dat')))
         self.plot_end_frame = self.frames
-        self.plot_start_frame = max(0, self.plot_end_frame-300)
+        self.plot_start_frame = max(0, self.plot_end_frame-3000)
         self.plot_interval = 1
         
 
@@ -180,7 +181,7 @@ class VISUAL:
                             self.write_data(seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, self.periodic, True, True, color=fil_color)
 
 
-# Filaments
+## Filaments
     def plot_fil(self):
         self.select_sim()
 
@@ -245,7 +246,7 @@ class VISUAL:
             plt.show()
 
 
-#### Ciliates
+## Ciliates
 # Single sim
     def phase(self):
         self.select_sim()
@@ -427,8 +428,12 @@ class VISUAL:
         ax = fig.add_subplot(1,1,1)
 
         time_array = np.arange(0, self.plot_end_frame )
-        body_vel_array = np.zeros((len(time_array), 6))
+        
         body_pos_array = np.zeros((len(time_array), 3))
+        body_vel_array = np.zeros((len(time_array), 6))
+        body_speed_array = np.zeros(len(time_array))
+
+        # pos = np.zeros(3)
 
         for i in range(self.plot_end_frame):
             print(" frame ", i, "/", self.frames, "          ", end="\r")
@@ -438,16 +443,54 @@ class VISUAL:
             body_states = np.array(body_states_str.split()[1:], dtype=float)
             body_vels = np.array(body_vels_str.split(), dtype=float)
 
-            body_pos_array[i] = body_states[0 : 3]
+            body_pos_array[i] = body_states[0:3]
             body_vel_array[i] = body_vels
+            body_speed_array[i] = np.sqrt(np.sum(body_vels[0:3]*body_vels[0:3], 0))
 
-        ax.plot(time_array, body_pos_array[:,0])
-        ax.plot(time_array, body_pos_array[:,1])
-        ax.plot(time_array, body_pos_array[:,2])
-        # ax.plot(time_array, body_vel_array[:,0])
-        # ax.plot(time_array, body_vel_array[:,1])
-        # ax.plot(time_array, body_vel_array[:,2])
+            # pos += body_vels[0:3]
+            # body_vel_array[i][0:3] = pos*self.dt
+
+        # for i in range(len(body_vel_array[0])):
+        #     # ax.plot(time_array, body_pos_array[:,i])
+        #     ax.plot(time_array, body_vel_array[:,i])
+        ax.plot(time_array, body_speed_array)
         plt.savefig(f'fig/ciliate_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        plt.show()
+
+    def ciliate_forcing(self):
+        self.select_sim()
+
+        seg_forces_f = open(self.simName + '_seg_forces.dat', "r")
+        blob_forces_f = open(self.simName + '_blob_forces.dat', "r")
+        
+
+        # Plotting
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+
+        time_array = np.arange(0, self.plot_end_frame )
+        body_force_array = np.zeros((len(time_array), 3))
+
+        for i in range(self.plot_end_frame):
+            print(" frame ", i, "/", self.frames, "          ", end="\r")
+            seg_forces_str = seg_forces_f.readline()
+            blob_forces_str = blob_forces_f.readline()
+
+            seg_forces = np.array(seg_forces_str.split()[1:], dtype=float)
+            blob_forces= np.array(blob_forces_str.split()[1:], dtype=float)
+
+            seg_force_array = np.zeros((int(self.pars['NSEG']*self.pars['NFIL']), 6))
+            blob_force_array = np.zeros((int(self.pars['NBLOB']), 3))
+
+            for seg in range(int(self.pars['NSEG']*self.pars['NFIL'])):
+                seg_force_array[seg] = seg_forces[6*seg : 6*seg+6]
+            for blob in range(int(self.pars['NBLOB'])):
+                blob_force_array[blob] = blob_forces[3*blob : 3*blob+3]
+            body_force_array[i] = np.sum(blob_force_array, axis=0) + np.sum(seg_force_array[:,0:3], axis=0) 
+
+        for i in range(len(body_force_array[0])):
+            ax.plot(time_array, body_force_array[:,i])
+        plt.savefig(f'fig/ciliate_forcing_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
     def timing(self):
@@ -462,16 +505,19 @@ class VISUAL:
         ax = fig.add_subplot(1,1,1)
         
         time_array = np.arange(0, plot_time_frame)
-        timings_array = np.zeros((len(time_array), 7))
-        total_timing_array = np.zeros(len(time_array))
+        
+        time_end_frame = plot_time_frame
+        time_start_frame = max(0, time_end_frame-100)
+        timings_array = np.zeros((plot_time_frame, 7))
+        total_timing_array = np.zeros(plot_time_frame)
 
         for i in range(plot_time_frame):
             print(" frame ", i, "/", plot_time_frame, "          ", end="\r")
             timings_str = timings_f.readline()
 
-            timings = np.array(timings_str.split(), dtype=float)
-
-            timings_array[i] = timings[:7]
+            if(i>=time_start_frame and time_end_frame):
+                timings = np.array(timings_str.split(), dtype=float)
+                timings_array[i] = timings[:7]
         labels = ['read_position',\
                   'assemble_rhs',\
                   'precondition',\
@@ -490,11 +536,12 @@ class VISUAL:
         
         ax.set_ylabel("Computation time/s")
         ax.set_xlabel("Time step")
-        ax.set_xlim(0)
-        ax.set_ylim(0)
+        ax.set_xlim(time_start_frame, time_end_frame)
+        ax.set_ylim(0, 3)
         plt.legend()
         plt.savefig(f'fig/timings_{self.nfil}fil_{self.ar}ar.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
+
 
 # Multi sims
     def multi_phase(self):
@@ -669,6 +716,41 @@ class VISUAL:
         plt.savefig(f'fig/ciliate_multi_traj.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
+    def multi_ciliate_speed(self):
+         # Plotting
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+
+        for ind in range(self.num_sim):
+            try:
+                self.index = ind
+                self.select_sim()
+
+                body_vels_f = open(self.simName + '_body_vels.dat', "r")
+
+                time_array = np.arange(0, self.plot_end_frame )
+        
+                body_vel_array = np.zeros((len(time_array), 6))
+                body_speed_array = np.zeros(len(time_array))
+
+                for i in range(self.plot_end_frame):
+                    print(" frame ", i, "/", self.frames, "          ", end="\r")
+                    body_vels_str = body_vels_f.readline()
+
+                    body_vels = np.array(body_vels_str.split(), dtype=float)
+
+                    body_vel_array[i] = body_vels
+                    body_speed_array[i] = np.sqrt(np.sum(body_vels[0:3]*body_vels[0:3], 0))
+
+                ax.plot(time_array, body_speed_array, label=f"nfil={self.nfil} AR={self.ar}")
+            except:
+                print("WARNING: " + self.simName + " not found.")
+
+        plt.tight_layout()
+        plt.savefig(f'fig/multi_speed.png', bbox_inches = 'tight', format='png')
+        plt.savefig(f'fig/multi_speed.pdf', bbox_inches = 'tight', format='pdf')
+        plt.show()
+
     def multi_timing(self):
         # Plotting
         fig = plt.figure()
@@ -697,7 +779,7 @@ class VISUAL:
                 for i in range(len(timings_array[0])):
                     # ax.plot(time_array, timings_array[:,i], label=labels[i])
                     total_timing_array += timings_array[:,i]
-                ax.plot(time_array, total_timing_array, label='Total')
+                ax.plot(time_array, total_timing_array, label=f"nfil={self.nfil} AR={self.ar}")
             except:
                 print("WARNING: " + self.simName + " not found.")
 
@@ -706,7 +788,54 @@ class VISUAL:
         plt.savefig(f'fig/multi_timing.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
-    def multi_timing_summary(self):
+    
+# Summary plot
+    def summary_ciliate_speed(self):
+        # Plotting
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+
+        nfil_list = np.array(self.pars_list['nfil'])
+        ar_list = np.array(self.pars_list['ar'])
+        speed_list = np.zeros(self.num_sim)
+
+        for ind in range(self.num_sim):
+            try:
+                self.index = ind
+                self.select_sim()
+
+                body_vels_f = open(self.simName + '_body_vels.dat', "r")
+
+                time_array = np.arange(0, self.plot_end_frame )
+        
+                body_vel_array = np.zeros((len(time_array), 6))
+                body_speed_array = np.zeros(len(time_array))
+
+                for i in range(self.plot_end_frame):
+                    print(" frame ", i, "/", self.frames, "          ", end="\r")
+                    body_vels_str = body_vels_f.readline()
+
+                    body_vels = np.array(body_vels_str.split(), dtype=float)
+
+                    body_vel_array[i] = body_vels
+                    body_speed_array[i] = np.sqrt(np.sum(body_vels[0:3]*body_vels[0:3], 0))
+
+                speed_list[ind] = np.mean(body_speed_array)
+            except:
+                print("WARNING: " + self.simName + " not found.")
+
+        ax.scatter(nfil_list, speed_list, label=f"nfil={self.nfil} AR={self.ar}")
+        # ax.scatter(ar_list, speed_list, label=f"nfil={self.nfil} AR={self.ar}")
+
+        ax.set_ylabel("Velocity")
+        ax.set_xlabel("Number of filaments")
+        # plt.legend()
+        plt.tight_layout()
+        plt.savefig(f'fig/multi_ciliate_speed_summary.png', bbox_inches = 'tight', format='png')
+        plt.savefig(f'fig/multi_ciliate_speed_summary.pdf', bbox_inches = 'tight', format='pdf')
+        plt.show()
+
+    def summary_timing(self):
         # Plotting
         fig = plt.figure()
         ax = fig.add_subplot(1,1,1)
@@ -745,7 +874,6 @@ class VISUAL:
         plt.savefig(f'fig/multi_timing_summary.png', bbox_inches = 'tight', format='png')
         plt.savefig(f'fig/multi_timing_summary.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
-
 
 
 #

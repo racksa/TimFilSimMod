@@ -5,10 +5,22 @@ import sys
 visualiser = visual.VISUAL()
 visualiser.index = 0
 
+
 if(sys.argv[1] == 'plot'):
     visualiser.read_rules()
     visualiser.plot()
 
+## Filaments
+if(sys.argv[1] == 'plot_fil'):
+    visualiser.read_rules()
+    if(len(sys.argv) > 2):
+        if(sys.argv[2] == 'video'):
+            visualiser.video = True
+    visualiser.plot_fil()
+
+
+## Ciliates
+# Single sim
 if(sys.argv[1] == 'phase'):
     visualiser.read_rules()
     if(len(sys.argv) > 2):
@@ -35,16 +47,12 @@ if(sys.argv[1] == 'timing'):
     visualiser.read_rules()
     visualiser.timing()
 
-
-if(sys.argv[1] == 'plot_fil'):
+if(sys.argv[1] == 'ciliate_forcing'):
     visualiser.read_rules()
-    if(len(sys.argv) > 2):
-        if(sys.argv[2] == 'video'):
-            visualiser.video = True
-    visualiser.plot_fil()
+    visualiser.ciliate_forcing()    
 
 
-
+# Multi sims
 if(sys.argv[1] == 'multi_phase'):
     visualiser.read_rules()
     visualiser.multi_phase()
@@ -57,13 +65,23 @@ if(sys.argv[1] == 'multi_ciliate_traj'):
     visualiser.read_rules()
     visualiser.multi_ciliate_traj()
 
+if(sys.argv[1] == 'multi_ciliate_speed'):
+    visualiser.read_rules()
+    visualiser.multi_ciliate_speed()
+
 if(sys.argv[1] == 'multi_timing'):
     visualiser.read_rules()
     visualiser.multi_timing()
 
-if(sys.argv[1] == 'multi_timing_summary'):
+
+# Summary plot
+if(sys.argv[1] == 'summary_ciliate_speed'):
     visualiser.read_rules()
-    visualiser.multi_timing_summary()
+    visualiser.summary_ciliate_speed()
+
+if(sys.argv[1] == 'summary_timing'):
+    visualiser.read_rules()
+    visualiser.summary_timing()
 
 
 

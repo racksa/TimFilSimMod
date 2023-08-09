@@ -3,7 +3,7 @@ import visual
 import sys
 
 visualiser = visual.VISUAL()
-visualiser.index = 0
+visualiser.index = 14
 
 
 if(sys.argv[1] == 'plot'):
@@ -49,7 +49,11 @@ if(sys.argv[1] == 'timing'):
 
 if(sys.argv[1] == 'ciliate_forcing'):
     visualiser.read_rules()
-    visualiser.ciliate_forcing()    
+    visualiser.ciliate_forcing()
+
+if(sys.argv[1] == 'ciliate_dissipation'):
+    visualiser.read_rules()
+    visualiser.ciliate_dissipation()    
 
 
 # Multi sims
@@ -83,6 +87,9 @@ if(sys.argv[1] == 'summary_timing'):
     visualiser.read_rules()
     visualiser.summary_timing()
 
+if(sys.argv[1] == 'summary_ciliate_dissipation'):
+    visualiser.read_rules()
+    visualiser.summary_ciliate_dissipation()
 
 
 

@@ -507,11 +507,9 @@ class VISUAL:
         blob_references_f = open(self.simName + '_blob_references.dat', "r")
         body_vels_f = open(self.simName + '_body_vels.dat', "r")
 
-        Q_phase_f = open('fulford_and_blake_reference_phase_generalised_forces.dat', 'r')
-        Q_phase_str = Q_phase_f.readline()
-        Q_phase = np.array(Q_phase_str.split()[1:], dtype=float)
-        print(Q_phase)
-
+        # Q_phase_f = open('fulford_and_blake_reference_phase_generalised_forces.dat', 'r')
+        # Q_phase_str = Q_phase_f.readline()
+        # Q_phase = np.array(Q_phase_str.split()[1:], dtype=float)
 
         # Plotting
         fig = plt.figure()
@@ -546,6 +544,36 @@ class VISUAL:
 
         ax.plot(time_array, dissipation_array)
         plt.savefig(f'fig/ciliate_dissipation_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        plt.show()
+
+    def ciliate_svd(self):
+        self.select_sim()
+        
+        fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
+        fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
+
+        # Plotting
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+        fil_references_sphpolar = np.zeros((self.nfil,3))
+
+
+        for i in range(self.plot_end_frame):
+            print(" frame ", i, "/", self.frames, "          ", end="\r")
+            fil_phases_str = fil_phases_f.readline()
+            # fil_angles_str = fil_angles_f.readline()
+            
+            if(i==self.plot_end_frame-1):
+                fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
+                fil_phases = util.box(fil_phases, 2*np.pi)
+                print(np.shape(fil_phases))
+                # for i in range(self.nfil):
+                #     fil_references_sphpolar[i] = util.cartesian_to_spherical(self.fil_references[3*i: 3*i+3])
+                    
+                # ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=fil_phases)
+
+
+        plt.savefig(f'fig/fil_svd_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
     def timing(self):

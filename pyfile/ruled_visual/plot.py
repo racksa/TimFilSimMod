@@ -81,6 +81,10 @@ if(sys.argv[1] == 'multi_timing'):
     visualiser.read_rules()
     visualiser.multi_timing()
 
+if(sys.argv[1] == 'multi_ciliate_svd'):
+    visualiser.read_rules()
+    visualiser.multi_ciliate_svd()
+
 
 # Summary plot
 if(sys.argv[1] == 'summary_ciliate_speed'):

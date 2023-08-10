@@ -26,11 +26,12 @@ class VISUAL:
         self.periodic = False
         self.big_sphere = True
 
+        self.plot_end_frame = 3000
         self.frames = 3000
 
-        self.Lx = 100
-        self.Ly = 100
-        self.Lz = 100
+        self.Lx = 1000
+        self.Ly = 1000
+        self.Lz = 1000
         
         self.index = 0
 
@@ -93,9 +94,8 @@ class VISUAL:
         if(self.pars['NFIL']>0):
             self.fil_references = myIo.read_fil_references(self.simName + '_fil_references.dat')
 
-        self.frames = min(self.frames, sum(1 for line in open(self.simName + '_body_states.dat')))
-        self.plot_end_frame = self.frames
-        self.plot_start_frame = max(0, self.plot_end_frame-3000)
+        self.plot_end_frame = min(self.plot_end_frame, sum(1 for line in open(self.simName + '_body_states.dat')))
+        self.plot_start_frame = max(0, self.plot_end_frame-self.frames)
         self.plot_interval = 1
         
 
@@ -117,7 +117,7 @@ class VISUAL:
             # fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
 
         for i in range(self.plot_end_frame):
-            print(" frame ", i, "/", self.frames, "          ", end="\r")
+            print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
             body_states_str = body_states_f.readline()
             if(self.pars['NFIL']>0):
                 seg_states_str = seg_states_f.readline()
@@ -239,7 +239,7 @@ class VISUAL:
             # ani.save(f'fig/ciliate_{nfil}fil_anim.mp4', writer=FFwriter)
         else:
             for i in range(self.plot_end_frame):
-                print(" frame ", i, "/", self.frames, "          ", end="\r")
+                print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
                 if(i==self.plot_end_frame-1):
                     animation_func(i)
                 else:
@@ -301,7 +301,7 @@ class VISUAL:
             # ani.save(f'fig/fil_phase_{nfil}fil_anim.mp4', writer=FFwriter)
         else:
             for i in range(self.plot_end_frame):
-                print(" frame ", i, "/", self.frames, "          ", end="\r")
+                print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
                 if(i==self.plot_end_frame-1):
                     animation_func(i)
                 else:
@@ -385,7 +385,7 @@ class VISUAL:
             # ani.save(f'fig/ciliate_{nfil}fil_anim.mp4', writer=FFwriter)
         else:
             for i in range(self.plot_end_frame):
-                print(" frame ", i, "/", self.frames, "          ", end="\r")
+                print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
                 if(i==self.plot_end_frame-1):
                     animation_func(i)
                 else:
@@ -407,7 +407,7 @@ class VISUAL:
         ax = fig.add_subplot(projection='3d')
 
         for i in range(self.plot_end_frame):
-            print(" frame ", i, "/", self.frames, "          ", end="\r")
+            print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
             body_states_str = body_states_f.readline()
 
             body_states = np.array(body_states_str.split()[1:], dtype=float)
@@ -438,7 +438,7 @@ class VISUAL:
         # pos = np.zeros(3)
 
         for i in range(self.plot_end_frame):
-            print(" frame ", i, "/", self.frames, "          ", end="\r")
+            print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
             body_states_str = body_states_f.readline()
             body_vels_str = body_vels_f.readline()
 
@@ -474,7 +474,7 @@ class VISUAL:
         body_force_array = np.zeros((len(time_array), 3))
 
         for i in range(self.plot_end_frame):
-            print(" frame ", i, "/", self.frames, "          ", end="\r")
+            print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
             seg_forces_str = seg_forces_f.readline()
             blob_forces_str = blob_forces_f.readline()
 
@@ -523,7 +523,7 @@ class VISUAL:
         blob_references = np.reshape(blob_references, (int(self.pars['NBLOB']), 3))
 
         for i in range(self.plot_end_frame):
-            print(" frame ", i, "/", self.frames, "          ", end="\r")
+            print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
             seg_forces_str = seg_forces_f.readline()
             seg_vels_str = seg_vels_f.readline()
             blob_forces_str = blob_forces_f.readline()
@@ -550,29 +550,62 @@ class VISUAL:
         self.select_sim()
         
         fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
-        fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
 
         # Plotting
         fig = plt.figure()
         ax = fig.add_subplot(1,1,1)
-        fil_references_sphpolar = np.zeros((self.nfil,3))
 
+        fig2 = plt.figure()
+        ax2 = fig2.add_subplot(1,1,1)
+
+        fig3 = plt.figure()
+        ax3 = fig3.add_subplot(1,1,1)
+
+
+        nfil = 48
+        data_n = min(60, self.plot_end_frame)
+        start = self.plot_end_frame - data_n
+        fil_A = np.zeros((nfil, data_n))
 
         for i in range(self.plot_end_frame):
-            print(" frame ", i, "/", self.frames, "          ", end="\r")
+            print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
             fil_phases_str = fil_phases_f.readline()
-            # fil_angles_str = fil_angles_f.readline()
             
-            if(i==self.plot_end_frame-1):
+            if(i>=start and i < self.plot_end_frame):
                 fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
                 fil_phases = util.box(fil_phases, 2*np.pi)
-                print(np.shape(fil_phases))
-                # for i in range(self.nfil):
-                #     fil_references_sphpolar[i] = util.cartesian_to_spherical(self.fil_references[3*i: 3*i+3])
-                    
-                # ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=fil_phases)
+                fil_A[:, i-start] = fil_phases[:nfil]
+        
+        result = np.linalg.svd(fil_A)
+        # ax.plot(np.arange(len(result[1])), result[1])
+        # print(result[1])
+        # print(result[2])
+        # ax.plot(result[2][:,0]*19)
+        # print(result[2])
+        
+        svd_diag = np.zeros((nfil, data_n))
+        diag = np.diag(result[1])
+        svd_diag[:diag.shape[0], :diag.shape[1]] = diag
+        pc = result[0] @ svd_diag
+        print(np.shape(result[0]), np.shape(result[1]), np.shape(result[2]))
+        print(np.shape(pc))
+        result[2][nfil:] = 0
+        for fil in range(nfil):
+            # print(fil, pc[fil][:nfil])
+            ax.plot(np.abs(pc[fil][:nfil]))
+        
+        cutoff = 10
+        result[2][cutoff:] = 0
+        reduced = pc @ result[2]
 
+        for i in range(min(cutoff, nfil)):
+            ax2.plot(result[2][i], label=f'Principal axis {i+1}')
+        
+        for i in range(3):
+            ax3.plot(fil_A[i], c='b')
+            ax3.plot(reduced[i], c='r')
 
+        plt.legend()
         plt.savefig(f'fig/fil_svd_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
@@ -649,7 +682,7 @@ class VISUAL:
                     fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
                     fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
                     for i in range(self.plot_end_frame):
-                        # print(" frame ", i, "/", self.frames, "          ", end="\r")
+                        # print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
                         fil_phases_str = fil_phases_f.readline()
                         # fil_angles_str = fil_angles_f.readline()
                         if(i==self.plot_end_frame-1):
@@ -724,7 +757,7 @@ class VISUAL:
                     body_states_f = open(self.simName + '_body_states.dat', "r")
 
                     for i in range(self.plot_end_frame):
-                        print(" frame ", i, "/", self.frames, "          ", end="\r")
+                        print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
                         body_states_str = body_states_f.readline()
                         seg_states_str = seg_states_f.readline()
 
@@ -782,7 +815,7 @@ class VISUAL:
                     body_pos_array = np.zeros((len(time_array), 3))
 
                     for i in range(self.plot_end_frame):
-                        print(" frame ", i, "/", self.frames, "          ", end="\r")
+                        print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
                         body_states_str = body_states_f.readline()
 
                         body_states = np.array(body_states_str.split()[1:], dtype=float)
@@ -817,7 +850,7 @@ class VISUAL:
                 body_speed_array = np.zeros(len(time_array))
 
                 for i in range(self.plot_end_frame):
-                    print(" frame ", i, "/", self.frames, "          ", end="\r")
+                    print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
                     body_vels_str = body_vels_f.readline()
 
                     body_vels = np.array(body_vels_str.split(), dtype=float)
@@ -871,6 +904,48 @@ class VISUAL:
         plt.savefig(f'fig/multi_timing.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
+    def multi_ciliate_svd(self):
+         # Plotting
+        nrow = int(self.num_sim**.5)
+        ncol = nrow + (1 if nrow**2 < self.num_sim else 0)
+        fig, axs = plt.subplots(nrow, ncol, figsize=(18, 18), sharex=True, sharey=True)
+        # cax = fig.add_axes([0.92, 0.1, 0.02, 0.8])  # [left, bottom, width, height] for the colorbar
+
+        axs_flat = axs.ravel()
+
+        for ind, ax in enumerate(axs_flat):
+            if (ind < self.num_sim):
+                try:
+                    self.index = ind
+                    self.select_sim()
+
+                    fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
+
+                    data_n = min(300, self.plot_end_frame)
+                    start = self.plot_end_frame - data_n
+                    fil_A = np.zeros((self.nfil, data_n))
+
+
+                    for i in range(self.plot_end_frame):
+                        print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
+                        fil_phases_str = fil_phases_f.readline()
+
+                        if(i>start and i < self.plot_end_frame):
+                            fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
+                            fil_phases = util.box(fil_phases, 2*np.pi)
+
+                            fil_A[:, i-start] = fil_phases
+                    
+                    result = np.linalg.svd(fil_A)
+                    ax.plot(np.arange(len(result[1])), result[1])
+
+                except:
+                    print("WARNING: " + self.simName + " not found.")
+
+        plt.tight_layout()
+        plt.savefig(f'fig/multi_svd.png', bbox_inches = 'tight', format='png')
+        plt.savefig(f'fig/multi_svd.pdf', bbox_inches = 'tight', format='pdf')
+        plt.show()
     
 # Summary plot
     def summary_ciliate_speed(self):
@@ -897,7 +972,7 @@ class VISUAL:
                 body_speed_array = np.zeros(len(time_array))
 
                 for i in range(self.plot_end_frame):
-                    print(" frame ", i, "/", self.frames, "          ", end="\r")
+                    print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
                     body_vels_str = body_vels_f.readline()
 
                     body_vels = np.array(body_vels_str.split(), dtype=float)
@@ -1004,7 +1079,7 @@ class VISUAL:
                 blob_references = np.reshape(blob_references, (int(self.pars['NBLOB']), 3))
             
                 for i in range(self.plot_end_frame):
-                    print(" frame ", i, "/", self.frames, "          ", end="\r")
+                    print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
                     seg_forces_str = seg_forces_f.readline()
                     seg_vels_str = seg_vels_f.readline()
                     blob_forces_str = blob_forces_f.readline()

@@ -11,6 +11,7 @@
 #include "../swimmer.hpp"
 #include "omp.h"
 #include "../../general/util.hpp"
+#include "../../../config.hpp"
 
 mobility_solver::~mobility_solver(){}
 

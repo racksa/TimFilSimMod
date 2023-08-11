@@ -3,7 +3,7 @@ import visual
 import sys
 
 visualiser = visual.VISUAL()
-visualiser.index = 0
+visualiser.index = 31
 
 
 if(sys.argv[1] == 'plot'):

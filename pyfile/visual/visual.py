@@ -26,7 +26,7 @@ class VISUAL:
         self.periodic = False
         self.big_sphere = True
 
-        self.plot_end_frame = 3000
+        self.plot_end_frame = 30000
         self.frames = 300
 
         self.Lx = 1000
@@ -94,7 +94,7 @@ class VISUAL:
         if(self.pars['NFIL']>0):
             self.fil_references = myIo.read_fil_references(self.simName + '_fil_references.dat')
 
-        self.plot_end_frame = min(self.plot_end_frame, sum(1 for line in open(self.simName + '_body_states.dat')))
+        # self.plot_end_frame = min(self.plot_end_frame, sum(1 for line in open(self.simName + '_body_states.dat')))
         self.plot_start_frame = max(0, self.plot_end_frame-self.frames)
         self.plot_interval = 1
         
@@ -577,7 +577,6 @@ class VISUAL:
         gamma_array = fil_references_sphpolar[:,1]
         sorted_indices = np.argsort(gamma_array)
         gamma_array_sorted = gamma_array[sorted_indices]
-        print(gamma_array_sorted)
 
         phi0 = 0
         for i in range(self.plot_end_frame):
@@ -597,7 +596,6 @@ class VISUAL:
                 fil_A[i-start] = fil_phases_sorted[:nfil]
 
         res = np.linalg.svd(fil_A)
-
         svd_diag = np.zeros(np.shape(fil_A))
         diag = np.diag(res[1])
         svd_diag[:diag.shape[0], :diag.shape[1]] = diag
@@ -967,14 +965,16 @@ class VISUAL:
                     nfil = self.nfil
                     data_n = min(60, self.plot_end_frame)
                     start = self.plot_end_frame - data_n
-                    fil_A = np.zeros((nfil, data_n))
+                    fil_A = np.zeros((data_n, nfil))
 
                     fil_references_sphpolar = np.zeros((nfil,3))
                     for fil in range(nfil):
                         fil_references_sphpolar[fil] = util.cartesian_to_spherical(self.fil_references[3*fil: 3*fil+3])
                     gamma_array = fil_references_sphpolar[:,1]
                     sorted_indices = np.argsort(gamma_array)
+                    gamma_array_sorted = gamma_array[sorted_indices]
 
+                    phi0 = 0
                     for i in range(self.plot_end_frame):
                         print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
                         fil_phases_str = fil_phases_f.readline()
@@ -982,10 +982,14 @@ class VISUAL:
                         if(i>=start):
                             
                             fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
-                            fil_phases = fil_phases[sorted_indices] - gamma_array[sorted_indices]
+                            fil_phases_sorted = fil_phases[sorted_indices]
+                            fil_phases_sorted = util.box(fil_phases_sorted, 2*np.pi)
 
-                            fil_phases = util.box(fil_phases, 2*np.pi)
-                            fil_A[:, i-start] = fil_phases[:nfil]
+                            phi0 = fil_phases_sorted[0]
+                            fil_phases_sorted = fil_phases_sorted - phi0
+                            fil_phases_sorted = np.sin(fil_phases_sorted)
+
+                            fil_A[i-start] = fil_phases_sorted[:nfil]
 
                     res = np.linalg.svd(fil_A)
                     svd_diag = np.zeros(np.shape(fil_A))
@@ -993,9 +997,6 @@ class VISUAL:
                     svd_diag[:diag.shape[0], :diag.shape[1]] = diag
                     pc = res[0] @ svd_diag
                     pa = res[2]
-
-                    pa[nfil:] = 0
-                    
                     
                     num_fil = 4
                     num_mode = 2

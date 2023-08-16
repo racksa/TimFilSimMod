@@ -645,6 +645,36 @@
 
   };
 
+  void mismatch_seeding(Real *const pos_ref, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs, const int N, shape_fourier_description& shape){
+    Real *X;
+    /*Implement the python algorithm here.*/
+
+    // Write the data for the final positions
+    for (int n = 0; n < N; n++){
+
+      pos_ref[3*n] = X[3*n];
+      pos_ref[3*n + 1] = X[3*n + 1];
+      pos_ref[3*n + 2] = X[3*n + 2];
+
+      const Real theta = std::atan2(std::sqrt(X[3*n]*X[3*n] + X[3*n + 1]*X[3*n + 1]), X[3*n + 2]);
+      const Real phi = std::atan2(X[3*n + 1], X[3*n]);
+
+      matrix frame = shape.full_frame(theta, phi);
+
+      polar_dir_refs[3*n] = frame(0);
+      polar_dir_refs[3*n + 1] = frame(1);
+      polar_dir_refs[3*n + 2] = frame(2);
+
+      azi_dir_refs[3*n] = frame(3);
+      azi_dir_refs[3*n + 1] = frame(4);
+      azi_dir_refs[3*n + 2] = frame(5);
+
+      normal_refs[3*n] = frame(6);
+      normal_refs[3*n + 1] = frame(7);
+      normal_refs[3*n + 2] = frame(8);
+
+    }
+  }
 
   void seed_blobs(Real *const blob_references, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs){
 
@@ -936,6 +966,13 @@
       }
       pos_file.close();
     
+    
+    #elif MISMATCH_SEEDING
+
+      std::cout << "Seeking a mismatched distribution for the filaments..." << std::endl;
+
+      mismatch_seeding(filament_references, polar_dir_refs, azi_dir_refs, normal_refs, NFIL, shape);
+
     #endif
 
     #if !HEXAGONAL_WALL_SEEDING

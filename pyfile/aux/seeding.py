@@ -12,10 +12,10 @@ ax2 = fig2.add_subplot(projection='3d')
 
 
 R = 1
-theta0 = 0.02*np.pi
-N0 = 16
+theta0 = 0.04*np.pi
+N0 = 6
 a = 2
-dtheta = 0.02*np.pi
+dtheta = 0.04*np.pi
 dx = 2*R*np.pi*np.sin(theta0)/N0
 dy = R*np.sin(dtheta)
 
@@ -46,21 +46,23 @@ while (theta0<0.5*np.pi):
 num_azimuth = len(theta_list)
 num_fil = np.sum(N_list)
 
-print(f'num fil = {num_fil}')
+print(f'num fil = {num_fil} x 2')
 
 # C-style
 index = 0
 phi0 = 0
 dphi = 0
-fil_pos = np.zeros((num_fil, 3))
+fil_pos = np.zeros((num_fil*2, 3))
 for i in range(num_azimuth):
     phi0 += 0.5*dphi
     dphi = 2*np.pi/N_list[i]
     start_index = index
     for j in range(N_list[i]):
         fil_pos[index] = util.spherical_to_cartesian(R, theta_list[i], phi0+dphi*j)
+        fil_pos[index+num_fil] = util.spherical_to_cartesian(R, np.pi-theta_list[i], phi0+dphi*j)
         index += 1
     ax2.plot(fil_pos[start_index:index,0], fil_pos[start_index:index, 1], fil_pos[start_index:index, 2], c=colors[i%len(colors)])
+    ax2.plot(fil_pos[start_index+num_fil:index+num_fil,0], fil_pos[start_index+num_fil:index+num_fil, 1], fil_pos[start_index+num_fil:index+num_fil, 2], c=colors[i%len(colors)])
 
 
 # # Python style
@@ -81,6 +83,8 @@ for i in range(num_azimuth):
 ax.plot(theta_list)
 ax2.set_box_aspect((np.ptp(fil_pos[:,0]), np.ptp(fil_pos[:,1]), np.ptp(fil_pos[:,2]))) 
 ax2.scatter(fil_pos[:,0], fil_pos[:,1], fil_pos[:,2])
+ax2.set_proj_type('ortho')
+ax2.view_init(elev=0., azim=45)
 
 
 

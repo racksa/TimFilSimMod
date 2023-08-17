@@ -26,7 +26,7 @@ class VISUAL:
         self.periodic = False
         self.big_sphere = True
 
-        self.plot_end_frame = 30000
+        self.plot_end_frame = 300
         self.frames = 300
 
         self.Lx = 1000
@@ -94,7 +94,7 @@ class VISUAL:
         if(self.pars['NFIL']>0):
             self.fil_references = myIo.read_fil_references(self.simName + '_fil_references.dat')
 
-        # self.plot_end_frame = min(self.plot_end_frame, sum(1 for line in open(self.simName + '_body_states.dat')))
+        self.plot_end_frame = min(self.plot_end_frame, sum(1 for line in open(self.simName + '_body_states.dat')))
         self.plot_start_frame = max(0, self.plot_end_frame-self.frames)
         self.plot_interval = 1
         
@@ -547,6 +547,109 @@ class VISUAL:
         plt.savefig(f'fig/ciliate_dissipation_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
+    def ciliate_dmd(self):
+        self.select_sim()
+        
+        fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
+
+        
+
+
+        nfil = self.nfil
+        data_n = min(30, self.plot_end_frame)
+        start = self.plot_end_frame - data_n
+        X = np.zeros((nfil, data_n))
+        r = min(nfil, data_n-1)
+        print(f'r={r}')
+        dt = 1./30
+        coeffs = np.zeros((r, data_n), dtype=complex)
+
+        fil_references_sphpolar = np.zeros((nfil,3))
+        for fil in range(nfil):
+            fil_references_sphpolar[fil] = util.cartesian_to_spherical(self.fil_references[3*fil: 3*fil+3])
+        gamma_array = fil_references_sphpolar[:,1]
+        sorted_indices = np.argsort(gamma_array)
+        gamma_array_sorted = gamma_array[sorted_indices]
+
+        for i in range(self.plot_end_frame):
+            print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
+            fil_phases_str = fil_phases_f.readline()
+            
+            if(i>=start):
+                fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
+                fil_phases_sorted = fil_phases[sorted_indices]
+                fil_phases_sorted = util.box(fil_phases_sorted, 2*np.pi)
+
+                fil_phases_sorted = np.sin(fil_phases_sorted)
+
+                X[:,i-start] = fil_phases_sorted[:nfil]
+                
+        X1 = X[:, :-1]
+        X2 = X[:, 1:]
+
+        U, sigma, V = np.linalg.svd(X1, full_matrices=False)
+        sigma = np.diag(sigma)
+        V = V.conj().T
+        U = U[:, :r]
+        sigma = sigma[:r, :r]
+        V = V[:, :r]
+        
+
+
+        A_tilde = U.conj().T @ X2 @ V @ np.linalg.inv(sigma)
+        D, W = np.linalg.eig(A_tilde)
+        omega = np.log(D)/dt
+        phi = X2 @ V @ np.linalg.inv(sigma) @ W
+        b = np.linalg.pinv(phi) @ X1[:,0]
+
+        for t in range(data_n):
+            coeffs[:, t] = np.exp(omega * t*dt) * b
+
+        D2 = (phi @ coeffs).real
+
+            
+        # print(np.shape(D), np.shape(W), np.shape(A_tilde))
+        # print(np.shape(mu), np.shape(b))
+        # print(np.shape(omega))
+        # print(phi)
+        # print(np.shape(np.exp(omega * dt)))
+
+        
+        num_fil = 3
+        modes = np.arange(3,5)
+    
+        # Plotting
+        fig, axs = plt.subplots(len(modes), sharex=True, sharey=True)
+        axs_flat = axs.ravel()
+        fig2 = plt.figure()
+        ax2 = fig2.add_subplot(1,1,1)
+        fig3 = plt.figure()
+        ax3 = fig3.add_subplot(1,1,1)
+        
+        for ind, mode in enumerate(modes):
+            axs[ind].plot(gamma_array_sorted, phi[:, mode].real, label=f'real')
+            axs[ind].plot(gamma_array_sorted, phi[:, mode].imag, label=f'imag')
+            axs[ind].set_xlabel('Azimuth angle')
+            axs[ind].set_ylabel(r'$\phi$')
+            axs[ind].set_title(f'mode={mode}')
+            axs[ind].legend()
+
+
+        for time in range(data_n):
+            ax2.plot(np.abs(coeffs[:, time]))
+        ax2.set_xlabel(r'Mode')
+        ax2.set_ylabel(r'$\psi$')
+
+        for i in range(num_fil):
+            ax3.plot(X[:, i], c='b', marker='+')
+            ax3.plot(D2[:, i], c='r', marker='x')
+        
+
+        fig.savefig(f'fig/fil_dmd_modes_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        # fig2.savefig(f'fig/fil_svd_cumsum_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        # fig3.savefig(f'fig/fil_svd_modes_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        plt.show()
+
     def ciliate_svd(self):
         self.select_sim()
         
@@ -591,6 +694,7 @@ class VISUAL:
 
                 phi0 = fil_phases_sorted[0]
                 fil_phases_sorted = fil_phases_sorted - phi0
+
                 fil_phases_sorted = np.sin(fil_phases_sorted)
 
                 fil_A[i-start] = fil_phases_sorted[:nfil]
@@ -601,15 +705,7 @@ class VISUAL:
         svd_diag[:diag.shape[0], :diag.shape[1]] = diag
 
         pc = res[0] @ svd_diag
-        pa = res[2]
-
-        # pc = svd_diag @ res[2]
-        # pa = res[0]
-
-        # print(np.shape(res[0]), np.shape(res[1]), np.shape(res[2]))
-        # print(np.shape(pc))
-        # pa[nfil:] = 0
-        
+        pa = res[2]        
         
         num_fil = 4
         num_mode = 2

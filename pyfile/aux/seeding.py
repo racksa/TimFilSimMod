@@ -12,10 +12,9 @@ ax2 = fig2.add_subplot(projection='3d')
 
 
 R = 1
-theta0 = 0.04*np.pi
-N0 = 6
-a = 2
-dtheta = 0.04*np.pi
+theta0 = 0.05*np.pi
+N0 = 64
+dtheta = 0.023*np.pi
 dx = 2*R*np.pi*np.sin(theta0)/N0
 dy = R*np.sin(dtheta)
 
@@ -24,28 +23,25 @@ N0_max = 11*(2*np.pi*np.sin(theta0)/R*AR_min)
 print(f'AR > {AR_min} to minimise collision')
 print(f'N0 < {N0_max} to minimise collision')
 
+num_layer = int(np.ceil((0.5*np.pi-theta0)/dtheta))
+
 theta_list = list()
 N_list = list()
 
+theta_list = np.zeros(num_layer)
+N_list = np.zeros(num_layer, dtype=int)
 
-while (theta0<0.5*np.pi):
-    theta_list.append(theta0)
-    N_list.append(N0)
-
-    # sin_next_theta = np.sin(theta0)*(1 + a/N0)
-    # if(sin_next_theta <= 1):
-    #     theta0 = np.arcsin(sin_next_theta)
-    #     N0 += 2
-    # else:
-    #     break
+for i in range(num_layer):
+    theta_list[i] = theta0
+    N_list[i] = N0
 
     theta0 += dtheta
-    l0 = 2*np.pi*R*np.sin(theta0)
     N0 = int(2*np.pi*np.sin(theta0)/dx)
 
 num_azimuth = len(theta_list)
-num_fil = np.sum(N_list)
-
+num_fil = int(np.sum(N_list))
+print(N_list)
+print(f'num layer = {num_layer}')
 print(f'num fil = {num_fil} x 2')
 
 # C-style
@@ -59,11 +55,13 @@ for i in range(num_azimuth):
     start_index = index
     for j in range(N_list[i]):
         fil_pos[index] = util.spherical_to_cartesian(R, theta_list[i], phi0+dphi*j)
-        fil_pos[index+num_fil] = util.spherical_to_cartesian(R, np.pi-theta_list[i], phi0+dphi*j)
+        fil_pos[index+num_fil] = util.spherical_to_cartesian(R, np.pi-theta_list[i], phi0+dphi*(j+0.5))
         index += 1
     ax2.plot(fil_pos[start_index:index,0], fil_pos[start_index:index, 1], fil_pos[start_index:index, 2], c=colors[i%len(colors)])
     ax2.plot(fil_pos[start_index+num_fil:index+num_fil,0], fil_pos[start_index+num_fil:index+num_fil, 1], fil_pos[start_index+num_fil:index+num_fil, 2], c=colors[i%len(colors)])
 
+# for i in range(num_fil*2):
+#     print(fil_pos[i])
 
 # # Python style
 # N_cumsum = np.zeros(len(N_list)+1, dtype=int)

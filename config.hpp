@@ -76,7 +76,7 @@ extern std::string SIMULATION_TETHERLAM_NAME;
   // Essentially, the cilia can 'tip backwards or forwards' in their beat planes.
   // If false, no such rotation ever occurs.
 
-  #define INITIAL_PHASE 3
+  #define INITIAL_PHASE 0
   // 0 = Random
   // 1 = All zeros
   // 2 = Ishikawa
@@ -136,7 +136,7 @@ extern std::string SIMULATION_TETHERLAM_NAME;
 
 #elif BODY_OR_SURFACE_TYPE==2 or BODY_OR_SURFACE_TYPE==4 or BODY_OR_SURFACE_TYPE==5
 
-  #define SEEDING_TYPE 0
+  #define SEEDING_TYPE 6
   // Valid options:
   // 0 = Filaments are evenly distributed over the surface.
   // 1 = Filaments are seeded in an equatorial band.
@@ -144,6 +144,7 @@ extern std::string SIMULATION_TETHERLAM_NAME;
   // 3 = Hexagonal grid seeding. (rigidbody plane)
   // 4 = Meridian seeding
   // 5 = Icosa seeding
+  // 6 = Mismatched seeding
 
   #define FOURIER_DIR "data/fourier_modes/"
   #define GENERATRIX_FILE_NAME FOURIER_DIR "sphere"
@@ -266,7 +267,7 @@ extern int NTOTAL;
 
 #endif
 
-#define TOTAL_TIME_STEPS (1000*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
+#define TOTAL_TIME_STEPS (10000*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
 #define NUM_EULER_STEPS 1 // Number of time-steps to use backwards-Euler before switching to BDF2.
 
 #if CILIA_TYPE==1

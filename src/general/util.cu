@@ -56,3 +56,12 @@ std::string data_from_ini(std::string section, std::string variable){
     }
 }
 
+
+
+CartesianCoordinates spherical_to_cartesian(double r, double theta, double phi) {
+    CartesianCoordinates cartesian;
+    cartesian.x = r * sin(theta) * cos(phi);
+    cartesian.y = r * sin(theta) * sin(phi);
+    cartesian.z = r * cos(theta);
+    return cartesian;
+}

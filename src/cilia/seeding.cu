@@ -11,6 +11,7 @@
   #include <cmath>
   #include <random>
   #include <string>
+  #include "../general/util.hpp"
   #include "../general/matrix.hpp"
 
   __global__ void find_nearest_neighbours(int *const ids, const Real *const samples, const int num_samples, const Real *const X, const int N){
@@ -646,8 +647,53 @@
   };
 
   void mismatch_seeding(Real *const pos_ref, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs, const int N, shape_fourier_description& shape){
-    Real *X;
-    /*Implement the python algorithm here.*/
+    
+    /*Implement the mismatched algorithm here.*/
+    Real R = 1;
+    double theta0 = (0.05*PI);
+    int N0 = 64;
+    double dtheta = (0.023*PI);
+    Real dx = 2*R*PI*sin(theta0)/N0;
+    Real dy = R*sin(dtheta);
+
+    int N_layer = ceil((0.5*PI-theta0)/dtheta);
+    
+    Real *theta_list = (Real*) malloc(N_layer*sizeof(Real));
+    Real *N_list = (Real*) malloc(N_layer*sizeof(Real));
+  
+    for(int i=0; i<N_layer; i++){
+      theta_list[i] = theta0;
+      N_list[i] = N0;
+
+      theta0 = theta0 + dtheta;
+      N0 = int(2*PI*sin(theta0)/dx);
+      
+    }
+
+    int num_fil = 0;
+    for (int i = 0; i < N_layer; i++) {
+        num_fil += N_list[i];
+    }
+    Real *X = (Real*) malloc(6*num_fil*sizeof(Real));
+    int index = 0;
+    Real phi0 = 0;
+    Real dphi = 0;
+
+    for(int i=0; i<N_layer; i++){
+      phi0 += 0.5*dphi;
+      dphi = 2*PI/N_list[i];
+      for(int j=0; j<N_list[i]; j++){
+        CartesianCoordinates cartesian1 = spherical_to_cartesian(R, theta_list[i], phi0+dphi*j);
+        X[3*index] = 0.5*cartesian1.x;
+        X[3*index+1] = 0.5*cartesian1.y;
+        X[3*index+2] = 0.5*cartesian1.z;
+        CartesianCoordinates cartesian2 = spherical_to_cartesian(R, PI-theta_list[i], phi0+dphi*(0.5+j));
+        X[3*index+3*num_fil] = 0.5*cartesian2.x;
+        X[3*index+1+3*num_fil] = 0.5*cartesian2.y;
+        X[3*index+2+3*num_fil] = 0.5*cartesian2.z;
+        index ++;
+      }
+    }
 
     // Write the data for the final positions
     for (int n = 0; n < N; n++){

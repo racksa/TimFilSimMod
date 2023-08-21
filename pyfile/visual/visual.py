@@ -15,7 +15,7 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20230814/"
+        self.dir = "data/expr_sims/20230821/"
         self.pars_list = {"nfil": [],
                      "nblob": [],
                      "ar": [],

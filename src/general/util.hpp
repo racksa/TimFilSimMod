@@ -32,4 +32,12 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::string>> pa
 
 std::string data_from_ini(std::string section, std::string variable);
 
+struct CartesianCoordinates {
+    double x;
+    double y;
+    double z;
+};
+
+CartesianCoordinates spherical_to_cartesian(double r, double theta, double phi);
+
 #endif

@@ -3,7 +3,7 @@ import visual
 import sys
 
 visualiser = visual.VISUAL()
-visualiser.index = 45
+visualiser.index = 56
 
 
 if(sys.argv[1] == 'plot'):

@@ -15,7 +15,7 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20230821/"
+        self.dir = "data/expr_sims/20230814/"
         self.pars_list = {"nfil": [],
                      "nblob": [],
                      "ar": [],
@@ -26,7 +26,7 @@ class VISUAL:
         self.periodic = False
         self.big_sphere = True
 
-        self.plot_end_frame = 300
+        self.plot_end_frame = 300000
         self.frames = 300
 
         self.Lx = 1000
@@ -101,6 +101,7 @@ class VISUAL:
 
     def plot(self):
         self.select_sim()
+        print(self.plot_end_frame)
 
         ax = plt.figure().add_subplot(projection='3d')
 
@@ -281,10 +282,14 @@ class VISUAL:
         ax.set_xticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0', 'π/2', 'π'])
         ax.set_yticks(np.linspace(0, np.pi, 5), ['0', 'π/4', 'π/2', '3π/4', 'π'])
 
+        global frame
+        frame = 0
+
         def animation_func(t):
+            global frame
+
             ax.cla()
             fil_phases_str = fil_phases_f.readline()
-            # fil_angles_str = fil_angles_f.readline()
 
             fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
             fil_phases = util.box(fil_phases, 2*np.pi)
@@ -292,13 +297,21 @@ class VISUAL:
                 fil_references_sphpolar[i] = util.cartesian_to_spherical(self.fil_references[3*i: 3*i+3])
                 
             ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=fil_phases, cmap=colormap)
+            frame += 1
 
         if(self.video):
-            plt.rcParams['animation.ffmpeg_path'] = '/usr/bin/ffmpeg'
-            ani = animation.FuncAnimation(fig, animation_func, frames=500, interval=10, repeat=False)
-            plt.show()
-            # FFwriter = animation.FFMpegWriter(fps=10)
-            # ani.save(f'fig/fil_phase_{nfil}fil_anim.mp4', writer=FFwriter)
+            for i in range(self.plot_end_frame):
+                print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
+                if(i>=self.plot_start_frame):
+                    frame = i
+                    plt.rcParams['animation.ffmpeg_path'] = '/usr/bin/ffmpeg'
+                    ani = animation.FuncAnimation(fig, animation_func, frames=500, interval=10, repeat=False)
+                    plt.show()
+                    FFwriter = animation.FFMpegWriter(fps=10)
+                    ani.save(f'fig/fil_phase_{self.nfil}fil_anim.mp4', writer=FFwriter)
+                    break
+                else:
+                    fil_phases_str = fil_phases_f.readline()
         else:
             for i in range(self.plot_end_frame):
                 print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
@@ -306,7 +319,6 @@ class VISUAL:
                     animation_func(i)
                 else:
                     fil_phases_str = fil_phases_f.readline()
-                    fil_angles_str = fil_angles_f.readline()
 
             plt.savefig(f'fig/fil_phase_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
             plt.show()
@@ -556,7 +568,7 @@ class VISUAL:
 
 
         nfil = self.nfil
-        data_n = min(30, self.plot_end_frame)
+        data_n = min(60, self.plot_end_frame)
         start = self.plot_end_frame - data_n
         X = np.zeros((nfil, data_n))
         r = min(nfil, data_n-1)
@@ -609,14 +621,14 @@ class VISUAL:
 
             
         # print(np.shape(D), np.shape(W), np.shape(A_tilde))
-        # print(np.shape(mu), np.shape(b))
+        # print(np.shape(b))
         # print(np.shape(omega))
         # print(phi)
         # print(np.shape(np.exp(omega * dt)))
-
         
         num_fil = 3
-        modes = np.arange(3,5)
+        modes = np.abs(b).argsort()[-2:][::-1]
+        # print()
     
         # Plotting
         fig, axs = plt.subplots(len(modes), sharex=True, sharey=True)
@@ -634,15 +646,17 @@ class VISUAL:
             axs[ind].set_title(f'mode={mode}')
             axs[ind].legend()
 
-
-        for time in range(data_n):
-            ax2.plot(np.abs(coeffs[:, time]))
+        ax2.plot(np.abs(b))
+        # for time in range(data_n):
+        #     ax2.plot(np.abs(coeffs[:, time]))
         ax2.set_xlabel(r'Mode')
         ax2.set_ylabel(r'$\psi$')
 
         for i in range(num_fil):
             ax3.plot(X[:, i], c='b', marker='+')
             ax3.plot(D2[:, i], c='r', marker='x')
+
+        
         
 
         fig.savefig(f'fig/fil_dmd_modes_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')

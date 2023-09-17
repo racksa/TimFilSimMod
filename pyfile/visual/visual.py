@@ -15,7 +15,7 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20230814/"
+        self.dir = "data/expr_sims/20230915/"
         self.pars_list = {"nfil": [],
                      "nblob": [],
                      "ar": [],
@@ -26,7 +26,7 @@ class VISUAL:
         self.periodic = False
         self.big_sphere = True
 
-        self.plot_end_frame = 300000
+        self.plot_end_frame = 600000
         self.frames = 300
 
         self.Lx = 1000
@@ -568,20 +568,20 @@ class VISUAL:
 
 
         nfil = self.nfil
-        data_n = min(60, self.plot_end_frame)
-        start = self.plot_end_frame - data_n
-        X = np.zeros((nfil, data_n))
-        r = min(nfil, data_n-1)
+        n_snapshots = min(30, self.plot_end_frame)
+        start = self.plot_end_frame - n_snapshots
+        X = np.zeros((nfil, n_snapshots))
+        r = min(nfil, n_snapshots-1)
         print(f'r={r}')
         dt = 1./30
-        coeffs = np.zeros((r, data_n), dtype=complex)
+        coeffs = np.zeros((r, n_snapshots), dtype=complex)
 
         fil_references_sphpolar = np.zeros((nfil,3))
         for fil in range(nfil):
             fil_references_sphpolar[fil] = util.cartesian_to_spherical(self.fil_references[3*fil: 3*fil+3])
-        gamma_array = fil_references_sphpolar[:,1]
-        sorted_indices = np.argsort(gamma_array)
-        gamma_array_sorted = gamma_array[sorted_indices]
+        azim_array = fil_references_sphpolar[:,1]
+        sorted_indices = np.argsort(azim_array)
+        azim_array_sorted = azim_array[sorted_indices]
 
         for i in range(self.plot_end_frame):
             print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
@@ -600,24 +600,27 @@ class VISUAL:
         X2 = X[:, 1:]
 
         U, sigma, V = np.linalg.svd(X1, full_matrices=False)
-        sigma = np.diag(sigma)
+        Sigma = np.diag(sigma)
         V = V.conj().T
         U = U[:, :r]
-        sigma = sigma[:r, :r]
+        Sigma = Sigma[:r, :r]
         V = V[:, :r]
         
 
 
-        A_tilde = U.conj().T @ X2 @ V @ np.linalg.inv(sigma)
+        A_tilde = U.conj().T @ X2 @ V @ np.linalg.inv(Sigma)
         D, W = np.linalg.eig(A_tilde)
         omega = np.log(D)/dt
-        phi = X2 @ V @ np.linalg.inv(sigma) @ W
+        phi = X2 @ V @ np.linalg.inv(Sigma) @ W
         b = np.linalg.pinv(phi) @ X1[:,0]
 
-        for t in range(data_n):
+        for t in range(n_snapshots):
             coeffs[:, t] = np.exp(omega * t*dt) * b
 
-        D2 = (phi @ coeffs).real
+        X_dmd = (phi @ coeffs).real
+
+        print(omega)
+        
 
             
         # print(np.shape(D), np.shape(W), np.shape(A_tilde))
@@ -626,9 +629,8 @@ class VISUAL:
         # print(phi)
         # print(np.shape(np.exp(omega * dt)))
         
-        num_fil = 3
-        modes = np.abs(b).argsort()[-2:][::-1]
-        # print()
+        inspected_snapshots = np.array([0, 1, 2])
+        modes = np.abs(b).argsort()[-4:][::-1]
     
         # Plotting
         fig, axs = plt.subplots(len(modes), sharex=True, sharey=True)
@@ -637,26 +639,33 @@ class VISUAL:
         ax2 = fig2.add_subplot(1,1,1)
         fig3 = plt.figure()
         ax3 = fig3.add_subplot(1,1,1)
+        fig4 = plt.figure()
+        ax4 = fig4.add_subplot(1,1,1)
         
         for ind, mode in enumerate(modes):
-            axs[ind].plot(gamma_array_sorted, phi[:, mode].real, label=f'real')
-            axs[ind].plot(gamma_array_sorted, phi[:, mode].imag, label=f'imag')
-            axs[ind].set_xlabel('Azimuth angle')
-            axs[ind].set_ylabel(r'$\phi$')
+            axs[ind].plot(azim_array_sorted, phi[:, mode].real, label=f'real')
+            axs[ind].plot(azim_array_sorted, phi[:, mode].imag, label=f'imag')
+            # axs[ind].set_xlabel('Azimuth angle')
+            # axs[ind].set_ylabel(r'$\phi$')
             axs[ind].set_title(f'mode={mode}')
             axs[ind].legend()
 
         ax2.plot(np.abs(b))
-        # for time in range(data_n):
+        # for time in range(n_snapshots):
         #     ax2.plot(np.abs(coeffs[:, time]))
         ax2.set_xlabel(r'Mode')
         ax2.set_ylabel(r'$\psi$')
 
-        for i in range(num_fil):
+        for i in inspected_snapshots:
             ax3.plot(X[:, i], c='b', marker='+')
-            ax3.plot(D2[:, i], c='r', marker='x')
+            ax3.plot(X_dmd[:, i], c='r', marker='x')
+        ax3.set_xlabel("fil")
+        ax3.set_ylabel(r"sin(phase)")
 
-        
+        ax4.imshow(X)
+        # ax4.plot(sigma)
+        ax4.set_xlabel("snapshot")
+        ax4.set_ylabel(r"fil")
         
 
         fig.savefig(f'fig/fil_dmd_modes_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
@@ -691,9 +700,9 @@ class VISUAL:
         fil_references_sphpolar = np.zeros((nfil,3))
         for fil in range(nfil):
             fil_references_sphpolar[fil] = util.cartesian_to_spherical(self.fil_references[3*fil: 3*fil+3])
-        gamma_array = fil_references_sphpolar[:,1]
-        sorted_indices = np.argsort(gamma_array)
-        gamma_array_sorted = gamma_array[sorted_indices]
+        azim_array = fil_references_sphpolar[:,1]
+        sorted_indices = np.argsort(azim_array)
+        azim_array_sorted = azim_array[sorted_indices]
 
         phi0 = 0
         for i in range(self.plot_end_frame):
@@ -727,7 +736,7 @@ class VISUAL:
         reduced = pc @ pa
 
         for fil in range(num_fil):
-            ax.scatter(gamma_array_sorted, fil_phases_sorted)
+            ax.scatter(azim_array_sorted, fil_phases_sorted)
             abs_pc = np.abs(pc[fil][:nfil])
             ax2.plot(np.cumsum(abs_pc)/np.sum(abs_pc), label=f'fil {fil}')
         ax.set_xlabel('Azimuth angle')
@@ -804,7 +813,7 @@ class VISUAL:
         ax.set_ylabel("Computation time/s")
         ax.set_xlabel("Time step")
         ax.set_xlim(time_start_frame, time_end_frame)
-        ax.set_ylim(0, 3)
+        ax.set_ylim(0, 10)
         plt.legend()
         plt.savefig(f'fig/timings_{self.nfil}fil_{self.ar}ar.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
@@ -1080,9 +1089,9 @@ class VISUAL:
                     fil_references_sphpolar = np.zeros((nfil,3))
                     for fil in range(nfil):
                         fil_references_sphpolar[fil] = util.cartesian_to_spherical(self.fil_references[3*fil: 3*fil+3])
-                    gamma_array = fil_references_sphpolar[:,1]
-                    sorted_indices = np.argsort(gamma_array)
-                    gamma_array_sorted = gamma_array[sorted_indices]
+                    azim_array = fil_references_sphpolar[:,1]
+                    sorted_indices = np.argsort(azim_array)
+                    azim_array_sorted = azim_array[sorted_indices]
 
                     phi0 = 0
                     for i in range(self.plot_end_frame):

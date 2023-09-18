@@ -119,4 +119,23 @@ def cartesian_to_spherical(x):
     
     return r, theta, phi
 
+def spherical_to_cartesian(r, theta, phi):
+    """
+    Convert spherical coordinates (r, theta, phi) to Cartesian coordinates (x, y, z).
+    
+    Args:
+        r (float): Radial distance from the origin.
+        theta (float): Angle in radians measured counterclockwise from the positive x-axis to the projection
+                      of the point onto the xy-plane.
+        phi (float): Angle in radians measured from the positive z-axis to the line connecting the origin
+                    and the point.
+    
+    Returns:
+        tuple: A tuple containing the Cartesian coordinates (x, y, z).
+    """
+    x = r * math.sin(phi) * math.cos(theta)
+    y = r * math.sin(phi) * math.sin(theta)
+    z = r * math.cos(phi)
+    return x, y, z
+
 #

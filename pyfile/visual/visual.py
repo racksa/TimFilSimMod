@@ -10,6 +10,7 @@ import matplotlib.patches as patches
 import matplotlib.animation as animation
 import configparser
 import math
+import sys
 
 class VISUAL:
 
@@ -564,8 +565,6 @@ class VISUAL:
         
         fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
 
-        
-
 
         nfil = self.nfil
         n_snapshots = min(30, self.plot_end_frame)
@@ -669,8 +668,8 @@ class VISUAL:
 
         ax4.imshow(X)
         # ax4.plot(sigma)
-        ax4.set_xlabel("snapshot")
-        ax4.set_ylabel(r"fil")
+        ax4.set_xlabel("t")
+        ax4.set_ylabel(r"fil i")
         
 
         fig.savefig(f'fig/fil_dmd_modes_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
@@ -683,95 +682,152 @@ class VISUAL:
         
         fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
 
-        # Plotting
-        fig = plt.figure()
-        ax = fig.add_subplot(1,1,1)
-
-        fig2 = plt.figure()
-        ax2 = fig2.add_subplot(1,1,1)
-
-        fig3 = plt.figure()
-        ax3 = fig3.add_subplot(1,1,1)
-
-        fig4 = plt.figure()
-        ax4 = fig4.add_subplot(1,1,1)
-
-
         nfil = self.nfil
-        data_n = min(60, self.plot_end_frame)
-        start = self.plot_end_frame - data_n
-        fil_A = np.zeros((data_n, nfil))
+        n_snapshots = min(30, self.plot_end_frame)
+        r = min(nfil, n_snapshots-1)
+        start = self.plot_end_frame - n_snapshots
+        X = np.zeros((nfil, n_snapshots))
 
         fil_references_sphpolar = np.zeros((nfil,3))
         for fil in range(nfil):
             fil_references_sphpolar[fil] = util.cartesian_to_spherical(self.fil_references[3*fil: 3*fil+3])
         azim_array = fil_references_sphpolar[:,1]
+        polar_array = fil_references_sphpolar[:,2]
         sorted_indices = np.argsort(azim_array)
         azim_array_sorted = azim_array[sorted_indices]
+        polar_array_sorted = polar_array[sorted_indices]
 
-        phi0 = 0
         for i in range(self.plot_end_frame):
             print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
             fil_phases_str = fil_phases_f.readline()
             
             if(i>=start):
-                
                 fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
                 fil_phases_sorted = fil_phases[sorted_indices]
                 fil_phases_sorted = util.box(fil_phases_sorted, 2*np.pi)
 
-                phi0 = fil_phases_sorted[0]
-                fil_phases_sorted = fil_phases_sorted - phi0
-
                 fil_phases_sorted = np.sin(fil_phases_sorted)
 
-                fil_A[i-start] = fil_phases_sorted[:nfil]
+                X[:,i-start] = fil_phases_sorted[:nfil]
 
-        res = np.linalg.svd(fil_A)
-        svd_diag = np.zeros(np.shape(fil_A))
-        diag = np.diag(res[1])
-        svd_diag[:diag.shape[0], :diag.shape[1]] = diag
+        U, sigma, V = np.linalg.svd(X, full_matrices=False)
+        Sigma = np.diag(sigma)
+        # V = V.conj().T
+        # U = U[:, :r]
+        # Sigma = Sigma[:r, :r]
+        # V = V[:, :r]
 
-        pc = res[0] @ svd_diag
-        pa = res[2]        
+        # res = np.linalg.svd(X)
+        # svd_diag = np.zeros(np.shape(X))
+        # diag = np.diag(res[1])
+        # svd_diag[:diag.shape[0], :diag.shape[1]] = diag
+
+        # print(np.shape(U),np.shape(Sigma), np.shape(V))
+
+        pc = U @ Sigma
+        pa = V        
         
         num_fil = 4
         num_mode = 2
-        pa[num_mode:] = 0
         reduced = pc @ pa
 
-        for fil in range(num_fil):
-            ax.scatter(azim_array_sorted, fil_phases_sorted)
-            abs_pc = np.abs(pc[fil][:nfil])
-            ax2.plot(np.cumsum(abs_pc)/np.sum(abs_pc), label=f'fil {fil}')
-        ax.set_xlabel('Azimuth angle')
-        ax.set_ylabel(r'$\phi$')
-        ax.legend()
-        ax2.set_xlabel('Mode')
-        ax2.set_ylabel('Accumulated |weight| fraction')
-        ax2.legend()
+        
 
-        for i in range(min(num_mode, nfil)):
-            ax3.plot(pa[i], label=f'Mode {i+1}')
-        
-        ax3.set_xlabel(r'Filament i')
-        ax3.set_ylabel(r'$\psi$')
-        ax3.legend()
-        
+        # Plotting
+        colormap = 'twilight_shifted'
+        from matplotlib.colors import Normalize
+        from matplotlib.cm import ScalarMappable
+        norm = Normalize(vmin=0, vmax=2*np.pi)
+        sm = ScalarMappable(cmap=colormap, norm=norm)
+        sm.set_array([])
+
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+        fig2 = plt.figure()
+        ax2 = fig2.add_subplot(1,1,1)
+        fig3 = plt.figure()
+        ax3 = fig3.add_subplot(1,1,1)
+        fig4 = plt.figure()
+        ax4 = fig4.add_subplot(1,1,1)
+        fig5 = plt.figure()
+        ax5 = fig5.add_subplot(1,1,1)
+        fig6 = plt.figure()
+        ax6 = fig6.add_subplot(1,1,1)
+        fig7 = plt.figure()
+        ax7 = fig7.add_subplot(1,1,1)
+
+        # Signal X
+        ax.imshow(X)
+        ax.set_xlabel('t')
+        ax.set_ylabel('Fil index (sorted by azimuth angle)')
+
+        # Signal of the first snapshot
+        ax2.scatter(azim_array_sorted, X[:,0])
+        ax2.set_xlabel('Fil index')
+        ax2.set_ylabel('Phase, t=0')
+
+        # Eigenvalue
+        ax3.scatter(np.arange(0, len(sigma), 1), sigma, marker='*')
+        ax3.set_xlabel(r'Mode')
+        ax3.set_ylabel(r'$Eigenvalue$')
+
+        # POD spatial modes
         for i in range(6):
-            ax4.plot(fil_A[i], c='b')
-            ax4.plot(reduced[i], c='r')
-        
-        ax4.plot(0, c='b', label='Original' )
-        ax4.plot(0, c='r', label=f'Using {num_mode} modes')
-        ax4.set_xlabel('Time step')
-        ax4.set_ylabel(r'$\phi$')
-        ax4.legend()
+            ax4.plot(U[:,i], label=f'Mode {i}')
+            ax4.set_xlabel('x')
+            ax4.set_ylabel('f(x, t=0)')
+            ax4.legend()
 
-        fig.savefig(f'fig/fil_svd_weights_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
-        fig2.savefig(f'fig/fil_svd_cumsum_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
-        fig3.savefig(f'fig/fil_svd_modes_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
-        fig4.savefig(f'fig/fil_svd_series_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        # POD temporal modes
+        for i in range(4):
+            ax5.plot(V[i, :], label=f'Mode {i}')
+            ax5.set_xlabel('t')
+            ax5.set_ylabel('f(x, t=0)')
+            ax5.legend()
+
+        # Phase of the first snapshot
+        ax6.scatter(azim_array_sorted, polar_array_sorted, c=X[:,0], cmap=colormap)
+
+        # Interpolated pahse of the first snapshot
+        n1, n2 = 100, 100
+        azim_grid = np.linspace(-np.pi, np.pi, n1)
+        polar_grid = np.linspace(0, np.pi, n2)
+        xx, yy = np.meshgrid(azim_grid, polar_grid)
+        import scipy.interpolate
+        zz = scipy.interpolate.griddata((azim_array_sorted, polar_array_sorted), X[:,0], (xx, yy), method='cubic')
+        ax7.scatter(xx, yy, c=zz, cmap=colormap)
+
+        # ax.scatter(azim_array_sorted, fil_phases_sorted)
+        # for fil in range(num_fil):
+        #     abs_pc = np.abs(pc[fil][:nfil])
+        #     ax2.plot(np.cumsum(abs_pc)/np.sum(abs_pc), label=f'fil {fil}')
+        # ax.set_xlabel('Azimuth angle')
+        # ax.set_ylabel(r'$\phi$')
+
+        # ax2.set_xlabel('Mode')
+        # ax2.set_ylabel('Accumulated |weight| fraction')
+        # ax2.legend()
+
+        
+        
+        # for i in range(6):
+        #     ax4.plot(U[i], c='b')
+        #     ax4.plot(reduced[i], c='r')
+
+        # ax4.plot(0, c='b', label='Original' )
+        # ax4.plot(0, c='r', label=f'Using {num_mode} modes')
+        # ax4.set_xlabel('Time step')
+        # ax4.set_ylabel(r'$\phi$')
+        # ax4.legend()
+        
+
+        fig.savefig(f'fig/fil_svd_signal_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        fig2.savefig(f'fig/fil_svd_initial_snapshot_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        fig3.savefig(f'fig/fil_svd_eigenvalues_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        fig4.savefig(f'fig/fil_svd_spatial_modes_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        fig5.savefig(f'fig/fil_svd_temporal_modes_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        fig6.savefig(f'fig/fil_svd_phase_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        fig7.savefig(f'fig/fil_svd_interpolated_phase_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
     def timing(self):
@@ -1087,9 +1143,9 @@ class VISUAL:
                     fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
 
                     nfil = self.nfil
-                    data_n = min(60, self.plot_end_frame)
-                    start = self.plot_end_frame - data_n
-                    fil_A = np.zeros((data_n, nfil))
+                    n_snapshots = min(60, self.plot_end_frame)
+                    start = self.plot_end_frame - n_snapshots
+                    fil_A = np.zeros((n_snapshots, nfil))
 
                     fil_references_sphpolar = np.zeros((nfil,3))
                     for fil in range(nfil):

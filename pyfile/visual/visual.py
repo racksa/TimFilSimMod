@@ -15,7 +15,7 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20230915/"
+        self.dir = "data/expr_sims/20230814/"
         self.pars_list = {"nfil": [],
                      "nblob": [],
                      "ar": [],
@@ -619,18 +619,16 @@ class VISUAL:
 
         X_dmd = (phi @ coeffs).real
 
-        print(omega)
-        
-
             
         # print(np.shape(D), np.shape(W), np.shape(A_tilde))
         # print(np.shape(b))
         # print(np.shape(omega))
         # print(phi)
         # print(np.shape(np.exp(omega * dt)))
-        
+
         inspected_snapshots = np.array([0, 1, 2])
         modes = np.abs(b).argsort()[-4:][::-1]
+        # modes = [0,1,2,3]
     
         # Plotting
         fig, axs = plt.subplots(len(modes), sharex=True, sharey=True)
@@ -641,20 +639,27 @@ class VISUAL:
         ax3 = fig3.add_subplot(1,1,1)
         fig4 = plt.figure()
         ax4 = fig4.add_subplot(1,1,1)
+
+        print(np.shape(phi))
         
         for ind, mode in enumerate(modes):
             axs[ind].plot(azim_array_sorted, phi[:, mode].real, label=f'real')
             axs[ind].plot(azim_array_sorted, phi[:, mode].imag, label=f'imag')
+
+            # axs[ind].plot(coeffs[:, mode].real, label=f'real')
+            # axs[ind].plot(coeffs[:, mode].imag, label=f'imag')
+
             # axs[ind].set_xlabel('Azimuth angle')
             # axs[ind].set_ylabel(r'$\phi$')
             axs[ind].set_title(f'mode={mode}')
             axs[ind].legend()
+        axs[-1].set_xlabel("Azimuthal position")
 
         ax2.plot(np.abs(b))
         # for time in range(n_snapshots):
         #     ax2.plot(np.abs(coeffs[:, time]))
         ax2.set_xlabel(r'Mode')
-        ax2.set_ylabel(r'$\psi$')
+        ax2.set_ylabel(r'Magnitude(b)')
 
         for i in inspected_snapshots:
             ax3.plot(X[:, i], c='b', marker='+')

@@ -9,6 +9,7 @@
 #include <omp.h>
 #include "cuda_functions.hpp"
 #include "../general/util.hpp"
+#include "../../config.hpp"
 
 
 

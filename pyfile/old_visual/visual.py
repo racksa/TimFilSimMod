@@ -65,8 +65,8 @@ for i in range(selection, selection+1):
 # simDir = 'data/box_height_sim/1024fil_sims/'
 # simName = simDir + 'test_fil_3200_3200_1000'
 
-# simDir = 'data/rod_sims/2304rod_sims/'
-# simName = simDir + 'test_rod_960_960_60'
+simDir = 'data/rod_sims/2304rod_sims/'
+simName = simDir + 'test_rod_960_960_60'
 # simName = simDir + 'test_rod_1920_1920_60'
 # simName = simDir + 'test_rod_3840_3840_60'
 
@@ -74,6 +74,7 @@ for i in range(selection, selection+1):
 # simName = simDir + 'test_rod_1800_1800_75'
 # simName = simDir + 'test_rod_3600_3600_75'
 # simName = simDir + 'test_rod_7200_7200_75'
+# 30 frames per period
 
 # simDir = 'data/rod_sims/rod7744/'
 # simName = simDir + 'test_rod_7744'
@@ -122,6 +123,7 @@ if(np.isinf(np.array([Lx, Ly, Lz])).any() and enable_periodic):
 # Ly = 1760.
 # Lz = 10.3125*10
 # 1024*1024*6
+# 10 frames per period
 
 
 class VISUAL:
@@ -136,7 +138,7 @@ class VISUAL:
             self.fil_references = myIo.read_fil_references(simName + '_fil_references.dat')
         self.dt = self.pars['DT']*self.pars['PLOT_FREQUENCY_IN_STEPS']
         self.L = 14.14*self.pars['NBLOB']/22.
-        self.frames = min(300001, sum(1 for line in open(simName + '_body_states.dat')))
+        self.frames = min(20000, sum(1 for line in open(simName + '_body_states.dat')))
 
         self.plot_end_frame = self.frames
         self.plot_start_frame = max(0, self.plot_end_frame-30)
@@ -145,7 +147,7 @@ class VISUAL:
         self.plot_hist_frame = np.array([self.frames-1])
         self.plot_seg_frames = [self.plot_end_frame-1-2*i for i in range(14)]
         self.plot_rod_frame = np.array([self.plot_end_frame-1])
-        self.plot_multi_rod_frames = np.array([100, 1000, 10000])
+        self.plot_multi_rod_frames = np.array([500, 10000])
         self.plot_single_fil_frames = [self.plot_end_frame-1-2*i for i in range(15)]
         # self.plot_single_fil_frames = [self.plot_end_frame-1]
         self.plot_phase_frames = [self.plot_end_frame-1]
@@ -754,6 +756,9 @@ class VISUAL:
     
     # Rods
     def compute_rod_vel(self):
+        dT = 100/300.
+        T0 = 14.14/22.
+
         body_states_f = open(simName + '_body_states.dat', "r")
 
         compute_start = self.plot_start_frame
@@ -778,30 +783,31 @@ class VISUAL:
                     body_vel = body_disp[7*swim : 7*swim+3]/self.dt
                     average_vel[i-compute_start] += body_vel
 
-        time_array = np.arange(compute_start, self.plot_end_frame )
+        time_array = np.arange(compute_start, self.plot_end_frame ) * dT / T0
         average_vel /= float(self.pars['NSWIM'])
         ax = plt.figure().add_subplot(1,1,1)
-        ax.set_ylabel(r"<$V_x$>/L")
-        ax.set_xlabel(r"time")
-        ax.plot(time_array[1:], average_vel[1:,0]/self.L)
-        plt.savefig('fig/rod_velocity.eps', format='eps')
+        ax.set_ylabel(r"<$V_x$>/W")
+        ax.set_xlabel(r"t/T")
+        ax.plot(time_array[1:], average_vel[1:,0]/4.1704212613e-01, c='black',)
+        plt.savefig('fig/rod_velocity.pdf', format='pdf')
 
         ax2 = plt.figure().add_subplot(1,1,1)
         ax2.set_ylabel(r"<$|V_x|$>/L")
-        ax2.set_xlabel(r"time")
-        ax2.plot(time_array[1:], average_vel[1:,0]/self.L)
-        plt.savefig('fig/rod_velocity_abs.eps', format='eps')
+        ax2.set_xlabel(r"t/T")
+        ax2.plot(time_array[1:], average_vel[1:,0]/self.L, c='black')
+        plt.savefig('fig/rod_velocity_abs.pdf', format='pdf')
         plt.show()
 
         plt.show()
 
     def multi_rod_vel(self):
+        dT = 30/300.
         ac = 1 - 1./4.*np.pi
-        T0 = 14.14**2/22.
+        T0 = 14.14/22.
         ls = ['solid', 'dashed', 'dotted']
         markers = ["^", "s", "d"]
 
-        simDir = 'data/2304rod_sims/'
+        simDir = 'data/rod_sims/2304rod_sims/'
         simNames = ['test_rod_960_960_60', 'test_rod_1920_1920_60', 'test_rod_3840_3840_60']
         box = [(960,960,960), (1920,1920,960), (3840,3840,3840)]
         area_fraction = 2304*(48-28*ac) / np.array([(960**2), (1920**2), (3840**2)])
@@ -845,7 +851,7 @@ class VISUAL:
                         average_vel[i-compute_start] += body_vel
                         # average_abs_vel[i-compute_start] += np.abs(body_vel)
 
-            time_array = np.arange(compute_start, self.plot_end_frame ) / T0
+            time_array = np.arange(compute_start, self.plot_end_frame ) * dT / T0
             average_vel =  average_vel / float(self.pars['NSWIM']) / self.dt
             
             ax.plot(time_array[1:], average_vel[1:,0]/ V0_list[ni], c='black', linestyle=ls[ni],label='Area fraction='+'{:.2f}'.format(area_fraction[ni]*100)+'%')
@@ -855,14 +861,14 @@ class VISUAL:
                         ax.scatter(time_array[t], average_vel[t, 0]/ V0_list[ni], s=60, marker=markers[ti], facecolors='none', edgecolors='black')
                     if(ni==2):
                         ax.scatter(time_array[t], average_vel[t, 0]/ V0_list[ni], s=60, marker=markers[ti], facecolors='black', edgecolors='black')
-        rect = patches.Rectangle((1556, 1.4), 138, 0.2, linewidth=1, edgecolor='black', facecolor='none', ls='dotted')
+        rect = patches.Rectangle((2180, 1.4), 220, 0.2, linewidth=1, edgecolor='black', facecolor='none', ls='dotted')
         ax.add_patch(rect)
         ax.legend()
         ax.set_ylabel(r"$<V_x>/W$")
         ax.set_xlabel(r"$t/T$")
         ax.set_xlim(left=0)
         nswim = int(self.pars['NSWIM'])
-        plt.savefig(f'fig/multi_velocity_{nswim}rods.eps', format='eps')
+        plt.savefig(f'fig/multi_velocity_{nswim}rods.pdf', format='pdf')
         plt.savefig(f'fig/multi_velocity_{nswim}rods.png', format='png')
         plt.show()
 
@@ -1015,10 +1021,14 @@ class VISUAL:
         end_pos = np.zeros((int(self.pars['NSWIM']), 3))
         end_vel = np.zeros((int(self.pars['NSWIM']), 3))
 
-        fig1 = plt.figure(figsize=(6, 6), dpi=300)
+        fig1 = plt.figure()
         fig2 = plt.figure()
+        fig3 = plt.figure()
+        fig4 = plt.figure()
         ax = fig1.add_subplot(1,1,1)
         ax2 = fig2.add_subplot(1,1,1)
+        ax3 = fig3.add_subplot(1,1,1)
+        ax4 = fig4.add_subplot(1,1,1)
         bins = np.linspace(0, Lx, 15)
 
         for i in range(self.plot_end_frame):
@@ -1045,43 +1055,61 @@ class VISUAL:
                     pdiff = rod_tail - rod_head
                     two_points = np.array([util.box(rod_head, np.array([Lx, Ly, Lz])), util.box(rod_head, np.array([Lx, Ly, Lz])) + pdiff])
 
-                    ax.plot(two_points[:,0], two_points[:,1], c= 'r', zorder=0, lw=.3
-                    )
+                    ax.plot(two_points[:,0], two_points[:,1], c= 'r', zorder=0, lw=.3) # Original
+                    ax3.plot(two_points[:,1], two_points[:,0], c= 'r', zorder=0, lw=.3) # Rotated
 
                 if self.enable_superpunto:
                     end_pos = util.box(end_pos, np.array([Lx, Ly, Lz]))
 
                 ax2.hist(end_pos[:,1], bins=bins, label=f'time={i}')
         
-        # ax.scatter(end_pos[:,0], end_pos[:,1])
-        ax.quiver(end_pos[:,0], end_pos[:,1], end_vel[:,0], end_vel[:,1], zorder=1)
+        ax.quiver(end_pos[:,0], end_pos[:,1], end_vel[:,0], end_vel[:,1], zorder=1)  # Original
         ax.set_ylabel(r"y")
         ax.set_xlabel(r"x")
         ax.set_xlim(0, Lx)
         ax.set_ylim(0, Ly)
         ax.set_aspect('equal')
+
+        # ax3.quiver(end_pos[:,1], end_pos[:,0], end_vel[:,1], -end_vel[:,0], zorder=1)  # Rotated
+        ax3.set_ylabel(r"x")
+        ax3.set_xlabel(r"y")
+        ax3.set_xlim(0, Ly)
+        ax3.set_ylim(0, Lx)
+        ax3.set_aspect('equal')
+        ax3.invert_yaxis()
+
+        ax4.quiver(end_pos[:,1], end_pos[:,0], end_vel[:,1], -end_vel[:,0], zorder=1)  # Rotated
+        ax4.set_ylabel(r"x")
+        ax4.set_xlabel(r"y")
+        ax4.set_xlim(0, Ly)
+        ax4.set_ylim(0, Lx)
+        ax4.set_aspect('equal')
+        ax4.invert_yaxis()
+
         # ax.axis('off')
         nswim = int(self.pars['NSWIM'])
-        fig1.savefig(f'fig/rod_displacement_{nswim}rods_{int(Lx)}_{int(Ly)}_{int(Lz)}_{int(self.plot_end_frame)}.eps', bbox_inches = 'tight',  format='eps')
-        fig1.savefig(f'fig/rod_displacement_{nswim}rods_{int(Lx)}_{int(Ly)}_{int(Lz)}_{int(self.plot_end_frame)}.pdf', bbox_inches = 'tight',  format='pdf')
 
         ax2.set_ylabel(r"frequency")
         ax2.set_xlabel(r"$y$")
         ax2.set_xlim(0, Lx)
-        fig2.savefig(f'fig/pos_distribution_{nswim}rods_{int(Lx)}_{int(Ly)}_{int(Lz)}_{int(self.plot_end_frame)}.eps', bbox_inches = 'tight',  format='eps')
+        # fig1.savefig(f'fig/rod_displacement_{nswim}rods_{int(Lx)}_{int(Ly)}_{int(Lz)}_{int(self.plot_end_frame)}.pdf', bbox_inches = 'tight',  format='pdf')
+        # fig2.savefig(f'fig/pos_distribution_{nswim}rods_{int(Lx)}_{int(Ly)}_{int(Lz)}_{int(self.plot_end_frame)}.eps', bbox_inches = 'tight',  format='eps')
+        fig3.savefig(f'fig/rod_displacement_{nswim}rods_{int(Lx)}_{int(Ly)}_{int(Lz)}_{int(self.plot_end_frame)}_rotated.pdf', bbox_inches = 'tight',  format='pdf')
+        fig4.savefig(f'fig/rod_velocity_{nswim}rods_{int(Lx)}_{int(Ly)}_{int(Lz)}_{int(self.plot_end_frame)}_rotated.pdf', bbox_inches = 'tight',  format='pdf')
 
         plt.show()
 
     def plot_rod_vel_multi(self):
-
-        simDir = 'data/2304rod_sims/'
+        dT = 30/300.
+        simDir = 'data/rod_sims/2304rod_sims/'
         simNames = ['test_rod_1920_1920_60', 'test_rod_3840_3840_60']
         box = [(1920,1920,960), (3840,3840,3840)]
         markers = ["^", "s", "d"]
         marker_string = [r'$\Delta$', r'$square$', r'$\bigcirc$']
         facecolors = ['none', 'black']
+
         
-        fig, axs = plt.subplots(3, 2, figsize=(8, 9))
+        fig, axs = plt.subplots(2, 2)
         for ni, name in enumerate(simNames):
             Lx, Ly, Lz = box[ni]
             simName = simDir + name
@@ -1116,24 +1144,25 @@ class VISUAL:
                         pdiff = rod_tail - rod_head
                         two_points = np.array([util.box(rod_head, np.array([Lx, Ly, Lz])), util.box(rod_head, np.array([Lx, Ly, Lz])) + pdiff])
 
-                        axs[current_fig, ni].plot(two_points[:,0], two_points[:,1], c= 'r', zorder=0, lw=.3)
+                        # axs[current_fig, ni].plot(two_points[:,1], two_points[:,0], c= 'r', zorder=0, lw=.3)
 
                     if self.enable_superpunto:
                         end_pos = util.box(end_pos, np.array([Lx, Ly, Lz]))
 
-                    axs[current_fig, ni].scatter(-1, -1, marker=markers[current_fig], facecolors=facecolors[ni], edgecolors='black', label=' ')
-                    axs[current_fig, ni].quiver(end_pos[:,0], end_pos[:,1], end_vel[:,0], end_vel[:,1], zorder=1)
+                    axs[current_fig, ni].scatter(-100, -100, marker=markers[current_fig], facecolors=facecolors[ni], edgecolors='black', label=' ')
+                    axs[current_fig, ni].quiver(end_pos[:,1], end_pos[:,0], end_vel[:,1], -end_vel[:,0], zorder=1)
                     axs[current_fig, ni].set_xlim(0, Lx)
                     axs[current_fig, ni].set_ylim(0, Ly)
                     axs[current_fig, ni].set_aspect('equal')
+                    axs[current_fig, ni].invert_yaxis()
                     axs[current_fig, ni].legend(loc='upper left', frameon=False)
                     current_fig +=1
             nswim = int(self.pars['NSWIM'])
         for axi, ax in enumerate(axs.flat):
-            ax.set(ylabel=r"y", xlabel=r"x")
+            ax.set(ylabel=r"x", xlabel=r"y")
         
-        T = 14.14**2/22.
-        times = [fr"t={int(self.plot_multi_rod_frames[i]/T)} T" for i in range(3)]
+        T = 14.14/22.
+        times = [fr"t={int(self.plot_multi_rod_frames[i]*dT/T)} T" for i in range(len(self.plot_multi_rod_frames))]
         pad = 5 # in points
         for ax, time in zip(axs[:,0], times):
             ax.annotate(time, xy=(0, 0.5), xytext=(-ax.yaxis.labelpad - pad, 0),
@@ -1141,6 +1170,7 @@ class VISUAL:
                         size='large', ha='right', va='center')
         fig.tight_layout()
         fig.subplots_adjust(left=0.21, top=0.95)
+
         # Hide x labels and tick labels for top plots and y ticks for right plots.
         # for ax in axs.flat:
         #     ax.label_outer()
@@ -1148,7 +1178,7 @@ class VISUAL:
         # fig.supxlabel(r"x")
         # fig.supylabel(r"y")
 
-        fig.savefig(f'fig/rod_displacement_{nswim}rods_multi.eps', bbox_inches = 'tight',  format='eps')
+        # fig.savefig(f'fig/rod_displacement_{nswim}rods_multi.eps', bbox_inches = 'tight',  format='eps')
         fig.savefig(f'fig/rod_displacement_{nswim}rods_multi.pdf', bbox_inches = 'tight',  format='pdf')
 
         plt.show()

@@ -755,6 +755,8 @@ class VISUAL:
         ax6 = fig6.add_subplot(1,1,1)
         fig7 = plt.figure()
         ax7 = fig7.add_subplot(1,1,1)
+        fig8 = plt.figure()
+        ax8 = fig8.add_subplot(1,1,1)
 
         # Signal X
         ax.imshow(X)
@@ -763,7 +765,7 @@ class VISUAL:
 
         # Signal of the first snapshot
         ax2.scatter(azim_array_sorted, X[:,0])
-        ax2.set_xlabel('Fil index')
+        ax2.set_xlabel('Azimuth position')
         ax2.set_ylabel('Phase, t=0')
 
         # Eigenvalue
@@ -772,7 +774,7 @@ class VISUAL:
         ax3.set_ylabel(r'$Eigenvalue$')
 
         # POD spatial modes
-        for i in range(6):
+        for i in range(2):
             ax4.plot(U[:,i], label=f'Mode {i}')
             ax4.set_xlabel('x')
             ax4.set_ylabel('f(x, t=0)')
@@ -787,8 +789,10 @@ class VISUAL:
 
         # Phase of the first snapshot
         ax6.scatter(azim_array_sorted, polar_array_sorted, c=X[:,0], cmap=colormap)
+        ax6.set_xlabel(r"Azimuth position")
+        ax6.set_ylabel(r"Polar position")
 
-        # Interpolated pahse of the first snapshot
+        # Interpolated phase of the first snapshot
         n1, n2 = 100, 100
         azim_grid = np.linspace(-np.pi, np.pi, n1)
         polar_grid = np.linspace(0, np.pi, n2)
@@ -796,6 +800,16 @@ class VISUAL:
         import scipy.interpolate
         zz = scipy.interpolate.griddata((azim_array_sorted, polar_array_sorted), X[:,0], (xx, yy), method='cubic')
         ax7.scatter(xx, yy, c=zz, cmap=colormap)
+        ax7.set_xlabel(r"Azimuth position")
+        ax7.set_ylabel(r"Polar position")
+        
+        # Interpolated phase of reconstruction using first mode
+        uu = scipy.interpolate.griddata((azim_array_sorted, polar_array_sorted), U[:,0], (xx, yy), method='cubic')
+        ax8.scatter(xx, yy, c=uu, cmap=colormap)
+        ax8.set_xlabel(r"Azimuth position")
+        ax8.set_ylabel(r"Polar position")
+
+
 
         # ax.scatter(azim_array_sorted, fil_phases_sorted)
         # for fil in range(num_fil):
@@ -821,13 +835,14 @@ class VISUAL:
         # ax4.legend()
         
 
-        fig.savefig(f'fig/fil_svd_signal_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
-        fig2.savefig(f'fig/fil_svd_initial_snapshot_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
-        fig3.savefig(f'fig/fil_svd_eigenvalues_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
-        fig4.savefig(f'fig/fil_svd_spatial_modes_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
-        fig5.savefig(f'fig/fil_svd_temporal_modes_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
-        fig6.savefig(f'fig/fil_svd_phase_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
-        fig7.savefig(f'fig/fil_svd_interpolated_phase_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        fig.savefig(f'fig/fil_svd_signal_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+        fig2.savefig(f'fig/fil_svd_initial_snapshot_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+        fig3.savefig(f'fig/fil_svd_eigenvalues_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+        fig4.savefig(f'fig/fil_svd_spatial_modes_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+        fig5.savefig(f'fig/fil_svd_temporal_modes_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+        fig6.savefig(f'fig/fil_svd_phase_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+        fig7.savefig(f'fig/fil_svd_interpolated_phase_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+        fig8.savefig(f'fig/fil_svd_first_mode_reconstruction_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
     def timing(self):

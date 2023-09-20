@@ -16,7 +16,7 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20230814/"
+        self.dir = "data/expr_sims/20230920/"
         self.pars_list = {"nfil": [],
                      "nblob": [],
                      "ar": [],
@@ -27,7 +27,7 @@ class VISUAL:
         self.periodic = False
         self.big_sphere = True
 
-        self.plot_end_frame = 600000
+        self.plot_end_frame = 30000
         self.frames = 300
 
         self.Lx = 1000
@@ -798,13 +798,13 @@ class VISUAL:
         polar_grid = np.linspace(0, np.pi, n2)
         xx, yy = np.meshgrid(azim_grid, polar_grid)
         import scipy.interpolate
-        zz = scipy.interpolate.griddata((azim_array_sorted, polar_array_sorted), X[:,0], (xx, yy), method='cubic')
+        zz = scipy.interpolate.griddata((azim_array_sorted, polar_array_sorted), X[:,20], (xx, yy), method='cubic')
         ax7.scatter(xx, yy, c=zz, cmap=colormap)
         ax7.set_xlabel(r"Azimuth position")
         ax7.set_ylabel(r"Polar position")
         
         # Interpolated phase of reconstruction using first mode
-        uu = scipy.interpolate.griddata((azim_array_sorted, polar_array_sorted), U[:,0], (xx, yy), method='cubic')
+        uu = scipy.interpolate.griddata((azim_array_sorted, polar_array_sorted), U[:,1], (xx, yy), method='cubic')
         ax8.scatter(xx, yy, c=uu, cmap=colormap)
         ax8.set_xlabel(r"Azimuth position")
         ax8.set_ylabel(r"Polar position")
@@ -1252,7 +1252,7 @@ class VISUAL:
         colormap = 'Greys'
         from matplotlib.colors import Normalize
         from matplotlib.cm import ScalarMappable
-        vmin, vmax = 0, 140
+        vmin, vmax = np.min(speed_list), np.max(speed_list)
         norm = Normalize(vmin=vmin, vmax=vmax)
         sm = ScalarMappable(cmap=colormap, norm=norm)
         sm.set_array([])
@@ -1260,17 +1260,18 @@ class VISUAL:
         cbar.ax.set_yticks(np.linspace(vmin, vmax, 8))
         cbar.set_label(r"Speed")
 
-        ax2.scatter(self.pars_list['nfil'], self.pars_list['ar'], c=speed_list, cmap=colormap)
+        ax2.scatter(self.pars_list['nfil'], self.pars_list['ar'], c=speed_list, edgecolors='red', linewidths=0.1, cmap=colormap)
         ax2.set_xlabel("Nfil")
         ax2.set_ylabel("R/L")
-        plt.savefig(f'fig/multi_ciliate_speed_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
+        fig2.savefig(f'fig/multi_ciliate_speed_summary_heatmap.png', bbox_inches = 'tight', format='png')
+        fig2.savefig(f'fig/multi_ciliate_speed_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
 
         ax.scatter(nfil_list, speed_list, label=f"nfil={self.nfil} AR={self.ar}")
         ax.set_ylabel("Velocity")
         ax.set_xlabel("Number of filaments")
-        plt.tight_layout()
-        plt.savefig(f'fig/multi_ciliate_speed_summary.png', bbox_inches = 'tight', format='png')
-        plt.savefig(f'fig/multi_ciliate_speed_summary.pdf', bbox_inches = 'tight', format='pdf')
+        fig.tight_layout()
+        fig.savefig(f'fig/multi_ciliate_speed_summary.png', bbox_inches = 'tight', format='png')
+        fig.savefig(f'fig/multi_ciliate_speed_summary.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
     def summary_timing(self):
@@ -1317,10 +1318,16 @@ class VISUAL:
         # Plotting
         fig = plt.figure()
         ax = fig.add_subplot(1,1,1)
+        fig2 = plt.figure(dpi=300)
+        ax2 = fig2.add_subplot(1,1,1)
+        fig3 = plt.figure(dpi=300)
+        ax3 = fig3.add_subplot(1,1,1)
 
         nfil_list = np.array(self.pars_list['nfil'])
         ar_list = np.array(self.pars_list['ar'])
         dissipation_list = np.zeros(self.num_sim)
+        speed_list = np.zeros(self.num_sim)
+        efficiency_list = np.zeros(self.num_sim)
 
         for ind in range(self.num_sim):
             try:
@@ -1332,6 +1339,9 @@ class VISUAL:
                 blob_forces_f = open(self.simName + '_blob_forces.dat', "r")
                 blob_references_f = open(self.simName + '_blob_references.dat', "r")
                 body_vels_f = open(self.simName + '_body_vels.dat', "r")
+                
+                body_vel_array = np.zeros((self.frames, 6))
+                body_speed_array = np.zeros(self.frames)
 
                 dissipation_array = np.zeros(self.frames)
 
@@ -1359,18 +1369,60 @@ class VISUAL:
                         blob_vels = body_vels_tile[:, 0:3] + np.cross(body_vels_tile[:, 3:6], blob_references)
 
                         dissipation_array[i-self.plot_start_frame] = np.sum(blob_forces * blob_vels) + np.sum(seg_forces * seg_vels)
+                        body_vel_array[i-self.plot_start_frame] = body_vels
+                        body_speed_array[i-self.plot_start_frame] = np.sqrt(np.sum(body_vels[0:3]*body_vels[0:3], 0))
 
                 dissipation_list[ind] = np.mean(dissipation_array)
+                speed_list[ind] = np.mean(body_speed_array)
             except:
                 print("WARNING: " + self.simName + " not found.")
 
-        ax.scatter(nfil_list, dissipation_list, label=f"nfil={self.nfil} AR={self.ar}")
+        efficiency_list = 6*np.pi*1*speed_list**2/dissipation_list
+        print(repr(dissipation_list))
+        print(repr(efficiency_list))
 
+        # Dissipation
+        colormap = 'Greys'
+        from matplotlib.colors import Normalize
+        from matplotlib.cm import ScalarMappable
+        vmin, vmax = np.min(dissipation_list), np.max(dissipation_list)
+        norm = Normalize(vmin=vmin, vmax=vmax)
+        sm = ScalarMappable(cmap=colormap, norm=norm)
+        sm.set_array([])
+        cbar = fig2.colorbar(sm)
+        cbar.ax.set_yticks(np.linspace(vmin, vmax, 8))
+        cbar.set_label(r"Dissipation")
+
+        ax2.scatter(self.pars_list['nfil'], self.pars_list['ar'], c=dissipation_list, edgecolors='red', linewidths=0.1, cmap=colormap)
+        ax2.set_xlabel("Nfil")
+        ax2.set_ylabel("R/L")
+        fig2.savefig(f'fig/multi_ciliate_dissipation_summary_heatmap.png', bbox_inches = 'tight', format='png')
+        fig2.savefig(f'fig/multi_ciliate_dissipation_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
+
+        # Efficiency
+        vmin, vmax = np.min(efficiency_list), np.max(efficiency_list)
+        norm = Normalize(vmin=vmin, vmax=vmax)
+        sm = ScalarMappable(cmap=colormap, norm=norm)
+        sm.set_array([])
+        cbar = fig3.colorbar(sm)
+        cbar.ax.ticklabel_format(axis='both', style='sci', scilimits=(0,0))
+        cbar.ax.set_yticks(np.linspace(vmin, vmax, 8))
+        cbar.set_label(r"Efficiency")
+
+        ax3.scatter(self.pars_list['nfil'], self.pars_list['ar'], c=efficiency_list, edgecolors='red', linewidths=0.1, cmap=colormap)
+        ax3.set_xlabel("Nfil")
+        ax3.set_ylabel("R/L")
+        fig3.savefig(f'fig/multi_ciliate_efficiency_summary_heatmap.png', bbox_inches = 'tight', format='png')
+        fig3.savefig(f'fig/multi_ciliate_efficiency_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
+
+        ax.scatter(nfil_list, dissipation_list, label=f"nfil={self.nfil} AR={self.ar}")
         ax.set_ylabel("Dissipation")
         ax.set_xlabel("Number of filaments")
-        plt.tight_layout()
-        plt.savefig(f'fig/ciliate_dissipation_summary.png', bbox_inches = 'tight', format='png')
-        plt.savefig(f'fig/ciliate_dissipation_summary.pdf', bbox_inches = 'tight', format='pdf')
+        fig.tight_layout()
+        fig.savefig(f'fig/ciliate_dissipation_summary.png', bbox_inches = 'tight', format='png')
+        fig.savefig(f'fig/ciliate_dissipation_summary.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
+
+        
 
 #

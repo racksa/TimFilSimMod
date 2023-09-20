@@ -7,13 +7,13 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20230915/"
+        self.dir = "data/expr_sims/20230920/"
         self.pars_list = {"nfil": [],
                      "nblob": [],
                      "ar": [],
                      "spring_factor": []}
         
-        self.sweep_shape = (1, 1, 1, 10)
+        self.sweep_shape = (8, 8, 1, 1)
 
         self.num_sim = 0
 
@@ -45,10 +45,10 @@ class DRIVER:
             for j in range(self.sweep_shape[1]):
                 for k in range(self.sweep_shape[2]):
                     for l in range(self.sweep_shape[3]):
-                        nfil = int(64)
-                        nblob = int(500)
-                        ar = round(3, 2)
-                        spring_factor = round(l+1, 2)
+                        nfil = int(34*(i+1) )
+                        nblob = int(2000*(1.2**j))
+                        ar = round(3*(1.2**j), 2)
+                        spring_factor = round(2, 2)
 
                         self.pars_list["nfil"].append(nfil)
                         self.pars_list["nblob"].append(nblob)

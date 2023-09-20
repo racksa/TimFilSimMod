@@ -64,9 +64,11 @@ for i in range(selection, selection+1):
 # simName = simDir + 'test_fil_1600_1600_1600'
 # simDir = 'data/box_height_sim/1024fil_sims/'
 # simName = simDir + 'test_fil_3200_3200_1000'
+simDir = 'data/box_height_sim/100fil_sims/'
+simName = simDir + 'test_fil_1000_1000_125'
 
-simDir = 'data/rod_sims/2304rod_sims/'
-simName = simDir + 'test_rod_960_960_60'
+# simDir = 'data/rod_sims/2304rod_sims/'
+# simName = simDir + 'test_rod_960_960_60'
 # simName = simDir + 'test_rod_1920_1920_60'
 # simName = simDir + 'test_rod_3840_3840_60'
 
@@ -141,7 +143,7 @@ class VISUAL:
         self.frames = min(20000, sum(1 for line in open(simName + '_body_states.dat')))
 
         self.plot_end_frame = self.frames
-        self.plot_start_frame = max(0, self.plot_end_frame-30)
+        self.plot_start_frame = max(0, self.plot_end_frame-1200)
         self.plot_interval = 1
 
         self.plot_hist_frame = np.array([self.frames-1])

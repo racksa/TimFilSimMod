@@ -16,7 +16,7 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20230920/"
+        self.dir = "data/expr_sims/20230814/"
         self.pars_list = {"nfil": [],
                      "nblob": [],
                      "ar": [],
@@ -1217,7 +1217,6 @@ class VISUAL:
         # Plotting
         fig = plt.figure()
         ax = fig.add_subplot(1,1,1)
-
         fig2 = plt.figure()
         ax2 = fig2.add_subplot(1,1,1)
 
@@ -1232,7 +1231,6 @@ class VISUAL:
 
                 body_vels_f = open(self.simName + '_body_vels.dat', "r")
 
-                body_vel_array = np.zeros((self.frames, 6))
                 body_speed_array = np.zeros(self.frames)
 
                 for i in range(self.plot_end_frame):
@@ -1242,7 +1240,6 @@ class VISUAL:
                     if(i>=self.plot_start_frame):
                         body_vels = np.array(body_vels_str.split(), dtype=float)
 
-                        body_vel_array[i-self.plot_start_frame] = body_vels
                         body_speed_array[i-self.plot_start_frame] = np.sqrt(np.sum(body_vels[0:3]*body_vels[0:3], 0))
 
                 speed_list[ind] = np.mean(body_speed_array)
@@ -1322,11 +1319,14 @@ class VISUAL:
         ax2 = fig2.add_subplot(1,1,1)
         fig3 = plt.figure(dpi=300)
         ax3 = fig3.add_subplot(1,1,1)
+        fig4 = plt.figure(dpi=300)
+        ax4 = fig4.add_subplot(1,1,1)
 
         nfil_list = np.array(self.pars_list['nfil'])
         ar_list = np.array(self.pars_list['ar'])
-        dissipation_list = np.zeros(self.num_sim)
+        sphere_r_list = np.zeros(self.num_sim)
         speed_list = np.zeros(self.num_sim)
+        dissipation_list = np.zeros(self.num_sim)
         efficiency_list = np.zeros(self.num_sim)
 
         for ind in range(self.num_sim):
@@ -1342,7 +1342,6 @@ class VISUAL:
                 
                 body_vel_array = np.zeros((self.frames, 6))
                 body_speed_array = np.zeros(self.frames)
-
                 dissipation_array = np.zeros(self.frames)
 
                 blob_references_str = blob_references_f.readline()
@@ -1368,52 +1367,72 @@ class VISUAL:
                         body_vels_tile = np.tile(body_vels, (int(self.pars['NBLOB']), 1))
                         blob_vels = body_vels_tile[:, 0:3] + np.cross(body_vels_tile[:, 3:6], blob_references)
 
-                        dissipation_array[i-self.plot_start_frame] = np.sum(blob_forces * blob_vels) + np.sum(seg_forces * seg_vels)
-                        body_vel_array[i-self.plot_start_frame] = body_vels
                         body_speed_array[i-self.plot_start_frame] = np.sqrt(np.sum(body_vels[0:3]*body_vels[0:3], 0))
+                        dissipation_array[i-self.plot_start_frame] = np.sum(blob_forces * blob_vels) + np.sum(seg_forces * seg_vels)
 
+                speed_list[ind] = np.mean(body_speed_array) 
                 dissipation_list[ind] = np.mean(dissipation_array)
-                speed_list[ind] = np.mean(body_speed_array)
+                sphere_r_list[ind] = self.radius
             except:
                 print("WARNING: " + self.simName + " not found.")
 
-        efficiency_list = 6*np.pi*1*speed_list**2/dissipation_list
+        efficiency_list = 6*np.pi*sphere_r_list*speed_list**2/dissipation_list
+        print(repr(speed_list))
         print(repr(dissipation_list))
         print(repr(efficiency_list))
 
-        # Dissipation
         colormap = 'Greys'
         from matplotlib.colors import Normalize
         from matplotlib.cm import ScalarMappable
-        vmin, vmax = np.min(dissipation_list), np.max(dissipation_list)
+
+        # Speed
+        vmin, vmax = np.min(speed_list), np.max(speed_list)
         norm = Normalize(vmin=vmin, vmax=vmax)
         sm = ScalarMappable(cmap=colormap, norm=norm)
         sm.set_array([])
         cbar = fig2.colorbar(sm)
+        cbar.ax.ticklabel_format(axis='both', style='sci', scilimits=(0,0))
+        cbar.ax.set_yticks(np.linspace(vmin, vmax, 8))
+        cbar.set_label(r"Speed")
+
+        ax2.scatter(self.pars_list['nfil'], self.pars_list['ar'], c=speed_list, edgecolors='red', linewidths=0.1, cmap=colormap)
+        ax2.set_xlabel("Nfil")
+        ax2.set_ylabel("R/L")
+        fig2.savefig(f'fig/multi_ciliate_speed_summary_heatmap.png', bbox_inches = 'tight', format='png')
+        fig2.savefig(f'fig/multi_ciliate_speed_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
+
+        # Dissipation
+        vmin, vmax = np.min(dissipation_list), np.max(dissipation_list)
+        norm = Normalize(vmin=vmin, vmax=vmax)
+        sm = ScalarMappable(cmap=colormap, norm=norm)
+        sm.set_array([])
+        cbar = fig3.colorbar(sm)
         cbar.ax.set_yticks(np.linspace(vmin, vmax, 8))
         cbar.set_label(r"Dissipation")
 
-        ax2.scatter(self.pars_list['nfil'], self.pars_list['ar'], c=dissipation_list, edgecolors='red', linewidths=0.1, cmap=colormap)
-        ax2.set_xlabel("Nfil")
-        ax2.set_ylabel("R/L")
-        fig2.savefig(f'fig/multi_ciliate_dissipation_summary_heatmap.png', bbox_inches = 'tight', format='png')
-        fig2.savefig(f'fig/multi_ciliate_dissipation_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
+        ax3.scatter(self.pars_list['nfil'], self.pars_list['ar'], c=dissipation_list, edgecolors='red', linewidths=0.1, cmap=colormap)
+        ax3.set_xlabel("Nfil")
+        ax3.set_ylabel("R/L")
+        fig3.savefig(f'fig/multi_ciliate_dissipation_summary_heatmap.png', bbox_inches = 'tight', format='png')
+        fig3.savefig(f'fig/multi_ciliate_dissipation_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
 
         # Efficiency
         vmin, vmax = np.min(efficiency_list), np.max(efficiency_list)
         norm = Normalize(vmin=vmin, vmax=vmax)
         sm = ScalarMappable(cmap=colormap, norm=norm)
         sm.set_array([])
-        cbar = fig3.colorbar(sm)
+        cbar = fig4.colorbar(sm)
         cbar.ax.ticklabel_format(axis='both', style='sci', scilimits=(0,0))
         cbar.ax.set_yticks(np.linspace(vmin, vmax, 8))
         cbar.set_label(r"Efficiency")
 
-        ax3.scatter(self.pars_list['nfil'], self.pars_list['ar'], c=efficiency_list, edgecolors='red', linewidths=0.1, cmap=colormap)
-        ax3.set_xlabel("Nfil")
-        ax3.set_ylabel("R/L")
-        fig3.savefig(f'fig/multi_ciliate_efficiency_summary_heatmap.png', bbox_inches = 'tight', format='png')
-        fig3.savefig(f'fig/multi_ciliate_efficiency_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
+        ax4.scatter(self.pars_list['nfil'], self.pars_list['ar'], c=efficiency_list, edgecolors='red', linewidths=0.1, cmap=colormap)
+        ax4.set_xlabel("Nfil")
+        ax4.set_ylabel("R/L")
+        fig4.savefig(f'fig/multi_ciliate_efficiency_summary_heatmap.png', bbox_inches = 'tight', format='png')
+        fig4.savefig(f'fig/multi_ciliate_efficiency_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
+        
+
 
         ax.scatter(nfil_list, dissipation_list, label=f"nfil={self.nfil} AR={self.ar}")
         ax.set_ylabel("Dissipation")

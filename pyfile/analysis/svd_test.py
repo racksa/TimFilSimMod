@@ -20,7 +20,7 @@ def func2(x, t):
 
 for i in range(m):
     for j in range(n):
-        X1[i][j] = func1(x_array[i], t_array[j]) + 4*random.random()
+        X1[i][j] = func1(x_array[i], t_array[j]) + 0*random.random()
         X2[i][j] = func2(x_array[i], t_array[j])
 
 X = X1 #+ X2

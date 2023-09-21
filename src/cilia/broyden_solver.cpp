@@ -40,17 +40,7 @@ broyden_solver::broyden_solver(){
       const int per_body = 6*NFIL*NSEG + 6;
 
     #endif
-
-    // Start-of-step part
-    // #pragma omp parallel
-    // {
-    //   int swimmer_per_thread = NSWIM/omp_get_num_threads();
-    //   for(int i = 0; i < swimmer_per_thread; i++){
-    //     int n = swimmer_per_thread*omp_get_thread_num() + i;
-    //     update.set_block(n*per_body, per_body, swimmers[n].jacobian_inv_mult(error.get_block(n*per_body, per_body), nt));
-    //   }
-    // }
-
+    
     for (int n = 0; n < NSWIM; n++){
 
       update.set_block(n*per_body, per_body, swimmers[n].jacobian_inv_mult(error.get_block(n*per_body, per_body), nt));

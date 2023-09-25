@@ -16,7 +16,7 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20230814/"
+        self.dir = "data/expr_sims/20230922/"
         self.pars_list = {"nfil": [],
                      "nblob": [],
                      "ar": [],
@@ -65,8 +65,10 @@ class VISUAL:
         try:
             sim.read(self.dir+"rules.ini")
             for key, value in self.pars_list.items():
-                self.pars_list[key] = [float(x) for x in sim["Parameter list"][key].split(', ')]
+                self.pars_list[key] = [float(x) for x in sim["Parameter list"][key].split(', ')][::4]
             self.num_sim = len(self.pars_list["nfil"])
+            print(self.pars_list)
+            
         except:
             print("WARNING: " + self.dir + "rules.ini not found.")
 
@@ -938,15 +940,6 @@ class VISUAL:
                 except:
                     print("WARNING: " + self.simName + " not found.")
 
-        # from matplotlib.colors import Normalize
-        # from matplotlib.cm import ScalarMappable
-        # norm = Normalize(vmin=0, vmax=2*np.pi)
-        # sm = ScalarMappable(cmap=colormap, norm=norm)
-        # sm.set_array([])
-        # cbar = plt.colorbar(sm)
-        # cbar.ax.set_yticks(np.linspace(0, 2*np.pi, 7), ['0', 'π/3', '2π/3', 'π', '4π/3', '5π/3', '2π'])
-        # cbar.set_label(r"phase")
-
         plt.tight_layout()
         plt.savefig(f'fig/ciliate_multi_phase.png', bbox_inches = 'tight', format='png')
         plt.savefig(f'fig/ciliate_multi_phase.pdf', bbox_inches = 'tight', format='pdf')
@@ -1219,10 +1212,14 @@ class VISUAL:
         ax = fig.add_subplot(1,1,1)
         fig2 = plt.figure()
         ax2 = fig2.add_subplot(1,1,1)
+        fig3 = plt.figure()
+        ax3 = fig3.add_subplot(1,1,1)
 
         nfil_list = np.array(self.pars_list['nfil'])
         ar_list = np.array(self.pars_list['ar'])
+        sphere_r_list = np.zeros(self.num_sim)
         speed_list = np.zeros(self.num_sim)
+        angular_speed_list = np.zeros(self.num_sim)
 
         for ind in range(self.num_sim):
             try:
@@ -1232,6 +1229,7 @@ class VISUAL:
                 body_vels_f = open(self.simName + '_body_vels.dat', "r")
 
                 body_speed_array = np.zeros(self.frames)
+                body_angular_speed_array = np.zeros(self.frames)
 
                 for i in range(self.plot_end_frame):
                     print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
@@ -1241,8 +1239,11 @@ class VISUAL:
                         body_vels = np.array(body_vels_str.split(), dtype=float)
 
                         body_speed_array[i-self.plot_start_frame] = np.sqrt(np.sum(body_vels[0:3]*body_vels[0:3], 0))
+                        body_angular_speed_array[i-self.plot_start_frame] = np.sqrt(np.sum(body_vels[3:6]*body_vels[3:6], 0))
 
                 speed_list[ind] = np.mean(body_speed_array)
+                angular_speed_list[ind] = np.mean(body_angular_speed_array)
+                sphere_r_list[ind] = self.radius
             except:
                 print("WARNING: " + self.simName + " not found.")
         
@@ -1253,15 +1254,30 @@ class VISUAL:
         norm = Normalize(vmin=vmin, vmax=vmax)
         sm = ScalarMappable(cmap=colormap, norm=norm)
         sm.set_array([])
-        cbar = plt.colorbar(sm)
+        cbar = fig2.colorbar(sm)
         cbar.ax.set_yticks(np.linspace(vmin, vmax, 8))
         cbar.set_label(r"Speed")
 
-        ax2.scatter(self.pars_list['nfil'], self.pars_list['ar'], c=speed_list, edgecolors='red', linewidths=0.1, cmap=colormap)
+        ax2.scatter(self.pars_list['nfil'], self.pars_list['ar'], s=100, c=speed_list, edgecolors='red', linewidths=0.1, cmap=colormap)
         ax2.set_xlabel("Nfil")
         ax2.set_ylabel("R/L")
         fig2.savefig(f'fig/multi_ciliate_speed_summary_heatmap.png', bbox_inches = 'tight', format='png')
         fig2.savefig(f'fig/multi_ciliate_speed_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
+
+        vmin, vmax = np.min(angular_speed_list), np.max(angular_speed_list)
+        norm = Normalize(vmin=vmin, vmax=vmax)
+        sm = ScalarMappable(cmap=colormap, norm=norm)
+        sm.set_array([])
+        cbar = fig3.colorbar(sm)
+        cbar.ax.set_yticks(np.linspace(vmin, vmax, 8))
+        cbar.set_label(r"Angular speed")
+
+        ax3.scatter(self.pars_list['nfil'], self.pars_list['ar'], s=100, c=angular_speed_list, edgecolors='red', linewidths=0.1, cmap=colormap)
+        ax3.set_xlabel("Nfil")
+        ax3.set_ylabel("R/L")
+        fig3.savefig(f'fig/multi_ciliate_angular_speed_summary_heatmap.png', bbox_inches = 'tight', format='png')
+        fig3.savefig(f'fig/multi_ciliate_angular_speed_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
+        
 
         ax.scatter(nfil_list, speed_list, label=f"nfil={self.nfil} AR={self.ar}")
         ax.set_ylabel("Velocity")
@@ -1321,11 +1337,14 @@ class VISUAL:
         ax3 = fig3.add_subplot(1,1,1)
         fig4 = plt.figure(dpi=300)
         ax4 = fig4.add_subplot(1,1,1)
+        fig5 = plt.figure(dpi=300)
+        ax5 = fig5.add_subplot(1,1,1)
 
         nfil_list = np.array(self.pars_list['nfil'])
         ar_list = np.array(self.pars_list['ar'])
         sphere_r_list = np.zeros(self.num_sim)
         speed_list = np.zeros(self.num_sim)
+        angular_speed_list = np.zeros(self.num_sim)
         dissipation_list = np.zeros(self.num_sim)
         efficiency_list = np.zeros(self.num_sim)
 
@@ -1340,8 +1359,8 @@ class VISUAL:
                 blob_references_f = open(self.simName + '_blob_references.dat', "r")
                 body_vels_f = open(self.simName + '_body_vels.dat', "r")
                 
-                body_vel_array = np.zeros((self.frames, 6))
                 body_speed_array = np.zeros(self.frames)
+                body_angular_speed_array = np.zeros(self.frames)
                 dissipation_array = np.zeros(self.frames)
 
                 blob_references_str = blob_references_f.readline()
@@ -1368,9 +1387,11 @@ class VISUAL:
                         blob_vels = body_vels_tile[:, 0:3] + np.cross(body_vels_tile[:, 3:6], blob_references)
 
                         body_speed_array[i-self.plot_start_frame] = np.sqrt(np.sum(body_vels[0:3]*body_vels[0:3], 0))
+                        body_angular_speed_array[i-self.plot_start_frame] = np.sqrt(np.sum(body_vels[3:6]*body_vels[3:6], 0))
                         dissipation_array[i-self.plot_start_frame] = np.sum(blob_forces * blob_vels) + np.sum(seg_forces * seg_vels)
 
-                speed_list[ind] = np.mean(body_speed_array) 
+                speed_list[ind] = np.mean(body_speed_array)
+                angular_speed_list[ind] = np.mean(body_angular_speed_array)
                 dissipation_list[ind] = np.mean(dissipation_array)
                 sphere_r_list[ind] = self.radius
             except:
@@ -1395,42 +1416,57 @@ class VISUAL:
         cbar.ax.set_yticks(np.linspace(vmin, vmax, 8))
         cbar.set_label(r"Speed")
 
-        ax2.scatter(self.pars_list['nfil'], self.pars_list['ar'], c=speed_list, edgecolors='red', linewidths=0.1, cmap=colormap)
+        ax2.scatter(self.pars_list['nfil'], self.pars_list['ar'], s=100, c=speed_list, edgecolors='red', linewidths=0.1, cmap=colormap)
         ax2.set_xlabel("Nfil")
         ax2.set_ylabel("R/L")
         fig2.savefig(f'fig/multi_ciliate_speed_summary_heatmap.png', bbox_inches = 'tight', format='png')
         fig2.savefig(f'fig/multi_ciliate_speed_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
+
+        # Angular speed
+        vmin, vmax = np.min(angular_speed_list), np.max(angular_speed_list)
+        norm = Normalize(vmin=vmin, vmax=vmax)
+        sm = ScalarMappable(cmap=colormap, norm=norm)
+        sm.set_array([])
+        cbar = fig3.colorbar(sm)
+        cbar.ax.set_yticks(np.linspace(vmin, vmax, 8))
+        cbar.set_label(r"Angular speed")
+
+        ax3.scatter(self.pars_list['nfil'], self.pars_list['ar'], s=100, c=angular_speed_list, edgecolors='red', linewidths=0.1, cmap=colormap)
+        ax3.set_xlabel("Nfil")
+        ax3.set_ylabel("R/L")
+        fig3.savefig(f'fig/multi_ciliate_angular_speed_summary_heatmap.png', bbox_inches = 'tight', format='png')
+        fig3.savefig(f'fig/multi_ciliate_angular_speed_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
 
         # Dissipation
         vmin, vmax = np.min(dissipation_list), np.max(dissipation_list)
         norm = Normalize(vmin=vmin, vmax=vmax)
         sm = ScalarMappable(cmap=colormap, norm=norm)
         sm.set_array([])
-        cbar = fig3.colorbar(sm)
+        cbar = fig4.colorbar(sm)
         cbar.ax.set_yticks(np.linspace(vmin, vmax, 8))
         cbar.set_label(r"Dissipation")
 
-        ax3.scatter(self.pars_list['nfil'], self.pars_list['ar'], c=dissipation_list, edgecolors='red', linewidths=0.1, cmap=colormap)
-        ax3.set_xlabel("Nfil")
-        ax3.set_ylabel("R/L")
-        fig3.savefig(f'fig/multi_ciliate_dissipation_summary_heatmap.png', bbox_inches = 'tight', format='png')
-        fig3.savefig(f'fig/multi_ciliate_dissipation_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
+        ax4.scatter(self.pars_list['nfil'], self.pars_list['ar'], s=100, c=dissipation_list, edgecolors='red', linewidths=0.1, cmap=colormap)
+        ax4.set_xlabel("Nfil")
+        ax4.set_ylabel("R/L")
+        fig4.savefig(f'fig/multi_ciliate_dissipation_summary_heatmap.png', bbox_inches = 'tight', format='png')
+        fig4.savefig(f'fig/multi_ciliate_dissipation_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
 
         # Efficiency
         vmin, vmax = np.min(efficiency_list), np.max(efficiency_list)
         norm = Normalize(vmin=vmin, vmax=vmax)
         sm = ScalarMappable(cmap=colormap, norm=norm)
         sm.set_array([])
-        cbar = fig4.colorbar(sm)
+        cbar = fig5.colorbar(sm)
         cbar.ax.ticklabel_format(axis='both', style='sci', scilimits=(0,0))
         cbar.ax.set_yticks(np.linspace(vmin, vmax, 8))
         cbar.set_label(r"Efficiency")
 
-        ax4.scatter(self.pars_list['nfil'], self.pars_list['ar'], c=efficiency_list, edgecolors='red', linewidths=0.1, cmap=colormap)
-        ax4.set_xlabel("Nfil")
-        ax4.set_ylabel("R/L")
-        fig4.savefig(f'fig/multi_ciliate_efficiency_summary_heatmap.png', bbox_inches = 'tight', format='png')
-        fig4.savefig(f'fig/multi_ciliate_efficiency_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
+        ax5.scatter(self.pars_list['nfil'], self.pars_list['ar'], s=100, c=efficiency_list, edgecolors='red', linewidths=0.1, cmap=colormap)
+        ax5.set_xlabel("Nfil")
+        ax5.set_ylabel("R/L")
+        fig5.savefig(f'fig/multi_ciliate_efficiency_summary_heatmap.png', bbox_inches = 'tight', format='png')
+        fig5.savefig(f'fig/multi_ciliate_efficiency_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
         
 
 

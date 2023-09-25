@@ -32,7 +32,7 @@ extern std::string SIMULATION_TETHERLAM_NAME;
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Simulation type
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define CILIA_TYPE 0
+#define CILIA_TYPE 3
 // Valid options:
 // 0 = Instability-driven cilia. This choice has some sub-types (see below).
 // 1 = Geometrically-switching cilia (partially implemented)
@@ -106,7 +106,7 @@ extern std::string SIMULATION_TETHERLAM_NAME;
 
 #endif
 
-#define BODY_OR_SURFACE_TYPE 4
+#define BODY_OR_SURFACE_TYPE 2
 // Valid options:
 // 0 = An infinite plane wall at z = 0. This choice has some sub-types (see below).
 // 1 = Deformed planes with 2 principal curvatures (partially implemented)
@@ -246,7 +246,7 @@ extern int NTOTAL;
 #define MAX_BROYDEN_ITER 400 // Maximum number of Broyden's method iterations per time-step.
 #define TOL 1e-4 // Tolerance to be reached by the Broyden's method solve.
 
-#define SOLVER_TYPE 0
+#define SOLVER_TYPE 1
 // Valid options:
 // 0: Use Broyden's method for absolutely everything. When there is a rigid body with forces (and velocities if they're not prescribed) to solve for,
 //    the associated linear system is embedded in the wider Broyden's solve, rather than being solved for the current iterate at each iteration.
@@ -267,7 +267,7 @@ extern int NTOTAL;
 
 #endif
 
-#define TOTAL_TIME_STEPS (1000*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
+#define TOTAL_TIME_STEPS (300*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
 #define NUM_EULER_STEPS 1 // Number of time-steps to use backwards-Euler before switching to BDF2.
 
 #if CILIA_TYPE==1

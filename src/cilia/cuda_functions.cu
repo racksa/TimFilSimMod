@@ -396,11 +396,11 @@ __global__ void Mss_mult(Real * __restrict__ V, const Real *const __restrict__ F
 
     }
 
-    for (int j_start = 0; j_start < NSWIM*NFIL_d*NSEG; j_start += THREADS_PER_BLOCK){
+    for (int j_start = 0; j_start < NSWIM_d*NFIL_d*NSEG_d; j_start += THREADS_PER_BLOCK){
 
       const int j_to_read = j_start + threadIdx.x;
 
-      if (j_to_read < NSWIM*NFIL_d*NSEG){
+      if (j_to_read < NSWIM_d*NFIL_d*NSEG_d){
 
         x_shared[threadIdx.x] = X[3*j_to_read];
         y_shared[threadIdx.x] = X[3*j_to_read + 1];
@@ -423,7 +423,7 @@ __global__ void Mss_mult(Real * __restrict__ V, const Real *const __restrict__ F
 
       if (i < (start_seg + num_segs)){
 
-        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NSWIM*NFIL_d*NSEG); j++){
+        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NSWIM_d*NFIL_d*NSEG_d); j++){
 
           Real f[6];
           f[0] = fx_shared[j];
@@ -501,11 +501,11 @@ __global__ void Mbb_mult(Real * __restrict__ V, const Real *const __restrict__ F
 
     }
 
-    for (int j_start = 0; j_start < NSWIM*NBLOB_d; j_start += THREADS_PER_BLOCK){
+    for (int j_start = 0; j_start < NSWIM_d*NBLOB_d; j_start += THREADS_PER_BLOCK){
 
       const int j_to_read = j_start + threadIdx.x;
 
-      if (j_to_read < NSWIM*NBLOB_d){
+      if (j_to_read < NSWIM_d*NBLOB_d){
 
         x_shared[threadIdx.x] = X[3*j_to_read];
         y_shared[threadIdx.x] = X[3*j_to_read + 1];
@@ -520,7 +520,7 @@ __global__ void Mbb_mult(Real * __restrict__ V, const Real *const __restrict__ F
 
       if (i < (start_blob + num_blobs)){
 
-        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NSWIM*NBLOB_d); j++){
+        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NSWIM_d*NBLOB_d); j++){
 
           const Real f[3] = {fx_shared[j], fy_shared[j], fz_shared[j]};
 
@@ -577,11 +577,11 @@ __global__ void Msb_mult(Real * __restrict__ V, const Real *const __restrict__ F
 
     }
 
-    for (int j_start = 0; j_start < NSWIM*NBLOB_d; j_start += THREADS_PER_BLOCK){
+    for (int j_start = 0; j_start < NSWIM_d*NBLOB_d; j_start += THREADS_PER_BLOCK){
 
       const int j_to_read = j_start + threadIdx.x;
 
-      if (j_to_read < NSWIM*NBLOB_d){
+      if (j_to_read < NSWIM_d*NBLOB_d){
 
         x_shared[threadIdx.x] = Xb[3*j_to_read];
         y_shared[threadIdx.x] = Xb[3*j_to_read + 1];
@@ -596,7 +596,7 @@ __global__ void Msb_mult(Real * __restrict__ V, const Real *const __restrict__ F
 
       if (i < (start_seg + num_segs)){
 
-        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NSWIM*NBLOB_d); j++){
+        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NSWIM_d*NBLOB_d); j++){
 
           const Real f[3] = {fx_shared[j], fy_shared[j], fz_shared[j]};
 
@@ -672,11 +672,11 @@ __global__ void Mbs_mult(Real * __restrict__ V, const Real *const __restrict__ F
 
     }
 
-    for (int j_start = 0; j_start < NSWIM*NFIL_d*NSEG; j_start += THREADS_PER_BLOCK){
+    for (int j_start = 0; j_start < NSWIM_d*NFIL_d*NSEG_d; j_start += THREADS_PER_BLOCK){
 
       const int j_to_read = j_start + threadIdx.x;
 
-      if (j_to_read < NSWIM*NFIL_d*NSEG){
+      if (j_to_read < NSWIM_d*NFIL_d*NSEG_d){
 
         x_shared[threadIdx.x] = Xs[3*j_to_read];
         y_shared[threadIdx.x] = Xs[3*j_to_read + 1];
@@ -699,7 +699,7 @@ __global__ void Mbs_mult(Real * __restrict__ V, const Real *const __restrict__ F
 
       if (i < (start_blob + num_blobs)){
 
-        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NSWIM*NFIL_d*NSEG); j++){
+        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NSWIM_d*NFIL_d*NSEG_d); j++){
 
           Real f[6];
           f[0] = fx_shared[j];
@@ -794,11 +794,11 @@ __global__ void Mbs_mult_add(Real * __restrict__ V, const Real *const __restrict
 
     }
 
-    for (int j_start = 0; j_start < NSWIM*NFIL_d*NSEG; j_start += THREADS_PER_BLOCK){
+    for (int j_start = 0; j_start < NSWIM_d*NFIL_d*NSEG_d; j_start += THREADS_PER_BLOCK){
 
       const int j_to_read = j_start + threadIdx.x;
 
-      if (j_to_read < NSWIM*NFIL_d*NSEG){
+      if (j_to_read < NSWIM_d*NFIL_d*NSEG_d){
 
         x_shared[threadIdx.x] = Xs[3*j_to_read];
         y_shared[threadIdx.x] = Xs[3*j_to_read + 1];
@@ -821,7 +821,7 @@ __global__ void Mbs_mult_add(Real * __restrict__ V, const Real *const __restrict
 
       if (i < (start_blob + num_blobs)){
 
-        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NSWIM*NFIL_d*NSEG); j++){
+        for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NSWIM_d*NFIL_d*NSEG_d); j++){
 
           Real f[6];
           f[0] = fx_shared[j];
@@ -996,7 +996,7 @@ __global__ void reset_mean_fil_posns(Real *Z){
   const int index = threadIdx.x + blockIdx.x*blockDim.x;
   const int stride = blockDim.x*gridDim.x;
 
-  for (int i = index; i < 3*NSWIM*NFIL_d; i += stride){
+  for (int i = index; i < 3*NSWIM_d*NFIL_d; i += stride){
 
       Z[i] = 0.0;
 
@@ -1011,13 +1011,13 @@ __global__ void write_mean_fil_posns(Real * __restrict__ Z, const Real *const __
   const int index = threadIdx.x + blockIdx.x*blockDim.x;
   const int stride = blockDim.x*gridDim.x;
 
-  for (int i = index; i < NSWIM*NFIL_d*NSEG; i += stride){
+  for (int i = index; i < NSWIM_d*NFIL_d*NSEG_d; i += stride){
 
-      const int fil_id = i/NSEG;
+      const int fil_id = i/NSEG_d;
 
-      atomicAdd_arch_indep(&Z[3*fil_id], X[3*i]/Real(NSEG));
-      atomicAdd_arch_indep(&Z[3*fil_id + 1], X[3*i + 1]/Real(NSEG));
-      atomicAdd_arch_indep(&Z[3*fil_id + 2], X[3*i + 2]/Real(NSEG));
+      atomicAdd_arch_indep(&Z[3*fil_id], X[3*i]/Real(NSEG_d));
+      atomicAdd_arch_indep(&Z[3*fil_id + 1], X[3*i + 1]/Real(NSEG_d));
+      atomicAdd_arch_indep(&Z[3*fil_id + 2], X[3*i + 2]/Real(NSEG_d));
 
   }
 
@@ -1030,7 +1030,7 @@ __global__ void reset_mean_fil_force_and_moment(Real * __restrict__ F, Real * __
   const int index = threadIdx.x + blockIdx.x*blockDim.x;
   const int stride = blockDim.x*gridDim.x;
 
-  for (int i = index; i < 3*NSWIM*NFIL_d; i += stride){
+  for (int i = index; i < 3*NSWIM_d*NFIL_d; i += stride){
 
       F[i] = 0.0;
 
@@ -1050,9 +1050,9 @@ __global__ void find_total_fil_force_and_first_moment(Real * __restrict__ F, Rea
   const int index = threadIdx.x + blockIdx.x*blockDim.x;
   const int stride = blockDim.x*gridDim.x;
 
-  for (int i = index; i < NSWIM*NFIL_d*NSEG; i += stride){
+  for (int i = index; i < NSWIM_d*NFIL_d*NSEG_d; i += stride){
 
-    const int fil_id = i/NSEG;
+    const int fil_id = i/NSEG_d;
 
     Real f[3], r[3];
 
@@ -1137,19 +1137,19 @@ __global__ void Msf_mult(Real *V, const Real *const F, const Real *const Ftot, c
   // This kernel won't make use of shared memory etc. to start with and I'll optimise it later.
   for (int i = (start_seg + index); i < (start_seg + num_segs); i += stride){
 
-    const int fil_id = i/NSEG;
+    const int fil_id = i/NSEG_d;
 
     Real v[3] = {0.0, 0.0, 0.0};
     Real xi = X[3*i], yi = X[3*i + 1], zi = X[3*i + 2];
 
-    for (int j = 0; j < NSWIM*NFIL_d; j++){
+    for (int j = 0; j < NSWIM_d*NFIL_d; j++){
 
       if (fil_id == j){
 
         // In the same filament, we do normal RPY interactions.
-        for (int k = 0; k < NSEG; k++){
+        for (int k = 0; k < NSEG_d; k++){
 
-          const int jj = k + j*NSEG; // Global ID of other segment.
+          const int jj = k + j*NSEG_d; // Global ID of other segment.
 
           const Real f[3] = {F[6*jj], F[6*jj + 1], F[6*jj + 2]};
 
@@ -1266,14 +1266,14 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
         yi = x_segs[3*i + 1];
         zi = x_segs[3*i + 2];
 
-        fili = i/NSEG;
+        fili = i/NSEG_d;
 
         #if INFINITE_PLANE_WALL
 
           if (zi < BASE_HEIGHT_ABOVE_SURFACE){
 
             fz = fmin(1.0, 1.0 - (zi - RSEG)/(0.5*DL - RSEG)); // max magnitude one radius from wall
-            fz *= REPULSIVE_FORCE_FACTOR*END_FORCE_MAGNITUDE*fz*fz*fz; // 4th power
+            fz *= REPULSIVE_FORCE_FACTOR*END_FORCE_MAGNITUDE_d*fz*fz*fz; // 4th power
 
           }
 
@@ -1285,7 +1285,7 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
 
         const int j_to_read = j_start + threadIdx.x;
 
-        if (j_to_read < NSWIM*NFIL_d*NSEG){
+        if (j_to_read < NSWIM_d*NFIL_d*NSEG_d){
 
           x_shared[threadIdx.x] = x_segs[3*j_to_read];
           y_shared[threadIdx.x] = x_segs[3*j_to_read + 1];
@@ -1293,9 +1293,9 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
 
         } else if (j_to_read < NTOTAL_d){
 
-          x_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL_d*NSEG)];
-          y_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL_d*NSEG) + 1];
-          z_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL_d*NSEG) + 2];
+          x_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM_d*NFIL_d*NSEG_d)];
+          y_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM_d*NFIL_d*NSEG_d) + 1];
+          z_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM_d*NFIL_d*NSEG_d) + 2];
 
         }
 
@@ -1305,7 +1305,7 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
 
           for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NTOTAL_d); j++){
 
-            const Real a_sum = (j_start + j < NSWIM*NFIL_d*NSEG) ? 2.0*RSEG : RSEG + RBLOB;
+            const Real a_sum = (j_start + j < NSWIM_d*NFIL_d*NSEG_d) ? 2.0*RSEG : RSEG + RBLOB;
             const Real chi_fac = 10.0/a_sum; // 1.0/(1.1*a_sum - a_sum)
 
             const Real dx = xi - x_shared[j];
@@ -1314,12 +1314,12 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
 
             const Real dist = sqrt(dx*dx + dy*dy + dz*dz);
 
-            int filj = (j_start + j)/NSEG;
+            int filj = (j_start + j)/NSEG_d;
 
             if (!(fili==filj && abs(i -(j_start + j))<=1) && (dist < 1.1*a_sum)){
 
               Real fac = fmin(1.0, 1.0 - chi_fac*(dist - a_sum));
-              fac *= REPULSIVE_FORCE_FACTOR*END_FORCE_MAGNITUDE*fac*fac*fac;
+              fac *= REPULSIVE_FORCE_FACTOR*END_FORCE_MAGNITUDE_d*fac*fac*fac;
 
               const Real dm1 = 1.0/dist;
 
@@ -1367,7 +1367,7 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
 
           const int j_to_read = j_start + threadIdx.x;
 
-          if (j_to_read < NSWIM*NFIL_d*NSEG){
+          if (j_to_read < NSWIM_d*NFIL_d*NSEG_d){
 
             x_shared[threadIdx.x] = x_segs[3*j_to_read];
             y_shared[threadIdx.x] = x_segs[3*j_to_read + 1];
@@ -1375,9 +1375,9 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
 
           } else if (j_to_read < NTOTAL_d){
 
-            x_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL_d*NSEG)];
-            y_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL_d*NSEG) + 1];
-            z_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM*NFIL_d*NSEG) + 2];
+            x_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM_d*NFIL_d*NSEG_d)];
+            y_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM_d*NFIL_d*NSEG_d) + 1];
+            z_shared[threadIdx.x] = x_blobs[3*(j_to_read - NSWIM_d*NFIL_d*NSEG_d) + 2];
 
           }
 
@@ -1387,7 +1387,7 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
 
             for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < NTOTAL_d); j++){
 
-              const Real a_sum = (j_start + j < NSWIM*NFIL_d*NSEG) ? RBLOB + RSEG : 2.0*RBLOB;
+              const Real a_sum = (j_start + j < NSWIM_d*NFIL_d*NSEG_d) ? RBLOB + RSEG : 2.0*RBLOB;
               const Real chi_fac = 10.0/a_sum; // 1.0/(1.1*a_sum - a_sum)
 
               const Real dx = xi - x_shared[j];
@@ -1396,10 +1396,10 @@ __global__ void barrier_forces(Real * __restrict__ f_segs, Real * __restrict__ f
 
               const Real dist = sqrt(dx*dx + dy*dy + dz*dz);
 
-              if (((i + NSWIM*NFIL_d*NSEG) != (j_start + j)) && (dist < 1.1*a_sum)){
+              if (((i + NSWIM_d*NFIL_d*NSEG_d) != (j_start + j)) && (dist < 1.1*a_sum)){
 
                 Real fac = fmin(1.0, 1.0 - chi_fac*(dist - a_sum));
-                fac *= REPULSIVE_FORCE_FACTOR*END_FORCE_MAGNITUDE*fac*fac*fac;
+                fac *= REPULSIVE_FORCE_FACTOR*END_FORCE_MAGNITUDE_d*fac*fac*fac;
 
                 const Real dm1 = 1.0/dist;
 
@@ -1482,7 +1482,7 @@ __global__ void periodic_barrier_forces(Real * __restrict__ f_segs,
           box_images(yj, boxsize);
           box_images(zj, boxsize);
 
-          const Real a_sum = (j < NSWIM*NFIL_d*NSEG) ? RBLOB + RSEG : 2.0*RBLOB;
+          const Real a_sum = (j < NSWIM_d*NFIL_d*NSEG_d) ? RBLOB + RSEG : 2.0*RBLOB;
           const Real chi_fac = 10.0/a_sum; // 1.0/(1.1*a_sum - a_sum)
 
           Real dx = xi - xj;
@@ -1495,10 +1495,10 @@ __global__ void periodic_barrier_forces(Real * __restrict__ f_segs,
 
           const Real dist = sqrt(dx*dx + dy*dy + dz*dz);
 
-          if (((i + NSWIM*NFIL_d*NSEG) != j) && (dist < 1.1*a_sum)){
+          if (((i + NSWIM_d*NFIL_d*NSEG_d) != j) && (dist < 1.1*a_sum)){
 
             Real fac = fmin(1.0, 1.0 - chi_fac*(dist - a_sum));
-            fac *= REPULSIVE_FORCE_FACTOR*END_FORCE_MAGNITUDE*fac*fac*fac;
+            fac *= REPULSIVE_FORCE_FACTOR*END_FORCE_MAGNITUDE_d*fac*fac*fac;
 
             const Real dm1 = 1.0/dist;
 
@@ -1531,11 +1531,14 @@ void box_images(Real &x, Real box_size){
 }
 
 __global__
-void sync_var(int nfil, int nblob){
-  
+void sync_var(int nswim, int nseg, int nfil, int nblob, int end_force_magnitude){
+
+  NSWIM_d = nswim;
+  NSEG_d = nseg;
   NFIL_d = nfil;
   NBLOB_d = nblob;
-  NTOTAL_d = (NSWIM*(nfil*NSEG + nblob));
+  NTOTAL_d = (nswim*(nfil*nseg + nblob));
+  END_FORCE_MAGNITUDE_d = end_force_magnitude;
 
   printf("%d\n", NTOTAL_d);
 

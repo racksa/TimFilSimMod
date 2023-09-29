@@ -16,8 +16,11 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20230922/"
-        self.pars_list = {"nfil": [],
+        self.dir = "data/expr_sims/20230814/"
+        self.pars_list = {
+                     "nswim": [],
+                     "nseg": [],
+                     "nfil": [],
                      "nblob": [],
                      "ar": [],
                      "spring_factor": []}
@@ -65,10 +68,9 @@ class VISUAL:
         try:
             sim.read(self.dir+"rules.ini")
             for key, value in self.pars_list.items():
-                self.pars_list[key] = [float(x) for x in sim["Parameter list"][key].split(', ')][::4]
-            self.num_sim = len(self.pars_list["nfil"])
-            print(self.pars_list)
-            
+                if(key in sim["Parameter list"]):
+                    self.pars_list[key] = [float(x) for x in sim["Parameter list"][key].split(', ')][0::1]
+            self.num_sim = len(self.pars_list["nfil"])            
         except:
             print("WARNING: " + self.dir + "rules.ini not found.")
 
@@ -698,6 +700,7 @@ class VISUAL:
         sorted_indices = np.argsort(azim_array)
         azim_array_sorted = azim_array[sorted_indices]
         polar_array_sorted = polar_array[sorted_indices]
+        
 
         for i in range(self.plot_end_frame):
             print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
@@ -903,8 +906,13 @@ class VISUAL:
         colormap = 'cividis'
         colormap = 'twilight_shifted'
 
-        nrow = int(self.num_sim**.5)
-        ncol = nrow + (1 if nrow**2 < self.num_sim else 0)
+
+        nrow = len(np.unique(self.pars_list['nfil']))
+        ncol = len(np.unique(self.pars_list['ar']))
+        spring_factor = self.pars_list['spring_factor'][0]
+
+        # nrow = int(self.num_sim**.5)
+        # ncol = nrow + (1 if nrow**2 < self.num_sim else 0)
         fig, axs = plt.subplots(nrow, ncol, figsize=(18, 18), sharex=True, sharey=True)
         # cax = fig.add_axes([0.92, 0.1, 0.02, 0.8])  # [left, bottom, width, height] for the colorbar
 
@@ -941,8 +949,8 @@ class VISUAL:
                     print("WARNING: " + self.simName + " not found.")
 
         plt.tight_layout()
-        plt.savefig(f'fig/ciliate_multi_phase.png', bbox_inches = 'tight', format='png')
-        plt.savefig(f'fig/ciliate_multi_phase.pdf', bbox_inches = 'tight', format='pdf')
+        plt.savefig(f'fig/ciliate_multi_phase_elst{spring_factor}.png', bbox_inches = 'tight', format='png')
+        plt.savefig(f'fig/ciliate_multi_phase_elst{spring_factor}.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
     def multi_ciliate(self):

@@ -228,17 +228,19 @@ void rigid_body::initial_setup(const int id, Real *const f_address, const Real *
         int c = relative_Lx/relative_Lz;
 
         // initialise plane 
-        // int Nx = ceil(sqrt(NSWIM));
-        // const int k = 0;
-        // const int j = id/Nx;
-        // const int i = id - j*Nx;
+        int Nx = ceil(sqrt(NSWIM));
+        const int k = 0;
+        const int j = id/Nx;
+        const int i = id - j*Nx;
+        //end
 
         // initialise lattice        
-        int Nx = ceil(cbrt(NSWIM*b*c));
-        int Ny = Nx/b;
-        int k = id/(Nx*Ny);
-        int j = (id - k*Nx*Ny)/Nx;
-        int i = id - k*Nx*Ny - j*Nx;
+        // int Nx = ceil(cbrt(NSWIM*b*c));
+        // int Ny = Nx/b;
+        // int k = id/(Nx*Ny);
+        // int j = (id - k*Nx*Ny)/Nx;
+        // int i = id - k*Nx*Ny - j*Nx;
+        // end
         
         std::ifstream in("separation.dat"); // input
         in >> body_spacing;
@@ -246,23 +248,6 @@ void rigid_body::initial_setup(const int id, Real *const f_address, const Real *
         x[0] = i*body_spacing + body_spacing;
         x[1] = j*body_spacing + body_spacing;
         x[2] = k*body_spacing + body_spacing;
-
-        // if(id==0){
-        //   x[0] = body_spacing;
-        //   x[1] = body_spacing;
-        // }
-        // if(id==1){
-        //   x[0] = -body_spacing;
-        //   x[1] = body_spacing;
-        // }
-        // if(id==2){
-        //   x[0] = body_spacing;
-        //   x[1] = -body_spacing;
-        // }
-        // if(id==3){
-        //   x[0] = -body_spacing;
-        //   x[1] = -body_spacing;
-        // }
 
         xm1[0] = x[0];
         xm1[1] = x[1];
@@ -399,9 +384,6 @@ void rigid_body::initial_setup(const int id, Real *const f_address, const Real *
 
     #endif
 
-  #elif TORUS_BODIES
-
-    // NOT YET IMPLEMENTED
   #endif
 
 }

@@ -55,7 +55,6 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
     body.initial_setup(id, f_blobs_address, &data_from_file[NFIL*data_per_fil]);
 
   #else
-
     body.initial_setup(id, f_blobs_address, data_from_file);
 
   #endif
@@ -469,34 +468,6 @@ void swimmer::forces_and_torques(const int nt, int id){
       // x_array[3*i] = pos(0);
       // x_array[3*i + 1] = pos(1);
       // x_array[3*i + 2] = pos(2);
-
-
-      // Fake gravity
-      // if(id==0){
-      //   f(0) += 30;
-      //   f(1) += 30;
-      // }
-      // if(id==1){
-      //   f(0) -= 30;
-      //   f(1) += 30;
-      // }
-      // if(id==2){
-      //   f(0) += 30;
-      //   f(1) -= 30;
-      // }
-      // if(id==3){
-      //   f(0) -= 30;
-      //   f(1) -= 30;
-      // }
-
-      // if(id==0){
-      //   f(0) += DIMENSIONLESS_FORCE/20;
-      // }
-      // if(id==1){
-      //   f(0) += DIMENSIONLESS_FORCE/20;
-      // }
-
-      // f(0) += DIMENSIONLESS_FORCE/2;
 
       #if ROD
         f(0) += Real(NBLOB);

@@ -233,57 +233,17 @@ void fcm_mobility_solver::copy_segment_velocities_to_host(){
 
 void fcm_mobility_solver::apply_interparticle_forces(){
 
-
   #if !PRESCRIBED_CILIA
 
     cudaSetDevice(0);
 
     const int num_thread_blocks = (std::max<int>(num_segs[0], num_blobs[0]) + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
 
-    // FILE *pfile;
-
-    // periodic_barrier_forces<<<num_thread_blocks, THREADS_PER_BLOCK>>>(
-    //   f_segs_device[0], f_blobs_repulsion_device[0],
-    //   x_segs_device[0], x_blobs_device[0],
-    //   num_segs[0],
-    //   num_blobs[0],
-    //   pars.boxsize);
-
-    // cudaMemcpy(&f_blobs_repulsion_host[0], f_blobs_repulsion_device[0], 3*num_blobs[0]*sizeof(Real), cudaMemcpyDeviceToHost);
-    // pfile = fopen("barrier_force_fil.dat", "w");
-    // for(int i = 0; i < num_blobs[0]; i++){
-    //     fprintf(pfile, "FIL %d %.8f %.8f %.8f %.8f %.8f %.8f \n", 
-    //     i, f_blobs_repulsion_host[3*i], f_blobs_repulsion_host[3*i+1], f_blobs_repulsion_host[3*i+2],
-    //     x_blobs_host[3*i], x_blobs_host[3*i+1], x_blobs_host[3*i+2]);
-    //     }
-    // fprintf(pfile, "\n#");
-    // fclose(pfile);
-
-    // barrier_forces<<<num_thread_blocks, THREADS_PER_BLOCK>>>(f_segs_device[0], f_blobs_repulsion_device[0], x_segs_device[0], x_blobs_device[0], 0, num_segs[0], 0, num_blobs[0]);
-
-    // cufcm_solver->reform_data(x_segs_device[0], f_segs_device[0], v_segs_device[0],
-    //                         x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0], true);
-
-    
-    cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
-    cufcm_solver->reform_fseg(f_segs_device[0], true);
-    cufcm_solver->apply_repulsion_for_timcode();
-    cufcm_solver->reform_fseg(f_segs_device[0], false);
-    cufcm_solver->reform_fblob(f_blobs_repulsion_device[0], false);
-
-
-    // cufcm_solver->reform_data_back(x_segs_device[0], f_segs_device[0], v_segs_device[0],
-    //                               x_blobs_device[0], f_blobs_repulsion_device[0], v_blobs_device[0], true);
-                                
-    // cudaMemcpy(&f_blobs_repulsion_host[0], f_blobs_repulsion_device[0], 3*num_blobs[0]*sizeof(Real), cudaMemcpyDeviceToHost);
-    // pfile = fopen("barrier_force_fcm.dat", "w");
-    // for(int i = 0; i < num_blobs[0]; i++){
-    //     fprintf(pfile, "FCM %d %.8f %.8f %.8f %.8f %.8f %.8f \n", 
-    //     i, f_blobs_repulsion_host[3*i], f_blobs_repulsion_host[3*i+1], f_blobs_repulsion_host[3*i+2],
-    //     x_blobs_host[3*i], x_blobs_host[3*i+1], x_blobs_host[3*i+2]);
-    //     }
-    // fprintf(pfile, "\n#");
-    // fclose(pfile);
+    // cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
+    // cufcm_solver->reform_fseg(f_segs_device[0], true);
+    // cufcm_solver->apply_repulsion();
+    // cufcm_solver->reform_fseg(f_segs_device[0], false);
+    // cufcm_solver->reform_fblob(f_blobs_repulsion_device[0], false);
 
   #endif
 
@@ -304,26 +264,119 @@ void fcm_mobility_solver::evaluate_segment_segment_mobility(){
 
   cudaSetDevice(0);
   int num_thread_blocks = (num_segs[0] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
+  cudaError_t err = cudaGetLastError();
+  
+  cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
+  err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "CUDA error reform_xsegblob: %s\n", cudaGetErrorString(err));
+    }
+  cufcm_solver->reform_fseg(f_segs_device[0], true);
+  err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "CUDA error reform_fseg: %s\n", cudaGetErrorString(err));
+    }
+  cufcm_solver->reform_fblob(f_blobs_device[0], true);
+  err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "CUDA error reform_fblob: %s\n", cudaGetErrorString(err));
+    }
+  cufcm_solver->evaluate_mobility_cilia();
+  err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "CUDA error evaluate_mobility_cilia: %s\n", cudaGetErrorString(err));
+    }
+  cufcm_solver->reform_vseg(v_segs_device[0], false);
+  err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "CUDA error reform_vseg: %s\n", cudaGetErrorString(err));
+    }
+  cufcm_solver->reform_vblob(v_blobs_device[0], false);
+  err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "CUDA error reform_vblob: %s\n", cudaGetErrorString(err));
+    }
 
-  // cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
-  // cufcm_solver->reform_fseg(f_segs_device[0], true);
-  // cufcm_solver->Mss();
-  // cufcm_solver->reform_vseg(v_segs_device[0], false);
-
-  // Mss_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_segs_device[0], f_segs_device[0], x_segs_device[0], 0, num_segs[0]);
+  // cufcm_solver->write_data_call();
+  
+  copy_segment_velocities_to_host();
+  copy_blob_velocities_to_host();
+  
 }
 
 void fcm_mobility_solver::evaluate_blob_blob_mobility(){
-
   cudaSetDevice(0);
-  int num_thread_blocks = (num_blobs[0] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
+  cudaError_t err = cudaGetLastError();
+  
+  cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
+  err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "CUDA error reform_xsegblob: %s\n", cudaGetErrorString(err));
+    }
+  cufcm_solver->reform_fseg(f_segs_device[0], true);
+  err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "CUDA error reform_fseg: %s\n", cudaGetErrorString(err));
+    }
+  cufcm_solver->reform_fblob(f_blobs_device[0], true);
+  err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "CUDA error reform_fblob: %s\n", cudaGetErrorString(err));
+    }
+  cufcm_solver->evaluate_mobility_cilia();
+  err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "CUDA error evaluate_mobility_cilia: %s\n", cudaGetErrorString(err));
+    }
+  cufcm_solver->reform_vseg(v_segs_device[0], false);
+  err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "CUDA error reform_vseg: %s\n", cudaGetErrorString(err));
+    }
+  cufcm_solver->reform_vblob(v_blobs_device[0], false);
+  err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "CUDA error reform_vblob: %s\n", cudaGetErrorString(err));
+    }
 
-  // cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
-  // cufcm_solver->reform_fblob(f_blobs_device[0], true);
-  // cufcm_solver->Mbb();
-  // cufcm_solver->reform_vblob(v_blobs_device[0], false);
+  // cufcm_solver->write_data_call();
+  
+   // ########################### 
+  // copy_segment_velocities_to_host();
+  // copy_blob_velocities_to_host();
+  // wait_for_device();
 
-  // Mbb_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_blobs_device[0], f_blobs_device[0], x_blobs_device[0], 0, num_blobs[0]);
+  // FILE *pfile;
+  // pfile = fopen("sim_blob_data_fcm.dat", "a");
+  // for(int i = 0; i < NBLOB; i++){
+  //     fprintf(pfile, "%d %.16f %.16f %.16f \n", 
+  //     i, v_blobs_host[3*i + 0], v_blobs_host[3*i + 1], v_blobs_host[3*i + 2]);
+  //     }
+  // fprintf(pfile, "\n#");
+  // fclose(pfile);
+
+  // ########################### 
+  // int start_blob = 0;
+  // for (int n = 0; n < num_gpus; n++){
+  //   cudaSetDevice(n);
+  //   int num_thread_blocks = (num_blobs[n] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
+  //   Mbb_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_blobs_device[n], f_blobs_device[n], x_blobs_device[n], start_blob, num_blobs[n]);
+  //   start_blob += num_blobs[n];
+  // }
+
+  // copy_segment_velocities_to_host();
+  // copy_blob_velocities_to_host();
+  // wait_for_device();
+  // pfile = fopen("sim_blob_data_rpy.dat", "a");
+  // for(int i = 0; i < NBLOB; i++){
+  //     fprintf(pfile, "%d %.16f %.16f %.16f \n", 
+  //     i, v_blobs_host[3*i + 0], v_blobs_host[3*i + 1], v_blobs_host[3*i + 2]);
+  //     }
+  // fprintf(pfile, "\n#");
+  // fclose(pfile);
+
+  
+  
 }
 
 void fcm_mobility_solver::evaluate_segment_blob_mobility(){
@@ -331,13 +384,6 @@ void fcm_mobility_solver::evaluate_segment_blob_mobility(){
   cudaSetDevice(0);
   int num_thread_blocks = (num_segs[0] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
 
-  // cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
-  // cufcm_solver->reform_fblob(f_blobs_device[0], true);
-  // cufcm_solver->reform_vseg(v_segs_device[0], true);
-  // cufcm_solver->Msb();
-  // cufcm_solver->reform_vseg(v_segs_device[0], false);
-
-  // Msb_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_segs_device[0], f_blobs_device[0], x_segs_device[0], x_blobs_device[0], 0, num_segs[0]);
 }
 
 void fcm_mobility_solver::evaluate_blob_segment_mobility(){
@@ -345,13 +391,6 @@ void fcm_mobility_solver::evaluate_blob_segment_mobility(){
   cudaSetDevice(0);
   int num_thread_blocks = (num_blobs[0] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
 
-  // cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
-  // cufcm_solver->reform_fseg(f_segs_device[0], true);
-  // cufcm_solver->reform_vblob(v_blobs_device[0], true);
-  // cufcm_solver->Mbs();
-  // cufcm_solver->reform_vblob(v_blobs_device[0], false);
-
-  // Mbs_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_blobs_device[0], f_segs_device[0], x_blobs_device[0], x_segs_device[0], 0, num_blobs[0]);
 }
 
 void fcm_mobility_solver::write_repulsion(){
@@ -377,10 +416,6 @@ void fcm_mobility_solver::copy_to_fcm(){
 
 void fcm_mobility_solver::evaluate_full_mobility(){
   cudaSetDevice(0);
-  int num_thread_blocks = (num_segs[0] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
-  // Mss_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_segs_device[0], f_segs_device[0], x_segs_device[0], 0, num_segs[0]);
-  // Mbb_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_blobs_device[0], f_blobs_device[0], x_blobs_device[0], 0, num_blobs[0]);
-
   cudaError_t err = cudaGetLastError();
   
   cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);

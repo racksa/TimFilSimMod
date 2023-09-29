@@ -7,13 +7,16 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20230922/"
-        self.pars_list = {"nfil": [],
+        self.dir = "data/expr_sims/20230929_rod/"
+        self.pars_list = {
+                     "nswim": [],
+                     "nseg": [],
+                     "nfil": [],
                      "nblob": [],
                      "ar": [],
                      "spring_factor": []}
         
-        self.sweep_shape = (12, 6, 1, 4)
+        self.sweep_shape = (3, 1, 1, 1)
 
         self.num_sim = 0
 
@@ -45,11 +48,13 @@ class DRIVER:
             for j in range(self.sweep_shape[1]):
                 for k in range(self.sweep_shape[2]):
                     for l in range(self.sweep_shape[3]):
-                        nfil = int(48*(i+1) )
+                        nfil = int(16*(i+1) )
                         nblob = int(2000*(1.25**j))
                         ar = round(3*(1.25**j), 2)
-                        spring_factor = round(0.5*2**l, 2)
+                        spring_factor = round(2, 2)
 
+                        self.pars_list["nswim"].append(1)
+                        self.pars_list["nseg"].append(20)
                         self.pars_list["nfil"].append(nfil)
                         self.pars_list["nblob"].append(nblob)
                         self.pars_list["ar"].append(ar)
@@ -70,10 +75,14 @@ class DRIVER:
 
     def read_rules(self):
         sim = configparser.ConfigParser()
-        sim.read(self.dir+"rules.ini")
-        for key, value in self.pars_list.items():
-            self.pars_list[key] = [float(x) for x in sim["Parameter list"][key].split(', ')]
-        self.num_sim = len(self.pars_list["nfil"])
+        try:
+            sim.read(self.dir+"rules.ini")
+            for key, value in self.pars_list.items():
+                if(key in sim["Parameter list"]):
+                    self.pars_list[key] = [float(x) for x in sim["Parameter list"][key].split(', ')][0::1]
+            self.num_sim = len(self.pars_list["nfil"])            
+        except:
+            print("WARNING: " + self.dir + "rules.ini not found.")
 
     def run(self):
         self.create_ini()

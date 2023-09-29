@@ -53,6 +53,8 @@
 int main(int argc, char** argv){
 
   // Read global variables from .ini
+  NSWIM = std::stoi(data_from_ini("Parameters", "nswim"));
+  NSEG = std::stoi(data_from_ini("Parameters", "nseg"));
   NFIL = std::stoi(data_from_ini("Parameters", "nfil"));
   NBLOB = std::stoi(data_from_ini("Parameters", "nblob"));
   AR = std::stof(data_from_ini("Parameters", "ar"));
@@ -61,12 +63,12 @@ int main(int argc, char** argv){
   SIMULATION_FILE = data_from_ini("Filenames", "simulation_file");
 
   #if INFINITE_PLANE_WALL
-    #define NSWIM 1
+    NSWIM = 1;
     NBLOB = 0;
   #endif
 
   #if WRITE_GENERALISED_FORCES
-    #define NSWIM 1
+    NSWIM = 1;
     NFIL = 1;
     NBLOB = 0;
   #endif
@@ -88,7 +90,7 @@ int main(int argc, char** argv){
   SIMULATION_TIME_NAME = SIMULATION_NAME + "_time.dat";
   SIMULATION_TETHERLAM_NAME = SIMULATION_NAME + "_tether_force.dat";
 
-  sync_var<<<1, 1>>>(NFIL, NBLOB);
+  sync_var<<<1, 1>>>(NSWIM, NSEG, NFIL, NBLOB, END_FORCE_MAGNITUDE);
   cudaDeviceSynchronize();
 
   float time_start;
@@ -193,6 +195,8 @@ int main(int argc, char** argv){
 
   config_file.close();
 
+  printf("initialise\n");
+
   // Initialise the simulation
   chosen_mobility_solver mobility;
   mobility.initialise();
@@ -204,6 +208,8 @@ int main(int argc, char** argv){
   #endif
 
   std::vector<swimmer> swimmers(NSWIM);
+
+  printf("initial setup\n");
 
   for (int n = 0; n < NSWIM; n++){
     swimmers[n].initial_setup(n, &data_from_file[n*data_per_swimmer],
@@ -218,8 +224,11 @@ int main(int argc, char** argv){
 
   #endif
 
+  printf("write ref\n");
+
   // Swimmers are all identical
   swimmers[0].write_reference_positions();
+  
 
   #if !(PRESCRIBED_BODY_VELOCITIES || PRESCRIBED_CILIA || USE_BROYDEN_FOR_EVERYTHING)
 
@@ -427,17 +436,17 @@ int main(int argc, char** argv){
         }
 
         #if DISPLAYTIME && CUFCM
-          if(nt%100==0){ cudaDeviceSynchronize(); solution_update_time += (get_time() - time_start); time_start = get_time();}
+          if(nt%10==0){ cudaDeviceSynchronize(); solution_update_time += (get_time() - time_start); time_start = get_time();}
         #endif
 
         mobility.compute_velocities(swimmers, num_gmres_iterations, nt);
 
         #if DISPLAYTIME && CUFCM
-          if(nt%100==0){ cudaDeviceSynchronize(); hisolver_time += (get_time() - time_start); time_start = get_time();}
+          if(nt%10==0){ cudaDeviceSynchronize(); hisolver_time += (get_time() - time_start); time_start = get_time();}
         #endif
 
         #if CUFCM
-          if(nt%100==0){
+          if(nt%10==0){
             printf("Checking overlap\n");
             mobility.cufcm_solver->check_overlap();
           }
@@ -446,7 +455,7 @@ int main(int argc, char** argv){
         error_is_too_large = mobility.compute_errors(broyden.new_error, swimmers, nt);
 
         #if DISPLAYTIME && CUFCM
-          if(nt%100==0){ cudaDeviceSynchronize(); eval_error_time += (get_time() - time_start); time_start = get_time();}
+          if(nt%10==0){ cudaDeviceSynchronize(); eval_error_time += (get_time() - time_start); time_start = get_time();}
         #endif
 
         if (!broyden.new_error.is_finite()){
@@ -472,7 +481,7 @@ int main(int argc, char** argv){
         broyden.end_of_iter(swimmers, nt, nt_start, error_is_too_large);
 
         #if DISPLAYTIME && CUFCM
-          if(nt%100==0){ cudaDeviceSynchronize(); jacobian_update_time += (get_time() - time_start); time_start = get_time();}
+          if(nt%10==0){ cudaDeviceSynchronize(); jacobian_update_time += (get_time() - time_start); time_start = get_time();}
         #endif
 
         std::cout << DELETE_CURRENT_LINE << std::flush;
@@ -485,15 +494,17 @@ int main(int argc, char** argv){
       }
 
       #if DISPLAYTIME && CUFCM
-        if(nt%100==0){
+        if(nt%10==0){
+            float total_time = solution_update_time+hisolver_time+eval_error_time+jacobian_update_time;
             std::ofstream time_file(SIMULATION_TIME_NAME, std::ios::app);
             time_file << nt << " " << broyden.iter << " ";
             time_file << std::scientific << std::setprecision(6);
             
-            time_file<<(solution_update_time/broyden.iter)<<" ";
-            time_file<<(hisolver_time/broyden.iter)<<" ";
-            time_file<<(eval_error_time/broyden.iter)<<" "; 
-            time_file<<(jacobian_update_time/broyden.iter)<<" ";
+            time_file<<(solution_update_time/(broyden.iter+1))<<" ";
+            time_file<<(hisolver_time/(broyden.iter+1))<<" ";
+            time_file<<(eval_error_time/(broyden.iter+1))<<" "; 
+            time_file<<(jacobian_update_time/(broyden.iter+1))<<" ";
+            time_file<<(total_time/(broyden.iter+1))<<" ";
 
             time_file << std::endl;
             time_file.close();

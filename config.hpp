@@ -32,7 +32,7 @@ extern std::string SIMULATION_TETHERLAM_NAME;
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Simulation type
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define CILIA_TYPE 3
+#define CILIA_TYPE 0
 // Valid options:
 // 0 = Instability-driven cilia. This choice has some sub-types (see below).
 // 1 = Geometrically-switching cilia (partially implemented)
@@ -106,7 +106,7 @@ extern std::string SIMULATION_TETHERLAM_NAME;
 
 #endif
 
-#define BODY_OR_SURFACE_TYPE 2
+#define BODY_OR_SURFACE_TYPE 4
 // Valid options:
 // 0 = An infinite plane wall at z = 0. This choice has some sub-types (see below).
 // 1 = Deformed planes with 2 principal curvatures (partially implemented)
@@ -187,15 +187,18 @@ extern std::string SIMULATION_TETHERLAM_NAME;
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Physical parameters
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+extern int NSWIM;
+extern int NSEG;
 extern int NFIL;
 extern int NBLOB;
 extern float AR;
 extern float AXIS_DIR_BODY_LENGTH;
 extern float TORSIONAL_SPRING_MAGNITUDE_FACTOR; // Pre-multiplies the mean generalised driving force magnitude to give the spring constant that resists rigid-body rotations of the shape.
 extern int NTOTAL;
+extern float END_FORCE_MAGNITUDE;
 
-#define NSEG (20)// The number of segments comprising each filament.
-#define NSWIM (1) // The number of swimmers.
+// #define NSEG (20)// The number of segments comprising each filament.
+// #define NSWIM (5) // The number of swimmers.
 
 #define MU 1.0 // Fluid viscosity.
 
@@ -215,7 +218,7 @@ extern int NTOTAL;
 //   #define AXIS_DIR_BODY_LENGTH (NBLOB*RBLOB)
 // #endif
 
-#if CILIA_TYPE==0
+#if CILIA_TYPE==0 or CILIA_TYPE==3
 
   #define DIMENSIONLESS_FORCE 220.0 
 
@@ -246,7 +249,7 @@ extern int NTOTAL;
 #define MAX_BROYDEN_ITER 400 // Maximum number of Broyden's method iterations per time-step.
 #define TOL 1e-4 // Tolerance to be reached by the Broyden's method solve.
 
-#define SOLVER_TYPE 1
+#define SOLVER_TYPE 0
 // Valid options:
 // 0: Use Broyden's method for absolutely everything. When there is a rigid body with forces (and velocities if they're not prescribed) to solve for,
 //    the associated linear system is embedded in the wider Broyden's solve, rather than being solved for the current iterate at each iteration.
@@ -267,7 +270,7 @@ extern int NTOTAL;
 
 #endif
 
-#define TOTAL_TIME_STEPS (300*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
+#define TOTAL_TIME_STEPS (1*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
 #define NUM_EULER_STEPS 1 // Number of time-steps to use backwards-Euler before switching to BDF2.
 
 #if CILIA_TYPE==1
@@ -344,7 +347,7 @@ extern int NTOTAL;
 
 #if INSTABILITY_CILIA
   
-  #define END_FORCE_MAGNITUDE (DIMENSIONLESS_FORCE*KB/(DL*DL*NSEG*NSEG))
+  // #define END_FORCE_MAGNITUDE (DIMENSIONLESS_FORCE*KB/(DL*DL*NSEG*NSEG))
   #define REPULSIVE_FORCE_FACTOR 2.0 // How much stronger is the barrier force than the driving force.
   #define DT (36.3833/STEPS_PER_PERIOD) // Based on the period of a single DIMENSIONLESS_FORCE = 220.0 filament above a no-slip wall.
 
@@ -471,7 +474,7 @@ extern int NTOTAL;
 
 #define DISPLAYTIME true
 
-#define FIL_USE_DOUBLE_PRECISION false
+#define FIL_USE_DOUBLE_PRECISION true
 
 #if FIL_USE_DOUBLE_PRECISION
     typedef double Real;

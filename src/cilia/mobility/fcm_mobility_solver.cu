@@ -239,11 +239,11 @@ void fcm_mobility_solver::apply_interparticle_forces(){
 
     const int num_thread_blocks = (std::max<int>(num_segs[0], num_blobs[0]) + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
 
-    // cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
-    // cufcm_solver->reform_fseg(f_segs_device[0], true);
-    // cufcm_solver->apply_repulsion();
-    // cufcm_solver->reform_fseg(f_segs_device[0], false);
-    // cufcm_solver->reform_fblob(f_blobs_repulsion_device[0], false);
+    cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
+    cufcm_solver->reform_fseg(f_segs_device[0], true);
+    cufcm_solver->apply_repulsion();
+    cufcm_solver->reform_fseg(f_segs_device[0], false);
+    cufcm_solver->reform_fblob(f_blobs_repulsion_device[0], false);
 
   #endif
 

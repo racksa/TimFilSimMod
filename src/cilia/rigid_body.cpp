@@ -264,15 +264,15 @@ void rigid_body::initial_setup(const int id, Real *const f_address, const Real *
         um1[2] = 0.0;
 
         // Randomise orientation in 2d
-        // q = quaternion(1.0, 0.0, 0.0, 0.0);
-        // std::random_device rd{};
-        // std::mt19937 gen = std::mt19937{rd()};
-        // std::normal_distribution<Real> d(0.0, 1.0);
-        // q(3) = d(gen);
-        // q.normalise_in_place();
+        q = quaternion(1.0, 0.0, 0.0, 0.0);
+        std::random_device rd{};
+        std::mt19937 gen = std::mt19937{rd()};
+        std::normal_distribution<Real> d(0.0, 1.0);
+        q(3) = d(gen);
+        q.normalise_in_place();
         
         // Randomise orientation in 3d
-        q.randomise();
+        // q.randomise();
 
         // if(id==0){
         //   q = quaternion(1.0, 0.0, 1.0, 0.0);

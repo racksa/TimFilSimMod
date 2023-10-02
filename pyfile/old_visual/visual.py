@@ -21,7 +21,7 @@ color_list.pop(2)
 
 # color_list = ['#00ffff', '#faebD7', '#838bbb', '#0000ff', '	#8a2be2', '#ff4040', '#7fff00', '#ff6103', '#9932cc', '#ff1493', '#030303']
 
-enable_periodic = False
+enable_periodic = True
 big_sphere = False
 
 simDir = 'data/box_height_sim/100fil_sims/'
@@ -58,17 +58,17 @@ for i in range(selection, selection+1):
 # simDir = 'data/4096fil_sims/'
 # simName = simDir + 'test_fil_6400_6400_800'
 
-# simDir = 'data/box_height_sim/1fil_sims/'
-# simName = simDir + 'test_fil_100_100_1375'
+simDir = 'data/box_height_sim/1fil_sims/'
+simName = simDir + 'test_fil_100_100_1250'
 # simDir = 'data/box_height_sim/256fil_sims/'
 # simName = simDir + 'test_fil_1600_1600_1600'
 # simDir = 'data/box_height_sim/1024fil_sims/'
 # simName = simDir + 'test_fil_3200_3200_1000'
-simDir = 'data/box_height_sim/100fil_sims/'
-simName = simDir + 'test_fil_1000_1000_125'
+# simDir = 'data/box_height_sim/100fil_sims/'
+# simName = simDir + 'test_fil_1000_1000_125'
 
-simDir = 'data/rod_sims/2304rod_sims/'
-simName = simDir + 'test_rod_960_960_60'
+# simDir = 'data/rod_sims/2304rod_sims/'
+# simName = simDir + 'test_rod_960_960_60'
 # simName = simDir + 'test_rod_1920_1920_60'
 # simName = simDir + 'test_rod_3840_3840_60'
 
@@ -78,8 +78,11 @@ simName = simDir + 'test_rod_960_960_60'
 # simName = simDir + 'test_rod_7200_7200_75'
 # 30 frames per period
 
-simDir = 'data/rod_sims/rod7744/'
-simName = simDir + 'test_rod_7744'
+# simDir = 'data/rod_sims/rod7744/'
+# simName = simDir + 'test_rod_7744'
+
+# simDir = 'data/expr_sims/20231002_rod/'
+# simName = simDir + 'rod_25'
 
 patternDatafileName = simName + '_pattern.dat'
 superpuntoDatafileName = simName + '_superpunto.dat'
@@ -121,11 +124,15 @@ if(np.isinf(np.array([Lx, Ly, Lz])).any() and enable_periodic):
 # Lz = 32*2
 
 # rod_7744
-Lx = 1760.
-Ly = 1760.
-Lz = 10.3125*10
+# Lx = 1760.
+# Ly = 1760.
+# Lz = 10.3125*10
 # 1024*1024*6
 # 10 frames per period
+
+# Lx = 75.
+# Ly = Lx
+# Lz = 10.3125*10
 
 
 class VISUAL:
@@ -140,10 +147,10 @@ class VISUAL:
             self.fil_references = myIo.read_fil_references(simName + '_fil_references.dat')
         self.dt = self.pars['DT']*self.pars['PLOT_FREQUENCY_IN_STEPS']
         self.L = 14.14*self.pars['NBLOB']/22.
-        self.frames = min(60, sum(1 for line in open(simName + '_body_states.dat')))
+        self.frames = min(30000, sum(1 for line in open(simName + '_body_states.dat')))
 
         self.plot_end_frame = self.frames
-        self.plot_start_frame = max(0, self.plot_end_frame-30)
+        self.plot_start_frame = max(0, self.plot_end_frame-1)
         self.plot_interval = 1
 
         self.plot_hist_frame = np.array([self.frames-1])
@@ -175,7 +182,7 @@ class VISUAL:
         myIo.clean_file(fcmForcefileName)
         myIo.clean_file(fcmTorquefileName)
 
-    def write_data(self, x, r, filename, box=True, center=True, superpunto=True, color=0):
+    def write_data(self, x, r, filename, box=True, center=True, superpunto=True, color=16777215):
         plot_x = x.copy()
         if(box):
             plot_x[0] = util.box(plot_x[0], Lx)
@@ -328,7 +335,8 @@ class VISUAL:
         seg_vels_f = open(simName + '_seg_vels.dat', "r")
         body_states_f = open(simName + '_body_states.dat', "r")
 
-        ax = plt.figure().add_subplot(1,1,1)
+        fig = plt.figure(figsize=(4.8, 3.6))
+        ax = fig.add_subplot(1,1,1)
         end_pos = np.zeros((int(self.pars['NFIL']), 3))
         end_vel = np.zeros((int(self.pars['NFIL']), 3))
         tip_traj = np.zeros((len(self.plot_seg_frames), int(self.pars['NFIL']), 3))
@@ -379,18 +387,21 @@ class VISUAL:
             ax.plot(tip_traj[:,fil,0], tip_traj[:,fil,1], c='black')
             ax.arrow(end_pos[fil,0], end_pos[fil,1], end_vel[fil,0], end_vel[fil,1], color='r', lw=1, head_width=18)
 
-        ax.set_ylabel(r"y")
-        ax.set_xlabel(r"x")
+        # ax.set_ylabel(r"y")
+        # ax.set_xlabel(r"x")
         ax.set_xlim(0, Lx)
         ax.set_ylim(0, Ly)
 
         L = 2.2*self.pars['NSEG']
-        x_ticks = np.linspace(0, Lx, 6)
+        x_ticks = np.linspace(0, Lx, 4)
         x_ticks_label = ["{:.2f}L".format(x/L) for x in x_ticks]
         ax.set_xticks(x_ticks, x_ticks_label)
-        y_ticks = np.linspace(0, Ly, 6)
+        y_ticks = np.linspace(0, Ly, 4)
         y_ticks_label = ["{:.2f}L".format(y/L) for y in y_ticks]
         ax.set_yticks(y_ticks, y_ticks_label)
+
+        ax.set_xticks([])
+        ax.set_yticks([])
 
         ax.set_aspect('equal')
         nfil = int(self.pars['NFIL'])
@@ -439,7 +450,7 @@ class VISUAL:
                             self.write_data(seg_pos, float(self.pars['RSEG']), patternDatafileName, enable_periodic, True, True)
     
     def plot_fil3d(self):
-        fig = plt.figure(figsize=(16,4),dpi=400)
+        fig = plt.figure()
         ax = fig.add_subplot(projection='3d')
         seg_states_f = open(simName + '_seg_states.dat', "r")
         body_states_f = open(simName + '_body_states.dat', "r")
@@ -486,8 +497,8 @@ class VISUAL:
                 current_frame += 1
         
         ax.set_proj_type('ortho')
-        ax.set_proj_type('persp', 0.08)  # FOV = 157.4 deg
-        ax.view_init(elev=15, azim=90)
+        # ax.set_proj_type('persp', 0.08)  # FOV = 157.4 deg
+        # ax.view_init(elev=20, azim=-60)
         ax.dist=10
         ax.axis('off')
         ax.grid(False)
@@ -511,7 +522,14 @@ class VISUAL:
         # z_ticks_label = ["{:.2f}L".format(z/L) for z in z_ticks]
         # ax.set_zticks(z_ticks, z_ticks_label)
 
-        ax.text(100, 50, 80, "H={:.2f}L".format(Lz/L))
+        # ax.text(100, 50, 80, "H={:.2f}L".format(Lz/L))
+
+        ax.quiver(15, 25, 0, 20, 0, 0, color='k', arrow_length_ratio=0.15) # x-axis
+        ax.quiver(15, 25, 0, 0, 20, 0, color='k', arrow_length_ratio=0.15) # y-axis
+        ax.quiver(15, 25, 0, 0, 0, 20, color='k', arrow_length_ratio=0.15) # z-axis
+
+        ax.set_xticks([], [])
+        ax.set_yticks([], [])
         ax.set_zticks([], [])
 
         ax.set_xlim(0, Lx)
@@ -817,7 +835,7 @@ class VISUAL:
         # area_fraction = 8100*(48-28*ac) / np.array([(1800**2), (3600**2), (7200**2)])
         # V0_list = np.array([4.0106966224e-01, 4.1725594718e-01, 4.3356909706e-01])
     
-        fig1 = plt.figure()
+        fig1 = plt.figure(figsize=(4.8, 3.6))
         ax = fig1.add_subplot(1,1,1)
         for ni, name in enumerate(simNames):
             Lx, Ly, Lz = box[ni]
@@ -859,9 +877,9 @@ class VISUAL:
                         ax.scatter(time_array[t], average_vel[t, 0]/ V0_list[ni], s=60, marker=markers[ti], facecolors='none', edgecolors='black')
                     if(ni==2):
                         ax.scatter(time_array[t], average_vel[t, 0]/ V0_list[ni], s=60, marker=markers[ti], facecolors='black', edgecolors='black')
-        # rect = patches.Rectangle((2180, 1.4), 220, 0.2, linewidth=1, edgecolor='black', facecolor='none', ls='dotted')
-        ax.add_patch(rect)
-        # ax.legend()
+        rect = patches.Rectangle((2180, 1.4), 220, 0.2, linewidth=1, edgecolor='black', facecolor='none', ls='dotted')
+        # ax.add_patch(rect)
+        ax.legend()
         ax.set_ylabel(r"$<V_x>/W$")
         ax.set_xlabel(r"$t/T$")
         ax.set_xlim(left=0)
@@ -1095,7 +1113,7 @@ class VISUAL:
         sm.set_array([])
         cbar = fig5.colorbar(sm)
         cbar.ax.set_yticks(np.linspace(vmin, vmax, 8))
-        cbar.set_label(r"$V/W_0$")
+        cbar.set_label(r"$|V|/W$")
 
         qq=ax5.quiver(end_pos[:,1], end_pos[:,0], end_vel[:,1], -end_vel[:,0], end_speed, cmap=colormap, zorder=1)  # Rotated
         ax5.set_ylabel(r"x")

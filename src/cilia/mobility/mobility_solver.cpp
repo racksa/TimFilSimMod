@@ -208,31 +208,6 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
   #if !(PRESCRIBED_BODY_VELOCITIES || PRESCRIBED_CILIA)
 
     wait_for_device();
-    
-    // #pragma omp parallel
-    // {
-    //   int swimmer_per_thread = NSWIM/omp_get_num_threads();
-    //   for(int i = 0; i < swimmer_per_thread; i++){
-    //     int n = swimmer_per_thread*omp_get_thread_num() + i;
-    //     matrix& f = swimmers[n].f;
-    //     const matrix R = swimmers[n].body.q.rot_mat();
-
-    //     for (int m = 0; m < NBLOB; m++){
-
-    //       const int id = 3*(n*NBLOB + m);
-    //       const matrix r = R*matrix(3, 1, &swimmers[n].body.blob_references[3*m]);
-
-    //       f(0) += f_blobs_repulsion_host[id];
-    //       f(1) += f_blobs_repulsion_host[id + 1];
-    //       f(2) += f_blobs_repulsion_host[id + 2];
-
-    //       f(3) += r(1)*f_blobs_repulsion_host[id + 2] - r(2)*f_blobs_repulsion_host[id + 1];
-    //       f(4) += r(2)*f_blobs_repulsion_host[id] - r(0)*f_blobs_repulsion_host[id + 2];
-    //       f(5) += r(0)*f_blobs_repulsion_host[id + 1] - r(1)*f_blobs_repulsion_host[id];
-
-    //     }
-    //   }
-    // }
 
     for (int n = 0; n < NSWIM; n++){
 

@@ -4,7 +4,7 @@
 
 // Global variables (CPU) first definition
 
-// From .ini
+// Values here are not meaningful.
 int NSWIM = 1;
 int NSEG = 1;
 int NFIL = 16;

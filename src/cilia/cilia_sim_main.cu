@@ -76,6 +76,7 @@ int main(int argc, char** argv){
   // Derive other global variables
   NTOTAL = (NSWIM*(NFIL*NSEG + NBLOB));
   AXIS_DIR_BODY_LENGTH = AR*44;
+  END_FORCE_MAGNITUDE = (DIMENSIONLESS_FORCE*KB/(DL*DL*NSEG*NSEG));
 
   // Filenames 
   SIMULATION_NAME = SIMULATION_DIR+SIMULATION_FILE;

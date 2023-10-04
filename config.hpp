@@ -106,7 +106,7 @@ extern std::string SIMULATION_TETHERLAM_NAME;
 
 #endif
 
-#define BODY_OR_SURFACE_TYPE 4
+#define BODY_OR_SURFACE_TYPE 0
 // Valid options:
 // 0 = An infinite plane wall at z = 0. This choice has some sub-types (see below).
 // 1 = Deformed planes with 2 principal curvatures (partially implemented)
@@ -163,7 +163,7 @@ extern std::string SIMULATION_TETHERLAM_NAME;
 // Define whether the motion of the rigid bodies is imposed or allowed to evolve dynamically.
 #define PRESCRIBED_BODY_VELOCITIES false
 
-#define MOBILITY_TYPE 1
+#define MOBILITY_TYPE 4
 // Valid options:
 // 0 = Basic Stokes drag. No hydrodynamic interactions between particles.
 // 1 = Rotne-Prager-Yamakawa (RPY) mobility matrices (with the corrections due to Swan and Brady if an infinite plane wall is selected).

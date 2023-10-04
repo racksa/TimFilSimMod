@@ -67,8 +67,8 @@ simName = simDir + 'test_fil_100_100_1250'
 # simDir = 'data/box_height_sim/100fil_sims/'
 # simName = simDir + 'test_fil_1000_1000_125'
 
-# simDir = 'data/rod_sims/2304rod_sims/'
-# simName = simDir + 'test_rod_960_960_60'
+simDir = 'data/rod_sims/2304rod_sims/'
+simName = simDir + 'test_rod_960_960_60'
 # simName = simDir + 'test_rod_1920_1920_60'
 # simName = simDir + 'test_rod_3840_3840_60'
 
@@ -81,8 +81,8 @@ simName = simDir + 'test_fil_100_100_1250'
 # simDir = 'data/rod_sims/rod7744/'
 # simName = simDir + 'test_rod_7744'
 
-# simDir = 'data/expr_sims/20231002_rod/'
-# simName = simDir + 'rod_25'
+# simDir = 'data/expr_sims/20231003_fil/'
+# simName = simDir + 'fil_16'
 
 patternDatafileName = simName + '_pattern.dat'
 superpuntoDatafileName = simName + '_superpunto.dat'
@@ -150,7 +150,7 @@ class VISUAL:
         self.frames = min(30000, sum(1 for line in open(simName + '_body_states.dat')))
 
         self.plot_end_frame = self.frames
-        self.plot_start_frame = max(0, self.plot_end_frame-1)
+        self.plot_start_frame = max(0, self.plot_end_frame-3000)
         self.plot_interval = 1
 
         self.plot_hist_frame = np.array([self.frames-1])
@@ -784,6 +784,7 @@ class VISUAL:
 
         body_states = np.zeros(7*int(self.pars['NSWIM']))
         average_vel = np.zeros((self.plot_end_frame - compute_start, 3))
+        print(30000*self.dt/T0)
 
         for i in range(self.plot_end_frame):
             print(" frame ", i, "/", self.frames, "          ", end="\r")
@@ -801,6 +802,8 @@ class VISUAL:
                 for swim in range(int(self.pars['NSWIM'])):
                     body_vel = body_disp[7*swim : 7*swim+3]/self.dt
                     average_vel[i-compute_start] += body_vel
+
+        
                     
         time_array = np.arange(compute_start, self.plot_end_frame ) * self.dt / T0
         average_vel /= float(self.pars['NSWIM'])

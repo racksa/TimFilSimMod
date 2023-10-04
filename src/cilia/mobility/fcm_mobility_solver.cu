@@ -239,11 +239,13 @@ void fcm_mobility_solver::apply_interparticle_forces(){
 
     const int num_thread_blocks = (std::max<int>(num_segs[0], num_blobs[0]) + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
 
-    cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
-    cufcm_solver->reform_fseg(f_segs_device[0], true);
-    cufcm_solver->apply_repulsion();
-    cufcm_solver->reform_fseg(f_segs_device[0], false);
-    cufcm_solver->reform_fblob(f_blobs_repulsion_device[0], false);
+    #if ROD
+      cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
+      cufcm_solver->reform_fseg(f_segs_device[0], true);
+      cufcm_solver->apply_repulsion();
+      cufcm_solver->reform_fseg(f_segs_device[0], false);
+      cufcm_solver->reform_fblob(f_blobs_repulsion_device[0], false);
+    #endif
 
   #endif
 
@@ -263,7 +265,6 @@ void fcm_mobility_solver::wait_for_device(){
 void fcm_mobility_solver::evaluate_segment_segment_mobility(){
 
   cudaSetDevice(0);
-  int num_thread_blocks = (num_segs[0] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
   cudaError_t err = cudaGetLastError();
   
   cufcm_solver->reform_xsegblob(x_segs_device[0], x_blobs_device[0], true);
@@ -299,8 +300,48 @@ void fcm_mobility_solver::evaluate_segment_segment_mobility(){
 
   // cufcm_solver->write_data_call();
   
-  copy_segment_velocities_to_host();
-  copy_blob_velocities_to_host();
+   // ########################### 
+  // copy_segment_velocities_to_host();
+  // copy_blob_velocities_to_host();
+  // wait_for_device();
+
+  // FILE *pfile;
+  // pfile = fopen("sim_data_fcm.dat", "a");
+  // for(int i = 0; i < NBLOB; i++){
+  //   fprintf(pfile, "%d %.16f %.16f %.16f \n", 
+  //   i, v_blobs_host[3*i + 0], v_blobs_host[3*i + 1], v_blobs_host[3*i + 2]);
+  // }
+  // for(int i = 0; i < NFIL; i++){
+  //   fprintf(pfile, "%d %.16f %.16f %.16f \n", 
+  //   i, v_segs_host[6*i + 0], v_segs_host[6*i + 1], v_segs_host[6*i + 2]);
+  // }
+  // fprintf(pfile, "\n#");
+  // fclose(pfile);
+
+  // // ########################### 
+  // int start_seg = 0;
+  // for (int n = 0; n < num_gpus; n++){
+  //   cudaSetDevice(n);
+  //   int num_thread_blocks = (num_segs[n] + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
+  //   Mss_mult<<<num_thread_blocks, THREADS_PER_BLOCK>>>(v_segs_device[n], f_segs_device[n], x_segs_device[n], start_seg, num_segs[n]);
+  //   start_seg += num_segs[n];
+  // }
+
+  // copy_segment_velocities_to_host();
+  // copy_blob_velocities_to_host();
+  // wait_for_device();
+  // pfile = fopen("sim_data_rpy.dat", "a");
+  // for(int i = 0; i < NBLOB; i++){
+  //   fprintf(pfile, "%d %.16f %.16f %.16f \n", 
+  //   i, v_blobs_host[3*i + 0], v_blobs_host[3*i + 1], v_blobs_host[3*i + 2]);
+  // }
+  // for(int i = 0; i < NFIL; i++){
+  //   fprintf(pfile, "%d %.16f %.16f %.16f \n", 
+  //   i, v_segs_host[6*i + 0], v_segs_host[6*i + 1], v_segs_host[6*i + 2]);
+  // }
+  // fprintf(pfile, "\n#");
+  // fclose(pfile);
+
   
 }
 

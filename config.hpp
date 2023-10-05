@@ -32,7 +32,7 @@ extern std::string SIMULATION_TETHERLAM_NAME;
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Simulation type
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define CILIA_TYPE 0
+#define CILIA_TYPE 3
 // Valid options:
 // 0 = Instability-driven cilia. This choice has some sub-types (see below).
 // 1 = Geometrically-switching cilia (partially implemented)
@@ -106,7 +106,7 @@ extern std::string SIMULATION_TETHERLAM_NAME;
 
 #endif
 
-#define BODY_OR_SURFACE_TYPE 0
+#define BODY_OR_SURFACE_TYPE 2
 // Valid options:
 // 0 = An infinite plane wall at z = 0. This choice has some sub-types (see below).
 // 1 = Deformed planes with 2 principal curvatures (partially implemented)
@@ -136,7 +136,7 @@ extern std::string SIMULATION_TETHERLAM_NAME;
 
 #elif BODY_OR_SURFACE_TYPE==2 or BODY_OR_SURFACE_TYPE==4 or BODY_OR_SURFACE_TYPE==5
 
-  #define SEEDING_TYPE 0
+  #define SEEDING_TYPE 7
   // Valid options:
   // 0 = Filaments are evenly distributed over the surface.
   // 1 = Filaments are seeded in an equatorial band.
@@ -145,6 +145,7 @@ extern std::string SIMULATION_TETHERLAM_NAME;
   // 4 = Meridian seeding
   // 5 = Icosa seeding
   // 6 = Mismatched seeding
+  // 7 = Filaments are evenly distributed over the surface but with potential at poles
 
   #define FOURIER_DIR "data/fourier_modes/"
   #define GENERATRIX_FILE_NAME FOURIER_DIR "sphere"
@@ -163,7 +164,7 @@ extern std::string SIMULATION_TETHERLAM_NAME;
 // Define whether the motion of the rigid bodies is imposed or allowed to evolve dynamically.
 #define PRESCRIBED_BODY_VELOCITIES false
 
-#define MOBILITY_TYPE 4
+#define MOBILITY_TYPE 1
 // Valid options:
 // 0 = Basic Stokes drag. No hydrodynamic interactions between particles.
 // 1 = Rotne-Prager-Yamakawa (RPY) mobility matrices (with the corrections due to Swan and Brady if an infinite plane wall is selected).
@@ -246,7 +247,7 @@ extern float END_FORCE_MAGNITUDE;
 #define MAX_BROYDEN_ITER 400 // Maximum number of Broyden's method iterations per time-step.
 #define TOL 1e-4 // Tolerance to be reached by the Broyden's method solve.
 
-#define SOLVER_TYPE 0
+#define SOLVER_TYPE 1
 // Valid options:
 // 0: Use Broyden's method for absolutely everything. When there is a rigid body with forces (and velocities if they're not prescribed) to solve for,
 //    the associated linear system is embedded in the wider Broyden's solve, rather than being solved for the current iterate at each iteration.
@@ -424,6 +425,7 @@ extern float END_FORCE_MAGNITUDE;
   #define MERIDIAN_SEEDING (SEEDING_TYPE==4)
   #define ICOSA_SEEDING (SEEDING_TYPE==5)
   #define MISMATCH_SEEDING (SEEDING_TYPE==6)
+  #define UNIFORM_SEEDING_POLE (SEEDING_TYPE==7)
 
 #endif
 

@@ -11,6 +11,11 @@ import matplotlib.animation as animation
 import subprocess
 import time
 import configparser
+import matplotlib
+matplotlib.rcParams['mathtext.fontset'] = 'stix'
+matplotlib.rcParams['mathtext.rm'] = 'Bitstream Vera Sans'
+matplotlib.rcParams['mathtext.it'] = 'Bitstream Vera Sans:italic'
+matplotlib.rcParams['mathtext.bf'] = 'Bitstream Vera Sans:bold'
 
 overlap = {name for name in mcolors.CSS4_COLORS
            if f'xkcd:{name}' in mcolors.XKCD_COLORS}

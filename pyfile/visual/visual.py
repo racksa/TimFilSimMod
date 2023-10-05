@@ -11,12 +11,17 @@ import matplotlib.animation as animation
 import configparser
 import math
 import sys
+import matplotlib
+matplotlib.rcParams['mathtext.fontset'] = 'stix'
+matplotlib.rcParams['mathtext.rm'] = 'Bitstream Vera Sans'
+matplotlib.rcParams['mathtext.it'] = 'Bitstream Vera Sans:italic'
+matplotlib.rcParams['mathtext.bf'] = 'Bitstream Vera Sans:bold'
 
 class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20230814/"
+        self.dir = "data/expr_sims/20231005/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],

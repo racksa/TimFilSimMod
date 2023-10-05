@@ -1,5 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.rcParams['mathtext.fontset'] = 'stix'
+matplotlib.rcParams['mathtext.rm'] = 'Bitstream Vera Sans'
+matplotlib.rcParams['mathtext.it'] = 'Bitstream Vera Sans:italic'
+matplotlib.rcParams['mathtext.bf'] = 'Bitstream Vera Sans:bold'
 
 endp = 46
 fig = plt.figure(figsize=(12,3.5))
@@ -67,7 +72,7 @@ for i, ind0 in enumerate(bifurcation_indices_single[:-1]):
 	ind1 = bifurcation_indices_single[i+1]
 	ax2.plot(H_list[ind0:ind1], np.zeros(np.shape(H_list[ind0:ind1])), c='black', linestyle='', 
 		  ms=10, marker=markers_single[i], label=labels_single[i])
-ax2.set_xlabel('H/L')
+ax2.set_xlabel(r'$H/L$')
 # fig2.legend()
 
 
@@ -89,7 +94,7 @@ for i, ind0 in enumerate(bifurcation_indices_100[:-1]):
 	ind1 = bifurcation_indices_100[i+1]
 	ax3.plot(H_list[ind0:ind1], np.zeros(np.shape(H_list[ind0:ind1])), c='black', linestyle='', 
 		  ms=10, marker=markers[i], label=labels[i])
-ax3.set_xlabel('H/L')
+ax3.set_xlabel(r'$H/L$')
 # fig3.legend()
 
 

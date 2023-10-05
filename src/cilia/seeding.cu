@@ -646,6 +646,185 @@
 
   };
 
+  void equal_area_seeding_poles(Real *const pos_ref, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs, const int N, shape_fourier_description& shape){
+
+    if (N == 0){
+
+      return; // Because of the squirmer-style simulations, the code may try to seed 0 filaments.
+
+    }
+
+    // This function essentially implements a version of MacQueen's algorithm.
+    // We seed a large number of points randomly on the surface according to a uniform distribution, and then find
+    // our N points as the centres of regions of (approximately) equal area through N-means clustering.
+
+    int samples_per_iter = 1000;
+
+    // Allocate memory for the CUDA nearest-neighbour search.
+    Real *samples, *X;
+    cudaMallocManaged(&samples, 3*samples_per_iter*sizeof(Real));
+    cudaMallocManaged(&X, 3*N*sizeof(Real));
+
+    int *sample_nn_ids;
+    cudaMallocManaged(&sample_nn_ids, samples_per_iter*sizeof(int));
+
+    const int num_thread_blocks = (samples_per_iter + THREADS_PER_BLOCK - 1)/THREADS_PER_BLOCK;
+
+    // Generate initial guesses.
+    if (std::string(GENERATRIX_FILE_NAME) == std::string("sphere")){
+
+      // We use the spiral distribution given by Saff and Kuijlaars (1997) as our initial positions.
+      Real phi = 0.0;
+
+      for (int n = 0; n < N; n++){
+
+        const Real theta = std::acos((N == 1) ? -1.0 : 2.0*n/Real(N-1) - 1.0);
+
+        const matrix d = shape.location(theta, phi);
+
+        X[3*n] = d(0);
+        X[3*n + 1] = d(1);
+        X[3*n + 2] = d(2);
+
+        if (n == N-2){
+
+          phi = 0.0;
+
+        } else {
+
+          const Real r = std::sqrt(d(0)*d(0) + d(1)*d(1));
+
+          phi += 3.6/(r*std::sqrt(N));
+
+        }
+
+      }
+
+    } else {
+
+      // Use random initial positions.
+      for (int n = 0; n < N; n++){
+
+        const matrix sample = shape.random_point();
+        X[3*n] = sample(0);
+        X[3*n + 1] = sample(1);
+        X[3*n + 2] = sample(2);
+
+      }
+
+    }
+
+    std::vector<int> count(N);
+    std::vector<int> old_count(N); // Used to check for convergence.
+
+    for (int n = 0; n < N; n++){
+
+      count[n] = 1;
+      old_count[n] = 1;
+
+    }
+
+    int num_iters = 0;
+
+    while (num_iters < 10000){
+
+      // Sample from the uniform distribution on the surface.
+      for (int n = 0; n < samples_per_iter; n++){
+
+        const matrix sample = shape.random_point();
+
+        samples[3*n] = sample(0);
+        samples[3*n + 1] = sample(1);
+        samples[3*n + 2] = sample(2);
+
+      }
+      
+
+      // Find the candidate points closest to the random samples.
+      find_nearest_neighbours<<<num_thread_blocks, THREADS_PER_BLOCK>>>(sample_nn_ids, samples, samples_per_iter, X, N);
+      cudaDeviceSynchronize();
+
+      // Update the candidate points.
+      for (int n = 0; n < samples_per_iter; n++){
+
+        const int min_id = sample_nn_ids[n];
+
+        X[3*min_id] = (count[min_id]*X[3*min_id] + samples[3*n])/Real(count[min_id] + 1);
+        X[3*min_id + 1] = (count[min_id]*X[3*min_id + 1] + samples[3*n + 1])/Real(count[min_id] + 1);
+        X[3*min_id + 2] = (count[min_id]*X[3*min_id + 2] + samples[3*n + 2])/Real(count[min_id] + 1);
+
+        count[min_id]++;
+
+        shape.project_onto_surface(&X[3*min_id]);
+
+      }
+
+      num_iters++;
+
+      // Check for convergence.
+      // In general, I only expect this to trigger an early exit for small numbers of points (e.g. some filament seeding problems),
+      // and even then possibly only on spheres (or any other shapes that actually have some exact solutions).
+      if (num_iters % 100 == 0){
+
+        int max_change = 0;
+        int min_change = 1000000;
+
+        for (int n = 0; n < N; n++){
+
+          if (max_change < count[n]-old_count[n]){
+
+            max_change = count[n] - old_count[n];
+
+          }
+
+          if (min_change > count[n]-old_count[n]){
+
+            min_change = count[n] - old_count[n];
+
+          }
+
+        }
+
+        old_count = count;
+
+        if (Real(min_change)/Real(max_change) > 0.99){
+
+          break;
+
+        }
+
+      }
+
+    }
+
+    // Write the data for the final positions
+    for (int n = 0; n < N; n++){
+
+      pos_ref[3*n] = X[3*n];
+      pos_ref[3*n + 1] = X[3*n + 1];
+      pos_ref[3*n + 2] = X[3*n + 2];
+
+      const Real theta = std::atan2(std::sqrt(X[3*n]*X[3*n] + X[3*n + 1]*X[3*n + 1]), X[3*n + 2]);
+      const Real phi = std::atan2(X[3*n + 1], X[3*n]);
+
+      matrix frame = shape.full_frame(theta, phi);
+
+      polar_dir_refs[3*n] = frame(0);
+      polar_dir_refs[3*n + 1] = frame(1);
+      polar_dir_refs[3*n + 2] = frame(2);
+
+      azi_dir_refs[3*n] = frame(3);
+      azi_dir_refs[3*n + 1] = frame(4);
+      azi_dir_refs[3*n + 2] = frame(5);
+
+      normal_refs[3*n] = frame(6);
+      normal_refs[3*n + 1] = frame(7);
+      normal_refs[3*n + 2] = frame(8);
+
+    }
+
+  };
+
   void mismatch_seeding(Real *const pos_ref, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs, const int N, shape_fourier_description& shape){
     
     /*Implement the mismatched algorithm here.*/
@@ -1018,6 +1197,12 @@
       std::cout << "Seeking a mismatched distribution for the filaments..." << std::endl;
 
       mismatch_seeding(filament_references, polar_dir_refs, azi_dir_refs, normal_refs, NFIL, shape);
+
+    #elif UNIFORM_SEEDING_POLE
+
+      std::cout << "Seeking an equal-area distribution (repulsion at poles) for the filaments..." << std::endl;
+
+      equal_area_seeding_poles(filament_references, polar_dir_refs, azi_dir_refs, normal_refs, NFIL, shape);
 
     #endif
 

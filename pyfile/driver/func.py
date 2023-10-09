@@ -7,7 +7,7 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20231005/"
+        self.dir = "data/expr_sims/20231009/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -48,7 +48,7 @@ class DRIVER:
             for j in range(self.sweep_shape[1]):
                 for k in range(self.sweep_shape[2]):
                     for l in range(self.sweep_shape[3]):
-                        nfil = int(16*(i+1) )
+                        nfil = int(258*(i+1) )
                         nblob = int(2000*(1.25**j))
                         ar = round(3*(1.25**j), 2)
                         spring_factor = round(2, 2)
@@ -107,11 +107,11 @@ class DRIVER:
             self.write_ini("Filenames", "simulation_file", f"ciliate_{self.pars_list['nfil'][i]:.0f}fil_{self.pars_list['nblob'][i]:.0f}blob_{self.pars_list['ar'][i]:.2f}R_{self.pars_list['spring_factor'][i]:.2f}torsion")
             self.write_ini("Filenames", "simulation_dir", self.dir)
 
+            # command = f"export OPENBLAS_NUM_THREADS=1; \
+            #             export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
+            #             ./bin/cilia > terminal_outputs/output_{self.pars_list['nfil'][i]:.0f}fil_{i}.out"
+
             command = f"export OPENBLAS_NUM_THREADS=1; \
                         export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
-                        ./bin/cilia > terminal_outputs/output_{self.pars_list['nfil'][i]:.0f}fil_{i}.out"
-
-                # command = f"export OPENBLAS_NUM_THREADS=1; \
-                #             export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
-                #             ./bin/cilia"
+                        ./bin/cilia"
             os.system(command)

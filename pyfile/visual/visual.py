@@ -21,7 +21,7 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20231005/"
+        self.dir = "data/expr_sims/20231009/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -192,7 +192,7 @@ class VISUAL:
                                 old_seg_pos = seg_pos
                             elif (self.pars['PRESCRIBED_CILIA'] == 1):
                                 seg_pos = seg_states[fil_i+3*(seg-1) : fil_i+3*seg] 
-                            self.write_data(seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, self.periodic, True, True, color=fil_color)
+                            # self.write_data(seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, self.periodic, True, True, color=fil_color)
 
 
 ## Filaments

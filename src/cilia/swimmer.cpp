@@ -327,6 +327,9 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
 
     }
 
+    seed_filaments(&filament_references[0], &polar_dir_refs[0], &azi_dir_refs[0], &normal_refs[0]);
+
+
     #if SURFACE_OF_REVOLUTION_BODIES
 
       // The seeding functions work on unit-length bodies, so the scaling must be done after we read or calculate.

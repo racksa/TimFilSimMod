@@ -88,6 +88,112 @@
 
   } // End of kernel.
 
+  __global__ void find_nearest_neighbours_aux_points(int *const ids, const Real *const samples, const int num_samples, const Real *const X, const int N){
+
+    // Work out which sample(s) this thread will compute the nearest-neighbour for
+    const int index = threadIdx.x + blockIdx.x*blockDim.x;
+    const int stride = blockDim.x*gridDim.x;
+
+    // Declare the shared memory for this thread block
+    __shared__ Real x_shared[THREADS_PER_BLOCK];
+    __shared__ Real y_shared[THREADS_PER_BLOCK];
+    __shared__ Real z_shared[THREADS_PER_BLOCK];
+
+    Real xi, yi, zi;
+    int min_id;
+    Real min_dist = 1e100;
+
+    for (int i = index; (i-threadIdx.x) < num_samples; i+=stride){
+
+      if (i < num_samples){
+
+        xi = samples[3*i];
+        yi = samples[3*i + 1];
+        zi = samples[3*i + 2];
+
+      }
+
+      for (int j_start = 0; j_start < N; j_start += THREADS_PER_BLOCK){
+
+        const int j_to_read = j_start + threadIdx.x;
+
+        if (j_to_read < N){
+
+          x_shared[threadIdx.x] = X[3*j_to_read];
+          y_shared[threadIdx.x] = X[3*j_to_read + 1];
+          z_shared[threadIdx.x] = X[3*j_to_read + 2];
+
+        }
+
+        __syncthreads();
+
+        if (i < num_samples){
+
+          for (int j=0; (j < THREADS_PER_BLOCK) && (j_start + j < N); j++){
+
+            const Real dx = xi - x_shared[j];
+            const Real dy = yi - y_shared[j];
+            const Real dz = zi - z_shared[j];
+
+            const Real dist = sqrt(dx*dx + dy*dy + dz*dz);
+
+            
+
+            if (dist < min_dist){
+
+              // printf("x(%.8f %.8f %.8f) y(%.8f %.8f %.8f) dist %.8f  mindist %.8f\n",
+              // xi, yi, zi, x_shared[j], y_shared[j], z_shared[j], dist, min_dist);
+
+              min_dist = dist;
+              min_id = j_start + j;
+
+            }
+
+          }
+
+        }
+
+        __syncthreads();
+
+      }
+
+      // Add filtered points here
+      // const Real X_filter[] = {0,0,-0.5, 0,0,0.5 };
+      // const int num_filter = 2;
+      // for (int j_filter = 0; j_filter < num_filter; j_filter++){
+      //   if (i < num_samples){
+
+      //     const Real dx = xi - X_filter[3*j_filter];
+      //     const Real dy = yi - X_filter[3*j_filter+1];
+      //     const Real dz = zi - X_filter[3*j_filter+2];
+
+      //     const Real dist = 0.3*sqrt(dx*dx + dy*dy + dz*dz);
+
+      //     if (dist < min_dist){
+
+      //       min_dist = dist;
+      //       min_id = -1;
+
+      //     }
+
+      //   }
+
+      //   __syncthreads();
+
+      // }
+      // End of adding filtered points
+
+      if (i < num_samples){
+
+        ids[i] = min_id;
+
+      }
+
+      
+
+    }
+
+  } // End of kernel.
 
 
 
@@ -291,7 +397,7 @@
 
     matrix sample(3,1);
 
-    if (std::string(GENERATRIX_FILE_NAME) == std::string("sphere")){
+    if (std::string(GENERATRIX_FILE_NAME) == std::string(FOURIER_DIR) + std::string("sphere")){
 
       // There's a really simple way of generating uniform samples on a sphere.
       std::normal_distribution<Real> d(0.0, 1.0);
@@ -332,6 +438,47 @@
         }
 
       }
+
+    }
+
+    return sample;
+
+  };
+
+  matrix random_point_away_from_poles(const Real shift_ratio){
+
+    // N.B. The Mersenne twister "gen" is modified whenever we call upon it, so this method cannot be
+    // const and consequently this class cannot be passed as const to the seeding function.
+
+    matrix sample(3,1);
+
+    if (std::string(GENERATRIX_FILE_NAME) == std::string(FOURIER_DIR) + std::string("sphere")){
+
+      // There's a really simple way of generating uniform samples on a sphere.
+      std::normal_distribution<Real> d(0.0, 1.0);
+
+      sample(0) = d(gen);
+      sample(1) = d(gen);
+      sample(2) = d(gen);
+
+      const Real sample_norm = norm(sample);
+      
+      sample /= sample_norm;
+
+      Real theta = std::atan2(std::sqrt(sample(0)*sample(0) + sample(1)*sample(1)),sample(2));
+      const Real phi = std::atan2(sample(1), sample(0));
+
+      theta = theta*(1-2*shift_ratio)+shift_ratio*PI;
+
+      sample(0) = sample_norm*std::sin(theta)*std::sin(phi);
+      sample(1) = sample_norm*std::sin(theta)*std::cos(phi);
+      sample(2) = sample_norm*std::cos(theta);
+     
+      sample /= sample_norm;
+
+    } else {
+
+      std::cout<< "Non-spherical shape not implemented." << std::endl;
 
     }
 
@@ -678,7 +825,7 @@
 
       for (int n = 0; n < N; n++){
 
-        const Real theta = std::acos((N == 1) ? -1.0 : 2.0*n/Real(N-1) - 1.0);
+        const Real theta = std::acos((N == 1) ? -0.5 : 1.0*n/Real(N-1) - 0.5);
 
         const matrix d = shape.location(theta, phi);
 
@@ -731,7 +878,7 @@
       // Sample from the uniform distribution on the surface.
       for (int n = 0; n < samples_per_iter; n++){
 
-        const matrix sample = shape.random_point();
+        const matrix sample = shape.random_point_away_from_poles(0.1);
 
         samples[3*n] = sample(0);
         samples[3*n + 1] = sample(1);
@@ -749,14 +896,16 @@
 
         const int min_id = sample_nn_ids[n];
 
-        X[3*min_id] = (count[min_id]*X[3*min_id] + samples[3*n])/Real(count[min_id] + 1);
-        X[3*min_id + 1] = (count[min_id]*X[3*min_id + 1] + samples[3*n + 1])/Real(count[min_id] + 1);
-        X[3*min_id + 2] = (count[min_id]*X[3*min_id + 2] + samples[3*n + 2])/Real(count[min_id] + 1);
+        // Hang: min_id == -1 means the nearest neighbour is the aux-point where we want filaments to avoid.
+        if(!(min_id == -1)){
+          X[3*min_id] = (count[min_id]*X[3*min_id] + samples[3*n])/Real(count[min_id] + 1);
+          X[3*min_id + 1] = (count[min_id]*X[3*min_id + 1] + samples[3*n + 1])/Real(count[min_id] + 1);
+          X[3*min_id + 2] = (count[min_id]*X[3*min_id + 2] + samples[3*n + 2])/Real(count[min_id] + 1);
 
-        count[min_id]++;
+          count[min_id]++;
 
-        shape.project_onto_surface(&X[3*min_id]);
-
+          shape.project_onto_surface(&X[3*min_id]);
+        }
       }
 
       num_iters++;
@@ -795,6 +944,20 @@
 
       }
 
+    }
+
+    // Shift away from poles
+    const Real shift_ratio = 0.0;
+    for (int n = 0; n < N; n++){
+
+      Real theta = std::atan2(std::sqrt(X[3*n]*X[3*n] + X[3*n + 1]*X[3*n + 1]), X[3*n + 2]);
+      const Real phi = std::atan2(X[3*n + 1], X[3*n]);
+
+      theta = theta*(1-2*shift_ratio)+shift_ratio*PI;
+
+      X[3*n] = 0.5*std::sin(theta)*std::sin(phi);
+      X[3*n + 1] = 0.5*std::sin(theta)*std::cos(phi);
+      X[3*n + 2] = 0.5*std::cos(theta);
     }
 
     // Write the data for the final positions

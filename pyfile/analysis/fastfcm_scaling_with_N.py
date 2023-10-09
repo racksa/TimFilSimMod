@@ -16,7 +16,7 @@ rod_total_time_list = np.array([7.963457e-03, 1.540168e-02, 3.568006e-02,\
                              8.318663e-01, 1.590558e+00 ])
 rod_Niter_list = np.array([6.6, 14.5, 24, 27, 31.5, 34, 39, 49])
 
-fig1 = plt.figure(figsize=(4.8, 3.2))
+fig1 = plt.figure(figsize=(4.8, 3.6))
 ax11 = fig1.add_subplot(1,1,1)
 ax12 = ax11.twinx()
 ax11.plot(Nrod_list, rod_fcm_time_list, marker='+', linestyle='dotted', c='black', label='Fast FCM')
@@ -42,7 +42,7 @@ fil_total_time_list = np.array([2.389592e-02, 2.495763e-02, 1.707681e-02, 2.7193
                                 9.131879e-02, 2.813344e-01, 4.684991e-01 ])
 fil_Niter_list = np.array([4, 5, 7, 8, 
                            11, 17, 25])
-fig2 = plt.figure(figsize=(4.8, 3.2))
+fig2 = plt.figure(figsize=(4.8, 3.6))
 ax21 = fig2.add_subplot(1,1,1)
 ax22 = ax21.twinx()
 ax21.plot(Nfil_list, fil_fcm_time_list, marker='+', linestyle='dotted', c='black', label='Fast FCM')

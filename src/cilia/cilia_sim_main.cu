@@ -519,6 +519,15 @@ int main(int argc, char** argv){
 
     }
 
+    #if CUFCM
+      if(nt%10==0){
+        std::cout << "Checking overlap";
+        std::cout << DELETE_CURRENT_LINE << std::flush;
+        
+        mobility.cufcm_solver->check_overlap();
+      }
+    #endif
+
     #if (PRESCRIBED_CILIA || NO_CILIA_SQUIRMER)
 
       std::cout << "Completed step " << nt+1 << "/" << TOTAL_TIME_STEPS << " in " << num_gmres_iterations << " iterations of the linear system solver." << std::endl;

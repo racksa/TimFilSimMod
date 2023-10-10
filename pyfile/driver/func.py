@@ -7,7 +7,7 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20231009/"
+        self.dir = "data/expr_sims/20231010/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -48,7 +48,7 @@ class DRIVER:
             for j in range(self.sweep_shape[1]):
                 for k in range(self.sweep_shape[2]):
                     for l in range(self.sweep_shape[3]):
-                        nfil = int(258*(i+1) )
+                        nfil = int(1*(i+1) )
                         nblob = int(2000*(1.25**j))
                         ar = round(3*(1.25**j), 2)
                         spring_factor = round(2, 2)

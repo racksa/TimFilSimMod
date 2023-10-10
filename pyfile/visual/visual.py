@@ -21,7 +21,8 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20231009/"
+        self.dir = "/home/clustor2/ma/h/hs2216/20230814/"
+        # self.dir = "data/expr_sims/20230814/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -192,7 +193,7 @@ class VISUAL:
                                 old_seg_pos = seg_pos
                             elif (self.pars['PRESCRIBED_CILIA'] == 1):
                                 seg_pos = seg_states[fil_i+3*(seg-1) : fil_i+3*seg] 
-                            # self.write_data(seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, self.periodic, True, True, color=fil_color)
+                            self.write_data(seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, self.periodic, True, True, color=fil_color)
 
 
 ## Filaments
@@ -1344,13 +1345,13 @@ class VISUAL:
         # Plotting
         fig = plt.figure()
         ax = fig.add_subplot(1,1,1)
-        fig2 = plt.figure(dpi=300)
+        fig2 = plt.figure()
         ax2 = fig2.add_subplot(1,1,1)
-        fig3 = plt.figure(dpi=300)
+        fig3 = plt.figure()
         ax3 = fig3.add_subplot(1,1,1)
-        fig4 = plt.figure(dpi=300)
+        fig4 = plt.figure()
         ax4 = fig4.add_subplot(1,1,1)
-        fig5 = plt.figure(dpi=300)
+        fig5 = plt.figure()
         ax5 = fig5.add_subplot(1,1,1)
 
         nfil_list = np.array(self.pars_list['nfil'])
@@ -1432,7 +1433,7 @@ class VISUAL:
         ax2.scatter(self.pars_list['nfil'], self.pars_list['ar'], s=100, c=speed_list, edgecolors='red', linewidths=0.1, cmap=colormap)
         ax2.set_xlabel("Nfil")
         ax2.set_ylabel("R/L")
-        fig2.savefig(f'fig/multi_ciliate_speed_summary_heatmap.png', bbox_inches = 'tight', format='png')
+        # fig2.savefig(f'fig/multi_ciliate_speed_summary_heatmap.png', bbox_inches = 'tight', format='png')
         fig2.savefig(f'fig/multi_ciliate_speed_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
 
         # Angular speed
@@ -1447,7 +1448,7 @@ class VISUAL:
         ax3.scatter(self.pars_list['nfil'], self.pars_list['ar'], s=100, c=angular_speed_list, edgecolors='red', linewidths=0.1, cmap=colormap)
         ax3.set_xlabel("Nfil")
         ax3.set_ylabel("R/L")
-        fig3.savefig(f'fig/multi_ciliate_angular_speed_summary_heatmap.png', bbox_inches = 'tight', format='png')
+        # fig3.savefig(f'fig/multi_ciliate_angular_speed_summary_heatmap.png', bbox_inches = 'tight', format='png')
         fig3.savefig(f'fig/multi_ciliate_angular_speed_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
 
         # Dissipation
@@ -1462,7 +1463,7 @@ class VISUAL:
         ax4.scatter(self.pars_list['nfil'], self.pars_list['ar'], s=100, c=dissipation_list, edgecolors='red', linewidths=0.1, cmap=colormap)
         ax4.set_xlabel("Nfil")
         ax4.set_ylabel("R/L")
-        fig4.savefig(f'fig/multi_ciliate_dissipation_summary_heatmap.png', bbox_inches = 'tight', format='png')
+        # fig4.savefig(f'fig/multi_ciliate_dissipation_summary_heatmap.png', bbox_inches = 'tight', format='png')
         fig4.savefig(f'fig/multi_ciliate_dissipation_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
 
         # Efficiency
@@ -1478,7 +1479,7 @@ class VISUAL:
         ax5.scatter(self.pars_list['nfil'], self.pars_list['ar'], s=100, c=efficiency_list, edgecolors='red', linewidths=0.1, cmap=colormap)
         ax5.set_xlabel("Nfil")
         ax5.set_ylabel("R/L")
-        fig5.savefig(f'fig/multi_ciliate_efficiency_summary_heatmap.png', bbox_inches = 'tight', format='png')
+        # fig5.savefig(f'fig/multi_ciliate_efficiency_summary_heatmap.png', bbox_inches = 'tight', format='png')
         fig5.savefig(f'fig/multi_ciliate_efficiency_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
         
 
@@ -1487,7 +1488,7 @@ class VISUAL:
         ax.set_ylabel("Dissipation")
         ax.set_xlabel("Number of filaments")
         fig.tight_layout()
-        fig.savefig(f'fig/ciliate_dissipation_summary.png', bbox_inches = 'tight', format='png')
+        # fig.savefig(f'fig/ciliate_dissipation_summary.png', bbox_inches = 'tight', format='png')
         fig.savefig(f'fig/ciliate_dissipation_summary.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 

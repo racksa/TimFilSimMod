@@ -19,6 +19,13 @@ if(len(sys.argv) > 1):
             driver.cuda_device = int(sys.argv[4])
         driver.run()
 
+    if(sys.argv[1] == 'run_rules'):
+        if(len(sys.argv) > 4):
+            driver.current_thread = int(sys.argv[2])
+            driver.num_thread = int(sys.argv[3])
+            driver.cuda_device = int(sys.argv[4])
+        driver.run()
+
 
 
 

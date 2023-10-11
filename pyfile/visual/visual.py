@@ -21,8 +21,8 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "/home/clustor2/ma/h/hs2216/20230814/"
-        # self.dir = "data/expr_sims/20230814/"
+        # self.dir = "/home/clustor2/ma/h/hs2216/20230814/"
+        self.dir = "data/expr_sims/20230922/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -37,7 +37,7 @@ class VISUAL:
         self.big_sphere = True
 
         self.plot_end_frame = 30000
-        self.frames = 300
+        self.frames = 1000
 
         self.Lx = 1000
         self.Ly = 1000

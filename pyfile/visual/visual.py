@@ -21,8 +21,8 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        # self.dir = "/home/clustor2/ma/h/hs2216/20230814/"
-        self.dir = "data/expr_sims/20230922/"
+        self.dir = "/home/clustor2/ma/h/hs2216/20230922/"
+        # self.dir = "data/expr_sims/20230922/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -73,9 +73,10 @@ class VISUAL:
         sim = configparser.ConfigParser()
         try:
             sim.read(self.dir+"rules.ini")
+            num_elst = len(np.unique([float(s) for s in sim["Parameter list"]['spring_factor'].split(', ')]))
             for key, value in self.pars_list.items():
                 if(key in sim["Parameter list"]):
-                    self.pars_list[key] = [float(x) for x in sim["Parameter list"][key].split(', ')][0::1]
+                    self.pars_list[key] = [float(x) for x in sim["Parameter list"][key].split(', ')][0::num_elst]
             self.num_sim = len(self.pars_list["nfil"])            
         except:
             print("WARNING: " + self.dir + "rules.ini not found.")

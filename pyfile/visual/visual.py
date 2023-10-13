@@ -21,8 +21,8 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "/home/clustor2/ma/h/hs2216/20230922/"
-        # self.dir = "data/expr_sims/20230922/"
+        # self.dir = "/home/clustor2/ma/h/hs2216/20230922/"
+        self.dir = "data/expr_sims/20231011/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -73,10 +73,16 @@ class VISUAL:
         sim = configparser.ConfigParser()
         try:
             sim.read(self.dir+"rules.ini")
+            num_fil = len(np.unique([float(s) for s in sim["Parameter list"]['nfil'].split(', ')]))
+            num_ar = len(np.unique([float(s) for s in sim["Parameter list"]['ar'].split(', ')]))
             num_elst = len(np.unique([float(s) for s in sim["Parameter list"]['spring_factor'].split(', ')]))
+            num_per_elst = int(num_fil*num_ar)
+            select_elst = 0
+
             for key, value in self.pars_list.items():
                 if(key in sim["Parameter list"]):
-                    self.pars_list[key] = [float(x) for x in sim["Parameter list"][key].split(', ')][0::num_elst]
+                    # self.pars_list[key] = [float(x) for x in sim["Parameter list"][key].split(', ')][0::num_elst]
+                    self.pars_list[key] = [float(x) for x in sim["Parameter list"][key].split(', ')][num_per_elst*select_elst:num_per_elst*(select_elst+1)]
             self.num_sim = len(self.pars_list["nfil"])            
         except:
             print("WARNING: " + self.dir + "rules.ini not found.")
@@ -912,7 +918,6 @@ class VISUAL:
         # Plotting
         colormap = 'cividis'
         colormap = 'twilight_shifted'
-
 
         nrow = len(np.unique(self.pars_list['nfil']))
         ncol = len(np.unique(self.pars_list['ar']))

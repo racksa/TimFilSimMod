@@ -386,9 +386,6 @@ void filament::initial_setup(const Real *const base_pos,
       Real seg_pos[3] = {base_pos[0], base_pos[1], base_pos[2]};
       Real seg_u[3] = {0.0, 0.0, 0.0};
 
-      // printf("fil %d (%.4f %.4f %.4f)\n",
-      //       fil_id, base_pos[0], base_pos[1], base_pos[2]);
-
       for (int i = 0; i < NSEG; i++) {
 
         segments[i].initial_setup(seg_pos, qtemp, seg_u);

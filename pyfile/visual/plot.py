@@ -6,7 +6,7 @@ import sys
 visualiser = visual.VISUAL()
 
 # lists of available options
-list_of_single_options = ['plot', 'plot_fil', 'phase', 'ciliate', 'ciliate_speed', 'ciliate_traj', 
+list_of_single_options = ['plot', 'plot_fil', 'phase', 'eckert', 'ciliate', 'ciliate_speed', 'ciliate_traj', 
                    'timing', 'ciliate_forcing', 'ciliate_dissipation',
                    'ciliate_svd', 'ciliate_dmd']
 list_of_multi_options = ['multi_phase', 'multi_ciliate', 'multi_ciliate_traj',

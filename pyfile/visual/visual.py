@@ -22,7 +22,7 @@ class VISUAL:
     def __init__(self):
         self.globals_name = 'globals.ini'
         # self.dir = "/home/clustor2/ma/h/hs2216/20230922/"
-        self.dir = "data/expr_sims/20231011/"
+        self.dir = "data/expr_sims/20231009/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -341,6 +341,22 @@ class VISUAL:
             plt.savefig(f'fig/fil_phase_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
             plt.show()
 
+    def eckert(self):
+        from scipy import optimize
+        def eckert_projection(theta, phi):
+            sign = 1
+            if theta >= np.pi/2:
+                theta = (np.pi/2 - (theta - np.pi/2))
+                sign = -1
+            
+            k=optimize.newton(find_k, 1, args=(theta,))
+
+            x = 0.4222382*R*(phi-phi0)*(1+np.cos(k))
+            y = 1.3265004*R*np.sin(k)*sign
+            return x, y
+    
+        return
+        
     def ciliate(self):
         self.select_sim()
 

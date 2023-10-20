@@ -770,7 +770,7 @@ void filament::accept_state_from_rigid_body(const Real *const x_in, const Real *
         // Start with the whole trapeziums
         fitted_shape_tangent(tx, ty, 0);
         Real f0 = sqrt(tx*tx + ty*ty);
-        const Real floor_val = floor(s/dl);
+        const Real floor_val = myfil_floor(s/dl);
 
         for (int n = 1; n <= floor_val; n++){
 
@@ -858,7 +858,7 @@ void filament::accept_state_from_rigid_body(const Real *const x_in, const Real *
 
         // Bilinear interpolation
         Real phi_index = 0.5*phase/PI; // = phase/(2*pi)
-        phi_index -= std::floor(phi_index); // Map this ratio into [0,1)
+        phi_index -= myfil_floor(phi_index); // Map this ratio into [0,1)
         phi_index *= (*s_to_use_ref_ptr).num_rows;
 
         int phi_index_int_lower_bound = int(phi_index); // Rounds towards 0.

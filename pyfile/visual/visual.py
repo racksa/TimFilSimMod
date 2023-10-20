@@ -22,7 +22,7 @@ class VISUAL:
     def __init__(self):
         self.globals_name = 'globals.ini'
         # self.dir = "/home/clustor2/ma/h/hs2216/20230922/"
-        self.dir = "data/expr_sims/20231009/"
+        self.dir = "data/expr_sims/20231011/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -31,13 +31,14 @@ class VISUAL:
                      "ar": [],
                      "spring_factor": []}
         self.video = False
+        self.interpolate = False
         self.output_to_fcm = False
         self.output_to_superpunto = True
         self.periodic = False
         self.big_sphere = True
 
-        self.plot_end_frame = 30000
-        self.frames = 1000
+        self.plot_end_frame = 150
+        self.frames = 150
 
         self.Lx = 1000
         self.Ly = 1000
@@ -77,7 +78,7 @@ class VISUAL:
             num_ar = len(np.unique([float(s) for s in sim["Parameter list"]['ar'].split(', ')]))
             num_elst = len(np.unique([float(s) for s in sim["Parameter list"]['spring_factor'].split(', ')]))
             num_per_elst = int(num_fil*num_ar)
-            select_elst = 0
+            select_elst = 1
 
             for key, value in self.pars_list.items():
                 if(key in sim["Parameter list"]):
@@ -302,19 +303,34 @@ class VISUAL:
 
         global frame
         frame = 0
+        import scipy.interpolate
 
         def animation_func(t):
             global frame
 
             ax.cla()
             fil_phases_str = fil_phases_f.readline()
-
             fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
             fil_phases = util.box(fil_phases, 2*np.pi)
+
+            fil_angles_str = fil_angles_f.readline()
+            fil_angles = np.array(fil_angles_str.split()[1:], dtype=float)
+
             for i in range(self.nfil):
                 fil_references_sphpolar[i] = util.cartesian_to_spherical(self.fil_references[3*i: 3*i+3])
-                
-            ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=fil_phases, cmap=colormap)
+
+            # Interpolation
+            if (self.interpolate):
+                n1, n2 = 100, 100
+                azim_grid = np.linspace(-np.pi, np.pi, n1)
+                polar_grid = np.linspace(0, np.pi, n2)
+                xx, yy = np.meshgrid(azim_grid, polar_grid)
+                zz = scipy.interpolate.griddata((fil_references_sphpolar[:,1],fil_references_sphpolar[:,2]), fil_phases, (xx, yy), method='cubic')
+                ax.scatter(xx, yy, c=zz, cmap=colormap)
+            else:
+            # Individual filaments
+                ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=fil_phases, cmap=colormap)
+
             frame += 1
 
         if(self.video):
@@ -342,7 +358,12 @@ class VISUAL:
             plt.show()
 
     def eckert(self):
+        R = 1
+        phi0 = np.pi
         from scipy import optimize
+        def find_k(k, theta):
+            return k + np.sin(k)*np.cos(k) + 2*np.sin(k) - (2 + np.pi/2)*np.sin(theta)
+
         def eckert_projection(theta, phi):
             sign = 1
             if theta >= np.pi/2:
@@ -355,8 +376,80 @@ class VISUAL:
             y = 1.3265004*R*np.sin(k)*sign
             return x, y
     
-        return
+        self.select_sim()
         
+        fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
+        fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
+
+        # Plotting
+        colormap = 'cividis'
+        colormap = 'twilight_shifted'
+
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+        fil_references_sphpolar = np.zeros((self.nfil,3))
+
+        from matplotlib.colors import Normalize
+        from matplotlib.cm import ScalarMappable
+        norm = Normalize(vmin=0, vmax=2*np.pi)
+        sm = ScalarMappable(cmap=colormap, norm=norm)
+        sm.set_array([])
+        cbar = plt.colorbar(sm)
+        cbar.ax.set_yticks(np.linspace(0, 2*np.pi, 7), ['0', 'π/3', '2π/3', 'π', '4π/3', '5π/3', '2π'])
+        cbar.set_label(r"phase")
+
+        ax.set_ylabel(r"$\theta$")
+        ax.set_xlabel(r"$\phi$")
+        # ax.set_xlim(-np.pi, np.pi)
+        # ax.set_ylim(0, np.pi)
+        ax.set_xticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0', 'π/2', 'π'])
+        ax.set_yticks(np.linspace(0, np.pi, 5), ['0', 'π/4', 'π/2', '3π/4', 'π'])
+
+        global frame
+        frame = 0
+
+        def animation_func(t):
+            global frame
+
+            ax.cla()
+            fil_phases_str = fil_phases_f.readline()
+
+            fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
+            fil_phases = util.box(fil_phases, 2*np.pi)
+            for i in range(self.nfil):
+                fil_references_sphpolar[i] = util.cartesian_to_spherical(self.fil_references[3*i: 3*i+3])
+                
+            projected_points = [eckert_projection(theta, phi) for theta, phi in zip(fil_references_sphpolar[:,2], fil_references_sphpolar[:,1])]
+            projected_x, projected_y = zip(*projected_points)
+            
+            ax.scatter(projected_x, projected_y, c=fil_phases, cmap=colormap)
+            frame += 1
+
+        if(self.video):
+            for i in range(self.plot_end_frame):
+                print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
+                if(i>=self.plot_start_frame):
+                    frame = i
+                    plt.rcParams['animation.ffmpeg_path'] = '/usr/bin/ffmpeg'
+                    ani = animation.FuncAnimation(fig, animation_func, frames=500, interval=10, repeat=False)
+                    plt.show()
+                    FFwriter = animation.FFMpegWriter(fps=10)
+                    ani.save(f'fig/fil_phase_{self.nfil}fil_anim.mp4', writer=FFwriter)
+                    break
+                else:
+                    fil_phases_str = fil_phases_f.readline()
+        else:
+            for i in range(self.plot_end_frame):
+                print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
+                if(i==self.plot_end_frame-1):
+                    animation_func(i)
+                else:
+                    fil_phases_str = fil_phases_f.readline()
+
+            plt.savefig(f'fig/fil_phase_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+            plt.show()
+        
+
     def ciliate(self):
         self.select_sim()
 
@@ -717,7 +810,6 @@ class VISUAL:
 
         nfil = self.nfil
         n_snapshots = min(30, self.plot_end_frame)
-        r = min(nfil, n_snapshots-1)
         start = self.plot_end_frame - n_snapshots
         X = np.zeros((nfil, n_snapshots))
 
@@ -945,6 +1037,7 @@ class VISUAL:
         # cax = fig.add_axes([0.92, 0.1, 0.02, 0.8])  # [left, bottom, width, height] for the colorbar
 
         axs_flat = axs.ravel()
+        import scipy.interpolate
 
         for ind, ax in enumerate(axs_flat):
             if (ind < self.num_sim):
@@ -965,7 +1058,18 @@ class VISUAL:
                             for i in range(self.nfil):
                                 fil_references_sphpolar[i] = util.cartesian_to_spherical(self.fil_references[3*i: 3*i+3])
                                 
-                            ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=fil_phases, cmap=colormap)
+                            if (self.interpolate):
+                                n1, n2 = 100, 100
+                                azim_grid = np.linspace(-np.pi, np.pi, n1)
+                                polar_grid = np.linspace(0, np.pi, n2)
+                                xx, yy = np.meshgrid(azim_grid, polar_grid)
+                                zz = scipy.interpolate.griddata((fil_references_sphpolar[:,1],fil_references_sphpolar[:,2]), fil_phases, (xx, yy), method='cubic')
+                                ax.scatter(xx, yy, c=zz, cmap=colormap)
+                            else:
+                            # Individual filaments
+                                ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=fil_phases, cmap=colormap)
+
+                            # ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=fil_phases, cmap=colormap)
                     ax.set_ylabel(r"$\theta$")
                     ax.set_xlabel(r"$\phi$")
                     ax.set_xlim(-np.pi, np.pi)
@@ -1173,9 +1277,14 @@ class VISUAL:
 
     def multi_ciliate_svd(self):
          # Plotting
-        nrow = int(self.num_sim**.5)
-        ncol = nrow + (1 if nrow**2 < self.num_sim else 0)
+        nrow = len(np.unique(self.pars_list['nfil']))
+        ncol = len(np.unique(self.pars_list['ar']))
+        spring_factor = self.pars_list['spring_factor'][0]
+
+        # nrow = int(self.num_sim**.5)
+        # ncol = nrow + (1 if nrow**2 < self.num_sim else 0)
         fig, axs = plt.subplots(nrow, ncol, figsize=(18, 18), sharex=True, sharey=True)
+    
         axs_flat = axs.ravel()
 
         for ind, ax in enumerate(axs_flat):
@@ -1185,61 +1294,73 @@ class VISUAL:
                     self.select_sim()
 
                     fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
+                    fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
+
 
                     nfil = self.nfil
-                    n_snapshots = min(60, self.plot_end_frame)
+                    n_snapshots = min(900, self.plot_end_frame)
                     start = self.plot_end_frame - n_snapshots
-                    fil_A = np.zeros((n_snapshots, nfil))
+                    X = np.zeros((nfil, n_snapshots))
+                    X_angle = np.zeros((nfil, n_snapshots))
 
                     fil_references_sphpolar = np.zeros((nfil,3))
                     for fil in range(nfil):
                         fil_references_sphpolar[fil] = util.cartesian_to_spherical(self.fil_references[3*fil: 3*fil+3])
                     azim_array = fil_references_sphpolar[:,1]
+                    polar_array = fil_references_sphpolar[:,2]
                     sorted_indices = np.argsort(azim_array)
                     azim_array_sorted = azim_array[sorted_indices]
+                    polar_array_sorted = polar_array[sorted_indices]
 
-                    phi0 = 0
                     for i in range(self.plot_end_frame):
                         print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
                         fil_phases_str = fil_phases_f.readline()
-            
+                        fil_angles_str = fil_angles_f.readline()
+                        
                         if(i>=start):
-                            
                             fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
                             fil_phases_sorted = fil_phases[sorted_indices]
                             fil_phases_sorted = util.box(fil_phases_sorted, 2*np.pi)
 
-                            phi0 = fil_phases_sorted[0]
-                            fil_phases_sorted = fil_phases_sorted - phi0
                             fil_phases_sorted = np.sin(fil_phases_sorted)
 
-                            fil_A[i-start] = fil_phases_sorted[:nfil]
+                            fil_angles = np.array(fil_angles_str.split()[1:], dtype=float)
+                            fil_angles_sorted = fil_angles[sorted_indices]
 
-                    res = np.linalg.svd(fil_A)
-                    svd_diag = np.zeros(np.shape(fil_A))
-                    diag = np.diag(res[1])
-                    svd_diag[:diag.shape[0], :diag.shape[1]] = diag
-                    pc = res[0] @ svd_diag
-                    pa = res[2]
+                            X[:,i-start] = fil_phases_sorted[:nfil]
+                            X_angle[:,i-start] = fil_angles_sorted[:nfil]
                     
-                    num_fil = 4
-                    num_mode = 2
-                    pa[num_mode:] = 0
+                    np.savetxt(f'phase_data/spring_constant{spring_factor}/by_index/X_phase_index{self.index}.txt', X, delimiter=', ')
+                    np.savetxt(f'phase_data/spring_constant{spring_factor}/by_index/X_rotation_angle_index{self.index}.txt', X_angle, delimiter=', ')
+                    np.savetxt(f'phase_data/spring_constant{spring_factor}/by_index/azim_pos_index{self.index}.txt', azim_array_sorted, delimiter=', ')
+                    np.savetxt(f'phase_data/spring_constant{spring_factor}/by_index/polar_pos_index{self.index}.txt', polar_array_sorted, delimiter=', ')
 
-                    for fil in range(num_fil):
-                        abs_pc = np.abs(pc[fil][:nfil])
-                        ax.plot(np.cumsum(abs_pc)/np.sum(abs_pc), label=f'fil {fil}')
-                    ax.set_xlabel('Mode')
-                    ax.set_ylabel('Accumulated |weight| fraction')
-                    ax.legend()
+                    np.savetxt(f'phase_data/spring_constant{spring_factor}/by_pars/X_phase_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', X, delimiter=', ')
+                    np.savetxt(f'phase_data/spring_constant{spring_factor}/by_pars/X_rotation_angle_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', X_angle, delimiter=', ')
+                    np.savetxt(f'phase_data/spring_constant{spring_factor}/by_pars/azim_pos_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', azim_array_sorted, delimiter=', ')
+                    np.savetxt(f'phase_data/spring_constant{spring_factor}/by_pars/polar_pos_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', polar_array_sorted, delimiter=', ')
+
+
+                    U, sigma, V = np.linalg.svd(X, full_matrices=False)
+                    Sigma = np.diag(sigma)
+
+                    pc = U @ Sigma
+                    pa = V
+
+                    # for fil in range(num_fil):
+                    #     abs_pc = np.abs(pc[fil][:nfil])
+                    #     ax.plot(np.cumsum(abs_pc)/np.sum(abs_pc), label=f'fil {fil}')
+                    # ax.set_xlabel('Mode')
+                    # ax.set_ylabel('Accumulated |weight| fraction')
+                    # ax.legend()
 
                 except:
                     print("WARNING: " + self.simName + " not found.")
 
-        plt.tight_layout()
-        plt.savefig(f'fig/multi_svd.png', bbox_inches = 'tight', format='png')
-        plt.savefig(f'fig/multi_svd.pdf', bbox_inches = 'tight', format='pdf')
-        plt.show()
+        # plt.tight_layout()
+        # plt.savefig(f'fig/multi_svd.png', bbox_inches = 'tight', format='png')
+        # plt.savefig(f'fig/multi_svd.pdf', bbox_inches = 'tight', format='pdf')
+        # plt.show()
     
 # Summary plot
     def summary_ciliate_speed(self):

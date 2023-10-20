@@ -15,6 +15,7 @@
 *.azi_dir
 *.pbs.e*
 *.pbs.o*
+*.txt
 
 # ignore all videos and figures
 *.avi

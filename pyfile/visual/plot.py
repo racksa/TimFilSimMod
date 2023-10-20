@@ -19,6 +19,8 @@ list_of_all_options = list_of_single_options + list_of_multi_options + list_of_s
 # execute the plotting function
 if(sys.argv[1] in list_of_all_options):
     visualiser.read_rules()
+    if('interpolate' in sys.argv):
+            visualiser.interpolate = True
 
     if(sys.argv[1] in list_of_single_options):
         if(len(sys.argv) > 2):
@@ -26,6 +28,7 @@ if(sys.argv[1] in list_of_all_options):
                 visualiser.index = int(sys.argv[2])
         if('video' in sys.argv):
             visualiser.video = True
+        
 
     if hasattr(visualiser, sys.argv[1]):
         method_to_call = getattr(visualiser, sys.argv[1])

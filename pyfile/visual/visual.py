@@ -22,7 +22,7 @@ class VISUAL:
     def __init__(self):
         self.globals_name = 'globals.ini'
         # self.dir = "/home/clustor2/ma/h/hs2216/20230922/"
-        self.dir = "data/expr_sims/20231011/"
+        self.dir = "data/expr_sims/20231024/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -37,8 +37,8 @@ class VISUAL:
         self.periodic = False
         self.big_sphere = True
 
-        self.plot_end_frame = 150
-        self.frames = 150
+        self.plot_end_frame = 60
+        self.frames = 60
 
         self.Lx = 1000
         self.Ly = 1000
@@ -78,7 +78,7 @@ class VISUAL:
             num_ar = len(np.unique([float(s) for s in sim["Parameter list"]['ar'].split(', ')]))
             num_elst = len(np.unique([float(s) for s in sim["Parameter list"]['spring_factor'].split(', ')]))
             num_per_elst = int(num_fil*num_ar)
-            select_elst = 1
+            select_elst = 0
 
             for key, value in self.pars_list.items():
                 if(key in sim["Parameter list"]):
@@ -1029,10 +1029,12 @@ class VISUAL:
 
         nrow = len(np.unique(self.pars_list['nfil']))
         ncol = len(np.unique(self.pars_list['ar']))
+        if(ncol == 1 or nrow == 1):
+            nrow = int(self.num_sim**.5)
+            ncol = nrow + (1 if nrow**2 < self.num_sim else 0)
         spring_factor = self.pars_list['spring_factor'][0]
 
-        # nrow = int(self.num_sim**.5)
-        # ncol = nrow + (1 if nrow**2 < self.num_sim else 0)
+        
         fig, axs = plt.subplots(nrow, ncol, figsize=(18, 18), sharex=True, sharey=True)
         # cax = fig.add_axes([0.92, 0.1, 0.02, 0.8])  # [left, bottom, width, height] for the colorbar
 
@@ -1059,7 +1061,7 @@ class VISUAL:
                                 fil_references_sphpolar[i] = util.cartesian_to_spherical(self.fil_references[3*i: 3*i+3])
                                 
                             if (self.interpolate):
-                                n1, n2 = 100, 100
+                                n1, n2 = 30, 30
                                 azim_grid = np.linspace(-np.pi, np.pi, n1)
                                 polar_grid = np.linspace(0, np.pi, n2)
                                 xx, yy = np.meshgrid(azim_grid, polar_grid)

@@ -293,7 +293,10 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
 
   #elif SURFACE_OF_REVOLUTION_BODIES or ROD or RIGIDWALL
 
-    std::string file_name_trunk = GENERATRIX_FILE_NAME+std::to_string(NFIL);
+    // std::string file_name_trunk = GENERATRIX_FILE_NAME+std::to_string(NFIL);
+
+    // WARNING: REMOVE THIS IS FOR DEBUGGING ONLY
+    std::string file_name_trunk = GENERATRIX_FILE_NAME+std::to_string(508);
 
     #if EQUATORIAL_SEEDING
 
@@ -327,7 +330,8 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
 
     }
 
-    seed_filaments(&filament_references[0], &polar_dir_refs[0], &azi_dir_refs[0], &normal_refs[0]);
+    // Seed filament anyway
+    // seed_filaments(&filament_references[0], &polar_dir_refs[0], &azi_dir_refs[0], &normal_refs[0]);
 
 
     #if SURFACE_OF_REVOLUTION_BODIES

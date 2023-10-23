@@ -164,7 +164,7 @@ extern std::string SIMULATION_TETHERLAM_NAME;
 // Define whether the motion of the rigid bodies is imposed or allowed to evolve dynamically.
 #define PRESCRIBED_BODY_VELOCITIES false
 
-#define MOBILITY_TYPE 4
+#define MOBILITY_TYPE 1
 // Valid options:
 // 0 = Basic Stokes drag. No hydrodynamic interactions between particles.
 // 1 = Rotne-Prager-Yamakawa (RPY) mobility matrices (with the corrections due to Swan and Brady if an infinite plane wall is selected).
@@ -268,7 +268,7 @@ extern float END_FORCE_MAGNITUDE;
 
 #endif
 
-#define TOTAL_TIME_STEPS (5*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
+#define TOTAL_TIME_STEPS (3*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
 #define NUM_EULER_STEPS 1 // Number of time-steps to use backwards-Euler before switching to BDF2.
 
 #if CILIA_TYPE==1
@@ -478,23 +478,31 @@ extern float END_FORCE_MAGNITUDE;
 #if FIL_USE_DOUBLE_PRECISION
     typedef double Real;
     typedef long Integer;
+    #define myfil_sqrt sqrt
     #define myfil_rint rint
     #define myfil_exp exp
     #define myfil_floor floor
+    #define myfil_ceil ceil
     #define myfil_fmod fmod
     #define myfil_getrf_ dgetrf_
     #define myfil_getri_ dgetri_
     #define myfil_gemm_ dgemm_
+    #define myfil_cos cos
+    #define myfil_sin sin
 #else
     typedef float Real;
     typedef int Integer;
+    #define myfil_sqrt sqrtf
     #define myfil_rint rintf
     #define myfil_exp expf
     #define myfil_floor floorf
+    #define myfil_ceil ceilf
     #define myfil_fmod fmodf
     #define myfil_getrf_ sgetrf_
     #define myfil_getri_ sgetri_
     #define myfil_gemm_ sgemm_
+    #define myfil_cos cosf
+    #define myfil_sin sinf
     
 #endif
 

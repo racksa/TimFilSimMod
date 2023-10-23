@@ -216,7 +216,7 @@ void filament::initial_setup(const Real *const base_pos,
 
   #else
 
-    const Real dir_norm = sqrt(dir_in[0]*dir_in[0] + dir_in[1]*dir_in[1] + dir_in[2]*dir_in[2]);
+    const Real dir_norm = myfil_sqrt(dir_in[0]*dir_in[0] + dir_in[1]*dir_in[1] + dir_in[2]*dir_in[2]);
     const Real dir[3] = {dir_in[0]/dir_norm, dir_in[1]/dir_norm, dir_in[2]/dir_norm};
 
     quaternion qtemp(dir[0], 0.0, -dir[2], dir[1]);
@@ -256,7 +256,7 @@ void filament::initial_setup(const Real *const base_pos,
 
             // WARNING this is only correct if a spherical body is initialised at the origin!!
             const Real phi = atan2(base_pos[1], base_pos[0]);
-            const Real theta = acos(base_pos[2]/(sqrt(base_pos[0]*base_pos[0]+
+            const Real theta = acos(base_pos[2]/(myfil_sqrt(base_pos[0]*base_pos[0]+
                                                       base_pos[1]*base_pos[1]+
                                                       base_pos[2]*base_pos[2])));
             const Real k = -2.0;
@@ -268,7 +268,7 @@ void filament::initial_setup(const Real *const base_pos,
 
             // WARNING this is only correct if a spherical body is initialised at the origin!!
             const Real phi = atan2(base_pos[1], base_pos[0]);
-            const Real theta = acos(base_pos[2]/(sqrt(base_pos[0]*base_pos[0]+
+            const Real theta = acos(base_pos[2]/(myfil_sqrt(base_pos[0]*base_pos[0]+
                                                       base_pos[1]*base_pos[1]+
                                                       base_pos[2]*base_pos[2])));
             phase = phi;
@@ -319,13 +319,13 @@ void filament::initial_setup(const Real *const base_pos,
       Real base_normal[3];
       qtemp.normal(base_normal);
 
-      Real polar_dir[3] = {0.0, 0.0, -1.0};
+      Real polar_dir[3] = {Real(0.0), Real(0.0), -Real(1.0)};
       const Real dir_dot_polar_dir = dir[0]*polar_dir[0] + dir[1]*polar_dir[1] + dir[2]*polar_dir[2];
       polar_dir[0] -= dir_dot_polar_dir*dir[0];
       polar_dir[1] -= dir_dot_polar_dir*dir[1];
       polar_dir[2] -= dir_dot_polar_dir*dir[2];
 
-      const Real norm_polar_dir = sqrt(polar_dir[0]*polar_dir[0] + polar_dir[1]*polar_dir[1] + polar_dir[2]*polar_dir[2]);
+      const Real norm_polar_dir = myfil_sqrt(polar_dir[0]*polar_dir[0] + polar_dir[1]*polar_dir[1] + polar_dir[2]*polar_dir[2]);
       quaternion q2;
 
       if (norm_polar_dir > 0.0){
@@ -456,7 +456,7 @@ void filament::initial_setup(const Real *const base_pos,
           std::normal_distribution<Real> d(0,1);
 
           Real dir1[3] = {d(gen), d(gen), d(gen)};
-          const Real norm_dir1 = sqrt(dir1[0]*dir1[0] + dir1[1]*dir1[1] + dir1[2]*dir1[2]);
+          const Real norm_dir1 = myfil_sqrt(dir1[0]*dir1[0] + dir1[1]*dir1[1] + dir1[2]*dir1[2]);
 
           perturbation1[0] = pMag*dir1[0]/norm_dir1;
           perturbation1[1] = pMag*dir1[1]/norm_dir1;
@@ -473,9 +473,9 @@ void filament::initial_setup(const Real *const base_pos,
           std::normal_distribution<Real> d(0,1);
 
           Real dir1[3] = {d(gen), d(gen), d(gen)};
-          const Real norm_dir1 = sqrt(dir1[0]*dir1[0] + dir1[1]*dir1[1] + dir1[2]*dir1[2]);
+          const Real norm_dir1 = myfil_sqrt(dir1[0]*dir1[0] + dir1[1]*dir1[1] + dir1[2]*dir1[2]);
           Real dir2[3] = {d(gen), d(gen), d(gen)};
-          const Real norm_dir2 = sqrt(dir2[0]*dir2[0] + dir2[1]*dir2[1] + dir2[2]*dir2[2]);
+          const Real norm_dir2 = myfil_sqrt(dir2[0]*dir2[0] + dir2[1]*dir2[1] + dir2[2]*dir2[2]);
 
           perturbation1[0] = pMag*dir1[0]/norm_dir1;
           perturbation1[1] = pMag*dir1[1]/norm_dir1;
@@ -769,13 +769,13 @@ void filament::accept_state_from_rigid_body(const Real *const x_in, const Real *
 
         // Start with the whole trapeziums
         fitted_shape_tangent(tx, ty, 0);
-        Real f0 = sqrt(tx*tx + ty*ty);
+        Real f0 = myfil_sqrt(tx*tx + ty*ty);
         const Real floor_val = myfil_floor(s/dl);
 
         for (int n = 1; n <= floor_val; n++){
 
           fitted_shape_tangent(tx, ty, n*dl);
-          Real f1 = sqrt(tx*tx + ty*ty);
+          Real f1 = myfil_sqrt(tx*tx + ty*ty);
 
           length += 0.5*dl*(f0 + f1);
 
@@ -786,12 +786,12 @@ void filament::accept_state_from_rigid_body(const Real *const x_in, const Real *
         // Interpolate between the mesh points to get the final value.
         // I want to do it like this, rather than have the mesh depend on the input s,
         // to ensure that the output is monotonic.
-        const Real ceil_val = ceil(s/dl);
+        const Real ceil_val = myfil_ceil(s/dl);
 
         if (ceil_val > floor_val){
 
-          fitted_shape_tangent(tx, ty, ceil(s/dl)*dl);
-          Real f1 = sqrt(tx*tx + ty*ty);
+          fitted_shape_tangent(tx, ty, myfil_ceil(s/dl)*dl);
+          Real f1 = myfil_sqrt(tx*tx + ty*ty);
 
           length += ((s/dl - floor_val)/(ceil_val - floor_val))*0.5*dl*(f0 + f1);
 
@@ -1031,7 +1031,7 @@ void filament::initial_guess(const int nt, const Real *const x_in, const Real *c
   #if PRESCRIBED_CILIA
 
     const matrix R = body_q.rot_mat();
-
+    
     vel_dir_phase[0] = 0.0;
     vel_dir_phase[1] = 0.0;
     vel_dir_phase[2] = 0.0;

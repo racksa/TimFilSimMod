@@ -1540,7 +1540,5 @@ void sync_var(int nswim, int nseg, int nfil, int nblob, int end_force_magnitude)
   NTOTAL_d = (nswim*(nfil*nseg + nblob));
   END_FORCE_MAGNITUDE_d = end_force_magnitude;
 
-  printf("%d\n", NTOTAL_d);
-
 }
 

@@ -1269,4 +1269,54 @@
 
   };
 
+  void check_seeding(Real *const filament_references, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs){
+    
+    Real *X;
+    shape_fourier_description shape;
+
+    cudaMallocManaged(&X, 3*sizeof(Real));
+
+    #if UNIFORM_SEEDING_POLE
+
+      std::cout << "Checking seeding..." << std::endl;
+    
+      for (int n = 0; n < NFIL; n++){
+
+        X[0] = filament_references[3*n];
+        X[1] = filament_references[3*n+1];
+        X[2] = filament_references[3*n+2];
+
+        const Real theta = std::atan2(std::sqrt(X[0]*X[0] + X[1]*X[1]), X[2]);
+        const Real phi = std::atan2(X[1], X[0]);
+
+        matrix frame = shape.full_frame(theta, phi);
+
+        // printf("fil %d (%.4f, %.4f) ref (%.4f %.4f %.4f) polar (%.4f %.4f %.4f) azi (%.4f %.4f %.4f) normal (%.4f %.4f %.4f)\n",
+        // n, theta, phi, X[0], X[1], X[2],
+        // frame(0), frame(1), frame(2),
+        // frame(3), frame(4), frame(5),
+        // frame(6), frame(7), frame(8));
+
+        printf("fil %d (%.4f, %.4f) ref (%.4f %.4f %.4f) polar (%.4f %.4f %.4f) azi (%.4f %.4f %.4f) normal (%.4f %.4f %.4f)\n",
+        n, theta, phi, X[0], X[1], X[2],
+        polar_dir_refs[3*n], polar_dir_refs[3*n+1], polar_dir_refs[3*n+2],
+        azi_dir_refs[3*n], azi_dir_refs[3*n+1], azi_dir_refs[3*n+2],
+        normal_refs[3*n], normal_refs[3*n+1], normal_refs[3*n+2]);
+
+      }
+
+      
+
+      
+
+    #else
+
+      std::cout << "Cannot check seeding of this type." << std::endl;
+
+    #endif
+    
+    
+
+  };
+
 #endif

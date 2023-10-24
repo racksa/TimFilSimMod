@@ -32,6 +32,7 @@ class VISUAL:
                      "spring_factor": []}
         self.video = False
         self.interpolate = False
+        self.angle = False
         self.output_to_fcm = False
         self.output_to_superpunto = True
         self.periodic = False
@@ -319,17 +320,22 @@ class VISUAL:
             for i in range(self.nfil):
                 fil_references_sphpolar[i] = util.cartesian_to_spherical(self.fil_references[3*i: 3*i+3])
 
+            if self.angle:
+                variables = fil_angles
+            else:
+                variables = fil_phases
+
             # Interpolation
             if (self.interpolate):
                 n1, n2 = 100, 100
                 azim_grid = np.linspace(-np.pi, np.pi, n1)
                 polar_grid = np.linspace(0, np.pi, n2)
                 xx, yy = np.meshgrid(azim_grid, polar_grid)
-                zz = scipy.interpolate.griddata((fil_references_sphpolar[:,1],fil_references_sphpolar[:,2]), fil_phases, (xx, yy), method='cubic')
+                zz = scipy.interpolate.griddata((fil_references_sphpolar[:,1],fil_references_sphpolar[:,2]), variables, (xx, yy), method='cubic')
                 ax.scatter(xx, yy, c=zz, cmap=colormap)
             else:
             # Individual filaments
-                ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=fil_phases, cmap=colormap)
+                ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=variables, cmap=colormap)
 
             frame += 1
 

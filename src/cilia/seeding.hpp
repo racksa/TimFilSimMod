@@ -15,6 +15,9 @@
     void seed_rod_blobs(Real *const blob_references, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs);
     void seed_rigidwall_blobs(Real *const blob_references, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs);
 
+    void check_seeding(Real *const filament_references, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs);
+
+
 #endif
 
 #endif // MY_SEEDING_FUNCTIONS_HEADER_INCLUDED

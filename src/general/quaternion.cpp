@@ -176,7 +176,7 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
   Real quaternion::norm() const {
 
-    return myfil_sqrt(scalar_part*scalar_part + vector_part[0]*vector_part[0] + vector_part[1]*vector_part[1] + vector_part[2]*vector_part[2]);
+    return sqrt(scalar_part*scalar_part + vector_part[0]*vector_part[0] + vector_part[1]*vector_part[1] + vector_part[2]*vector_part[2]);
 
   }
 
@@ -196,7 +196,7 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
   void quaternion::sqrt_in_place(){
 
-    if (scalar_part < -0.999999) {
+    if (scalar_part < -0.9999998) {
 
       scalar_part = 0.0;
       vector_part[0] = 0.0;
@@ -214,7 +214,7 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
     } else {
 
-      scalar_part = myfil_sqrt(0.5*(1.0 + scalar_part));
+      scalar_part = sqrt(0.5*(1.0 + scalar_part));
 
       const Real temp = 2.0*scalar_part;
 
@@ -471,9 +471,9 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
   void lie_exp(quaternion& q, const Real *const u){
 
-    const Real theta = myfil_sqrt(u[0]*u[0] + u[1]*u[1] + u[2]*u[2]);
+    const Real theta = sqrt(u[0]*u[0] + u[1]*u[1] + u[2]*u[2]);
 
-    if (theta < 1e-10){ // No trig involved in the norm(u)-based denominator so we don't have to use SMALL_ANGLE.
+    if (theta < 1e-6){ // No trig involved in the norm(u)-based denominator so we don't have to use SMALL_ANGLE.
 
       q.scalar_part = 1.0;
       q.vector_part[0] = 0.0;
@@ -524,7 +524,7 @@ quaternion& quaternion::operator -=(const quaternion& q){
   void dexp(Real *const out, const Real *const u, const Real *const v){
 
     const Real theta2 = u[0]*u[0] + u[1]*u[1] + u[2]*u[2];
-    const Real theta = myfil_sqrt(theta2);
+    const Real theta = sqrt(theta2);
 
     Real alpha, beta;
 
@@ -560,7 +560,7 @@ quaternion& quaternion::operator -=(const quaternion& q){
   void dexpinv(Real *const out, const Real *const u, const Real *const v){
 
     const Real theta2 = u[0]*u[0] + u[1]*u[1] + u[2]*u[2];
-    const Real theta = myfil_sqrt(theta2);
+    const Real theta = sqrt(theta2);
 
     Real fac;
 
@@ -585,7 +585,7 @@ quaternion& quaternion::operator -=(const quaternion& q){
   void dexpinv_transpose(Real *const out, const Real *const u, const Real *const v){
 
     const Real theta2 = u[0]*u[0] + u[1]*u[1] + u[2]*u[2];
-    const Real theta = myfil_sqrt(theta2);
+    const Real theta = sqrt(theta2);
 
     Real fac;
 
@@ -614,8 +614,8 @@ quaternion& quaternion::operator -=(const quaternion& q){
     // and it's going to hit the fan really quickly if either of these rotations are
     // through more than pi/2.
 
-    const Real theta = myfil_sqrt(u[0]*u[0] + u[1]*u[1] + u[2]*u[2]);
-    const Real phi = myfil_sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+    const Real theta = sqrt(u[0]*u[0] + u[1]*u[1] + u[2]*u[2]);
+    const Real phi = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
 
     if (theta < SMALL_ANGLE){
 
@@ -648,7 +648,7 @@ quaternion& quaternion::operator -=(const quaternion& q){
       const Real a = st*csq_half_phi - sp*ssq_half_theta*dir_dot;
       const Real b = sp*csq_half_theta - st*ssq_half_phi*dir_dot;
       const Real c = 0.5*st*sp - 2.0*ssq_half_theta*ssq_half_phi*dir_dot;
-      const Real d = myfil_sqrt(a*a + b*b + 2.0*a*b*dir_dot + c*c*sa*sa);
+      const Real d = sqrt(a*a + b*b + 2.0*a*b*dir_dot + c*c*sa*sa);
 
       Real alpha = asin(d)/d;
       Real beta = alpha;

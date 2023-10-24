@@ -293,10 +293,11 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
 
   #elif SURFACE_OF_REVOLUTION_BODIES or ROD or RIGIDWALL
 
-    // std::string file_name_trunk = GENERATRIX_FILE_NAME+std::to_string(NFIL);
+    std::string file_name_trunk = GENERATRIX_FILE_NAME+std::to_string(NFIL);
 
-    // WARNING: REMOVE THIS IS FOR DEBUGGING ONLY
-    std::string file_name_trunk = GENERATRIX_FILE_NAME+std::to_string(508);
+    // DEBUGING BEGIN
+    // std::string file_name_trunk = GENERATRIX_FILE_NAME+std::to_string(472);
+    // DEBUGING END
 
     #if EQUATORIAL_SEEDING
 
@@ -324,14 +325,45 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
 
       }
 
+      // DEBUGING BEGIN
+      // Real nothing;
+      // Real count = 0;
+      // for (int i = 0; i < 3*472; i++){
+
+      //   if (i>=3*360){
+      //     if (count>=3*NFIL){
+      //       break;
+      //     }
+      //     pos_file >> filament_references[count];
+      //     polar_file >> polar_dir_refs[count];
+      //     azi_file >> azi_dir_refs[count];
+      //     normal_file >> normal_refs[count];
+      //     count ++;
+      //   }else{
+      //     pos_file >> nothing;
+      //     polar_file >> nothing;
+      //     azi_file >> nothing;
+      //     normal_file >> nothing;
+      //   }
+      // }
+      // DEBUGING END
+
     } else {
 
       seed_filaments(&filament_references[0], &polar_dir_refs[0], &azi_dir_refs[0], &normal_refs[0]);
 
     }
 
-    // Seed filament anyway
-    // seed_filaments(&filament_references[0], &polar_dir_refs[0], &azi_dir_refs[0], &normal_refs[0]);
+    // DEBUGING BEGIN
+
+      // check_seeding(&filament_references[0], &polar_dir_refs[0], &azi_dir_refs[0], &normal_refs[0]);    
+
+    // DEBUGING END
+
+    
+
+    // Seed filaments anyway
+    seed_filaments(&filament_references[0], &polar_dir_refs[0], &azi_dir_refs[0], &normal_refs[0]);
 
 
     #if SURFACE_OF_REVOLUTION_BODIES

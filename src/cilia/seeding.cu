@@ -2,7 +2,7 @@
 
 #include "seeding.hpp"
 #include "../../config.hpp"
-#include "../../globals.hpp"
+// #include "../../globals.hpp"
 
 #if SURFACE_OF_REVOLUTION_BODIES or ROD or RIGIDWALL
 

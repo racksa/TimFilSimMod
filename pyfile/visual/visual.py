@@ -22,7 +22,7 @@ class VISUAL:
     def __init__(self):
         self.globals_name = 'globals.ini'
         # self.dir = "/home/clustor2/ma/h/hs2216/20230922/"
-        self.dir = "data/expr_sims/20231024/"
+        self.dir = "data/expr_sims/20231025/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],

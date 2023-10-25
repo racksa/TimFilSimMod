@@ -47,7 +47,7 @@
 #endif
 
 #include "../../config.hpp"
-#include "../../globals.hpp"
+// #include "../../globals.hpp"
 
 
 int main(int argc, char** argv){

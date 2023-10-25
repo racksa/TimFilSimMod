@@ -1,7 +1,6 @@
 // util.cpp
 
 #include "util.hpp"
-#include "../../globals.hpp"
 
 bool hasEnding (std::string const &fullString, std::string const &ending) {
     if (fullString.length() >= ending.length()) {

@@ -66,6 +66,7 @@ public:
   void normalise_in_place();
   void conj_in_place();
   void sqrt_in_place();
+  void sqrt_in_place_ortho(Real *polar_dir);
   void write_data(std::ofstream& data_file) const;
 
   // Array versions for if we just want to see the values and maybe do basic addition etc.

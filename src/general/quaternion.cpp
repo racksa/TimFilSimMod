@@ -194,9 +194,90 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
   }
 
+  void quaternion::sqrt_in_place_ortho(Real *polar_dir){    
+
+    if (scalar_part < -0.999999999) {
+
+      scalar_part = 0.0;
+
+      // matrix a = cross({1,0,0}, polar_dir);
+      const Real dir_norm = sqrt(vector_part[0]*vector_part[0] + vector_part[1]*vector_part[1] + vector_part[2]*vector_part[2]);
+
+      vector_part[0] /= dir_norm;
+      vector_part[1] /= dir_norm;
+      vector_part[2] /= dir_norm;
+
+      // Any unit vector would be technically correct here.
+      // If we're taking the sqrt to find the rotation mapping two vectors to one another
+      // and we enter this case -- i.e. we're mapping v to -v -- then this unit vector should be
+      // orthogonal to v. This function isn't supposed to handle this -- it's primary purpose
+      // is to do the sqrts appearing in the elastic moment expression where the rotation should be small --
+      // and care should be taken around this case when seeding filements etc. This default choice of the
+      // z-direction is so that it is perpendicular to the x-direction, which is mapped to the filament
+      // tangent and hence is the v --> -v scenario most likely to occur, hopefully avoiding most issues
+      // in practice.
+
+    } else {
+
+      scalar_part = sqrt(0.5*(1.0 + scalar_part));
+
+      const Real temp = 2.0*scalar_part;
+
+      vector_part[0] /= temp;
+      vector_part[1] /= temp;
+      vector_part[2] /= temp;
+
+    }
+
+  }
+
   void quaternion::sqrt_in_place(){
 
-    if (scalar_part < -0.9999998) {
+    // double scalar_part_aux;
+    // double vector_part_aux[3];
+
+    // if (scalar_part == - 1.0) {
+    //   scalar_part_aux = -0.999999;
+    // }else{
+    //   scalar_part_aux = double(scalar_part);
+    // }
+    // vector_part_aux[0] = double(vector_part[0]);
+    // vector_part_aux[1] = double(vector_part[1]);
+    // vector_part_aux[2] = double(vector_part[2]);
+
+    // if (scalar_part_aux < -0.999999999) {
+
+    //   scalar_part_aux = 0.0;
+    //   vector_part_aux[0] = 0.0;
+    //   vector_part_aux[1] = 0.0;
+    //   vector_part_aux[2] = 1.0;
+    //   // Any unit vector would be technically correct here.
+    //   // If we're taking the sqrt to find the rotation mapping two vectors to one another
+    //   // and we enter this case -- i.e. we're mapping v to -v -- then this unit vector should be
+    //   // orthogonal to v. This function isn't supposed to handle this -- it's primary purpose
+    //   // is to do the sqrts appearing in the elastic moment expression where the rotation should be small --
+    //   // and care should be taken around this case when seeding filements etc. This default choice of the
+    //   // z-direction is so that it is perpendicular to the x-direction, which is mapped to the filament
+    //   // tangent and hence is the v --> -v scenario most likely to occur, hopefully avoiding most issues
+    //   // in practice.
+
+    // }else{
+    //   scalar_part_aux = sqrt(0.5*(1.0 + scalar_part_aux));
+
+    //   const double temp = 2.0*scalar_part_aux;
+
+    //   vector_part_aux[0] /= temp;
+    //   vector_part_aux[1] /= temp;
+    //   vector_part_aux[2] /= temp;
+    // }
+
+    // scalar_part = Real(scalar_part_aux);
+    // vector_part[0] = Real(vector_part_aux[0]);
+    // vector_part[1] = Real(vector_part_aux[1]);
+    // vector_part[2] = Real(vector_part_aux[2]);
+    
+
+    if (scalar_part < -0.999999999) {
 
       scalar_part = 0.0;
       vector_part[0] = 0.0;
@@ -482,8 +563,8 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
     } else {
 
-      const Real cs = myfil_cos(0.5*theta);
-      const Real sn = myfil_sin(0.5*theta)/theta;
+      const Real cs = cos(0.5*theta);
+      const Real sn = sin(0.5*theta)/theta;
 
       q.scalar_part = cs;
       q.vector_part[0] = sn*u[0];
@@ -542,10 +623,10 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
       const Real theta3 = theta*theta2;
 
-      alpha = myfil_sin(0.5*theta);
+      alpha = sin(0.5*theta);
       alpha *= 2.0*alpha/theta2;
 
-      beta = (theta - myfil_sin(theta))/theta3;
+      beta = (theta - sin(theta))/theta3;
 
     }
 
@@ -570,7 +651,7 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
     } else {
 
-      fac = (0.5*theta*myfil_cos(0.5*theta)/myfil_sin(0.5*theta) - 1.0)/theta2;
+      fac = (0.5*theta*cos(0.5*theta)/sin(0.5*theta) - 1.0)/theta2;
 
     }
 
@@ -595,7 +676,7 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
     } else {
 
-      fac = (0.5*theta*myfil_cos(0.5*theta)/myfil_sin(0.5*theta) - 1.0)/theta2;
+      fac = (0.5*theta*cos(0.5*theta)/sin(0.5*theta) - 1.0)/theta2;
 
     }
 
@@ -634,14 +715,14 @@ quaternion& quaternion::operator -=(const quaternion& q){
       const Real dir_dot = (u[0]*v[0] + u[1]*v[1] + u[2]*v[2])/(theta*phi);
       const Real ang = acos(dir_dot);
 
-      const Real st = myfil_sin(theta);
-      const Real sp = myfil_sin(phi);
-      const Real sa = myfil_sin(ang);
+      const Real st = sin(theta);
+      const Real sp = sin(phi);
+      const Real sa = sin(ang);
 
-      Real csq_half_phi = myfil_cos(0.5*phi);
+      Real csq_half_phi = cos(0.5*phi);
       csq_half_phi *= csq_half_phi;
       const Real ssq_half_phi = 1.0 - csq_half_phi;
-      Real csq_half_theta = myfil_cos(0.5*theta);
+      Real csq_half_theta = cos(0.5*theta);
       csq_half_theta *= csq_half_theta;
       const Real ssq_half_theta = 1.0 - csq_half_theta;
 

@@ -217,10 +217,10 @@ void filament::initial_setup(const Real *const base_pos,
   #else
 
     const Real dir_norm = sqrt(dir_in[0]*dir_in[0] + dir_in[1]*dir_in[1] + dir_in[2]*dir_in[2]);
-    const Real dir[3] = {dir_in[0]/dir_norm, dir_in[1]/dir_norm, dir_in[2]/dir_norm};
+    Real dir[3] = {dir_in[0]/dir_norm, dir_in[1]/dir_norm, dir_in[2]/dir_norm};
 
     quaternion qtemp(dir[0], 0.0, -dir[2], dir[1]);
-    qtemp.sqrt_in_place();
+    qtemp.sqrt_in_place_ortho(dir);
 
     #if PRESCRIBED_CILIA
 
@@ -338,7 +338,10 @@ void filament::initial_setup(const Real *const base_pos,
         q2.vector_part[0] = base_normal[1]*polar_dir[2] - base_normal[2]*polar_dir[1];
         q2.vector_part[1] = base_normal[2]*polar_dir[0] - base_normal[0]*polar_dir[2];
         q2.vector_part[2] = base_normal[0]*polar_dir[1] - base_normal[1]*polar_dir[0];
-        q2.sqrt_in_place();
+        printf("fil %d q2_before_sqrt (%.16f %.16f %.16f %.16f) \n",
+        fil_id, q2(0), q2(1), q2(2), q2(3));
+        
+        q2.sqrt_in_place_ortho(base_normal);
 
       }
       // If false, then we've managed to seed a filament at the pole.
@@ -356,14 +359,14 @@ void filament::initial_setup(const Real *const base_pos,
       body_q = body_qm1;
 
       // DEBUGING BEGIN
-      // Real body_q_dir[3];
-      // body_q.normal(body_q_dir);
-      // printf("fil %d polar (%.4f %.4f %.4f) body_q_dir (%.4f %.4f %.4f) q2 (%.8f %.8f %.8f %.8f) qtemp (%.8f %.8f %.8f %.8f) body_q (%.8f %.8f %.8f %.8f) \n",
-      //   fil_id, polar_dir[0], polar_dir[1], polar_dir[2],
-      //   body_q_dir[0], body_q_dir[1], body_q_dir[2],
-      //   q2(0), q2(1), q2(2), q2(3),
-      //   qtemp(0), qtemp(1), qtemp(2), qtemp(3),
-      //   body_q(0), body_q(1), body_q(2), body_q(3) );
+      Real body_q_dir[3];
+      body_q.normal(body_q_dir);
+      printf("fil %d polar (%.4f %.4f %.4f) body_q_dir (%.4f %.4f %.4f) q2 (%.4f %.4f %.4f %.4f) qtemp (%.4f %.4f %.4f %.4f) body_q (%.16f %.16f %.16f %.16f)  \n",
+        fil_id, polar_dir[0], polar_dir[1], polar_dir[2],
+        body_q_dir[0], body_q_dir[1], body_q_dir[2],
+        q2(0), q2(1), q2(2), q2(3),
+        qtemp(0), qtemp(1), qtemp(2), qtemp(3),
+        body_q(0), body_q(1), body_q(2), body_q(3) );
 
       // DEBUGING END
 

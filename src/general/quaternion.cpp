@@ -196,86 +196,42 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
   void quaternion::sqrt_in_place_ortho(Real *polar_dir){    
 
-    if (scalar_part < -0.999999999) {
-
-      scalar_part = 0.0;
-
-      // matrix a = cross({1,0,0}, polar_dir);
+    if (scalar_part < -0.9999999) {
       const Real dir_norm = sqrt(vector_part[0]*vector_part[0] + vector_part[1]*vector_part[1] + vector_part[2]*vector_part[2]);
-
-      vector_part[0] /= dir_norm;
-      vector_part[1] /= dir_norm;
-      vector_part[2] /= dir_norm;
-
-      // Any unit vector would be technically correct here.
-      // If we're taking the sqrt to find the rotation mapping two vectors to one another
-      // and we enter this case -- i.e. we're mapping v to -v -- then this unit vector should be
-      // orthogonal to v. This function isn't supposed to handle this -- it's primary purpose
-      // is to do the sqrts appearing in the elastic moment expression where the rotation should be small --
-      // and care should be taken around this case when seeding filements etc. This default choice of the
-      // z-direction is so that it is perpendicular to the x-direction, which is mapped to the filament
-      // tangent and hence is the v --> -v scenario most likely to occur, hopefully avoiding most issues
-      // in practice.
-
-    } else {
-
+      if(dir_norm*dir_norm < 0.00000001){
+        scalar_part = 0.0;
+        vector_part[0] = 0.0;
+        vector_part[1] = 0.0;
+        vector_part[2] = 1.0;
+      }else{
+        if(scalar_part==-1.0){
+          scalar_part=-0.9999999;
+        }
+        scalar_part = sqrt(0.5*(1.0 + scalar_part));
+        const Real temp = 2.0*scalar_part;
+        vector_part[0] /= temp;
+        vector_part[1] /= temp;
+        vector_part[2] /= temp;
+        
+        Real q_norm = sqrt(scalar_part*scalar_part +vector_part[0]*vector_part[0] + vector_part[1]*vector_part[1] + vector_part[2]*vector_part[2]);
+        scalar_part *= q_norm;
+        vector_part[0] /= q_norm;
+        vector_part[1] /= q_norm;
+        vector_part[2] /= q_norm;
+      }
+    }else {
       scalar_part = sqrt(0.5*(1.0 + scalar_part));
-
       const Real temp = 2.0*scalar_part;
-
       vector_part[0] /= temp;
       vector_part[1] /= temp;
       vector_part[2] /= temp;
-
     }
+
+    this->normalise_in_place();
 
   }
 
   void quaternion::sqrt_in_place(){
-
-    // double scalar_part_aux;
-    // double vector_part_aux[3];
-
-    // if (scalar_part == - 1.0) {
-    //   scalar_part_aux = -0.999999;
-    // }else{
-    //   scalar_part_aux = double(scalar_part);
-    // }
-    // vector_part_aux[0] = double(vector_part[0]);
-    // vector_part_aux[1] = double(vector_part[1]);
-    // vector_part_aux[2] = double(vector_part[2]);
-
-    // if (scalar_part_aux < -0.999999999) {
-
-    //   scalar_part_aux = 0.0;
-    //   vector_part_aux[0] = 0.0;
-    //   vector_part_aux[1] = 0.0;
-    //   vector_part_aux[2] = 1.0;
-    //   // Any unit vector would be technically correct here.
-    //   // If we're taking the sqrt to find the rotation mapping two vectors to one another
-    //   // and we enter this case -- i.e. we're mapping v to -v -- then this unit vector should be
-    //   // orthogonal to v. This function isn't supposed to handle this -- it's primary purpose
-    //   // is to do the sqrts appearing in the elastic moment expression where the rotation should be small --
-    //   // and care should be taken around this case when seeding filements etc. This default choice of the
-    //   // z-direction is so that it is perpendicular to the x-direction, which is mapped to the filament
-    //   // tangent and hence is the v --> -v scenario most likely to occur, hopefully avoiding most issues
-    //   // in practice.
-
-    // }else{
-    //   scalar_part_aux = sqrt(0.5*(1.0 + scalar_part_aux));
-
-    //   const double temp = 2.0*scalar_part_aux;
-
-    //   vector_part_aux[0] /= temp;
-    //   vector_part_aux[1] /= temp;
-    //   vector_part_aux[2] /= temp;
-    // }
-
-    // scalar_part = Real(scalar_part_aux);
-    // vector_part[0] = Real(vector_part_aux[0]);
-    // vector_part[1] = Real(vector_part_aux[1]);
-    // vector_part[2] = Real(vector_part_aux[2]);
-    
 
     if (scalar_part < -0.999999999) {
 

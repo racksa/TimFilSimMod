@@ -196,29 +196,42 @@ quaternion& quaternion::operator -=(const quaternion& q){
 
   void quaternion::sqrt_in_place_ortho(Real *polar_dir){    
 
-    if (scalar_part < -0.9999999) {
-      const Real dir_norm = sqrt(vector_part[0]*vector_part[0] + vector_part[1]*vector_part[1] + vector_part[2]*vector_part[2]);
-      if(dir_norm*dir_norm < 0.00000001){
-        scalar_part = 0.0;
-        vector_part[0] = 0.0;
-        vector_part[1] = 0.0;
-        vector_part[2] = 1.0;
-      }else{
-        if(scalar_part==-1.0){
-          scalar_part=-0.9999999;
-        }
-        scalar_part = sqrt(0.5*(1.0 + scalar_part));
-        const Real temp = 2.0*scalar_part;
-        vector_part[0] /= temp;
-        vector_part[1] /= temp;
-        vector_part[2] /= temp;
+    if (scalar_part < -0.999999) {
+      scalar_part=-0.9999999;
+      scalar_part = sqrt(0.5*(1.0 + scalar_part));
+      const Real temp = 2.0*scalar_part;
+      vector_part[0] /= temp;
+      vector_part[1] /= temp;
+      vector_part[2] /= temp;
+      
+      Real q_norm = sqrt(scalar_part*scalar_part +vector_part[0]*vector_part[0] + vector_part[1]*vector_part[1] + vector_part[2]*vector_part[2]);
+      scalar_part *= q_norm;
+      vector_part[0] /= q_norm;
+      vector_part[1] /= q_norm;
+      vector_part[2] /= q_norm;
+
+      // const Real dir_norm = sqrt(vector_part[0]*vector_part[0] + vector_part[1]*vector_part[1] + vector_part[2]*vector_part[2]);
+      // if(dir_norm*dir_norm < 0.00000001){
+      //   scalar_part = 0.0;
+      //   vector_part[0] = 0.0;
+      //   vector_part[1] = 0.0;
+      //   vector_part[2] = 1.0;
+      // }else{
+      //   if(scalar_part==-1.0){
+      //     scalar_part=-0.9999999;
+      //   }
+      //   scalar_part = sqrt(0.5*(1.0 + scalar_part));
+      //   const Real temp = 2.0*scalar_part;
+      //   vector_part[0] /= temp;
+      //   vector_part[1] /= temp;
+      //   vector_part[2] /= temp;
         
-        Real q_norm = sqrt(scalar_part*scalar_part +vector_part[0]*vector_part[0] + vector_part[1]*vector_part[1] + vector_part[2]*vector_part[2]);
-        scalar_part *= q_norm;
-        vector_part[0] /= q_norm;
-        vector_part[1] /= q_norm;
-        vector_part[2] /= q_norm;
-      }
+      //   Real q_norm = sqrt(scalar_part*scalar_part +vector_part[0]*vector_part[0] + vector_part[1]*vector_part[1] + vector_part[2]*vector_part[2]);
+      //   scalar_part *= q_norm;
+      //   vector_part[0] /= q_norm;
+      //   vector_part[1] /= q_norm;
+      //   vector_part[2] /= q_norm;
+      // }
     }else {
       scalar_part = sqrt(0.5*(1.0 + scalar_part));
       const Real temp = 2.0*scalar_part;

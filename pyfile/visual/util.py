@@ -138,4 +138,71 @@ def spherical_to_cartesian(r, theta, phi):
     z = r * math.cos(phi)
     return x, y, z
 
+def create_3d_cell_list(positions, cell_size):
+    pos1, pos2= np.min(positions, axis=0), np.max(positions, axis=0)
+
+    domain_size = pos2-pos1
+    # Calculate the dimensions of the 3D grid based on cell size
+    grid_shape = np.ceil(domain_size/ cell_size).astype(int)
+    
+    # Create an empty 3D cell list
+    cell_list = [[] for _ in range(grid_shape[0] * grid_shape[1] * grid_shape[2])]
+    
+    # Assign particles to 3D cells
+    for i, pos in enumerate(positions):
+        cell_x = int((pos[0]-pos1[0]) / cell_size)
+        cell_y = int((pos[1]-pos1[1]) / cell_size)
+        cell_z = int((pos[2]-pos1[2]) / cell_size)
+        cell_index = cell_x + cell_y * grid_shape[0] + cell_z * grid_shape[0] * grid_shape[1]
+        cell_list[cell_index].append(i)
+    
+    return cell_list, grid_shape
+
+def label_colliding_particles_with_3d_cell_list(positions, cell_size, radius):
+    N = positions.shape[0]
+    
+    # Create the 3D cell list
+    cell_list, grid_shape = create_3d_cell_list(positions, cell_size)
+    
+    # Calculate the squared distances only within cells and neighboring cells
+    colliding_particles = []
+    colliding_indices = []
+
+    for cell_x in range(grid_shape[0]):
+        for cell_y in range(grid_shape[1]):
+            for cell_z in range(grid_shape[2]):
+                cell_index = cell_x + cell_y * grid_shape[0] + cell_z * grid_shape[0] * grid_shape[1]
+                cell = cell_list[cell_index]
+
+                for i in cell:
+                    for j in cell:
+                        if i != j:
+                            # Calculate squared distance between particles i and j
+                            distance_sq = np.sum((positions[i] - positions[j]) ** 2)
+                            
+                            if distance_sq < 4*radius**2:
+                                colliding_indices.append(i)
+                                colliding_particles.append((i, j))
+
+    return set(colliding_indices), colliding_particles
+
+def label_colliding_particles(positions, radius):
+    N = positions.shape[0]
+
+    # Calculate all pairwise squared Euclidean distances efficiently
+    squared_distances = np.sum((positions[:, np.newaxis] - positions)**2, axis=2)
+
+    # Set the diagonal elements (self-distances) to a large value to avoid counting them
+    np.fill_diagonal(squared_distances, np.inf)
+
+    # Find the indices of particles that collide with others
+    colliding_indices = np.where(squared_distances < 4*radius**2)
+
+    # Create a list of colliding particle pairs
+    colliding_particles = []
+    for i, j in zip(*colliding_indices):
+        colliding_particles.append((i, j))
+
+    return colliding_indices, colliding_particles
+
 #

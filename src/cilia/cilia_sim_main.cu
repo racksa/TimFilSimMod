@@ -75,7 +75,7 @@ int main(int argc, char** argv){
 
   // Derive other global variables
   NTOTAL = (NSWIM*(NFIL*NSEG + NBLOB));
-  AXIS_DIR_BODY_LENGTH = AR*44;
+  AXIS_DIR_BODY_LENGTH = AR*FIL_LENGTH;
   END_FORCE_MAGNITUDE = (DIMENSIONLESS_FORCE*KB/(DL*DL*NSEG*NSEG));
 
   // Filenames 

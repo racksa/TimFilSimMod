@@ -7,7 +7,7 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20231025/"
+        self.dir = "data/expr_sims/ishikawa/k2.0/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -16,8 +16,8 @@ class DRIVER:
                      "ar": [],
                      "spring_factor": []}
 
-        self.sweep_shape = (3, 8, 6, 1)
-        # self.sweep_shape = (1, 48, 1, 1)
+        # self.sweep_shape = (3, 8, 6, 1)
+        self.sweep_shape = (1, 1, 1, 1)
 
         self.num_sim = 0
 
@@ -51,15 +51,15 @@ class DRIVER:
                 for k in range(self.sweep_shape[2]):
                     for l in range(self.sweep_shape[3]):
 
-                        nfil = int( 96*1.4**j)
-                        nblob = int(2400*(1.4**k))
-                        ar = round(4*(1.4**k), 2)
+                        nfil = int( 192 + 128*j )
+                        nblob = int(3200*(1.3**k))
+                        ar = round(6*(1.3**k), 2)
                         spring_factor = round(0.5*2**i, 2)
                         
-                        # nfil = int( 400+12*j)
-                        # nblob = int(2400*(1.4**4))
-                        # ar = round(4*(1.4**4), 2)
-                        # spring_factor = round(0.5*2**i, 2)
+                        nfil = int( 160)
+                        nblob = int(6000)
+                        ar = round(6, 2)
+                        spring_factor = round(0.5*2**i, 2)
 
                         self.pars_list["nswim"].append(1)
                         self.pars_list["nseg"].append(20)
@@ -117,7 +117,7 @@ class DRIVER:
 
             command = f"export OPENBLAS_NUM_THREADS=1; \
                         export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
-                        ./bin/cilia > terminal_outputs/output_{self.pars_list['nfil'][i]:.0f}fil_{i}.out"
+                        ./bin/cilia2 > terminal_outputs/output_{self.pars_list['nfil'][i]:.0f}fil_{i}.out"
 
             # command = f"export OPENBLAS_NUM_THREADS=1; \
             #             export CUDA_VISIBLE_DEVICES={self.cuda_device}; \

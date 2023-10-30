@@ -76,7 +76,7 @@ extern std::string SIMULATION_TETHERLAM_NAME;
   // Essentially, the cilia can 'tip backwards or forwards' in their beat planes.
   // If false, no such rotation ever occurs.
 
-  #define INITIAL_PHASE 3
+  #define INITIAL_PHASE 2
   // 0 = Random
   // 1 = All zeros
   // 2 = Ishikawa
@@ -136,7 +136,7 @@ extern std::string SIMULATION_TETHERLAM_NAME;
 
 #elif BODY_OR_SURFACE_TYPE==2 or BODY_OR_SURFACE_TYPE==4 or BODY_OR_SURFACE_TYPE==5
 
-  #define SEEDING_TYPE 7
+  #define SEEDING_TYPE 0
   // Valid options:
   // 0 = Filaments are evenly distributed over the surface.
   // 1 = Filaments are seeded in an equatorial band.
@@ -201,7 +201,7 @@ extern float END_FORCE_MAGNITUDE;
 #define MU 1.0 // Fluid viscosity.
 
 #define RSEG 1.0 // Segment radius.
-#define DL (2.2*RSEG) // Inter-segment distance.
+#define DL (2.6*RSEG) // Inter-segment distance.
 #define RBLOB 1.0 // Surface blob radius.
 
 #define KB 1800.0 // Bending modulus.
@@ -268,7 +268,7 @@ extern float END_FORCE_MAGNITUDE;
 
 #endif
 
-#define TOTAL_TIME_STEPS (50*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
+#define TOTAL_TIME_STEPS (2*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
 #define NUM_EULER_STEPS 1 // Number of time-steps to use backwards-Euler before switching to BDF2.
 
 #if CILIA_TYPE==1

@@ -22,7 +22,7 @@ class VISUAL:
     def __init__(self):
         self.globals_name = 'globals.ini'
         # self.dir = "/home/clustor2/ma/h/hs2216/20230922/"
-        self.dir = "data/expr_sims/20231025/"
+        self.dir = "data/expr_sims/20231009/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -37,9 +37,14 @@ class VISUAL:
         self.output_to_superpunto = True
         self.periodic = False
         self.big_sphere = True
+        self.check_collision = False
 
-        self.plot_end_frame = 60
-        self.frames = 60
+        self.plot_end_frame_setting = 30000
+        self.frames = 900
+
+        self.plot_end_frame = self.plot_end_frame_setting
+
+        self.select_elst = 1
 
         self.Lx = 1000
         self.Ly = 1000
@@ -70,6 +75,7 @@ class VISUAL:
                             str(plot_x[1]) + ' ' +\
                             str(plot_x[2]),
                             filename)
+        
 
     def read_rules(self):
         sim = configparser.ConfigParser()
@@ -79,13 +85,13 @@ class VISUAL:
             num_ar = len(np.unique([float(s) for s in sim["Parameter list"]['ar'].split(', ')]))
             num_elst = len(np.unique([float(s) for s in sim["Parameter list"]['spring_factor'].split(', ')]))
             num_per_elst = int(num_fil*num_ar)
-            select_elst = 0
+            select_elst = min(num_elst-1, self.select_elst)
 
             for key, value in self.pars_list.items():
                 if(key in sim["Parameter list"]):
                     # self.pars_list[key] = [float(x) for x in sim["Parameter list"][key].split(', ')][0::num_elst]
                     self.pars_list[key] = [float(x) for x in sim["Parameter list"][key].split(', ')][num_per_elst*select_elst:num_per_elst*(select_elst+1)]
-            self.num_sim = len(self.pars_list["nfil"])            
+            self.num_sim = len(self.pars_list["nfil"])
         except:
             print("WARNING: " + self.dir + "rules.ini not found.")
 
@@ -101,6 +107,7 @@ class VISUAL:
         self.ar = self.pars_list['ar'][self.index]
         self.spring_factor = self.pars_list['spring_factor'][self.index]
         self.radius = 0.5*self.ar*2.2*self.nseg
+        self.N = int(self.nswim*(self.nfil*self.nseg + self.nblob))
 
         self.simName = self.dir + f"ciliate_{self.nfil:.0f}fil_{self.nblob:.0f}blob_{self.ar:.2f}R_{self.spring_factor:.2f}torsion"
         self.fil_references = myIo.read_fil_references(self.simName + '_fil_references.dat')
@@ -114,7 +121,7 @@ class VISUAL:
         if(self.pars['NFIL']>0):
             self.fil_references = myIo.read_fil_references(self.simName + '_fil_references.dat')
 
-        self.plot_end_frame = min(self.plot_end_frame, sum(1 for line in open(self.simName + '_body_states.dat')))
+        self.plot_end_frame = min(self.plot_end_frame_setting, sum(1 for line in open(self.simName + '_body_states.dat')))
         self.plot_start_frame = max(0, self.plot_end_frame-self.frames)
         self.plot_interval = 1
         
@@ -139,6 +146,11 @@ class VISUAL:
 
         for i in range(self.plot_end_frame):
             print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
+            if(self.check_collision):
+                segs_list = np.zeros((int(self.nfil*self.nseg), 3))
+                blobs_list = np.zeros((int(self.nblob), 3))
+                
+
             body_states_str = body_states_f.readline()
             if(self.pars['NFIL']>0):
                 seg_states_str = seg_states_f.readline()
@@ -160,14 +172,17 @@ class VISUAL:
                     R = util.rot_mat(body_states[7*swim+3 : 7*swim+7])
                     R = np.linalg.inv(R)
                     R = np.eye(3)
-                    if(self.big_sphere):
-                        self.write_data(body_pos, self.radius, superpuntoDatafileName, self.periodic, color=16777215)
-                    else:
+                    if(not self.big_sphere or self.check_collision):
                         for blob in range(int(self.pars['NBLOB'])):
                             blob_x, blob_y, blob_z = util.blob_point_from_data(body_states[7*swim : 7*swim+7], self.blob_references[3*blob:3*blob+3])
-                            self.write_data([blob_x, blob_y, blob_z], float(self.pars['RBLOB']), superpuntoDatafileName, self.periodic, color=16777215)
+                            if(self.check_collision):
+                                blobs_list[blob] = blob_x, blob_y, blob_z
+                            elif(not self.big_sphere):
+                                self.write_data([blob_x, blob_y, blob_z], float(self.pars['RBLOB']), superpuntoDatafileName, self.periodic, color=16777215)
+                            
+                    if(self.big_sphere):
+                        self.write_data(body_pos, self.radius, superpuntoDatafileName, self.periodic, color=16777215)
 
-                    
                     for fil in range(int(self.pars['NFIL'])):
                         fil_color = int("000000", base=16)
                         # Robot arm to find segment position (Ignored plane rotation!)
@@ -187,8 +202,10 @@ class VISUAL:
                             bgr_hex = rgb_hex[4:]+rgb_hex[2:4]+rgb_hex[:2]
                             fil_color = int(bgr_hex, base=16)
                             # print("\n", bgr_hex, fil_color, "\t")
-
-                        self.write_data(old_seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, self.periodic, True, True, color=fil_color)
+                        if(self.check_collision):
+                            segs_list[fil*self.nseg] = old_seg_pos
+                        else:
+                            self.write_data(old_seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, self.periodic, True, True, color=fil_color)
 
                         for seg in range(1, int(self.pars['NSEG'])):
                             if (self.pars['PRESCRIBED_CILIA'] == 0):
@@ -201,9 +218,28 @@ class VISUAL:
                                 seg_pos = old_seg_pos + 0.5*self.pars['DL']*(t1 + t2)
                                 old_seg_pos = seg_pos
                             elif (self.pars['PRESCRIBED_CILIA'] == 1):
-                                seg_pos = seg_states[fil_i+3*(seg-1) : fil_i+3*seg] 
-                            self.write_data(seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, self.periodic, True, True, color=fil_color)
-
+                                seg_pos = seg_states[fil_i+3*(seg) : fil_i+3*(seg+1)] 
+                            if(self.check_collision):
+                                segs_list[fil*self.nseg + seg] = seg_pos
+                            else:
+                                self.write_data(seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, self.periodic, True, True, color=fil_color)
+                            
+                if(self.check_collision):
+                    threshold = 0.9
+                    # colliding_indices, colliding_particles = util.label_colliding_particles(segs_list, 0.9*float(self.pars['RSEG']))
+                    colliding_indices, colliding_particles = util.label_colliding_particles_with_3d_cell_list(segs_list, 5, threshold*float(self.pars['RSEG']))
+                    
+                    # print(colliding_indices[0])
+                    # myIo.write_line('#', superpuntoDatafileName)
+                    self.write_data(body_pos, self.radius, superpuntoDatafileName, self.periodic, color=16777215)
+                    if not colliding_indices:
+                        print(f'No overlapping at threshold {threshold}\n')
+                    for i, pos in enumerate(segs_list):
+                        fil_color = 16777215
+                        if(i in colliding_indices):
+                            fil_color = 255
+                        self.write_data(pos, float(self.pars['RSEG']), superpuntoDatafileName, self.periodic, True, True, color=fil_color)
+                        
 
 ## Filaments
     def plot_fil(self):
@@ -363,6 +399,73 @@ class VISUAL:
             plt.savefig(f'fig/fil_phase_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
             plt.show()
 
+    def order_parameter(self):
+        self.select_sim()
+        
+        fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
+        fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
+
+        # Plotting
+        colormap = 'cividis'
+        colormap = 'twilight_shifted'
+
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+        fil_references_sphpolar = np.zeros((self.nfil,3))
+
+        # from matplotlib.colors import Normalize
+        # from matplotlib.cm import ScalarMappable
+        # norm = Normalize(vmin=0, vmax=0.2*np.pi)
+        # sm = ScalarMappable(cmap=colormap, norm=norm)
+        # sm.set_array([])
+        # cbar = plt.colorbar(sm)
+        # cbar.ax.set_yticks(np.linspace(0, 2*np.pi, 7), ['0', 'π/3', '2π/3', 'π', '4π/3', '5π/3', '2π'])
+        # cbar.set_label(r"phase")
+
+        ax.set_ylabel(r"$\theta$")
+        ax.set_xlabel(r"$\phi$")
+        ax.set_xlim(-np.pi, np.pi)
+        ax.set_ylim(0, np.pi)
+        ax.set_xticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0', 'π/2', 'π'])
+        ax.set_yticks(np.linspace(0, np.pi, 5), ['0', 'π/4', 'π/2', '3π/4', 'π'])
+
+        for i in range(self.plot_end_frame):
+            print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
+
+            if(i==self.plot_end_frame-2):
+                fil_phases_str1 = fil_phases_f.readline()
+                fil_phases1 = np.array(fil_phases_str1.split()[1:], dtype=float)
+                fil_phases1 = util.box(fil_phases1, 2*np.pi)
+
+                fil_angles_str1 = fil_angles_f.readline()
+                fil_angles1 = np.array(fil_angles_str1.split()[1:], dtype=float)
+              
+            elif(i==self.plot_end_frame-1):
+                fil_phases_str = fil_phases_f.readline()
+                fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
+                fil_phases = util.box(fil_phases, 2*np.pi)
+
+                fil_angles_str = fil_angles_f.readline()
+                fil_angles = np.array(fil_angles_str.split()[1:], dtype=float)
+
+                for i in range(self.nfil):
+                    fil_references_sphpolar[i] = util.cartesian_to_spherical(self.fil_references[3*i: 3*i+3])
+
+                if self.angle:
+                    variables = util.box(fil_angles - fil_angles1, 2*np.pi)
+                else:
+                    variables = util.box(fil_phases - fil_phases1, 2*np.pi)
+
+                # Individual filaments
+                ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=variables)
+            else:
+                fil_phases_str = fil_phases_f.readline()
+            
+        
+
+        plt.savefig(f'fig/fil_order_parameter_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        plt.show()
+        
     def eckert(self):
         R = 1
         phi0 = np.pi
@@ -1047,6 +1150,16 @@ class VISUAL:
         axs_flat = axs.ravel()
         import scipy.interpolate
 
+        fig.supxlabel(r"Azimuth position")
+        fig.supylabel(r"Polar position")
+        plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
+        # plt.ylabel(r"$\theta$")
+        # plt.xlabel(r"$\phi$")
+        plt.xlim(-np.pi, np.pi)
+        plt.ylim(0, np.pi)
+        plt.xticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0', 'π/2', 'π'])
+        plt.yticks(np.linspace(0, np.pi, 3), ['0', 'π/2', 'π'])
+
         for ind, ax in enumerate(axs_flat):
             if (ind < self.num_sim):
                 try:
@@ -1057,7 +1170,7 @@ class VISUAL:
                     fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
                     fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
                     for i in range(self.plot_end_frame):
-                        print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
+                        print(" index ", self.index,  " frame ", i, "/", self.plot_end_frame, "          ", end="\r")
                         fil_phases_str = fil_phases_f.readline()
                         # fil_angles_str = fil_angles_f.readline()
                         if(i==self.plot_end_frame-1):
@@ -1078,13 +1191,13 @@ class VISUAL:
                                 ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=fil_phases, cmap=colormap)
 
                             # ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=fil_phases, cmap=colormap)
-                    ax.set_ylabel(r"$\theta$")
-                    ax.set_xlabel(r"$\phi$")
-                    ax.set_xlim(-np.pi, np.pi)
-                    ax.set_ylim(0, np.pi)
-                    ax.set_xticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0', 'π/2', 'π'])
-                    ax.set_yticks(np.linspace(0, np.pi, 5), ['0', 'π/4', 'π/2', '3π/4', 'π'])
-                    ax.set_title(f"nfil={self.nfil} AR={self.ar}")
+                    # ax.set_ylabel(r"$\theta$")
+                    # ax.set_xlabel(r"$\phi$")
+                    # ax.set_xlim(-np.pi, np.pi)
+                    # ax.set_ylim(0, np.pi)
+                    # ax.set_xticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0', 'π/2', 'π'])
+                    # ax.set_yticks(np.linspace(0, np.pi, 5), ['0', 'π/4', 'π/2', '3π/4', 'π'])
+                    ax.set_title(f"index={self.index} nfil={self.nfil} AR={self.ar}")
                 except:
                     print("WARNING: " + self.simName + " not found.")
 
@@ -1338,15 +1451,15 @@ class VISUAL:
                             X[:,i-start] = fil_phases_sorted[:nfil]
                             X_angle[:,i-start] = fil_angles_sorted[:nfil]
                     
-                    np.savetxt(f'phase_data/spring_constant{spring_factor}/by_index/X_phase_index{self.index}.txt', X, delimiter=', ')
-                    np.savetxt(f'phase_data/spring_constant{spring_factor}/by_index/X_rotation_angle_index{self.index}.txt', X_angle, delimiter=', ')
-                    np.savetxt(f'phase_data/spring_constant{spring_factor}/by_index/azim_pos_index{self.index}.txt', azim_array_sorted, delimiter=', ')
-                    np.savetxt(f'phase_data/spring_constant{spring_factor}/by_index/polar_pos_index{self.index}.txt', polar_array_sorted, delimiter=', ')
+                    np.savetxt(f'phase_data/by_index/spring_constant{spring_factor}/X_phase_index{self.index}.txt', X, delimiter=', ')
+                    np.savetxt(f'phase_data/by_index/spring_constant{spring_factor}/X_rotation_angle_index{self.index}.txt', X_angle, delimiter=', ')
+                    np.savetxt(f'phase_data/by_index/spring_constant{spring_factor}/azim_pos_index{self.index}.txt', azim_array_sorted, delimiter=', ')
+                    np.savetxt(f'phase_data/by_index/spring_constant{spring_factor}/polar_pos_index{self.index}.txt', polar_array_sorted, delimiter=', ')
 
-                    np.savetxt(f'phase_data/spring_constant{spring_factor}/by_pars/X_phase_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', X, delimiter=', ')
-                    np.savetxt(f'phase_data/spring_constant{spring_factor}/by_pars/X_rotation_angle_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', X_angle, delimiter=', ')
-                    np.savetxt(f'phase_data/spring_constant{spring_factor}/by_pars/azim_pos_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', azim_array_sorted, delimiter=', ')
-                    np.savetxt(f'phase_data/spring_constant{spring_factor}/by_pars/polar_pos_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', polar_array_sorted, delimiter=', ')
+                    np.savetxt(f'phase_data/by_pars/spring_constant{spring_factor}/X_phase_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', X, delimiter=', ')
+                    np.savetxt(f'phase_data/by_pars/spring_constant{spring_factor}/X_rotation_angle_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', X_angle, delimiter=', ')
+                    np.savetxt(f'phase_data/by_pars/spring_constant{spring_factor}/azim_pos_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', azim_array_sorted, delimiter=', ')
+                    np.savetxt(f'phase_data/by_pars/spring_constant{spring_factor}/polar_pos_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', polar_array_sorted, delimiter=', ')
 
 
                     U, sigma, V = np.linalg.svd(X, full_matrices=False)
@@ -1643,6 +1756,74 @@ class VISUAL:
         fig.savefig(f'fig/ciliate_dissipation_summary.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
+# Special plot
+    def ishikawa(self):
+        dirs = ["data/expr_sims/ishikawa/k0.0/",
+                "data/expr_sims/ishikawa/k0.5/",
+                "data/expr_sims/ishikawa/k1.0/",
+                "data/expr_sims/ishikawa/k1.5/",
+                "data/expr_sims/ishikawa/k2.0/"]
+        ls = ['solid', 'dashed', 'dotted']
+        markers = ["^", "s", "d"]
+        labels = [r"$k=0$",r"$k=0.5$",r"$k=1$",r"$k=1.5$",r"$k=2$",]
+        colors = ["black","red","green","blue","purple"]
+
+        L = 2.6*(20-1)
+
+        # Plotting
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+        ax.set_xlim(0, 1)
+        ax.set_ylim(-1.4, 3.4)
+        ax.set_ylabel(r"$V_zT/L$")
+        ax.set_xlabel(r"$t/T$")
+
+        start_time = 0
+        end_time = 60
+
+        for ni, directory in enumerate(dirs):
+
+            
         
+            self.dir = directory
+
+            self.select_sim()
+
+            body_states_f = open(self.simName + '_body_states.dat', "r")
+            body_vels_f = open(self.simName + '_body_vels.dat', "r")
+
+            time_array = np.arange(start_time, end_time)
+            
+            body_pos_array = np.zeros((len(time_array), 3))
+            body_vel_array = np.zeros((len(time_array), 6))
+            body_speed_array = np.zeros(len(time_array))
+
+            # pos = np.zeros(3)
+
+            for i in range(end_time):
+                print(" frame ", i, "/", end_time, "          ", end="\r")
+                body_states_str = body_states_f.readline()
+                body_vels_str = body_vels_f.readline()
+
+                if(i>=start_time):
+
+                    body_states = np.array(body_states_str.split()[1:], dtype=float)
+                    body_vels = np.array(body_vels_str.split(), dtype=float)
+
+                    body_pos_array[i-start_time] = body_states[0:3]
+                    body_vel_array[i-start_time] = body_vels
+                    body_speed_array[i-start_time] = np.sqrt(np.sum(body_vels[0:3]*body_vels[0:3], 0))
+
+                # pos += body_vels[0:3]
+                # body_vel_array[i][0:3] = pos*self.dt
+
+            # for i in range(len(body_vel_array[0])):
+            #     # ax.plot(time_array, body_pos_array[:,i])
+            #     ax.plot(time_array, body_vel_array[:,i])
+            ax.plot(time_array/30., body_vel_array[:,2]/L, label=labels[ni], c=colors[ni])
+        
+        plt.legend()
+        plt.savefig(f'fig/ishikawa_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        plt.show()
 
 #

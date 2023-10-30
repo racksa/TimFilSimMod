@@ -259,7 +259,7 @@ void filament::initial_setup(const Real *const base_pos,
             const Real theta = acos(base_pos[2]/(sqrt(base_pos[0]*base_pos[0]+
                                                       base_pos[1]*base_pos[1]+
                                                       base_pos[2]*base_pos[2])));
-            const Real k = -2.0;
+            const Real k = 2.0;
             const Real v = 0.0;
             phase = Real(2.0)*PI*( sin(k*theta/2.0) + cos(v*phi/4.0) );
             // printf("fil %d (%.4f %.4f %.4f) theta=%.4f phase=%.4f\n",
@@ -315,18 +315,24 @@ void filament::initial_setup(const Real *const base_pos,
       #endif
 
       // qtemp maps x to the surface normal, which we want, but we also need to rotate about the surface normal to align
-      // the 'normal' vector at the base (i.e. the second frame vector) with the polar direction.
+      // the 'normal-to-filament-centerline' vector at the base (i.e. the second frame vector) with the polar direction.
       Real base_normal[3];
       qtemp.normal(base_normal);
+      // here base_normal is a vector that is orthogonal to the filament tangent.
+      // n' in appendix A.1
 
       Real polar_dir[3] = {Real(0.0), Real(0.0), -Real(1.0)};
       const Real dir_dot_polar_dir = dir[0]*polar_dir[0] + dir[1]*polar_dir[1] + dir[2]*polar_dir[2];
       polar_dir[0] -= dir_dot_polar_dir*dir[0];
       polar_dir[1] -= dir_dot_polar_dir*dir[1];
       polar_dir[2] -= dir_dot_polar_dir*dir[2];
-
+      
       const Real norm_polar_dir = sqrt(polar_dir[0]*polar_dir[0] + polar_dir[1]*polar_dir[1] + polar_dir[2]*polar_dir[2]);
+      // here polar_dir becomes a vector that is orthogonal to dir.
+      // therefore nothing 
+
       quaternion q2;
+      quaternion q2_before;
 
       if (norm_polar_dir > 0.0){
 
@@ -338,8 +344,8 @@ void filament::initial_setup(const Real *const base_pos,
         q2.vector_part[0] = base_normal[1]*polar_dir[2] - base_normal[2]*polar_dir[1];
         q2.vector_part[1] = base_normal[2]*polar_dir[0] - base_normal[0]*polar_dir[2];
         q2.vector_part[2] = base_normal[0]*polar_dir[1] - base_normal[1]*polar_dir[0];
-        printf("fil %d q2_before_sqrt (%.16f %.16f %.16f %.16f) \n",
-        fil_id, q2(0), q2(1), q2(2), q2(3));
+
+        q2_before = q2;
         
         q2.sqrt_in_place_ortho(base_normal);
 
@@ -361,12 +367,18 @@ void filament::initial_setup(const Real *const base_pos,
       // DEBUGING BEGIN
       Real body_q_dir[3];
       body_q.normal(body_q_dir);
-      printf("fil %d polar (%.4f %.4f %.4f) body_q_dir (%.4f %.4f %.4f) q2 (%.4f %.4f %.4f %.4f) qtemp (%.4f %.4f %.4f %.4f) body_q (%.16f %.16f %.16f %.16f)  \n",
+      
+      if(abs(polar_dir[0]-body_q_dir[0]) > 0.00001 || abs(polar_dir[1]-body_q_dir[1]) > 0.00001 || abs(polar_dir[2]-body_q_dir[2]) > 0.00001){
+        printf("fil %d q2_before_sqrt (%.16f %.16f %.16f %.16f) \n",
+        fil_id, q2(0), q2(1), q2(2), q2(3));
+        printf("fil %d polar (%.4f %.4f %.4f) body_q_dir (%.4f %.4f %.4f) q2 (%.4f %.4f %.4f %.4f) qtemp (%.4f %.4f %.4f %.4f) body_q (%.16f %.16f %.16f %.16f)  \n",
         fil_id, polar_dir[0], polar_dir[1], polar_dir[2],
         body_q_dir[0], body_q_dir[1], body_q_dir[2],
         q2(0), q2(1), q2(2), q2(3),
         qtemp(0), qtemp(1), qtemp(2), qtemp(3),
         body_q(0), body_q(1), body_q(2), body_q(3) );
+      }
+
 
       // DEBUGING END
 

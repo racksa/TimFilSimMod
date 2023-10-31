@@ -24,6 +24,8 @@ if(sys.argv[1] in list_of_all_options):
         visualiser.interpolate = True
     if('angle' in sys.argv):
         visualiser.angle = True
+    if('check_overlap' in sys.argv):
+        visualiser.check_overlap = True
 
     if(sys.argv[1] in list_of_single_options):
         if(len(sys.argv) > 2):

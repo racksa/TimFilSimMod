@@ -7,7 +7,7 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/ishikawa/k2.0/"
+        self.dir = "data/expr_sims/ishikawa_expr/k-1.0v0.0/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],

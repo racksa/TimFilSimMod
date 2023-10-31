@@ -22,7 +22,8 @@ class VISUAL:
     def __init__(self):
         self.globals_name = 'globals.ini'
         # self.dir = "/home/clustor2/ma/h/hs2216/20230922/"
-        self.dir = "data/expr_sims/20231009/"
+        # self.dir = "data/expr_sims/20231027/"
+        self.dir = "data/expr_sims/ishikawa_expr/k0.0/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -36,8 +37,8 @@ class VISUAL:
         self.output_to_fcm = False
         self.output_to_superpunto = True
         self.periodic = False
-        self.big_sphere = True
-        self.check_collision = False
+        self.big_sphere = False
+        self.check_overlap = False
 
         self.plot_end_frame_setting = 30000
         self.frames = 900
@@ -100,7 +101,7 @@ class VISUAL:
             self.index = len(self.pars_list['nfil'])-1
             print(f'Index out of range. Using the last sim: {self.index}')
 
-        self.nseg = 20
+        self.nseg = int(self.pars_list['nseg'][self.index])
         self.nswim = 1
         self.nfil = int(self.pars_list['nfil'][self.index])
         self.nblob = int(self.pars_list['nblob'][self.index])
@@ -123,9 +124,9 @@ class VISUAL:
 
         self.plot_end_frame = min(self.plot_end_frame_setting, sum(1 for line in open(self.simName + '_body_states.dat')))
         self.plot_start_frame = max(0, self.plot_end_frame-self.frames)
+        self.frames = self.plot_end_frame - self.plot_start_frame
         self.plot_interval = 1
         
-
     def plot(self):
         self.select_sim()
         print(self.plot_end_frame)
@@ -146,7 +147,7 @@ class VISUAL:
 
         for i in range(self.plot_end_frame):
             print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
-            if(self.check_collision):
+            if(self.check_overlap):
                 segs_list = np.zeros((int(self.nfil*self.nseg), 3))
                 blobs_list = np.zeros((int(self.nblob), 3))
                 
@@ -172,10 +173,10 @@ class VISUAL:
                     R = util.rot_mat(body_states[7*swim+3 : 7*swim+7])
                     R = np.linalg.inv(R)
                     R = np.eye(3)
-                    if(not self.big_sphere or self.check_collision):
+                    if(not self.big_sphere or self.check_overlap):
                         for blob in range(int(self.pars['NBLOB'])):
                             blob_x, blob_y, blob_z = util.blob_point_from_data(body_states[7*swim : 7*swim+7], self.blob_references[3*blob:3*blob+3])
-                            if(self.check_collision):
+                            if(self.check_overlap):
                                 blobs_list[blob] = blob_x, blob_y, blob_z
                             elif(not self.big_sphere):
                                 self.write_data([blob_x, blob_y, blob_z], float(self.pars['RBLOB']), superpuntoDatafileName, self.periodic, color=16777215)
@@ -202,7 +203,7 @@ class VISUAL:
                             bgr_hex = rgb_hex[4:]+rgb_hex[2:4]+rgb_hex[:2]
                             fil_color = int(bgr_hex, base=16)
                             # print("\n", bgr_hex, fil_color, "\t")
-                        if(self.check_collision):
+                        if(self.check_overlap):
                             segs_list[fil*self.nseg] = old_seg_pos
                         else:
                             self.write_data(old_seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, self.periodic, True, True, color=fil_color)
@@ -219,12 +220,12 @@ class VISUAL:
                                 old_seg_pos = seg_pos
                             elif (self.pars['PRESCRIBED_CILIA'] == 1):
                                 seg_pos = seg_states[fil_i+3*(seg) : fil_i+3*(seg+1)] 
-                            if(self.check_collision):
+                            if(self.check_overlap):
                                 segs_list[fil*self.nseg + seg] = seg_pos
                             else:
                                 self.write_data(seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, self.periodic, True, True, color=fil_color)
                             
-                if(self.check_collision):
+                if(self.check_overlap):
                     threshold = 0.9
                     # colliding_indices, colliding_particles = util.label_colliding_particles(segs_list, 0.9*float(self.pars['RSEG']))
                     colliding_indices, colliding_particles = util.label_colliding_particles_with_3d_cell_list(segs_list, 5, threshold*float(self.pars['RSEG']))
@@ -1642,7 +1643,7 @@ class VISUAL:
                 dissipation_array = np.zeros(self.frames)
 
                 blob_references_str = blob_references_f.readline()
-                blob_references= np.array(blob_references_str.split(), dtype=float)
+                blob_references = np.array(blob_references_str.split(), dtype=float)
                 blob_references = np.reshape(blob_references, (int(self.pars['NBLOB']), 3))
             
                 for i in range(self.plot_end_frame):
@@ -1758,17 +1759,33 @@ class VISUAL:
 
 # Special plot
     def ishikawa(self):
-        dirs = ["data/expr_sims/ishikawa/k0.0/",
-                "data/expr_sims/ishikawa/k0.5/",
-                "data/expr_sims/ishikawa/k1.0/",
-                "data/expr_sims/ishikawa/k1.5/",
-                "data/expr_sims/ishikawa/k2.0/"]
+        top_dir = "data/expr_sims/ishikawa_expr/"
+        vel_dirs = dirs = [ "k0.0/",
+                            "k0.5/",
+                            "k1.0/",
+                            "k1.5/",
+                            "k2.0/"]
+        
+        dissipation_dirs = ["k0.0/",
+                            "k1.0/",
+                            "k-1.0v0.0/"]
+        dirs = ["k-1.0v0.0/",
+                "k0.0/",
+                "k0.5/",
+                "k1.0/",
+                "k1.5/",
+                "k2.0/"]
+        
         ls = ['solid', 'dashed', 'dotted']
         markers = ["^", "s", "d"]
         labels = [r"$k=0$",r"$k=0.5$",r"$k=1$",r"$k=1.5$",r"$k=2$",]
         colors = ["black","red","green","blue","purple"]
+        dissipation_labels = [r"$k=-1$",r"$k=0$",r"$k=1$"]
+        dissipation_colors = ["green","black","red"]
+        vel_marker = 0
+        dissipation_marker = 0
 
-        L = 2.6*(20-1)
+        
 
         # Plotting
         fig = plt.figure()
@@ -1778,52 +1795,112 @@ class VISUAL:
         ax.set_ylabel(r"$V_zT/L$")
         ax.set_xlabel(r"$t/T$")
 
+        fig2 = plt.figure()
+        ax2 = fig2.add_subplot(1,1,1)
+        ax2.set_xlim(0, 1)
+        # ax2.set_ylim(0, 1500)
+        ax2.set_ylabel(r"$PT^2/\mu L^3$")
+        ax2.set_xlabel(r"$t/T$")
+
         start_time = 0
-        end_time = 60
+        end_time = 32
 
         for ni, directory in enumerate(dirs):
+            try:
+                self.dir = top_dir + directory
+                self.read_rules()
+                self.select_sim()
+                L = 2.6*(self.nseg-1)
 
-            
+                body_states_f = open(self.simName + '_body_states.dat', "r")
+                body_vels_f = open(self.simName + '_body_vels.dat', "r")
+                seg_forces_f = open(self.simName + '_seg_forces.dat', "r")
+                seg_vels_f = open(self.simName + '_seg_vels.dat', "r")
+                blob_forces_f = open(self.simName + '_blob_forces.dat', "r")
+                blob_references_f = open(self.simName + '_blob_references.dat', "r")
+
+                time_array = np.arange(start_time, end_time)
+                
+                body_pos_array = np.zeros((len(time_array), 3))
+                body_vel_array = np.zeros((len(time_array), 6))
+                body_speed_array = np.zeros(len(time_array))
+                body_angular_speed_array = np.zeros(len(time_array))
+                dissipation_array = np.zeros(len(time_array))
+
+                blob_references_str = blob_references_f.readline()
+                blob_references = np.array(blob_references_str.split(), dtype=float)
+                blob_references = np.reshape(blob_references, (int(self.pars['NBLOB']), 3))
+
+                for i in range(end_time):
+                    print(" frame ", i, "/", end_time, "          ", end="\r")
+                    seg_forces_str = seg_forces_f.readline()
+                    seg_vels_str = seg_vels_f.readline()
+                    blob_forces_str = blob_forces_f.readline()
+                    
+                    body_vels_str = body_vels_f.readline()
+
+                    if(i>=start_time):
+                        seg_forces = np.array(seg_forces_str.split()[1:], dtype=float)
+                        seg_vels = np.array(seg_vels_str.split()[1:], dtype=float)
+                        blob_forces= np.array(blob_forces_str.split()[1:], dtype=float)
+                        body_vels = np.array(body_vels_str.split(), dtype=float)
+                        
+
+                        seg_forces = np.reshape(seg_forces, (int(self.pars['NSEG']*self.pars['NFIL']), 6))
+                        seg_vels = np.reshape(seg_vels, (int(self.pars['NSEG']*self.pars['NFIL']), 6))
+                        blob_forces = np.reshape(blob_forces, (int(self.pars['NBLOB']), 3))
+                        body_vels_tile = np.tile(body_vels, (int(self.pars['NBLOB']), 1))
+                        blob_vels = body_vels_tile[:, 0:3] - np.cross(body_vels_tile[:, 3:6], blob_references)
+
+                        body_vel_array[i-start_time] = body_vels
+                        body_speed_array[i-start_time] = np.sqrt(np.sum(body_vels[0:3]*body_vels[0:3], 0))
+                        body_angular_speed_array[i-start_time] = np.sqrt(np.sum(body_vels[3:6]*body_vels[3:6], 0))
+                        dissipation_array[i-start_time] = np.sum(blob_forces * blob_vels) + np.sum(seg_forces[:, 0:3] * seg_vels[:, 0:3])
+                        # dissipation_array[i-start_time] =  np.sum(seg_forces[:, 0:3] * seg_vels[:, 0:3])
+                        
+                        # m = 2
+                        # dissipation_array[i-start_time] = np.sum(blob_forces[:, m]  * blob_vels[:, m] ) + np.sum(seg_forces[:, m] * seg_vels[:, m])\
+                        
+                    # pos += body_vels[0:3]
+                    # body_vel_array[i][0:3] = pos*self.dt
+
+                # for i in range(len(body_vel_array[0])):
+                #     # ax.plot(time_array, body_pos_array[:,i])
+                #     ax.plot(time_array, body_vel_array[:,i])
+
+                if directory in vel_dirs:
+                    ax.plot(time_array/30., body_vel_array[:,2]/L, label=labels[vel_marker], c=colors[vel_marker])
+                    vel_marker += 1
+                if directory in dissipation_dirs:
+                    ax2.plot(time_array/30., dissipation_array/L**3, label=dissipation_labels[dissipation_marker], c=dissipation_colors[dissipation_marker])
+                    dissipation_marker +=1
+            except:
+                print("WARNING: " + self.dir + "rules.ini not found.")
         
-            self.dir = directory
+        # Plot the comparison data
+        directory = 'pyfile/analysis/ishikawa_data/'
+        files = ['k0.0.csv', 'k0.5.csv', 'k1.0.csv', 'k1.5.csv', 'k2.0.csv']
+        for i, filename in enumerate(files):
+            file = open(directory + filename, mode='r')
+            df = pd.read_csv(directory + filename, header=None)
+            data = df.to_numpy()
+            x, y = data[:,0], data[:,1]
 
-            self.select_sim()
+            ax.plot(x, y, ls='dotted', c=colors[i], alpha=0.5)
+            # ax.scatter(x, y, marker='+', c=colors[i], alpha=0.5)
 
-            body_states_f = open(self.simName + '_body_states.dat', "r")
-            body_vels_f = open(self.simName + '_body_vels.dat', "r")
-
-            time_array = np.arange(start_time, end_time)
-            
-            body_pos_array = np.zeros((len(time_array), 3))
-            body_vel_array = np.zeros((len(time_array), 6))
-            body_speed_array = np.zeros(len(time_array))
-
-            # pos = np.zeros(3)
-
-            for i in range(end_time):
-                print(" frame ", i, "/", end_time, "          ", end="\r")
-                body_states_str = body_states_f.readline()
-                body_vels_str = body_vels_f.readline()
-
-                if(i>=start_time):
-
-                    body_states = np.array(body_states_str.split()[1:], dtype=float)
-                    body_vels = np.array(body_vels_str.split(), dtype=float)
-
-                    body_pos_array[i-start_time] = body_states[0:3]
-                    body_vel_array[i-start_time] = body_vels
-                    body_speed_array[i-start_time] = np.sqrt(np.sum(body_vels[0:3]*body_vels[0:3], 0))
-
-                # pos += body_vels[0:3]
-                # body_vel_array[i][0:3] = pos*self.dt
-
-            # for i in range(len(body_vel_array[0])):
-            #     # ax.plot(time_array, body_pos_array[:,i])
-            #     ax.plot(time_array, body_vel_array[:,i])
-            ax.plot(time_array/30., body_vel_array[:,2]/L, label=labels[ni], c=colors[ni])
+        # Make legends
+        legend1 = ax.legend()
+        line1, = ax.plot([-1, -1.1], [-1, -1.1], ls='-', c='black', label=r'$data$' )
+        line2, = ax.plot([-1, -1.1], [-1, -1.1], ls='dotted', c='black', label=r'$Ito\ etc.\ (2019)$')
+        legend2 = ax.legend(handles = [line1, line2], loc='upper left')
+        ax.add_artist(legend1)
         
-        plt.legend()
-        plt.savefig(f'fig/ishikawa_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        ax2.legend()
+
+
+        fig.savefig(f'fig/ishikawa_vel{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        fig2.savefig(f'fig/ishikawa_dissipation{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
 #

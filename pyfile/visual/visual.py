@@ -23,7 +23,7 @@ class VISUAL:
         self.globals_name = 'globals.ini'
         # self.dir = "/home/clustor2/ma/h/hs2216/20230922/"
         # self.dir = "data/expr_sims/20231027/"
-        self.dir = "data/expr_sims/ishikawa_expr/k0.0/"
+        self.dir = "data/expr_sims/ishikawa_expr/k0.0N2520/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -126,6 +126,7 @@ class VISUAL:
         self.plot_start_frame = max(0, self.plot_end_frame-self.frames)
         self.frames = self.plot_end_frame - self.plot_start_frame
         self.plot_interval = 1
+        print(f'Opening {self.simName}\n')
         
     def plot(self):
         self.select_sim()
@@ -1766,51 +1767,58 @@ class VISUAL:
                             "k1.5/",
                             "k2.0/"]
         
-        dissipation_dirs = ["k0.0/",
-                            "k1.0/",
-                            "k-1.0v0.0/"]
-        dirs = ["k-1.0v0.0/",
-                "k0.0/",
+        # dissipation_dirs = ["k0.0/",
+        #                     "k1.0/"]
+        
+        N_dirs = ["k0.0N162/",
+                  "k0.0N636/",
+                  "k0.0N2520/",]
+        N_dirs = ["k0.0N162_RoL20/",
+                  "k0.0N636_RoL20/",
+                  "k0.0N2520_RoL20/",]
+
+        dirs = ["k0.0/",
                 "k0.5/",
                 "k1.0/",
                 "k1.5/",
-                "k2.0/"]
+                "k2.0/",
+                "k0.0N162/",
+                "k0.0N636/",
+                "k0.0N2520/"]
         
         ls = ['solid', 'dashed', 'dotted']
         markers = ["^", "s", "d"]
         labels = [r"$k=0$",r"$k=0.5$",r"$k=1$",r"$k=1.5$",r"$k=2$",]
         colors = ["black","red","green","blue","purple"]
-        dissipation_labels = [r"$k=-1$",r"$k=0$",r"$k=1$"]
+        dissipation_labels = [r"$N=162,RoL=10$",r"$N=636,RoL=10$",r"$N=636,RoL=20$"]
         dissipation_colors = ["green","black","red"]
         vel_marker = 0
         dissipation_marker = 0
-
-        
 
         # Plotting
         fig = plt.figure()
         ax = fig.add_subplot(1,1,1)
         ax.set_xlim(0, 1)
-        ax.set_ylim(-1.4, 3.4)
+        ax.set_ylim(-1.4, 4.5)
         ax.set_ylabel(r"$V_zT/L$")
         ax.set_xlabel(r"$t/T$")
 
         fig2 = plt.figure()
         ax2 = fig2.add_subplot(1,1,1)
         ax2.set_xlim(0, 1)
-        # ax2.set_ylim(0, 1500)
+        ax2.set_ylim(0, 80000)
         ax2.set_ylabel(r"$PT^2/\mu L^3$")
         ax2.set_xlabel(r"$t/T$")
 
-        start_time = 0
-        end_time = 32
 
-        for ni, directory in enumerate(dirs):
+        for ni, directory in enumerate(N_dirs):
             try:
                 self.dir = top_dir + directory
                 self.read_rules()
                 self.select_sim()
                 L = 2.6*(self.nseg-1)
+                start_time = 0
+                end_time = min(32, sum(1 for line in open(self.simName + '_body_states.dat')))
 
                 body_states_f = open(self.simName + '_body_states.dat', "r")
                 body_vels_f = open(self.simName + '_body_vels.dat', "r")
@@ -1856,51 +1864,65 @@ class VISUAL:
                         body_speed_array[i-start_time] = np.sqrt(np.sum(body_vels[0:3]*body_vels[0:3], 0))
                         body_angular_speed_array[i-start_time] = np.sqrt(np.sum(body_vels[3:6]*body_vels[3:6], 0))
                         dissipation_array[i-start_time] = np.sum(blob_forces * blob_vels) + np.sum(seg_forces[:, 0:3] * seg_vels[:, 0:3])
-                        # dissipation_array[i-start_time] =  np.sum(seg_forces[:, 0:3] * seg_vels[:, 0:3])
-                        
-                        # m = 2
-                        # dissipation_array[i-start_time] = np.sum(blob_forces[:, m]  * blob_vels[:, m] ) + np.sum(seg_forces[:, m] * seg_vels[:, m])\
-                        
-                    # pos += body_vels[0:3]
-                    # body_vel_array[i][0:3] = pos*self.dt
 
-                # for i in range(len(body_vel_array[0])):
-                #     # ax.plot(time_array, body_pos_array[:,i])
-                #     ax.plot(time_array, body_vel_array[:,i])
-
-                if directory in vel_dirs:
-                    ax.plot(time_array/30., body_vel_array[:,2]/L, label=labels[vel_marker], c=colors[vel_marker])
-                    vel_marker += 1
-                if directory in dissipation_dirs:
+                # if directory in vel_dirs:
+                #     ax.plot(time_array/30., body_vel_array[:,2]/L, label=labels[vel_marker], c=colors[vel_marker])
+                #     vel_marker += 1
+                if directory in N_dirs:
+                    ax.plot(time_array/30., body_vel_array[:,2]/L, label=dissipation_labels[dissipation_marker], c=dissipation_colors[dissipation_marker])
                     ax2.plot(time_array/30., dissipation_array/L**3, label=dissipation_labels[dissipation_marker], c=dissipation_colors[dissipation_marker])
                     dissipation_marker +=1
             except:
                 print("WARNING: " + self.dir + "rules.ini not found.")
         
         # Plot the comparison data
+        # JFM 2019 velocity
         directory = 'pyfile/analysis/ishikawa_data/'
         files = ['k0.0.csv', 'k0.5.csv', 'k1.0.csv', 'k1.5.csv', 'k2.0.csv']
+        files = ['vel_k0.0N162.csv', 'vel_k0.0N636.csv', 'vel_k0.0N2520.csv']
         for i, filename in enumerate(files):
-            file = open(directory + filename, mode='r')
-            df = pd.read_csv(directory + filename, header=None)
-            data = df.to_numpy()
-            x, y = data[:,0], data[:,1]
+            try:
+                file = open(directory + filename, mode='r')
+                df = pd.read_csv(directory + filename, header=None)
+                data = df.to_numpy()
+                x, y = data[:,0], data[:,1]
 
-            ax.plot(x, y, ls='dotted', c=colors[i], alpha=0.5)
-            # ax.scatter(x, y, marker='+', c=colors[i], alpha=0.5)
+                ax.plot(x, y, ls='dotted', c=dissipation_colors[i], alpha=0.5)
+            except:
+                print("WARNING: " + directory + filename + " not found.")
+        # PNAS 2020 dissipation
+        files = ['dissipation_k0.0N162.csv', 'dissipation_k0.0N636.csv', 'dissipation_k0.0N2520.csv']
+        for i, filename in enumerate(files):
+            try:
+                file = open(directory + filename, mode='r')
+                df = pd.read_csv(directory + filename, header=None)
+                data = df.to_numpy()
+                x, y = data[:,0], data[:,1]
+
+                ax2.plot(x, y, ls='dotted', c=dissipation_colors[i], alpha=0.5)
+            except:
+                print("WARNING: " + directory + filename + " not found.")
+
 
         # Make legends
+        legend_label = r'$Ito\ etc.\ (2019)$'
+        legend_label = r'$Omori\ etc.\ (2020)$'
         legend1 = ax.legend()
-        line1, = ax.plot([-1, -1.1], [-1, -1.1], ls='-', c='black', label=r'$data$' )
-        line2, = ax.plot([-1, -1.1], [-1, -1.1], ls='dotted', c='black', label=r'$Ito\ etc.\ (2019)$')
-        legend2 = ax.legend(handles = [line1, line2], loc='upper left')
+        line1a, = ax.plot([-1, -1.1], [-1, -1.1], ls='-', c='black', label=r'$data$' )
+        line1b, = ax.plot([-1, -1.1], [-1, -1.1], ls='dotted', c='black', label=legend_label)
+        ax.legend(handles = [line1a, line1b], loc='upper left')
         ax.add_artist(legend1)
         
-        ax2.legend()
+        legend2 = ax2.legend()
+        line2a, = ax2.plot([-1, -1.1], [-1, -1.1], ls='-', c='black', label=r'$data$' )
+        line2b, = ax2.plot([-1, -1.1], [-1, -1.1], ls='dotted', c='black', label=legend_label)
+        ax2.legend(handles = [line2a, line2b], loc='upper left')
+        ax2.add_artist(legend2)
 
-
-        fig.savefig(f'fig/ishikawa_vel{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
-        fig2.savefig(f'fig/ishikawa_dissipation{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        fig.savefig(f'fig/PNAS_comparison_vel.pdf', bbox_inches = 'tight', format='pdf')
+        fig2.savefig(f'fig/PNAS_comparison_dissipation.pdf', bbox_inches = 'tight', format='pdf')
+        # fig.savefig(f'fig/ishikawa_vel{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        # fig2.savefig(f'fig/ishikawa_dissipation{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
 #

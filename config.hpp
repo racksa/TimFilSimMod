@@ -255,7 +255,7 @@ extern float END_FORCE_MAGNITUDE;
 
 #if SOLVER_TYPE==1
 
-  #define MAX_LINEAR_SYSTEM_ITER 350 // Maximum number of iterations used to solve the linear system in each mobility solve.
+  #define MAX_LINEAR_SYSTEM_ITER 120 // Maximum number of iterations used to solve the linear system in each mobility solve.
   #define LINEAR_SYSTEM_TOL 1e-4 // Relative tolerance in the linear system solves.
 
   // GMRES preconditioner type.

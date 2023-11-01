@@ -7,7 +7,7 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/ishikawa_expr/k-1.0v0.0/"
+        self.dir = "data/expr_sims/ishikawa_expr/k0.0N162_RoL20/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -51,18 +51,18 @@ class DRIVER:
                 for k in range(self.sweep_shape[2]):
                     for l in range(self.sweep_shape[3]):
 
-                        nfil = int( 192 + 128*j )
-                        nblob = int(3200*(1.3**k))
-                        ar = round(6*(1.3**k), 2)
-                        spring_factor = round(0.5*2**i, 2)
+                        # nfil = int( 192 + 128*j )
+                        # nblob = int(3200*(1.3**k))
+                        # ar = round(6*(1.3**k), 2)
+                        # spring_factor = round(0.5*2**i, 2)
                         
-                        nfil = int( 160)
-                        nblob = int(6000)
-                        ar = round(6, 2)
+                        nfil = int(162)
+                        nblob = int(40000)
+                        ar = round(40, 2)
                         spring_factor = round(0.5*2**i, 2)
 
                         self.pars_list["nswim"].append(1)
-                        self.pars_list["nseg"].append(20)
+                        self.pars_list["nseg"].append(40)
                         self.pars_list["nfil"].append(nfil)
                         self.pars_list["nblob"].append(nblob)
                         self.pars_list["ar"].append(ar)

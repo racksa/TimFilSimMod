@@ -2311,34 +2311,6 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
         Q.set_col(iter, new_soln);
 
-        // matrix moded = system_matrix_mult_new(soln, swimmers);
-        // matirx origin = system_matrix_mult_new(soln, swimmers);
-        // origin.set_block(int(3*NFIL*NSEG + 3*NBLOB), 6+2*NFIL, 0);
-        // moded.set_block(int(3*NFIL*NSEG + 3*NBLOB), 6+2*NFIL, 0);
-        // matrix diffsq = origin;
-        // diffsq.zero();
-        // for(int i=0; i<Q.num_rows-2*NFIL-6; i++){
-        //   diffsq(i, 0) = (origin(i, 0) - moded(i, 0))*(origin(i, 0) - moded(i, 0));
-        // }
-        // std::cout<<"origin="<<norm(origin)<<"\t";
-        // std::cout<<"moded="<<norm(moded)<<"\t";
-        // std::cout<<"diffsq="<<norm(diffsq)<<"\t";
-        // std::cout<<std::endl;
-
-        // std::string Qname = "soln.dat";
-        // std::ofstream out_file(Qname, std::ios::app);
-        // if (out_file.is_open()) {
-        //   for(int i=0; i<Q.num_rows; i++){
-        //     out_file << new_soln(i, 0) << " ";
-        //   }
-        //   out_file << std::endl << std::endl;
-        //   out_file.close();
-        // }
-        // else{
-        //   std::cerr << "Failed to open input file." << std::endl;
-        // }
-        
-
       #else
 
         Q.set_col(iter, apply_preconditioner(system_matrix_mult_new(Q.get_col(iter-1), swimmers), swimmers));

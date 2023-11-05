@@ -21,9 +21,9 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        # self.dir = "/home/clustor2/ma/h/hs2216/20230922/"
+        self.dir = "/home/clustor2/ma/h/hs2216/20231027/"
         # self.dir = "data/expr_sims/20231027/"
-        self.dir = "data/expr_sims/20231027/"
+        self.dir = "data/expr_sims/20231105/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -41,7 +41,7 @@ class VISUAL:
         self.check_overlap = False
 
         self.plot_end_frame_setting = 30000
-        self.frames = 900
+        self.frames = 90
 
         self.plot_end_frame = self.plot_end_frame_setting
 
@@ -107,13 +107,13 @@ class VISUAL:
         self.nblob = int(self.pars_list['nblob'][self.index])
         self.ar = self.pars_list['ar'][self.index]
         self.spring_factor = self.pars_list['spring_factor'][self.index]
-        self.radius = 0.5*self.ar*2.2*self.nseg
         self.N = int(self.nswim*(self.nfil*self.nseg + self.nblob))
 
         self.simName = self.dir + f"ciliate_{self.nfil:.0f}fil_{self.nblob:.0f}blob_{self.ar:.2f}R_{self.spring_factor:.2f}torsion"
         self.fil_references = myIo.read_fil_references(self.simName + '_fil_references.dat')
 
         self.pars = myIo.read_pars(self.simName + '.par')
+        self.radius = 0.5*self.ar*self.pars['FIL_LENGTH']
         self.dt = self.pars['DT']*self.pars['PLOT_FREQUENCY_IN_STEPS']
         if(not 'PRESCRIBED_CILIA' in self.pars):
             self.pars['PRESCRIBED_CILIA'] = 0
@@ -225,15 +225,12 @@ class VISUAL:
                                 self.write_data(seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, self.periodic, True, True, color=fil_color)
                             
                 if(self.check_overlap):
-                    threshold = 0.95
-                    # colliding_indices, colliding_particles = util.label_colliding_particles(segs_list, 0.9*float(self.pars['RSEG']))
+                    threshold = 1.00
                     colliding_indices, colliding_particles = util.label_colliding_particles_with_3d_cell_list(segs_list, 5, threshold*float(self.pars['RSEG']))
                     
-                    # print(colliding_indices[0])
-                    # myIo.write_line('#', superpuntoDatafileName)
                     self.write_data(body_pos, self.radius, superpuntoDatafileName, self.periodic, color=16777215)
-                    if not colliding_indices:
-                        print(f'No overlapping at threshold {threshold}\n')
+                    print(f'Overlapping case at threshold {threshold} = {len(colliding_indices)}')
+
                     for i, pos in enumerate(segs_list):
                         fil_color = 16777215
                         if(i in colliding_indices):
@@ -1147,9 +1144,10 @@ class VISUAL:
 
         nrow = len(np.unique(self.pars_list['nfil']))
         ncol = len(np.unique(self.pars_list['ar']))
-        if(ncol == 1 or nrow == 1):
-            nrow = int(self.num_sim**.5)
-            ncol = nrow + (1 if nrow**2 < self.num_sim else 0)
+        # if(ncol == 1 or nrow == 1):
+        nrow = int(self.num_sim**.5)
+        ncol = nrow + (1 if nrow**2 < self.num_sim else 0)
+        print(f'nrow = {nrow} ncol = {ncol}')
         spring_factor = self.pars_list['spring_factor'][0]
 
         

@@ -375,6 +375,47 @@
 
   };
 
+  matrix random_point_away_from_poles_and_inhomogeneous(const Real shift_ratio, const Real factor){
+
+    // N.B. The Mersenne twister "gen" is modified whenever we call upon it, so this method cannot be
+    // const and consequently this class cannot be passed as const to the seeding function.
+
+    matrix sample(3,1);
+
+    if (std::string(GENERATRIX_FILE_NAME) == std::string(FOURIER_DIR) + std::string("sphere")){
+
+      // There's a really simple way of generating uniform samples on a sphere.
+      std::normal_distribution<Real> d(0.0, 1.0);
+
+      sample(0) = d(gen)*factor;
+      sample(1) = d(gen)*factor;
+      sample(2) = d(gen);
+
+      const Real sample_norm = norm(sample);
+      
+      sample /= sample_norm;
+
+      Real theta = std::atan2(std::sqrt(sample(0)*sample(0) + sample(1)*sample(1)),sample(2));
+      const Real phi = std::atan2(sample(1), sample(0));
+
+      theta = theta*(1-2*shift_ratio)+shift_ratio*PI;
+
+      sample(0) = sample_norm*std::sin(theta)*std::sin(phi);
+      sample(1) = sample_norm*std::sin(theta)*std::cos(phi);
+      sample(2) = sample_norm*std::cos(theta);
+     
+      sample /= sample_norm;
+
+    } else {
+
+      std::cout<< "Non-spherical shape not implemented." << std::endl;
+
+    }
+
+    return sample;
+
+  };
+
   Real polar_angle_area_fraction_integrand(const Real theta) const {
 
     const Real r = radius(theta);
@@ -768,6 +809,7 @@
       for (int n = 0; n < samples_per_iter; n++){
 
         const matrix sample = shape.random_point_away_from_poles(0.02);
+        // const matrix sample = shape.random_point_away_from_poles_and_inhomogeneous(0.02, 10);
 
         samples[3*n] = sample(0);
         samples[3*n + 1] = sample(1);

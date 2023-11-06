@@ -9,6 +9,7 @@ from matplotlib.lines import Line2D
 import matplotlib.patches as patches
 import matplotlib.animation as animation
 import configparser
+from sklearn.cluster import KMeans
 import math
 import sys
 import matplotlib
@@ -41,11 +42,11 @@ class VISUAL:
         self.check_overlap = False
 
         self.plot_end_frame_setting = 30000
-        self.frames = 90
+        self.frames = 30
 
         self.plot_end_frame = self.plot_end_frame_setting
 
-        self.select_elst = 0
+        self.select_elst = 2
 
         self.Lx = 1000
         self.Ly = 1000
@@ -225,8 +226,9 @@ class VISUAL:
                                 self.write_data(seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, self.periodic, True, True, color=fil_color)
                             
                 if(self.check_overlap):
-                    threshold = 1.00
-                    colliding_indices, colliding_particles = util.label_colliding_particles_with_3d_cell_list(segs_list, 5, threshold*float(self.pars['RSEG']))
+                    threshold = 0.9
+                    cell_size = 10
+                    colliding_indices, colliding_particles = util.label_colliding_particles_with_3d_cell_list(segs_list, cell_size, threshold*float(self.pars['RSEG']))
                     
                     self.write_data(body_pos, self.radius, superpuntoDatafileName, self.periodic, color=16777215)
                     print(f'Overlapping case at threshold {threshold} = {len(colliding_indices)}')
@@ -405,6 +407,10 @@ class VISUAL:
         ax2 = fig2.add_subplot(1,1,1)
         fig3 = plt.figure()
         ax3 = fig3.add_subplot(1,1,1)
+        fig4 = plt.figure()
+        ax4 = fig4.add_subplot(1,1,1)
+        fig5 = plt.figure()
+        ax5 = fig5.add_subplot(1,1,1)
         fil_references_sphpolar = np.zeros((self.nfil,3))
         
         fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
@@ -412,7 +418,7 @@ class VISUAL:
 
 
         nfil = self.nfil
-        n_snapshots = min(30, self.plot_end_frame)
+        n_snapshots = min(300, self.plot_end_frame)
         start = self.plot_end_frame - n_snapshots
         X = np.zeros((nfil, n_snapshots))
         time_array = np.arange(n_snapshots)
@@ -435,39 +441,58 @@ class VISUAL:
             if(i>=start):
                 fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
                 fil_phases_sorted = fil_phases[sorted_indices]
-                fil_phases_sorted = util.box(fil_phases_sorted, 2*np.pi)
 
                 fil_angles = np.array(fil_angles_str.split()[1:], dtype=float)
                 fil_angles_sorted = fil_angles[sorted_indices]
 
-                # fil_phases_sorted = np.sin(fil_phases_sorted)
-
                 X[:,i-start] = fil_phases_sorted[:nfil]
                 # X[:,i-start] = fil_angles_sorted[:nfil]
         
+
+        phi_unboxed = X
+        phi = util.box(phi_unboxed, 2*np.pi)
+        phi_dot = np.diff(phi_unboxed)
+        ax4.scatter(azim_array_sorted, polar_array_sorted, c = phi_dot[:,-1])
+
+        r = np.abs(np.sum(np.exp(phi*1j), 0)/self.nfil)
+
+        diff = np.diff(np.sin(phi), axis=0)
+        corr_matrix = np.abs(diff[:-1,:]) + np.abs(diff[1:,:])
+        corr_over_time = np.mean(corr_matrix, 0)
+        avg_corr = np.mean(corr_over_time)
+        print(f"index={self.index} correlation={avg_corr}")
         
-        
-        phi_dot = X[:,1:] - X[:,:-1]
+
         for i in range(5):
             ax.plot(time_array[1:], phi_dot[i,:])
-        print(max(phi_dot[:,-1]), min(phi_dot[:,-1]))
+            ax2.plot(time_array, phi[i,:])
+            ax3.plot(time_array, corr_over_time)
         ax.set_xlabel('time')
-
-        # phi_dot = phi_dot[:,0]
-
-        # phi_dot_mean = np.mean()
-
-        r = np.abs(np.sum(np.exp(phi_dot*1j), 0)/self.nfil)
-        print(f"index={self.index} r={np.mean(r)}")
-        # print(np.exp(phi_dot*1j))
-        # print(np.sum(np.exp(phi_dot*1j), 0)/self.nfil)
-
-        # print(self.nfil, np.shape(r))
         
-        # print(r)
-        ax2.scatter(azim_array_sorted, polar_array_sorted, c = phi_dot[:,-1])
+        #########################
+        # Combine x and y into a single array
+        data = np.column_stack((polar_array_sorted, azim_array_sorted))
 
-        # ax3.plot(time_array[1:], r)
+        # Specify the number of clusters you want
+        n_clusters = int(self.nfil/10)  # You can choose the appropriate number of clusters
+        corr_array = np.zeros(n_clusters)
+
+        # Create and fit a K-Means model
+        kmeans = KMeans(n_clusters=n_clusters)
+        kmeans.fit(data)
+
+        # Get cluster assignments for each data point
+        cluster_assignments = kmeans.labels_
+
+        for i in range(n_clusters):
+            corr_array[i] = 0
+            # Implement this tomorrow
+            
+    
+        ##################
+            
+        ax5.scatter(azim_array_sorted, polar_array_sorted, c = cluster_assignments)
+        
 
         fig.savefig(f'fig/fil_order_parameter_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
@@ -953,6 +978,7 @@ class VISUAL:
 
         U, sigma, V = np.linalg.svd(X, full_matrices=False)
         Sigma = np.diag(sigma)
+
         # V = V.conj().T
         # U = U[:, :r]
         # Sigma = Sigma[:r, :r]

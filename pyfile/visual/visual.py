@@ -41,7 +41,7 @@ class VISUAL:
         self.big_sphere = True
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 30000
+        self.plot_end_frame_setting = 3600
         self.frames = 30
 
         self.plot_end_frame = self.plot_end_frame_setting
@@ -1452,7 +1452,7 @@ class VISUAL:
 
 
                     nfil = self.nfil
-                    n_snapshots = min(900, self.plot_end_frame)
+                    n_snapshots = min(2400, self.plot_end_frame)
                     start = self.plot_end_frame - n_snapshots
                     X = np.zeros((nfil, n_snapshots))
                     X_angle = np.zeros((nfil, n_snapshots))
@@ -1484,15 +1484,15 @@ class VISUAL:
                             X[:,i-start] = fil_phases_sorted[:nfil]
                             X_angle[:,i-start] = fil_angles_sorted[:nfil]
                     
-                    np.savetxt(f'phase_data/by_index/spring_constant{spring_factor}/X_phase_index{self.index}.txt', X, delimiter=', ')
-                    np.savetxt(f'phase_data/by_index/spring_constant{spring_factor}/X_rotation_angle_index{self.index}.txt', X_angle, delimiter=', ')
-                    np.savetxt(f'phase_data/by_index/spring_constant{spring_factor}/azim_pos_index{self.index}.txt', azim_array_sorted, delimiter=', ')
-                    np.savetxt(f'phase_data/by_index/spring_constant{spring_factor}/polar_pos_index{self.index}.txt', polar_array_sorted, delimiter=', ')
+                    np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/X_phase_index{self.index}.txt', X, delimiter=', ')
+                    np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/X_rotation_angle_index{self.index}.txt', X_angle, delimiter=', ')
+                    np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/azim_pos_index{self.index}.txt', azim_array_sorted, delimiter=', ')
+                    np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/polar_pos_index{self.index}.txt', polar_array_sorted, delimiter=', ')
 
-                    np.savetxt(f'phase_data/by_pars/spring_constant{spring_factor}/X_phase_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', X, delimiter=', ')
-                    np.savetxt(f'phase_data/by_pars/spring_constant{spring_factor}/X_rotation_angle_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', X_angle, delimiter=', ')
-                    np.savetxt(f'phase_data/by_pars/spring_constant{spring_factor}/azim_pos_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', azim_array_sorted, delimiter=', ')
-                    np.savetxt(f'phase_data/by_pars/spring_constant{spring_factor}/polar_pos_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', polar_array_sorted, delimiter=', ')
+                    # np.savetxt(f'phase_data/by_pars/spring_constant{spring_factor}/X_phase_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', X, delimiter=', ')
+                    # np.savetxt(f'phase_data/by_pars/spring_constant{spring_factor}/X_rotation_angle_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', X_angle, delimiter=', ')
+                    # np.savetxt(f'phase_data/by_pars/spring_constant{spring_factor}/azim_pos_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', azim_array_sorted, delimiter=', ')
+                    # np.savetxt(f'phase_data/by_pars/spring_constant{spring_factor}/polar_pos_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', polar_array_sorted, delimiter=', ')
 
 
                     U, sigma, V = np.linalg.svd(X, full_matrices=False)

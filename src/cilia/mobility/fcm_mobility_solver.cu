@@ -29,7 +29,6 @@ fcm_mobility_solver::fcm_mobility_solver(){
   pars.repeat = values[8];
   pars.prompt = values[9];
   pars.boxsize = values[13];
-  // pars.boxsize = pars.rh/1.7724538509055159 * pars.nx / pars.alpha;
 
   cufcm_solver = new FCM_solver(pars);
   cufcm_solver->init_aux_for_filament();

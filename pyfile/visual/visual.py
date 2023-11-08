@@ -41,12 +41,12 @@ class VISUAL:
         self.big_sphere = True
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 3600
-        self.frames = 30
+        self.plot_end_frame_setting = 3000
+        self.frames = 3600
 
         self.plot_end_frame = self.plot_end_frame_setting
 
-        self.select_elst = 2
+        self.select_elst = 0
 
         self.Lx = 1000
         self.Ly = 1000
@@ -116,6 +116,8 @@ class VISUAL:
         self.pars = myIo.read_pars(self.simName + '.par')
         self.radius = 0.5*self.ar*self.pars['FIL_LENGTH']
         self.dt = self.pars['DT']*self.pars['PLOT_FREQUENCY_IN_STEPS']
+        self.period = float(self.pars['STEPS_PER_PERIOD'])/float(self.pars['PLOT_FREQUENCY_IN_STEPS'])
+
         if(not 'PRESCRIBED_CILIA' in self.pars):
             self.pars['PRESCRIBED_CILIA'] = 0
         if(self.pars['NBLOB']>0):
@@ -589,7 +591,6 @@ class VISUAL:
             plt.savefig(f'fig/fil_phase_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
             plt.show()
         
-
     def ciliate(self):
         self.select_sim()
 
@@ -791,7 +792,7 @@ class VISUAL:
         fig = plt.figure()
         ax = fig.add_subplot(1,1,1)
 
-        time_array = np.arange(self.plot_start_frame, self.plot_end_frame )
+        time_array = np.arange(self.plot_start_frame, self.plot_end_frame )/self.period
         dissipation_array = np.zeros(self.frames)
 
         blob_references_str = blob_references_f.readline()
@@ -799,14 +800,13 @@ class VISUAL:
         blob_references = np.reshape(blob_references, (int(self.pars['NBLOB']), 3))
 
         for i in range(self.plot_end_frame):
-            print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
+            # print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
             seg_forces_str = seg_forces_f.readline()
             seg_vels_str = seg_vels_f.readline()
             blob_forces_str = blob_forces_f.readline()
             body_vels_str = body_vels_f.readline()
 
             if(i>=self.plot_start_frame):
-
                 seg_forces = np.array(seg_forces_str.split()[1:], dtype=float)
                 seg_vels = np.array(seg_vels_str.split()[1:], dtype=float)
                 blob_forces= np.array(blob_forces_str.split()[1:], dtype=float)
@@ -820,10 +820,11 @@ class VISUAL:
 
                 dissipation_array[i-self.plot_start_frame] = np.sum(blob_forces * blob_vels) + np.sum(seg_forces * seg_vels)
 
+        ax.set_xlim(time_array[0], time_array[-1])
         ax.plot(time_array, dissipation_array)
-        ax.set_xlabel('Time step')
+        ax.set_xlabel('t/T')
         ax.set_ylabel('Dissipation')
-        plt.savefig(f'fig/ciliate_dissipation_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        plt.savefig(f'fig/ciliate_dissipation_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
     def ciliate_dmd(self):
@@ -1230,7 +1231,7 @@ class VISUAL:
                     # ax.set_ylim(0, np.pi)
                     # ax.set_xticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0', 'π/2', 'π'])
                     # ax.set_yticks(np.linspace(0, np.pi, 5), ['0', 'π/4', 'π/2', '3π/4', 'π'])
-                    ax.set_title(f"index={self.index} nfil={self.nfil} AR={self.ar}")
+                    ax.set_title(f"index={self.index} nfil={self.nfil} AR={self.ar} frames={self.plot_end_frame}")
                 except:
                     print("WARNING: " + self.simName + " not found.")
 
@@ -1370,7 +1371,7 @@ class VISUAL:
 
                 time_array = np.arange(self.plot_start_frame, self.plot_end_frame )
         
-                body_vel_array = np.zeros((self.frames, 6))
+                # body_vel_array = np.zeros((self.frames, 6))
                 body_speed_array = np.zeros(self.frames)
 
                 for i in range(self.plot_end_frame):
@@ -1380,7 +1381,7 @@ class VISUAL:
                     if(i>=self.plot_start_frame):
                         body_vels = np.array(body_vels_str.split(), dtype=float)
 
-                        body_vel_array[i-self.plot_start_frame] = body_vels
+                        # body_vel_array[i-self.plot_start_frame] = body_vels
                         body_speed_array[i-self.plot_start_frame] = np.sqrt(np.sum(body_vels[0:3]*body_vels[0:3], 0))
 
                 ax.plot(time_array, body_speed_array, label=f"nfil={self.nfil} AR={self.ar}")
@@ -1388,8 +1389,83 @@ class VISUAL:
                 print("WARNING: " + self.simName + " not found.")
 
         plt.tight_layout()
-        plt.savefig(f'fig/multi_speed.png', bbox_inches = 'tight', format='png')
         plt.savefig(f'fig/multi_speed.pdf', bbox_inches = 'tight', format='pdf')
+        plt.show()
+
+    def multi_ciliate_dissipation(self):
+         # Plotting
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+        fig2 = plt.figure()
+        ax2 = fig2.add_subplot(1,1,1)
+        fig3 = plt.figure()
+        ax3 = fig3.add_subplot(1,1,1)
+
+        for ind in range(self.num_sim):
+            try:
+                self.index = ind
+                self.select_sim()
+
+                seg_forces_f = open(self.simName + '_seg_forces.dat', "r")
+                seg_vels_f = open(self.simName + '_seg_vels.dat', "r")
+                blob_forces_f = open(self.simName + '_blob_forces.dat', "r")
+                blob_references_f = open(self.simName + '_blob_references.dat', "r")
+                body_vels_f = open(self.simName + '_body_vels.dat', "r")
+
+                time_array = np.arange(self.plot_start_frame, self.plot_end_frame )/self.period
+        
+                body_speed_array = np.zeros(self.frames)
+                dissipation_array = np.zeros(self.frames)
+                efficiency_array = np.zeros(self.frames)
+
+                blob_references_str = blob_references_f.readline()
+                blob_references= np.array(blob_references_str.split(), dtype=float)
+                blob_references = np.reshape(blob_references, (int(self.pars['NBLOB']), 3))
+
+                for i in range(self.plot_end_frame):
+                    print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
+                    seg_forces_str = seg_forces_f.readline()
+                    seg_vels_str = seg_vels_f.readline()
+                    blob_forces_str = blob_forces_f.readline()
+                    body_vels_str = body_vels_f.readline()
+
+                    if(i>=self.plot_start_frame):
+                        seg_forces = np.array(seg_forces_str.split()[1:], dtype=float)
+                        seg_vels = np.array(seg_vels_str.split()[1:], dtype=float)
+                        blob_forces= np.array(blob_forces_str.split()[1:], dtype=float)
+                        body_vels= np.array(body_vels_str.split(), dtype=float)
+                        body_vels = np.array(body_vels_str.split(), dtype=float)
+
+                        seg_forces = np.reshape(seg_forces, (int(self.pars['NSEG']*self.pars['NFIL']), 6))
+                        seg_vels = np.reshape(seg_vels, (int(self.pars['NSEG']*self.pars['NFIL']), 6))
+                        blob_forces = np.reshape(blob_forces, (int(self.pars['NBLOB']), 3))
+                        body_vels_tile = np.tile(body_vels, (int(self.pars['NBLOB']), 1))
+                        blob_vels = body_vels_tile[:, 0:3] + np.cross(body_vels_tile[:, 3:6], blob_references)
+
+                        body_speed_array[i-self.plot_start_frame] = np.sqrt(np.sum(body_vels[0:3]*body_vels[0:3], 0))
+                        dissipation_array[i-self.plot_start_frame] = np.sum(blob_forces * blob_vels) + np.sum(seg_forces * seg_vels)
+
+                efficiency_array = 6*np.pi*self.radius*body_speed_array**2/dissipation_array
+                ax.plot(time_array, body_speed_array, label=f"index={self.index}")
+                ax2.plot(time_array, dissipation_array, label=f"index={self.index}")
+                ax3.plot(time_array, efficiency_array, label=f"index={self.index}")
+                
+            except:
+                print("WARNING: " + self.simName + " not found.")
+
+        ax.set_xlabel('t/T')
+        ax.set_ylabel('Speed')
+        ax2.set_xlabel('t/T')
+        ax2.set_ylabel('Dissipation')
+        ax3.set_xlabel('t/T')
+        ax3.set_ylabel('Efficiency')
+
+        fig.legend()
+        fig2.legend()
+        fig3.legend()
+        fig.savefig(f'fig/multi_speed.pdf', bbox_inches = 'tight', format='pdf')
+        fig2.savefig(f'fig/multi_dissipation.pdf', bbox_inches = 'tight', format='pdf')
+        fig3.savefig(f'fig/multi_efficiency.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
     def multi_timing(self):
@@ -1452,7 +1528,7 @@ class VISUAL:
 
 
                     nfil = self.nfil
-                    n_snapshots = min(2400, self.plot_end_frame)
+                    n_snapshots = min(3600, self.plot_end_frame)
                     start = self.plot_end_frame - n_snapshots
                     X = np.zeros((nfil, n_snapshots))
                     X_angle = np.zeros((nfil, n_snapshots))
@@ -1711,9 +1787,9 @@ class VISUAL:
                 print("WARNING: " + self.simName + " not found.")
 
         efficiency_list = 6*np.pi*sphere_r_list*speed_list**2/dissipation_list
-        print(repr(speed_list))
-        print(repr(dissipation_list))
-        print(repr(efficiency_list))
+        # print(repr(speed_list))
+        # print(repr(dissipation_list))
+        # print(repr(efficiency_list))
 
         colormap = 'Greys'
         from matplotlib.colors import Normalize
@@ -1732,7 +1808,6 @@ class VISUAL:
         ax2.scatter(self.pars_list['nfil'], self.pars_list['ar'], s=100, c=speed_list, edgecolors='red', linewidths=0.1, cmap=colormap)
         ax2.set_xlabel("Nfil")
         ax2.set_ylabel("R/L")
-        # fig2.savefig(f'fig/multi_ciliate_speed_summary_heatmap.png', bbox_inches = 'tight', format='png')
         fig2.savefig(f'fig/multi_ciliate_speed_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
 
         # Angular speed
@@ -1747,7 +1822,6 @@ class VISUAL:
         ax3.scatter(self.pars_list['nfil'], self.pars_list['ar'], s=100, c=angular_speed_list, edgecolors='red', linewidths=0.1, cmap=colormap)
         ax3.set_xlabel("Nfil")
         ax3.set_ylabel("R/L")
-        # fig3.savefig(f'fig/multi_ciliate_angular_speed_summary_heatmap.png', bbox_inches = 'tight', format='png')
         fig3.savefig(f'fig/multi_ciliate_angular_speed_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
 
         # Dissipation
@@ -1762,7 +1836,6 @@ class VISUAL:
         ax4.scatter(self.pars_list['nfil'], self.pars_list['ar'], s=100, c=dissipation_list, edgecolors='red', linewidths=0.1, cmap=colormap)
         ax4.set_xlabel("Nfil")
         ax4.set_ylabel("R/L")
-        # fig4.savefig(f'fig/multi_ciliate_dissipation_summary_heatmap.png', bbox_inches = 'tight', format='png')
         fig4.savefig(f'fig/multi_ciliate_dissipation_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
 
         # Efficiency
@@ -1778,18 +1851,104 @@ class VISUAL:
         ax5.scatter(self.pars_list['nfil'], self.pars_list['ar'], s=100, c=efficiency_list, edgecolors='red', linewidths=0.1, cmap=colormap)
         ax5.set_xlabel("Nfil")
         ax5.set_ylabel("R/L")
-        # fig5.savefig(f'fig/multi_ciliate_efficiency_summary_heatmap.png', bbox_inches = 'tight', format='png')
         fig5.savefig(f'fig/multi_ciliate_efficiency_summary_heatmap.pdf', bbox_inches = 'tight', format='pdf')
         
-
-
         ax.scatter(nfil_list, dissipation_list, label=f"nfil={self.nfil} AR={self.ar}")
         ax.set_ylabel("Dissipation")
         ax.set_xlabel("Number of filaments")
         fig.tight_layout()
-        # fig.savefig(f'fig/ciliate_dissipation_summary.png', bbox_inches = 'tight', format='png')
         fig.savefig(f'fig/ciliate_dissipation_summary.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
+
+    def summary_order_parameter(self):
+        # Plotting
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+        fig2 = plt.figure()
+        ax2 = fig2.add_subplot(1,1,1)
+        fig3 = plt.figure()
+        ax3 = fig3.add_subplot(1,1,1)
+        fig4 = plt.figure()
+        ax4 = fig4.add_subplot(1,1,1)
+        fig5 = plt.figure()
+        ax5 = fig5.add_subplot(1,1,1)
+
+        nfil_list = np.array(self.pars_list['nfil'])
+        ar_list = np.array(self.pars_list['ar'])
+        sphere_r_list = np.zeros(self.num_sim)
+        speed_list = np.zeros(self.num_sim)
+        angular_speed_list = np.zeros(self.num_sim)
+        dissipation_list = np.zeros(self.num_sim)
+        efficiency_list = np.zeros(self.num_sim)
+
+        for ind in range(self.num_sim):
+            try:
+                self.index = ind
+                self.select_sim()
+
+                seg_forces_f = open(self.simName + '_seg_forces.dat', "r")
+                seg_vels_f = open(self.simName + '_seg_vels.dat', "r")
+                blob_forces_f = open(self.simName + '_blob_forces.dat', "r")
+                blob_references_f = open(self.simName + '_blob_references.dat', "r")
+                body_vels_f = open(self.simName + '_body_vels.dat', "r")
+                
+                body_speed_array = np.zeros(self.frames)
+                body_angular_speed_array = np.zeros(self.frames)
+                dissipation_array = np.zeros(self.frames)
+
+                blob_references_str = blob_references_f.readline()
+                blob_references = np.array(blob_references_str.split(), dtype=float)
+                blob_references = np.reshape(blob_references, (int(self.pars['NBLOB']), 3))
+            
+                for i in range(self.plot_end_frame):
+                    print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
+                    seg_forces_str = seg_forces_f.readline()
+                    seg_vels_str = seg_vels_f.readline()
+                    blob_forces_str = blob_forces_f.readline()
+                    body_vels_str = body_vels_f.readline()
+
+                    if(i>=self.plot_start_frame):
+                        seg_forces = np.array(seg_forces_str.split()[1:], dtype=float)
+                        seg_vels = np.array(seg_vels_str.split()[1:], dtype=float)
+                        blob_forces= np.array(blob_forces_str.split()[1:], dtype=float)
+                        body_vels= np.array(body_vels_str.split(), dtype=float)
+
+                        seg_forces = np.reshape(seg_forces, (int(self.pars['NSEG']*self.pars['NFIL']), 6))
+                        seg_vels = np.reshape(seg_vels, (int(self.pars['NSEG']*self.pars['NFIL']), 6))
+                        blob_forces = np.reshape(blob_forces, (int(self.pars['NBLOB']), 3))
+                        body_vels_tile = np.tile(body_vels, (int(self.pars['NBLOB']), 1))
+                        blob_vels = body_vels_tile[:, 0:3] + np.cross(body_vels_tile[:, 3:6], blob_references)
+
+                        body_speed_array[i-self.plot_start_frame] = np.sqrt(np.sum(body_vels[0:3]*body_vels[0:3], 0))
+                        body_angular_speed_array[i-self.plot_start_frame] = np.sqrt(np.sum(body_vels[3:6]*body_vels[3:6], 0))
+                        dissipation_array[i-self.plot_start_frame] = np.sum(blob_forces * blob_vels) + np.sum(seg_forces * seg_vels)
+
+                speed_list[ind] = np.mean(body_speed_array)
+                angular_speed_list[ind] = np.mean(body_angular_speed_array)
+                dissipation_list[ind] = np.mean(dissipation_array)
+                sphere_r_list[ind] = self.radius
+            except:
+                print("WARNING: " + self.simName + " not found.")
+
+        efficiency_list = 6*np.pi*sphere_r_list*speed_list**2/dissipation_list
+
+        colormap = 'Greys'
+        from matplotlib.colors import Normalize
+        from matplotlib.cm import ScalarMappable
+
+        # Speed
+        vmin, vmax = np.min(speed_list), np.max(speed_list)
+        norm = Normalize(vmin=vmin, vmax=vmax)
+        sm = ScalarMappable(cmap=colormap, norm=norm)
+        sm.set_array([])
+        cbar = fig2.colorbar(sm)
+        cbar.ax.ticklabel_format(axis='both', style='sci', scilimits=(0,0))
+        cbar.ax.set_yticks(np.linspace(vmin, vmax, 8))
+        cbar.set_label(r"Speed")
+
+        fig.savefig(f'fig/ciliate_coordination_summary.pdf', bbox_inches = 'tight', format='pdf')
+        plt.show()
+
 
     def summary_check_overlap(self):
         # Plotting
@@ -1846,6 +2005,8 @@ class VISUAL:
         # fig.tight_layout()
         # fig.savefig(f'fig/multi_ciliate_speed_summary.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
+
+
 # 
 # density for different elsticity
 # efficiency/disspation

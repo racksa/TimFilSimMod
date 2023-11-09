@@ -11,9 +11,11 @@ list_of_single_options = ['plot', 'plot_fil', 'phase', 'order_parameter', 'ecker
                    'ciliate_svd', 'ciliate_dmd']
 list_of_multi_options = ['multi_phase', 'multi_ciliate', 'multi_ciliate_traj',
                          'multi_ciliate_speed', 'multi_timing', 'multi_ciliate_svd',
-                         'multi_check_overlap', 'multi_ciliate_dissipation',]
+                         'multi_check_overlap', 'multi_ciliate_dissipation',
+                         'multi_order_parameter']
 list_of_summary_options = ['summary_ciliate_speed', 'summary_timing',
-                           'summary_ciliate_dissipation', 'summary_check_overlap']
+                           'summary_ciliate_dissipation', 'summary_check_overlap',
+                           'summary_ciliate_density']
 
 list_of_special_options = ['ishikawa']
 list_of_all_options = list_of_single_options + list_of_multi_options + list_of_summary_options + list_of_special_options

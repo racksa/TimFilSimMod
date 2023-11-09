@@ -400,7 +400,7 @@ class VISUAL:
             plt.savefig(f'fig/fil_phase_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
             plt.show()
 
-    def order_parameter(self):
+    def phi_dot(self):
         self.select_sim()
 
         fig = plt.figure()
@@ -433,6 +433,7 @@ class VISUAL:
         sorted_indices = np.argsort(azim_array)
         azim_array_sorted = azim_array[sorted_indices]
         polar_array_sorted = polar_array[sorted_indices]
+        fil_phases_sorted = np.array([])
         
 
         for i in range(self.plot_end_frame):
@@ -476,20 +477,20 @@ class VISUAL:
         data = np.column_stack((polar_array_sorted, azim_array_sorted))
 
         # Specify the number of clusters you want
-        n_clusters = int(self.nfil/10)  # You can choose the appropriate number of clusters
-        corr_array = np.zeros(n_clusters)
+        n_clusters = int(self.nfil/10) 
+        corr_array = np.zeros(n_clusters) # correlation within each cluster
 
         # Create and fit a K-Means model
         kmeans = KMeans(n_clusters=n_clusters)
         kmeans.fit(data)
-
-        # Get cluster assignments for each data point
         cluster_assignments = kmeans.labels_
 
         for i in range(n_clusters):
-            corr_array[i] = 0
-            # Implement this tomorrow
-            
+            phases_in_group = np.sin(fil_phases_sorted[np.where(cluster_assignments==i)])
+            corr_array[i] = np.var(phases_in_group)
+        
+        avg_var = np.mean(corr_array)
+        print(f"index={self.index} variance={avg_var}")
     
         ##################
             
@@ -499,6 +500,86 @@ class VISUAL:
         fig.savefig(f'fig/fil_order_parameter_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
         
+    def order_parameter(self):
+        self.select_sim()
+
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+        fig2 = plt.figure()
+        ax2 = fig2.add_subplot(1,1,1)
+        fig3 = plt.figure()
+        ax3 = fig3.add_subplot(1,1,1)
+
+        fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
+
+        time_array = np.arange(self.frames)
+        corr_array = np.zeros(self.frames)
+        corr_array2 = np.zeros(self.frames)
+
+        fil_references_sphpolar = np.zeros((self.nfil,3))
+        for fil in range(self.nfil):
+            fil_references_sphpolar[fil] = util.cartesian_to_spherical(self.fil_references[3*fil: 3*fil+3])
+        azim_array = fil_references_sphpolar[:,1]
+        polar_array = fil_references_sphpolar[:,2]
+        sorted_indices = np.argsort(azim_array)
+        azim_array_sorted = azim_array[sorted_indices]
+        polar_array_sorted = polar_array[sorted_indices]
+        fil_phases_sorted = np.array([])
+
+        #########################
+        # Combine x and y into a single array
+        pos_data = np.column_stack((polar_array_sorted, azim_array_sorted))
+
+        # Specify the number of clusters you want
+        n_clusters = int(self.nfil/10) 
+        variance_array = np.zeros(n_clusters) # correlation within each cluster
+
+        # Create and fit a K-Means model
+        kmeans = KMeans(n_clusters=n_clusters)
+        kmeans.fit(pos_data)
+        cluster_assignments = kmeans.labels_
+        ##################
+
+        for i in range(self.plot_end_frame):
+            print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
+            fil_phases_str = fil_phases_f.readline()
+
+            if(i>=self.plot_start_frame):
+                fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
+                fil_phases_sorted = fil_phases[sorted_indices]
+                sin_phases_sorted = np.sin(fil_phases_sorted)
+
+                # Coordination number 1
+                phase_diff = np.diff(sin_phases_sorted, prepend=sin_phases_sorted[-1])
+                corr = np.abs(phase_diff[:-1]) + np.abs(phase_diff[1:])
+                corr_array[i-self.plot_start_frame] = np.mean(corr)
+
+                # Coordination number 2
+                for m in range(n_clusters):
+                    phases_in_group = sin_phases_sorted[np.where(cluster_assignments==m)]
+                    variance_array[m] = np.var(phases_in_group)
+                
+                corr_array2[i-self.plot_start_frame] = np.mean(variance_array)
+
+        ax.plot(time_array, corr_array)
+        ax.set_xlabel('t/T')
+        ax.set_ylabel('Coordination number')
+        ax.set_xlim(0)
+        ax.set_ylim(0)
+
+        ax2.plot(time_array, corr_array2)
+        ax2.set_xlabel('t/T')
+        ax2.set_ylabel('Coordination number 2')
+        ax2.set_xlim(0)
+        ax2.set_ylim(0)
+        
+        
+        ax3.scatter(azim_array_sorted, polar_array_sorted, c = cluster_assignments)
+        
+
+        fig.savefig(f'fig/fil_order_parameter_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+        plt.show()
+
     def eckert(self):
         R = 1
         phi0 = np.pi

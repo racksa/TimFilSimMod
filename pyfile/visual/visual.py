@@ -41,7 +41,7 @@ class VISUAL:
         self.big_sphere = False
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 9000
+        self.plot_end_frame_setting = 60000
         self.frames = 240
 
         self.plot_end_frame = self.plot_end_frame_setting

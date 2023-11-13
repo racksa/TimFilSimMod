@@ -22,9 +22,9 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "/home/clustor2/ma/h/hs2216/20231027/"
-        # self.dir = "data/expr_sims/20231027/"
-        self.dir = "data/expr_sims/20231105/"
+        # self.dir = "/home/clustor2/ma/h/hs2216/20231027/"
+        self.date = '20231105'
+        self.dir = f"data/expr_sims/{self.date}/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -41,16 +41,20 @@ class VISUAL:
         self.big_sphere = False
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 60000
-        self.frames = 240
+        self.plot_end_frame_setting = 6000
+        self.frames_setting = 12000
 
         self.plot_end_frame = self.plot_end_frame_setting
+        self.frames = self.frames_setting
 
         self.select_elst = 0
 
         self.Lx = 1000
         self.Ly = 1000
         self.Lz = 1000
+
+        self.nrow = 4
+        self.ncol = 4
         
         self.index = 0
 
@@ -128,7 +132,7 @@ class VISUAL:
             self.fil_references = myIo.read_fil_references(self.simName + '_fil_references.dat')
 
         self.plot_end_frame = min(self.plot_end_frame_setting, sum(1 for line in open(self.simName + '_body_states.dat')))
-        self.plot_start_frame = max(0, self.plot_end_frame-self.frames)
+        self.plot_start_frame = max(0, self.plot_end_frame-self.frames_setting)
         self.frames = self.plot_end_frame - self.plot_start_frame
         self.plot_interval = 1
         print(f'index={self.index} file={self.simName}')
@@ -1048,7 +1052,7 @@ class VISUAL:
         fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
         fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
 
-        n_snapshots = min(5400, self.plot_end_frame)
+        n_snapshots = min(12000, self.plot_end_frame)
         start = self.plot_end_frame - n_snapshots
         X = np.zeros((self.nfil, n_snapshots))
         X_angle = np.zeros((self.nfil, n_snapshots))
@@ -1085,131 +1089,131 @@ class VISUAL:
         Sigma = np.diag(sigma)
 
         np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/X_phase_index{self.index}.txt', X, delimiter=', ')
-        np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/X_rotation_angle_index{self.index}.txt', X_angle, delimiter=', ')
+        # np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/X_rotation_angle_index{self.index}.txt', X_angle, delimiter=', ')
         np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/azim_pos_index{self.index}.txt', azim_array_sorted, delimiter=', ')
         np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/polar_pos_index{self.index}.txt', polar_array_sorted, delimiter=', ')
 
 
-        pc = U @ Sigma
-        pa = V        
+        # pc = U @ Sigma
+        # pa = V        
         
-        num_fil = 4
-        num_mode = 2
-        reduced = pc @ pa
-
-        
-
-        # Plotting
-        colormap = 'twilight_shifted'
-        from matplotlib.colors import Normalize
-        from matplotlib.cm import ScalarMappable
-        norm = Normalize(vmin=0, vmax=2*np.pi)
-        sm = ScalarMappable(cmap=colormap, norm=norm)
-        sm.set_array([])
-
-        fig = plt.figure()
-        ax = fig.add_subplot(1,1,1)
-        fig2 = plt.figure()
-        ax2 = fig2.add_subplot(1,1,1)
-        fig3 = plt.figure()
-        ax3 = fig3.add_subplot(1,1,1)
-        fig4 = plt.figure()
-        ax4 = fig4.add_subplot(1,1,1)
-        fig5 = plt.figure()
-        ax5 = fig5.add_subplot(1,1,1)
-        fig6 = plt.figure()
-        ax6 = fig6.add_subplot(1,1,1)
-        fig7 = plt.figure()
-        ax7 = fig7.add_subplot(1,1,1)
-        fig8 = plt.figure()
-        ax8 = fig8.add_subplot(1,1,1)
-
-        # Signal X
-        ax.imshow(X)
-        ax.set_xlabel('t')
-        ax.set_ylabel('Fil index (sorted by azimuth angle)')
-
-        # Signal of the first snapshot
-        ax2.scatter(azim_array_sorted, X[:,0])
-        ax2.set_xlabel('Azimuth position')
-        ax2.set_ylabel('Phase, t=0')
-
-        # Eigenvalue
-        ax3.scatter(np.arange(0, len(sigma), 1), sigma, marker='*')
-        ax3.set_xlabel(r'Mode')
-        ax3.set_ylabel(r'$Eigenvalue$')
-
-        # POD spatial modes
-        for i in range(2):
-            ax4.plot(U[:,i], label=f'Mode {i}')
-            ax4.set_xlabel('x')
-            ax4.set_ylabel('f(x, t=0)')
-            ax4.legend()
-
-        # POD temporal modes
-        for i in range(4):
-            ax5.plot(V[i, :], label=f'Mode {i}')
-            ax5.set_xlabel('t')
-            ax5.set_ylabel('f(x, t=0)')
-            ax5.legend()
-
-        # Phase of the first snapshot
-        ax6.scatter(azim_array_sorted, polar_array_sorted, c=X[:,0], cmap=colormap)
-        ax6.set_xlabel(r"Azimuth position")
-        ax6.set_ylabel(r"Polar position")
-
-        # Interpolated phase of the first snapshot
-        n1, n2 = 100, 100
-        azim_grid = np.linspace(-np.pi, np.pi, n1)
-        polar_grid = np.linspace(0, np.pi, n2)
-        xx, yy = np.meshgrid(azim_grid, polar_grid)
-        import scipy.interpolate
-        zz = scipy.interpolate.griddata((azim_array_sorted, polar_array_sorted), X[:,20], (xx, yy), method='cubic')
-        ax7.scatter(xx, yy, c=zz, cmap=colormap)
-        ax7.set_xlabel(r"Azimuth position")
-        ax7.set_ylabel(r"Polar position")
-        
-        # Interpolated phase of reconstruction using first mode
-        uu = scipy.interpolate.griddata((azim_array_sorted, polar_array_sorted), U[:,1], (xx, yy), method='cubic')
-        ax8.scatter(xx, yy, c=uu, cmap=colormap)
-        ax8.set_xlabel(r"Azimuth position")
-        ax8.set_ylabel(r"Polar position")
-
-
-
-        # ax.scatter(azim_array_sorted, fil_phases_sorted)
-        # for fil in range(num_fil):
-        #     abs_pc = np.abs(pc[fil][:nfil])
-        #     ax2.plot(np.cumsum(abs_pc)/np.sum(abs_pc), label=f'fil {fil}')
-        # ax.set_xlabel('Azimuth angle')
-        # ax.set_ylabel(r'$\phi$')
-
-        # ax2.set_xlabel('Mode')
-        # ax2.set_ylabel('Accumulated |weight| fraction')
-        # ax2.legend()
+        # num_fil = 4
+        # num_mode = 2
+        # reduced = pc @ pa
 
         
-        
-        # for i in range(6):
-        #     ax4.plot(U[i], c='b')
-        #     ax4.plot(reduced[i], c='r')
 
-        # ax4.plot(0, c='b', label='Original' )
-        # ax4.plot(0, c='r', label=f'Using {num_mode} modes')
-        # ax4.set_xlabel('Time step')
-        # ax4.set_ylabel(r'$\phi$')
-        # ax4.legend()
+        # # Plotting
+        # colormap = 'twilight_shifted'
+        # from matplotlib.colors import Normalize
+        # from matplotlib.cm import ScalarMappable
+        # norm = Normalize(vmin=0, vmax=2*np.pi)
+        # sm = ScalarMappable(cmap=colormap, norm=norm)
+        # sm.set_array([])
+
+        # fig = plt.figure()
+        # ax = fig.add_subplot(1,1,1)
+        # fig2 = plt.figure()
+        # ax2 = fig2.add_subplot(1,1,1)
+        # fig3 = plt.figure()
+        # ax3 = fig3.add_subplot(1,1,1)
+        # fig4 = plt.figure()
+        # ax4 = fig4.add_subplot(1,1,1)
+        # fig5 = plt.figure()
+        # ax5 = fig5.add_subplot(1,1,1)
+        # fig6 = plt.figure()
+        # ax6 = fig6.add_subplot(1,1,1)
+        # fig7 = plt.figure()
+        # ax7 = fig7.add_subplot(1,1,1)
+        # fig8 = plt.figure()
+        # ax8 = fig8.add_subplot(1,1,1)
+
+        # # Signal X
+        # ax.imshow(X)
+        # ax.set_xlabel('t')
+        # ax.set_ylabel('Fil index (sorted by azimuth angle)')
+
+        # # Signal of the first snapshot
+        # ax2.scatter(azim_array_sorted, X[:,0])
+        # ax2.set_xlabel('Azimuth position')
+        # ax2.set_ylabel('Phase, t=0')
+
+        # # Eigenvalue
+        # ax3.scatter(np.arange(0, len(sigma), 1), sigma, marker='*')
+        # ax3.set_xlabel(r'Mode')
+        # ax3.set_ylabel(r'$Eigenvalue$')
+
+        # # POD spatial modes
+        # for i in range(2):
+        #     ax4.plot(U[:,i], label=f'Mode {i}')
+        #     ax4.set_xlabel('x')
+        #     ax4.set_ylabel('f(x, t=0)')
+        #     ax4.legend()
+
+        # # POD temporal modes
+        # for i in range(4):
+        #     ax5.plot(V[i, :], label=f'Mode {i}')
+        #     ax5.set_xlabel('t')
+        #     ax5.set_ylabel('f(x, t=0)')
+        #     ax5.legend()
+
+        # # Phase of the first snapshot
+        # ax6.scatter(azim_array_sorted, polar_array_sorted, c=X[:,0], cmap=colormap)
+        # ax6.set_xlabel(r"Azimuth position")
+        # ax6.set_ylabel(r"Polar position")
+
+        # # Interpolated phase of the first snapshot
+        # n1, n2 = 100, 100
+        # azim_grid = np.linspace(-np.pi, np.pi, n1)
+        # polar_grid = np.linspace(0, np.pi, n2)
+        # xx, yy = np.meshgrid(azim_grid, polar_grid)
+        # import scipy.interpolate
+        # zz = scipy.interpolate.griddata((azim_array_sorted, polar_array_sorted), X[:,20], (xx, yy), method='cubic')
+        # ax7.scatter(xx, yy, c=zz, cmap=colormap)
+        # ax7.set_xlabel(r"Azimuth position")
+        # ax7.set_ylabel(r"Polar position")
+        
+        # # Interpolated phase of reconstruction using first mode
+        # uu = scipy.interpolate.griddata((azim_array_sorted, polar_array_sorted), U[:,1], (xx, yy), method='cubic')
+        # ax8.scatter(xx, yy, c=uu, cmap=colormap)
+        # ax8.set_xlabel(r"Azimuth position")
+        # ax8.set_ylabel(r"Polar position")
+
+
+
+        # # ax.scatter(azim_array_sorted, fil_phases_sorted)
+        # # for fil in range(num_fil):
+        # #     abs_pc = np.abs(pc[fil][:nfil])
+        # #     ax2.plot(np.cumsum(abs_pc)/np.sum(abs_pc), label=f'fil {fil}')
+        # # ax.set_xlabel('Azimuth angle')
+        # # ax.set_ylabel(r'$\phi$')
+
+        # # ax2.set_xlabel('Mode')
+        # # ax2.set_ylabel('Accumulated |weight| fraction')
+        # # ax2.legend()
+
+        
+        
+        # # for i in range(6):
+        # #     ax4.plot(U[i], c='b')
+        # #     ax4.plot(reduced[i], c='r')
+
+        # # ax4.plot(0, c='b', label='Original' )
+        # # ax4.plot(0, c='r', label=f'Using {num_mode} modes')
+        # # ax4.set_xlabel('Time step')
+        # # ax4.set_ylabel(r'$\phi$')
+        # # ax4.legend()
         
 
-        fig.savefig(f'fig/fil_svd_signal_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
-        fig2.savefig(f'fig/fil_svd_initial_snapshot_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
-        fig3.savefig(f'fig/fil_svd_eigenvalues_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
-        fig4.savefig(f'fig/fil_svd_spatial_modes_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
-        fig5.savefig(f'fig/fil_svd_temporal_modes_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
-        fig6.savefig(f'fig/fil_svd_phase_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
-        fig7.savefig(f'fig/fil_svd_interpolated_phase_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
-        fig8.savefig(f'fig/fil_svd_first_mode_reconstruction_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
-        plt.show()
+        # fig.savefig(f'fig/fil_svd_signal_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+        # fig2.savefig(f'fig/fil_svd_initial_snapshot_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+        # fig3.savefig(f'fig/fil_svd_eigenvalues_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+        # fig4.savefig(f'fig/fil_svd_spatial_modes_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+        # fig5.savefig(f'fig/fil_svd_temporal_modes_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+        # fig6.savefig(f'fig/fil_svd_phase_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+        # fig7.savefig(f'fig/fil_svd_interpolated_phase_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+        # fig8.savefig(f'fig/fil_svd_first_mode_reconstruction_{self.nfil}fil_{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+        # plt.show()
 
     def timing(self):
         self.select_sim()
@@ -1270,8 +1274,11 @@ class VISUAL:
         nrow = len(np.unique(self.pars_list['nfil']))
         ncol = len(np.unique(self.pars_list['ar']))
         # if(ncol == 1 or nrow == 1):
-        nrow = int(self.num_sim**.5)
-        ncol = nrow + (1 if nrow**2 < self.num_sim else 0)
+            # nrow = int(self.num_sim**.5)
+            # ncol = nrow + (1 if nrow**2 < self.num_sim else 0)
+        
+        nrow = self.nrow
+        ncol = self.ncol
         print(f'nrow = {nrow} ncol = {ncol}')
         spring_factor = self.pars_list['spring_factor'][0]
 
@@ -1335,7 +1342,7 @@ class VISUAL:
 
         plt.tight_layout()
         # plt.savefig(f'fig/ciliate_multi_phase_elst{spring_factor}.png', bbox_inches = 'tight', format='png')
-        plt.savefig(f'fig/ciliate_multi_phase_elst{spring_factor}.pdf', bbox_inches = 'tight', format='pdf')
+        plt.savefig(f'fig/ciliate_multi_phase_elst{spring_factor}_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
     def multi_ciliate(self):
@@ -1551,7 +1558,7 @@ class VISUAL:
                         dissipation_array[i-self.plot_start_frame] = np.sum(blob_forces * blob_vels) + np.sum(seg_forces * seg_vels)
 
                 efficiency_array = 6*np.pi*self.radius*body_speed_array**2/dissipation_array
-                ax.plot(time_array, body_speed_array, label=f"index={self.index}")
+                ax.plot(time_array, body_speed_array/self.fillength, label=f"index={self.index}")
                 ax2.plot(time_array, dissipation_array/self.fillength**3, label=f"index={self.index}")
                 ax3.plot(time_array, efficiency_array, label=f"index={self.index}")
                 
@@ -1572,6 +1579,153 @@ class VISUAL:
         fig2.savefig(f'fig/multi_dissipation.pdf', bbox_inches = 'tight', format='pdf')
         fig3.savefig(f'fig/multi_efficiency.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
+
+    def multi_ciliate_dissipation_generate(self):
+         # Plotting
+        for ind in range(self.num_sim):
+            fig = plt.figure()
+            ax = fig.add_subplot(1,1,1)
+            fig2 = plt.figure()
+            ax2 = fig2.add_subplot(1,1,1)
+            fig3 = plt.figure()
+            ax3 = fig3.add_subplot(1,1,1)
+            fig4 = plt.figure()
+            ax4 = fig4.add_subplot(1,1,1)
+            try:
+                self.index = ind
+                self.select_sim()
+
+                seg_forces_f = open(self.simName + '_seg_forces.dat', "r")
+                seg_vels_f = open(self.simName + '_seg_vels.dat', "r")
+                blob_forces_f = open(self.simName + '_blob_forces.dat', "r")
+                blob_references_f = open(self.simName + '_blob_references.dat', "r")
+                body_vels_f = open(self.simName + '_body_vels.dat', "r")
+
+                time_array = np.arange(self.plot_start_frame, self.plot_end_frame )/self.period
+        
+                body_speed_array = np.zeros(self.frames)
+                dissipation_array = np.zeros(self.frames)
+                efficiency_array = np.zeros(self.frames)
+
+                blob_references_str = blob_references_f.readline()
+                blob_references= np.array(blob_references_str.split(), dtype=float)
+                blob_references = np.reshape(blob_references, (int(self.pars['NBLOB']), 3))
+
+                for i in range(self.plot_end_frame):
+                    print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
+                    seg_forces_str = seg_forces_f.readline()
+                    seg_vels_str = seg_vels_f.readline()
+                    blob_forces_str = blob_forces_f.readline()
+                    body_vels_str = body_vels_f.readline()
+
+                    if(i>=self.plot_start_frame):
+                        seg_forces = np.array(seg_forces_str.split()[1:], dtype=float)
+                        seg_vels = np.array(seg_vels_str.split()[1:], dtype=float)
+                        blob_forces= np.array(blob_forces_str.split()[1:], dtype=float)
+                        body_vels= np.array(body_vels_str.split(), dtype=float)
+                        body_vels = np.array(body_vels_str.split(), dtype=float)
+
+                        seg_forces = np.reshape(seg_forces, (int(self.pars['NSEG']*self.pars['NFIL']), 6))
+                        seg_vels = np.reshape(seg_vels, (int(self.pars['NSEG']*self.pars['NFIL']), 6))
+                        blob_forces = np.reshape(blob_forces, (int(self.pars['NBLOB']), 3))
+                        body_vels_tile = np.tile(body_vels, (int(self.pars['NBLOB']), 1))
+                        blob_vels = body_vels_tile[:, 0:3] + np.cross(body_vels_tile[:, 3:6], blob_references)
+
+                        body_speed_array[i-self.plot_start_frame] = np.sqrt(np.sum(body_vels[0:3]*body_vels[0:3], 0))
+                        dissipation_array[i-self.plot_start_frame] = np.sum(blob_forces * blob_vels) + np.sum(seg_forces * seg_vels)
+
+                # efficiency_array = 6*np.pi*self.radius*body_speed_array**2/dissipation_array
+                # ax.plot(time_array, body_speed_array/self.fillength, label=f"index={self.index}")
+                # ax2.plot(time_array, dissipation_array/self.fillength**3, label=f"index={self.index}")
+                # ax3.plot(time_array, efficiency_array, label=f"index={self.index}")
+                # ax4.plot(time_array, dissipation_array/self.fillength**3/self.nfil, label=f"index={self.index}")
+
+                np.savetxt(f'other/data_over_time/speed_{self.date}_index{self.index}.txt', body_speed_array, delimiter=', ')
+                np.savetxt(f'other/data_over_time/dissipation_{self.date}_index{self.index}.txt', dissipation_array, delimiter=', ')
+
+                # ax.set_xlabel(r'$t/T$')
+                # ax.set_ylabel(r'$VT/L$')
+                # ax.set_xlim(time_array[0], time_array[-1])
+                # ax2.set_xlabel(r'$t/T$')
+                # ax2.set_ylabel(r'$PT^2/\mu L^3$')
+                # ax2.set_xlim(time_array[0], time_array[-1])
+                # ax3.set_xlabel(r'$t/T$')
+                # ax3.set_ylabel(r'Efficiency')
+                # ax3.set_xlim(time_array[0], time_array[-1])
+                # ax4.set_xlabel(r'$N_{fil}$')
+                # ax4.set_ylabel(r'$<PT^2/\mu L^3 N_{fil}>$')
+                # ax4.set_xlim(time_array[0], time_array[-1])
+
+                # fig.legend(loc=0)
+                # fig2.legend(loc=0)
+                # fig3.legend(loc=0)
+                # fig4.legend(loc=0)
+                # fig.savefig(f'fig/data_over_time/speed_{self.date}_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+                # fig2.savefig(f'fig/data_over_time/dissipation_{self.date}_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+                # fig3.savefig(f'fig/data_over_time/efficiency_{self.date}_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+                # fig4.savefig(f'fig/data_over_time/dissipation_per_cilium{self.date}_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+                
+                # plt.show()
+                
+            except:
+                print("WARNING: " + self.simName + " not found.")
+
+    def multi_ciliate_dissipation_plots(self):
+         # Plotting
+        for ind in range(8,12):
+            fig = plt.figure()
+            ax = fig.add_subplot(1,1,1)
+            fig2 = plt.figure()
+            ax2 = fig2.add_subplot(1,1,1)
+            fig3 = plt.figure()
+            ax3 = fig3.add_subplot(1,1,1)
+            fig4 = plt.figure()
+            ax4 = fig4.add_subplot(1,1,1)
+
+            self.index = ind
+            self.select_sim()
+
+            speed_array_f = open(f'other/data_over_time/speed_{self.date}_index{self.index}.txt', "r")
+            dissipation_array_f = open(f'other/data_over_time/dissipation_{self.date}_index{self.index}.txt', "r")
+
+            self.plot_end_frame = min(self.plot_end_frame_setting, sum(1 for line in open(f'other/data_over_time/speed_{self.date}_index{self.index}.txt')))
+            self.plot_start_frame = max(0, self.plot_end_frame-self.frames_setting)
+            self.frames = self.plot_end_frame - self.plot_start_frame
+
+            time_array = np.arange(self.plot_start_frame, self.plot_end_frame )/self.period
+            body_speed_array = np.array([float(line.strip()) for line in speed_array_f])[self.plot_start_frame:self.plot_end_frame]
+            dissipation_array = np.array([float(line.strip()) for line in dissipation_array_f])[self.plot_start_frame:self.plot_end_frame]
+            efficiency_array = 6*np.pi*self.radius*body_speed_array**2/dissipation_array
+
+            ax.plot(time_array, body_speed_array/self.fillength, label=f"index={self.index}")
+            ax2.plot(time_array, dissipation_array/self.fillength**3, label=f"index={self.index}")
+            ax3.plot(time_array, efficiency_array, label=f"index={self.index}")
+            ax4.plot(time_array, dissipation_array/self.fillength**3/self.nfil, label=f"index={self.index}")
+
+            ax.set_xlabel(r'$t/T$')
+            ax.set_ylabel(r'$VT/L$')
+            ax.set_xlim(time_array[0], time_array[-1])
+            ax2.set_xlabel(r'$t/T$')
+            ax2.set_ylabel(r'$PT^2/\mu L^3$')
+            ax2.set_xlim(time_array[0], time_array[-1])
+            ax3.set_xlabel(r'$t/T$')
+            ax3.set_ylabel(r'Efficiency')
+            ax3.set_xlim(time_array[0], time_array[-1])
+            ax4.set_xlabel(r'$N_{fil}$')
+            ax4.set_ylabel(r'$<PT^2/\mu L^3 N_{fil}>$')
+            ax4.set_xlim(time_array[0], time_array[-1])
+
+            fig.legend()
+            fig2.legend()
+            fig3.legend()
+            fig4.legend()
+            fig.savefig(f'fig/data_over_time/speed_{self.date}_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+            fig2.savefig(f'fig/data_over_time/dissipation_{self.date}_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+            fig3.savefig(f'fig/data_over_time/efficiency_{self.date}_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+            fig4.savefig(f'fig/data_over_time/dissipation_per_cilium{self.date}_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+            
+            # plt.show()
+                
 
     def multi_order_parameter(self):
          # Plotting
@@ -1723,7 +1877,7 @@ class VISUAL:
 
 
                     nfil = self.nfil
-                    n_snapshots = min(3600, self.plot_end_frame)
+                    n_snapshots = min(4800, self.plot_end_frame)
                     start = self.plot_end_frame - n_snapshots
                     X = np.zeros((nfil, n_snapshots))
                     X_angle = np.zeros((nfil, n_snapshots))
@@ -1756,7 +1910,7 @@ class VISUAL:
                             X_angle[:,i-start] = fil_angles_sorted[:nfil]
                     
                     np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/X_phase_index{self.index}.txt', X, delimiter=', ')
-                    np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/X_rotation_angle_index{self.index}.txt', X_angle, delimiter=', ')
+                    # np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/X_rotation_angle_index{self.index}.txt', X_angle, delimiter=', ')
                     np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/azim_pos_index{self.index}.txt', azim_array_sorted, delimiter=', ')
                     np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/polar_pos_index{self.index}.txt', polar_array_sorted, delimiter=', ')
 
@@ -2066,13 +2220,19 @@ class VISUAL:
         ax2 = fig2.add_subplot(1,1,1)
         fig3 = plt.figure()
         ax3 = fig3.add_subplot(1,1,1)
+        fig4 = plt.figure()
+        ax4 = fig4.add_subplot(1,1,1)
         # fig4 = plt.figure()
         # ax4 = fig4.add_subplot(1,1,1)
         # fig5 = plt.figure()
         # ax5 = fig5.add_subplot(1,1,1)
 
-        nrow = len(np.unique(self.pars_list['nfil']))
-        ncol = nrow + (1 if nrow**2 < self.num_sim else 0)
+        # nrow = len(np.unique(self.pars_list['nfil']))
+        # ncol = nrow + (1 if nrow**2 < self.num_sim else 0)
+
+        nrow = self.nrow
+        ncol = self.ncol
+        print(f'nrow = {nrow} ncol = {ncol}')
 
         nfil_list = np.array(self.pars_list['nfil'])
         density_list = np.zeros(self.num_sim)
@@ -2096,7 +2256,9 @@ class VISUAL:
                 body_vels_f = open(self.simName + '_body_vels.dat', "r")
 
             except:
-                raise FileExistsError("WARNING: " + self.simName + " not found.")
+                print("WARNING: " + self.simName + " not found.")
+                continue
+                # raise FileExistsError("WARNING: " + self.simName + " not found.")
                 
             body_speed_array = np.zeros(self.frames)
             dissipation_array = np.zeros(self.frames)
@@ -2145,24 +2307,32 @@ class VISUAL:
 
         efficiency_list = 6*np.pi*sphere_r_list*speed_list**2/dissipation_list
         
+        linestyle_list = ['solid', 'dotted', 'dashed', 'dashdot', '' ]
+        
         for i in range(ncol):
-            ax.plot(nfil_list[i::ncol], speed_list[i::ncol]/fillen_list[i::ncol], label=f"density={density_list[i]:.2e}")
-            ax2.plot(nfil_list[i::ncol], dissipation_list[i::ncol]/fillen_list[i::ncol]**3, label=f"density={density_list[i]:.2e}")
-            ax3.plot(nfil_list[i::ncol], efficiency_list[i::ncol], label=f"density={density_list[i]:.2e}")
+            ax.plot(nfil_list[i::ncol], speed_list[i::ncol]/fillen_list[i::ncol], marker='+', linestyle=linestyle_list[i], c='black', label=f"density={density_list[i]:.2e}")
+            ax2.plot(nfil_list[i::ncol], dissipation_list[i::ncol]/fillen_list[i::ncol]**3, marker='+', linestyle=linestyle_list[i], c='black', label=f"density={density_list[i]:.2e}")
+            ax3.plot(nfil_list[i::ncol], efficiency_list[i::ncol], marker='+', linestyle=linestyle_list[i], c='black', label=f"density={density_list[i]:.2e}")
+            ax4.plot(nfil_list[i::ncol], dissipation_list[i::ncol]/nfil_list[i::ncol]/fillen_list[i::ncol]**3, marker='+', linestyle=linestyle_list[i], c='black', label=f"density={density_list[i]:.2e}")
+            
 
-        fig.legend()
-        fig2.legend()
-        fig3.legend()
+        fig.legend(loc=0)
+        fig2.legend(loc=0)
+        fig3.legend(loc=0)
+        fig4.legend(loc=0)
         ax.set_xlabel(r'$N_{fil}$')
         ax.set_ylabel(r'$<VT/L>$')
         ax2.set_xlabel(r'$N_{fil}$')
-        ax2.set_ylabel(r'$<PT^2/\mu L^3 N_{fil}>$')
+        ax2.set_ylabel(r'$<PT^2/\mu L^3>$')
         ax3.set_xlabel(r'$N_{fil}$')
         ax3.set_ylabel(r'$<Efficiency>$')
+        ax4.set_xlabel(r'$N_{fil}$')
+        ax4.set_ylabel(r'$<PT^2/\mu L^3 N_{fil}>$')
 
-        fig.savefig(f'fig/ciliate_speed_summary.pdf', bbox_inches = 'tight', format='pdf')
-        fig2.savefig(f'fig/ciliate_dissipation_summary.pdf', bbox_inches = 'tight', format='pdf')
-        fig3.savefig(f'fig/ciliate_efficiency_summary.pdf', bbox_inches = 'tight', format='pdf')
+        fig.savefig(f'fig/ciliate_speed_summary_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
+        fig2.savefig(f'fig/ciliate_dissipation_summary_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
+        fig3.savefig(f'fig/ciliate_efficiency_summary_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
+        fig4.savefig(f'fig/ciliate_dissipation_per_cilium_summary_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
 
         plt.show()
 

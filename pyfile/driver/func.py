@@ -7,7 +7,7 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.dir = "data/expr_sims/20231110/"
+        self.dir = "data/expr_sims/20231111/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -17,7 +17,7 @@ class DRIVER:
                      "spring_factor": []}
 
         # self.sweep_shape = (3, 8, 6, 1)
-        self.sweep_shape = (1, 4, 4, 1)
+        self.sweep_shape = (1, 12, 4, 1)
 
         self.num_sim = 0
 
@@ -53,7 +53,7 @@ class DRIVER:
 
                         fil_density = 3.0 - 0.6*k
                         blob_density = 75
-                        nfil = int( 192*(1.6**2)**j )
+                        nfil = int( 192 + 96*j )
                         ar = round( (nfil/fil_density)**.5 ,2)
                         nblob = int(ar**2*blob_density)
                         spring_factor = round(0.5+ 0.25*i, 2)

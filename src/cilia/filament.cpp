@@ -224,7 +224,7 @@ void filament::initial_setup(const Real *const base_pos,
 
     #if PRESCRIBED_CILIA
 
-      omega0 = 2.0*PI; // T = 1
+      omega0 = 2.0*PI*0.75; // T = 1
 
       #if (DYNAMIC_SHAPE_ROTATION || WRITE_GENERALISED_FORCES)
 

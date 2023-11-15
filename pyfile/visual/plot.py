@@ -48,7 +48,11 @@ if(sys.argv[1] in list_of_all_options):
         else:
             print(f"'{sys.argv[1]}' is not a callable method.")
 
+if(sys.argv[1] == 'special'):
+    visualiser.multi_ciliate_special_func()
 
+if(sys.argv[1] == 'special2'):
+    visualiser.multi_ciliate_special_func2()
 
 
 

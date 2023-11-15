@@ -12,18 +12,18 @@ import configparser
 from sklearn.cluster import KMeans
 import math
 import sys
-import matplotlib
-matplotlib.rcParams['mathtext.fontset'] = 'stix'
-matplotlib.rcParams['mathtext.rm'] = 'Bitstream Vera Sans'
-matplotlib.rcParams['mathtext.it'] = 'Bitstream Vera Sans:italic'
-matplotlib.rcParams['mathtext.bf'] = 'Bitstream Vera Sans:bold'
+import matplotlib as mpl
+mpl.rcParams['mathtext.fontset'] = 'stix'
+mpl.rcParams['mathtext.rm'] = 'Bitstream Vera Sans'
+mpl.rcParams['mathtext.it'] = 'Bitstream Vera Sans:italic'
+mpl.rcParams['mathtext.bf'] = 'Bitstream Vera Sans:bold'
 
 class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
         # self.dir = "/home/clustor2/ma/h/hs2216/20231027/"
-        self.date = '20231105'
+        self.date = '20231115'
         self.dir = f"data/expr_sims/{self.date}/"
         self.pars_list = {
                      "nswim": [],
@@ -41,8 +41,8 @@ class VISUAL:
         self.big_sphere = False
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 6000
-        self.frames_setting = 12000
+        self.plot_end_frame_setting = 12000
+        self.frames_setting = 80
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -53,7 +53,7 @@ class VISUAL:
         self.Ly = 1000
         self.Lz = 1000
 
-        self.nrow = 4
+        self.nrow = 12
         self.ncol = 4
         
         self.index = 0
@@ -188,6 +188,8 @@ class VISUAL:
                                 blobs_list[blob] = blob_x, blob_y, blob_z
                             elif(not self.big_sphere):
                                 self.write_data([blob_x, blob_y, blob_z], float(self.pars['RBLOB']), superpuntoDatafileName, self.periodic, color=16777215)
+                                self.write_data([blob_x, blob_y, blob_z], float(self.pars['RBLOB']), superpuntoDatafileName, self.periodic, color=8421504)
+                                
                             
                     if(self.big_sphere):
                         self.write_data(body_pos, self.radius, superpuntoDatafileName, self.periodic, color=16777215)
@@ -836,10 +838,14 @@ class VISUAL:
                     min_diff = diff
                     period = p
             return period
+    
+        avg_speed = np.mean(body_speed_array)/self.fillength
+        print(f'index={self.index} avg speed={avg_speed}')
         
+        ax.set_title(f'index={self.index} avg speed={avg_speed}')
         ax.set_xlim(time_array[0], time_array[-1])
         ax.plot(time_array, body_speed_array/self.fillength)
-        plt.savefig(f'fig/ciliate_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+        plt.savefig(f'fig/ciliate_speed_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
     def ciliate_forcing(self):
@@ -1582,7 +1588,7 @@ class VISUAL:
 
     def multi_ciliate_dissipation_generate(self):
          # Plotting
-        for ind in range(self.num_sim):
+        for ind in range(23, 24):
             fig = plt.figure()
             ax = fig.add_subplot(1,1,1)
             fig2 = plt.figure()
@@ -1652,7 +1658,7 @@ class VISUAL:
                 # ax3.set_xlabel(r'$t/T$')
                 # ax3.set_ylabel(r'Efficiency')
                 # ax3.set_xlim(time_array[0], time_array[-1])
-                # ax4.set_xlabel(r'$N_{fil}$')
+                # ax4.set_xlabel(r'$t/T$')
                 # ax4.set_ylabel(r'$<PT^2/\mu L^3 N_{fil}>$')
                 # ax4.set_xlim(time_array[0], time_array[-1])
 
@@ -1671,8 +1677,8 @@ class VISUAL:
                 print("WARNING: " + self.simName + " not found.")
 
     def multi_ciliate_dissipation_plots(self):
-         # Plotting
-        for ind in range(8,12):
+        # Plotting
+        for ind in range(self.num_sim-24):
             fig = plt.figure()
             ax = fig.add_subplot(1,1,1)
             fig2 = plt.figure()
@@ -1711,7 +1717,7 @@ class VISUAL:
             ax3.set_xlabel(r'$t/T$')
             ax3.set_ylabel(r'Efficiency')
             ax3.set_xlim(time_array[0], time_array[-1])
-            ax4.set_xlabel(r'$N_{fil}$')
+            ax4.set_xlabel(r'$t/T$')
             ax4.set_ylabel(r'$<PT^2/\mu L^3 N_{fil}>$')
             ax4.set_xlim(time_array[0], time_array[-1])
 
@@ -1725,6 +1731,228 @@ class VISUAL:
             fig4.savefig(f'fig/data_over_time/dissipation_per_cilium{self.date}_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
             
             # plt.show()
+
+    def multi_ciliate_special_func(self):
+        dates = ['20231105', '20231111']
+        num_sim = np.array([12, 12])
+        total_num_sim = np.sum(num_sim)
+
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+        fig2 = plt.figure()
+        ax2 = fig2.add_subplot(1,1,1)
+        fig3 = plt.figure()
+        ax3 = fig3.add_subplot(1,1,1)
+        fig4 = plt.figure()
+        ax4 = fig4.add_subplot(1,1,1)
+
+        nfil_list = np.zeros(total_num_sim)
+        density_list = np.zeros(total_num_sim)
+        ar_list = np.zeros(total_num_sim)
+        fillen_list = np.zeros(total_num_sim)
+        sphere_r_list = np.zeros(total_num_sim)
+        speed_list = np.zeros(total_num_sim)
+        angular_speed_list = np.zeros(total_num_sim)
+        dissipation_list = np.zeros(total_num_sim)
+        efficiency_list = np.zeros(total_num_sim)
+        from_which_sim_list = np.zeros(total_num_sim)
+
+        ncol = 4
+        
+        for di, date in enumerate(dates):
+            self.date = date
+            self.dir = f"data/expr_sims/{self.date}/"
+            self.read_rules()
+
+            # Plotting
+            for ind in range(num_sim[di]):
+                start_ind = di*num_sim[0]
+                self.index = ind
+                self.select_sim()
+
+                speed_array_f = open(f'other/data_over_time/speed_{self.date}_index{self.index}.txt', "r")
+                dissipation_array_f = open(f'other/data_over_time/dissipation_{self.date}_index{self.index}.txt', "r")
+
+                self.plot_end_frame = min(self.plot_end_frame_setting, sum(1 for line in open(f'other/data_over_time/speed_{self.date}_index{self.index}.txt')))
+                self.plot_start_frame = max(0, self.plot_end_frame-self.frames_setting)
+                self.frames = self.plot_end_frame - self.plot_start_frame
+                print(self.plot_start_frame, self.plot_end_frame)
+
+                body_speed_array = np.array([float(line.strip()) for line in speed_array_f])[self.plot_start_frame:self.plot_end_frame]
+                dissipation_array = np.array([float(line.strip()) for line in dissipation_array_f])[self.plot_start_frame:self.plot_end_frame]
+                efficiency_array = 6*np.pi*self.radius*body_speed_array**2/dissipation_array
+
+                nfil_list[ind+start_ind] = self.nfil
+                speed_list[ind+start_ind] = np.mean(body_speed_array)
+                dissipation_list[ind+start_ind] = np.mean(dissipation_array)
+                efficiency_list[ind+start_ind] = np.mean(efficiency_array)
+                sphere_r_list[ind+start_ind] = self.radius
+                ar_list[ind+start_ind] = self.ar
+                fillen_list[ind+start_ind] = self.fillength
+                density_list[ind+start_ind] = self.fildensity
+                if di == 0:
+                    from_which_sim_list[ind+start_ind] = 1
+
+        linestyle_list = ['solid', 'dotted', 'dashed', 'dashdot', '' ]
+        for i in range(ncol):
+            plot_fil_list = nfil_list[i::ncol]
+            sorted_indices = np.argsort(plot_fil_list)
+            plot_fil_list = plot_fil_list[sorted_indices]
+            plot_speed_list = speed_list[i::ncol][sorted_indices]
+            plot_fillen_list = fillen_list[i::ncol][sorted_indices]
+            plot_dis_list = dissipation_list[i::ncol][sorted_indices]
+            plot_eff_list = efficiency_list[i::ncol][sorted_indices]
+            plot_from_which_sim_list = from_which_sim_list[i::ncol][sorted_indices]
+            color_list = list()
+            for l in range(len(plot_from_which_sim_list)):
+                if plot_from_which_sim_list[l] == 1:
+                    color_list.append('r')
+                else:
+                    color_list.append('black')
+
+            ax.scatter(plot_fil_list, plot_speed_list/plot_fillen_list, marker='+', c=color_list)
+            ax2.scatter(plot_fil_list, plot_dis_list/plot_fillen_list **3, marker='+', c=color_list)
+            ax3.scatter(plot_fil_list, plot_eff_list, marker='+', c=color_list)
+            ax4.scatter(plot_fil_list, plot_dis_list/plot_fil_list/plot_fillen_list **3, marker='+', c=color_list)
+
+            ax.plot(plot_fil_list, plot_speed_list/plot_fillen_list, linestyle=linestyle_list[i], c='black', label=f"density={density_list[i]:.2e}")
+            ax2.plot(plot_fil_list, plot_dis_list/plot_fillen_list **3, linestyle=linestyle_list[i], c='black', label=f"density={density_list[i]:.2e}")
+            ax3.plot(plot_fil_list, plot_eff_list, linestyle=linestyle_list[i], c='black', label=f"density={density_list[i]:.2e}")
+            ax4.plot(plot_fil_list, plot_dis_list/plot_fil_list/plot_fillen_list **3, linestyle=linestyle_list[i], c='black', label=f"density={density_list[i]:.2e}")
+
+        fig.legend()
+        fig2.legend()
+        fig3.legend()
+        fig4.legend()
+        ax.set_xlabel(r'$N_{fil}$')
+        ax.set_ylabel(r'$<VT/L>$')
+        ax2.set_xlabel(r'$N_{fil}$')
+        ax2.set_ylabel(r'$<PT^2/\mu L^3>$')
+        ax3.set_xlabel(r'$N_{fil}$')
+        ax3.set_ylabel(r'$<Efficiency>$')
+        ax4.set_xlabel(r'$N_{fil}$')
+        ax4.set_ylabel(r'$<PT^2/\mu L^3 N_{fil}>$')
+
+        fig.savefig(f'fig/speed_vs_nfil.pdf', bbox_inches = 'tight', format='pdf')
+        fig2.savefig(f'fig/dissipation_vs_nfil.pdf', bbox_inches = 'tight', format='pdf')
+        fig3.savefig(f'fig/efficiency_vs_nfil.pdf', bbox_inches = 'tight', format='pdf')
+        fig4.savefig(f'fig/dissipation_per_cilium_vs_nfil.pdf', bbox_inches = 'tight', format='pdf')
+        
+        plt.show()
+
+    def multi_ciliate_special_func2(self):
+        dates = ['20231105', '20231111']
+        num_sim = np.array([16, 24])
+        total_num_sim = np.sum(num_sim)
+
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+        fig2 = plt.figure()
+        ax2 = fig2.add_subplot(1,1,1)
+        fig3 = plt.figure()
+        ax3 = fig3.add_subplot(1,1,1)
+        fig4 = plt.figure()
+        ax4 = fig4.add_subplot(1,1,1)
+
+        nfil_list = np.zeros(total_num_sim)
+        density_list = np.zeros(total_num_sim)
+        ar_list = np.zeros(total_num_sim)
+        fillen_list = np.zeros(total_num_sim)
+        sphere_r_list = np.zeros(total_num_sim)
+        speed_list = np.zeros(total_num_sim)
+        angular_speed_list = np.zeros(total_num_sim)
+        dissipation_list = np.zeros(total_num_sim)
+        efficiency_list = np.zeros(total_num_sim)
+        from_which_sim_list = np.zeros(total_num_sim)
+
+        ncol = 4
+        nrow = int(total_num_sim/4)
+        mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=["r", "k", "c"]) 
+        
+        for di, date in enumerate(dates):
+            self.date = date
+            self.dir = f"data/expr_sims/{self.date}/"
+            self.read_rules()
+
+            # Plotting
+            for ind in range(num_sim[di]):
+                start_ind = di*num_sim[0]
+                self.index = ind
+                self.select_sim()
+
+                speed_array_f = open(f'other/data_over_time/speed_{self.date}_index{self.index}.txt', "r")
+                dissipation_array_f = open(f'other/data_over_time/dissipation_{self.date}_index{self.index}.txt', "r")
+
+                self.plot_end_frame = min(self.plot_end_frame_setting, sum(1 for line in open(f'other/data_over_time/speed_{self.date}_index{self.index}.txt')))
+                self.plot_start_frame = max(0, self.plot_end_frame-self.frames_setting)
+                self.frames = self.plot_end_frame - self.plot_start_frame
+                print(self.plot_start_frame, self.plot_end_frame)
+
+                body_speed_array = np.array([float(line.strip()) for line in speed_array_f])[self.plot_start_frame:self.plot_end_frame]
+                dissipation_array = np.array([float(line.strip()) for line in dissipation_array_f])[self.plot_start_frame:self.plot_end_frame]
+                efficiency_array = 6*np.pi*self.radius*body_speed_array**2/dissipation_array
+
+                nfil_list[ind+start_ind] = self.nfil
+                speed_list[ind+start_ind] = np.mean(body_speed_array)
+                dissipation_list[ind+start_ind] = np.mean(dissipation_array)
+                efficiency_list[ind+start_ind] = np.mean(efficiency_array)
+                sphere_r_list[ind+start_ind] = self.radius
+                ar_list[ind+start_ind] = self.ar
+                fillen_list[ind+start_ind] = self.fillength
+                density_list[ind+start_ind] = self.fildensity
+                if di == 0:
+                    from_which_sim_list[ind+start_ind] = 1
+
+        # linestyle_list = ['solid', 'dotted', 'dashed', 'dashdot', 'loosely dotted', 'densely dotted', 
+        #                  'long dash with offset', 'loosely dashed', 'loosely dashdotted', 'dashdotted',
+        #                  'dashdotdotted', 'densely dashed', 'densely dashdotdotted', 'loosely dashdotdotted']
+        
+        for i in range(nrow):
+            plot_density_list = density_list[4*i:4*i+4]
+
+            plot_fil_list = nfil_list[4*i:4*i+4]
+            print(plot_fil_list)
+            plot_speed_list = speed_list[4*i:4*i+4]
+            plot_fillen_list = fillen_list[4*i:4*i+4]
+            plot_dis_list = dissipation_list[4*i:4*i+4]
+            plot_eff_list = efficiency_list[4*i:4*i+4]
+            plot_from_which_sim_list = from_which_sim_list[4*i:4*i+4]
+            color_list = list()
+            for l in range(len(plot_from_which_sim_list)):
+                if plot_from_which_sim_list[l] == 1:
+                    color_list.append('r')
+                else:
+                    color_list.append('black')
+
+            ax.scatter(plot_density_list, plot_speed_list/plot_fillen_list, marker='+', c=color_list)
+            ax2.scatter(plot_density_list, plot_dis_list/plot_fillen_list **3, marker='+', c=color_list)
+            ax3.scatter(plot_density_list, plot_eff_list, marker='+', c=color_list)
+            ax4.scatter(plot_density_list, plot_dis_list/plot_fil_list/plot_fillen_list **3, marker='+', c=color_list)
+
+            ax.plot(plot_density_list, plot_speed_list/plot_fillen_list, label=r"$N_{fil}=$"+f"{plot_fil_list[0]:.0f}")
+            ax2.plot(plot_density_list, plot_dis_list/plot_fillen_list **3, label=r"$N_{fil}=$"+f"{plot_fil_list[0]:.0f}")
+            ax3.plot(plot_density_list, plot_eff_list, label=r"$N_{fil}=$"+f"{plot_fil_list[0]:.0f}")
+            ax4.plot(plot_density_list, plot_dis_list/plot_fil_list/plot_fillen_list **3, label=r"$N_{fil}=$"+f"{plot_fil_list[0]:.0f}")
+
+        fig.legend()
+        fig2.legend()
+        fig3.legend()
+        fig4.legend()
+        ax.set_xlabel(r'$N_{fil}/4\pi r^2$')
+        ax.set_ylabel(r'$<VT/L>$')
+        ax2.set_xlabel(r'$N_{fil}/4\pi r^2$')
+        ax2.set_ylabel(r'$<PT^2/\mu L^3>$')
+        ax3.set_xlabel(r'$N_{fil}/4\pi r^2$')
+        ax3.set_ylabel(r'$<Efficiency>$')
+        ax4.set_xlabel(r'$N_{fil}/4\pi r^2$')
+        ax4.set_ylabel(r'$<PT^2/\mu L^3 N_{fil}>$')
+
+        fig.savefig(f'fig/speed_vs_density.pdf', bbox_inches = 'tight', format='pdf')
+        fig2.savefig(f'fig/dissipation_vs_density.pdf', bbox_inches = 'tight', format='pdf')
+        fig3.savefig(f'fig/efficiency_vs_density.pdf', bbox_inches = 'tight', format='pdf')
+        fig4.savefig(f'fig/dissipation_per_cilium_vs_density.pdf', bbox_inches = 'tight', format='pdf')
+        
+        plt.show()
                 
 
     def multi_order_parameter(self):
@@ -2316,10 +2544,10 @@ class VISUAL:
             ax4.plot(nfil_list[i::ncol], dissipation_list[i::ncol]/nfil_list[i::ncol]/fillen_list[i::ncol]**3, marker='+', linestyle=linestyle_list[i], c='black', label=f"density={density_list[i]:.2e}")
             
 
-        fig.legend(loc=0)
-        fig2.legend(loc=0)
-        fig3.legend(loc=0)
-        fig4.legend(loc=0)
+        fig.legend()
+        fig2.legend()
+        fig3.legend()
+        fig4.legend()
         ax.set_xlabel(r'$N_{fil}$')
         ax.set_ylabel(r'$<VT/L>$')
         ax2.set_xlabel(r'$N_{fil}$')

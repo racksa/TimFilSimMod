@@ -410,7 +410,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
               r(1) = swimmers[n].filaments[m].segments[k].x[1] - swimmers[n].body.x[1];
               r(2) = swimmers[n].filaments[m].segments[k].x[2] - swimmers[n].body.x[2];
 
-              // K mult
+              // K mult (V_body + W_body \cross ref)
               rhs(id) += v_bodies(6*n) + v_bodies(6*n + 4)*r(2) - v_bodies(6*n + 5)*r(1);
               rhs(id + 1) += v_bodies(6*n + 1) + v_bodies(6*n + 5)*r(0) - v_bodies(6*n + 3)*r(2);
               rhs(id + 2) += v_bodies(6*n + 2) + v_bodies(6*n + 3)*r(1) - v_bodies(6*n + 4)*r(0);
@@ -1059,6 +1059,9 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
             for (int m = 0; m < NFIL; m++){
 
+              Real c11 = 0.0, c22 = 0.0, c12 = 0.0;
+              Real cinv_11 = 0.0, cinv_22 = 0.0, cinv_12 = 0.0;
+
               Real dot_phase = 0.0;
               Real Knorm_phase = 0.0;
 
@@ -1066,35 +1069,62 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
                 Real dot_angle = 0.0;
                 Real Knorm_angle = 0.0;
+                Real K_phase_angle = 0.0;
 
               #endif
 
               for (int k = 0; k < 3*NSEG; k++){
 
+                // this is (K^T r_1)_m in the notes
                 dot_phase += swimmers[n].filaments[m].vel_dir_phase[k]*out(3*NSEG*(n*NFIL + m) + k);
+                // this is (K^T K)_mm in the notes
                 Knorm_phase += swimmers[n].filaments[m].vel_dir_phase[k]*swimmers[n].filaments[m].vel_dir_phase[k];
-
+                
                 #if DYNAMIC_SHAPE_ROTATION
 
                   dot_angle += swimmers[n].filaments[m].vel_dir_angle[k]*out(3*NSEG*(n*NFIL + m) + k);
                   Knorm_angle += swimmers[n].filaments[m].vel_dir_angle[k]*swimmers[n].filaments[m].vel_dir_angle[k];
-
+                  
+                  c11 += swimmers[n].filaments[m].vel_dir_phase[k]*swimmers[n].filaments[m].vel_dir_phase[k];
+                  c22 += swimmers[n].filaments[m].vel_dir_angle[k]*swimmers[n].filaments[m].vel_dir_angle[k];
+                  c12 += swimmers[n].filaments[m].vel_dir_angle[k]*swimmers[n].filaments[m].vel_dir_phase[k];
                 #endif
 
               }
 
-              out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m) -= dot_phase;
-              out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m) /= Knorm_phase*seg_mob_inv;
-
               #if DYNAMIC_SHAPE_ROTATION
 
+                out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m) -= dot_phase;
                 out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m + NSWIM*NFIL) -= dot_angle;
-                out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m + NSWIM*NFIL) /= Knorm_angle*seg_mob_inv;
+
+                // here I apply the (K^T K)^-1 to the temporary s_2 to get the new s_2
+                // note this process is in place so I need intermediate variables
+                // for example, I update the two entries of phase and angle at the same time
+                Real phase_m = out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m);
+                Real angle_m = out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m + NSWIM*NFIL);
+
+                Real det = c11*c22 - c12*c12;
+                cinv_11 = c22 / det;
+                cinv_22 = c11 / det;
+                cinv_12 = - c12 / det;
+
+                out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m) = phase_m*cinv_11 + angle_m*cinv_12;
+                out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m) /= seg_mob_inv;
+
+                out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m + NSWIM*NFIL) = phase_m*cinv_12 + angle_m*cinv_22;
+                out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m + NSWIM*NFIL) /= seg_mob_inv;
+              #else
+                // it can't be just dividing by Knorm_phase here if K^T K is not diagonal, i.e. with rotation
+                // but for the phase evolution-only case, this is fine.
+                // this is (s_2)_m in the notes
+                out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m) -= dot_phase;
+                out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m) /= Knorm_phase*seg_mob_inv;
 
               #endif
 
               for (int k = 0; k < 3*NSEG; k++){
-
+                
+                // this is (s_1)_m in the notes
                 out(3*NSEG*(n*NFIL + m) + k) += seg_mob_inv*out(3*NSWIM*(NBLOB + NFIL*NSEG) + n*NFIL + m)*swimmers[n].filaments[m].vel_dir_phase[k];
 
                 #if DYNAMIC_SHAPE_ROTATION

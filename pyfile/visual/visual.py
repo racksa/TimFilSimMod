@@ -18,12 +18,13 @@ mpl.rcParams['mathtext.rm'] = 'Bitstream Vera Sans'
 mpl.rcParams['mathtext.it'] = 'Bitstream Vera Sans:italic'
 mpl.rcParams['mathtext.bf'] = 'Bitstream Vera Sans:bold'
 
+
 class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
         # self.dir = "/home/clustor2/ma/h/hs2216/20231027/"
-        self.date = '20231115'
+        self.date = '20231127'
         self.dir = f"data/expr_sims/{self.date}/"
         self.pars_list = {
                      "nswim": [],
@@ -38,11 +39,11 @@ class VISUAL:
         self.output_to_fcm = False
         self.output_to_superpunto = True
         self.periodic = False
-        self.big_sphere = False
+        self.big_sphere = True
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 12000
-        self.frames_setting = 80
+        self.plot_end_frame_setting = 750000
+        self.frames_setting = 1200
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -121,8 +122,8 @@ class VISUAL:
         self.radius = 0.5*self.ar*self.pars['FIL_LENGTH']
         self.dt = self.pars['DT']*self.pars['PLOT_FREQUENCY_IN_STEPS']
         self.period = float(self.pars['STEPS_PER_PERIOD'])/float(self.pars['PLOT_FREQUENCY_IN_STEPS'])
-        self.fildensity = self.nfil/(4*np.pi*self.radius**2)
         self.fillength = float(self.pars['FIL_LENGTH'])
+        self.fildensity = self.nfil*self.fillength**2/(self.radius**2)
 
         if(not 'PRESCRIBED_CILIA' in self.pars):
             self.pars['PRESCRIBED_CILIA'] = 0
@@ -187,10 +188,11 @@ class VISUAL:
                             if(self.check_overlap):
                                 blobs_list[blob] = blob_x, blob_y, blob_z
                             elif(not self.big_sphere):
-                                self.write_data([blob_x, blob_y, blob_z], float(self.pars['RBLOB']), superpuntoDatafileName, self.periodic, color=16777215)
-                                self.write_data([blob_x, blob_y, blob_z], float(self.pars['RBLOB']), superpuntoDatafileName, self.periodic, color=8421504)
-                                
-                            
+                                color=16777215 #white
+                                color=13882323 # grey
+                                # color=0 # black
+                                self.write_data([blob_x, blob_y, blob_z], float(self.pars['RBLOB']), superpuntoDatafileName, self.periodic, color=color)
+
                     if(self.big_sphere):
                         self.write_data(body_pos, self.radius, superpuntoDatafileName, self.periodic, color=16777215)
 
@@ -340,8 +342,7 @@ class VISUAL:
         cbar.ax.set_yticks(np.linspace(0, 2*np.pi, 7), ['0', 'π/3', '2π/3', 'π', '4π/3', '5π/3', '2π'])
         cbar.set_label(r"phase")
 
-        ax.set_ylabel(r"$\theta$")
-        ax.set_xlabel(r"$\phi$")
+        
         ax.set_xlim(-np.pi, np.pi)
         ax.set_ylim(0, np.pi)
         ax.set_xticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0', 'π/2', 'π'])
@@ -405,6 +406,9 @@ class VISUAL:
                 else:
                     fil_phases_str = fil_phases_f.readline()
 
+            ax.invert_yaxis()
+            ax.set_ylabel(r"$\theta$")
+            ax.set_xlabel(r"$\phi$")
             plt.savefig(f'fig/fil_phase_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
             plt.show()
 
@@ -1295,17 +1299,19 @@ class VISUAL:
         axs_flat = axs.ravel()
         import scipy.interpolate
 
-        fig.supxlabel(r"Azimuth position")
-        fig.supylabel(r"Polar position")
-        plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
+        # fig.supxlabel(r"Azimuth position")
+        # fig.supylabel(r"Polar position")
+        # plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
         # plt.ylabel(r"$\theta$")
         # plt.xlabel(r"$\phi$")
         plt.xlim(-np.pi, np.pi)
         plt.ylim(0, np.pi)
         plt.xticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0', 'π/2', 'π'])
         plt.yticks(np.linspace(0, np.pi, 3), ['0', 'π/2', 'π'])
+        plt.gca().invert_yaxis()
 
         for ind, ax in enumerate(axs_flat):
+            ax.invert_yaxis()
             if (ind < self.num_sim):
                 try:
                     self.index = ind
@@ -1313,7 +1319,7 @@ class VISUAL:
 
                     fil_references_sphpolar = np.zeros((self.nfil,3))
                     fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
-                    fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
+                    # fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
                     for i in range(self.plot_end_frame):
                         print(" index ", self.index,  " frame ", i, "/", self.plot_end_frame, "          ", end="\r")
                         fil_phases_str = fil_phases_f.readline()
@@ -1334,7 +1340,6 @@ class VISUAL:
                             else:
                             # Individual filaments
                                 ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=fil_phases, cmap=colormap)
-
                             # ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=fil_phases, cmap=colormap)
                     # ax.set_ylabel(r"$\theta$")
                     # ax.set_xlabel(r"$\phi$")
@@ -1345,7 +1350,8 @@ class VISUAL:
                     ax.set_title(f"index={self.index} nfil={self.nfil} AR={self.ar} frames={self.plot_end_frame}")
                 except:
                     print("WARNING: " + self.simName + " not found.")
-
+        # for ax in axs_flat:
+        #     ax.tick_params(axis='both', which='both', labelsize=18)
         plt.tight_layout()
         # plt.savefig(f'fig/ciliate_multi_phase_elst{spring_factor}.png', bbox_inches = 'tight', format='png')
         plt.savefig(f'fig/ciliate_multi_phase_elst{spring_factor}_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
@@ -1588,7 +1594,7 @@ class VISUAL:
 
     def multi_ciliate_dissipation_generate(self):
          # Plotting
-        for ind in range(23, 24):
+        for ind in range(self.num_sim):
             fig = plt.figure()
             ax = fig.add_subplot(1,1,1)
             fig2 = plt.figure()
@@ -1678,7 +1684,7 @@ class VISUAL:
 
     def multi_ciliate_dissipation_plots(self):
         # Plotting
-        for ind in range(self.num_sim-24):
+        for ind in range(self.num_sim):
             fig = plt.figure()
             ax = fig.add_subplot(1,1,1)
             fig2 = plt.figure()
@@ -1709,16 +1715,16 @@ class VISUAL:
             ax4.plot(time_array, dissipation_array/self.fillength**3/self.nfil, label=f"index={self.index}")
 
             ax.set_xlabel(r'$t/T$')
-            ax.set_ylabel(r'$VT/L$')
+            ax.set_ylabel(r'$<VT/L>$')
             ax.set_xlim(time_array[0], time_array[-1])
             ax2.set_xlabel(r'$t/T$')
-            ax2.set_ylabel(r'$PT^2/\mu L^3$')
+            ax2.set_ylabel(r'$<P>$')
             ax2.set_xlim(time_array[0], time_array[-1])
             ax3.set_xlabel(r'$t/T$')
-            ax3.set_ylabel(r'Efficiency')
+            ax3.set_ylabel(r'<Efficiency>')
             ax3.set_xlim(time_array[0], time_array[-1])
             ax4.set_xlabel(r'$t/T$')
-            ax4.set_ylabel(r'$<PT^2/\mu L^3 N_{fil}>$')
+            ax4.set_ylabel(r'$<P/N>$')
             ax4.set_xlim(time_array[0], time_array[-1])
 
             fig.legend()
@@ -1734,7 +1740,7 @@ class VISUAL:
 
     def multi_ciliate_special_func(self):
         dates = ['20231105', '20231111']
-        num_sim = np.array([12, 12])
+        num_sim = np.array([16, 24])
         total_num_sim = np.sum(num_sim)
 
         fig = plt.figure()
@@ -1806,7 +1812,7 @@ class VISUAL:
             color_list = list()
             for l in range(len(plot_from_which_sim_list)):
                 if plot_from_which_sim_list[l] == 1:
-                    color_list.append('r')
+                    color_list.append('black')
                 else:
                     color_list.append('black')
 
@@ -1815,23 +1821,24 @@ class VISUAL:
             ax3.scatter(plot_fil_list, plot_eff_list, marker='+', c=color_list)
             ax4.scatter(plot_fil_list, plot_dis_list/plot_fil_list/plot_fillen_list **3, marker='+', c=color_list)
 
-            ax.plot(plot_fil_list, plot_speed_list/plot_fillen_list, linestyle=linestyle_list[i], c='black', label=f"density={density_list[i]:.2e}")
-            ax2.plot(plot_fil_list, plot_dis_list/plot_fillen_list **3, linestyle=linestyle_list[i], c='black', label=f"density={density_list[i]:.2e}")
-            ax3.plot(plot_fil_list, plot_eff_list, linestyle=linestyle_list[i], c='black', label=f"density={density_list[i]:.2e}")
-            ax4.plot(plot_fil_list, plot_dis_list/plot_fil_list/plot_fillen_list **3, linestyle=linestyle_list[i], c='black', label=f"density={density_list[i]:.2e}")
+            ax.plot(plot_fil_list, plot_speed_list/plot_fillen_list, linestyle=linestyle_list[i], c='black', label=f"density={density_list[i]:.2f}")
+            ax2.plot(plot_fil_list, plot_dis_list/plot_fillen_list **3, linestyle=linestyle_list[i], c='black', label=f"density={density_list[i]:.2f}")
+            ax3.plot(plot_fil_list, plot_eff_list, linestyle=linestyle_list[i], c='black', label=f"density={density_list[i]:.2f}")
+            ax4.plot(plot_fil_list, plot_dis_list/plot_fil_list/plot_fillen_list **3, linestyle=linestyle_list[i], c='black', label=f"density={density_list[i]:.2f}")
 
-        fig.legend()
-        fig2.legend()
-        fig3.legend()
-        fig4.legend()
-        ax.set_xlabel(r'$N_{fil}$')
+        ax.legend()
+        # ax2.legend()
+        ax3.legend()
+        ax4.legend(loc='upper left')
+        ax.set_xlabel(r'$N$')
         ax.set_ylabel(r'$<VT/L>$')
-        ax2.set_xlabel(r'$N_{fil}$')
-        ax2.set_ylabel(r'$<PT^2/\mu L^3>$')
-        ax3.set_xlabel(r'$N_{fil}$')
+        ax2.set_xlabel(r'$N$')
+        ax2.set_ylabel(r'$<P>$')
+        ax3.set_xlabel(r'$N$')
         ax3.set_ylabel(r'$<Efficiency>$')
-        ax4.set_xlabel(r'$N_{fil}$')
-        ax4.set_ylabel(r'$<PT^2/\mu L^3 N_{fil}>$')
+        ax4.set_xlabel(r'$N$')
+        ax4.set_ylabel(r'$<P/N>$')
+        ax4.set_ylim(5.3, 8.0)
 
         fig.savefig(f'fig/speed_vs_nfil.pdf', bbox_inches = 'tight', format='pdf')
         fig2.savefig(f'fig/dissipation_vs_nfil.pdf', bbox_inches = 'tight', format='pdf')
@@ -1842,7 +1849,7 @@ class VISUAL:
 
     def multi_ciliate_special_func2(self):
         dates = ['20231105', '20231111']
-        num_sim = np.array([16, 24])
+        num_sim = np.array([16, 44])
         total_num_sim = np.sum(num_sim)
 
         fig = plt.figure()
@@ -1934,10 +1941,10 @@ class VISUAL:
             ax3.plot(plot_density_list, plot_eff_list, label=r"$N_{fil}=$"+f"{plot_fil_list[0]:.0f}")
             ax4.plot(plot_density_list, plot_dis_list/plot_fil_list/plot_fillen_list **3, label=r"$N_{fil}=$"+f"{plot_fil_list[0]:.0f}")
 
-        fig.legend()
-        fig2.legend()
-        fig3.legend()
-        fig4.legend()
+        ax.legend()
+        ax2.legend()
+        ax3.legend()
+        ax4.legend()
         ax.set_xlabel(r'$N_{fil}/4\pi r^2$')
         ax.set_ylabel(r'$<VT/L>$')
         ax2.set_xlabel(r'$N_{fil}/4\pi r^2$')

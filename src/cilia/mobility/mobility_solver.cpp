@@ -316,7 +316,11 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
               Qbar += std::abs(gen_angle_force_refs[ii]);
             }
             Qbar /= gen_angle_force_refs.size();
-            q_angle -= TORSIONAL_SPRING_MAGNITUDE_FACTOR*Qbar*swimmers[n].filaments[i].shape_rotation_angle;
+
+            Real k_scaling = (swimmers[n].filaments[i].omega0*FIL_LENGTH*FIL_LENGTH*FIL_LENGTH);
+            // std::cout<< Qbar << "   " << k_scaling << "\n";
+
+            q_angle -= TORSIONAL_SPRING_MAGNITUDE_FACTOR*k_scaling*swimmers[n].filaments[i].shape_rotation_angle;
 
           #endif
 
@@ -327,6 +331,8 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
             // Scale if the natural frequency of this cilium differs from the reference case
             q_phase *= 0.5*swimmers[n].filaments[i].omega0/PI;
+
+            q_phase *= GEN_FORCE_MAGNITUDE_FACTOR;
 
             // Store minus the generalised force in the RHS
             #if PRESCRIBED_BODY_VELOCITIES

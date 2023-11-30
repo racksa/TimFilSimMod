@@ -195,6 +195,7 @@ extern int NBLOB;
 extern float AR;
 extern float AXIS_DIR_BODY_LENGTH;
 extern float TORSIONAL_SPRING_MAGNITUDE_FACTOR; // Pre-multiplies the mean generalised driving force magnitude to give the spring constant that resists rigid-body rotations of the shape.
+extern float GEN_FORCE_MAGNITUDE_FACTOR; 
 extern int NTOTAL;
 extern float END_FORCE_MAGNITUDE;
 
@@ -268,7 +269,7 @@ extern float END_FORCE_MAGNITUDE;
 
 #endif
 
-#define TOTAL_TIME_STEPS (300*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
+#define TOTAL_TIME_STEPS (1000*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
 #define NUM_EULER_STEPS 1 // Number of time-steps to use backwards-Euler before switching to BDF2.
 
 #if CILIA_TYPE==1

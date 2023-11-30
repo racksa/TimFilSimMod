@@ -24,7 +24,7 @@ class VISUAL:
     def __init__(self):
         self.globals_name = 'globals.ini'
         # self.dir = "/home/clustor2/ma/h/hs2216/20231027/"
-        self.date = '20231127'
+        self.date = '20231129'
         self.dir = f"data/expr_sims/{self.date}/"
         self.pars_list = {
                      "nswim": [],
@@ -32,7 +32,8 @@ class VISUAL:
                      "nfil": [],
                      "nblob": [],
                      "ar": [],
-                     "spring_factor": []}
+                     "spring_factor": [],
+                     "force_mag": []}
         self.video = False
         self.interpolate = False
         self.angle = False
@@ -40,10 +41,11 @@ class VISUAL:
         self.output_to_superpunto = True
         self.periodic = False
         self.big_sphere = True
+        self.show_poles = True
         self.check_overlap = False
 
         self.plot_end_frame_setting = 750000
-        self.frames_setting = 1200
+        self.frames_setting = 2040
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -114,8 +116,11 @@ class VISUAL:
         self.ar = self.pars_list['ar'][self.index]
         self.spring_factor = self.pars_list['spring_factor'][self.index]
         self.N = int(self.nswim*(self.nfil*self.nseg + self.nblob))
-
-        self.simName = self.dir + f"ciliate_{self.nfil:.0f}fil_{self.nblob:.0f}blob_{self.ar:.2f}R_{self.spring_factor:.2f}torsion"
+        self.simName = self.dir + f"ciliate_{self.nfil:.0f}fil_{self.nblob:.0f}blob_{self.ar:.2f}R_{self.spring_factor:.3f}torsion"
+        try:
+            open(self.simName + '_fil_references.dat')
+        except:
+            self.simName = self.dir + f"ciliate_{self.nfil:.0f}fil_{self.nblob:.0f}blob_{self.ar:.2f}R_{self.spring_factor:.2f}torsion"
         self.fil_references = myIo.read_fil_references(self.simName + '_fil_references.dat')
 
         self.pars = myIo.read_pars(self.simName + '.par')
@@ -180,8 +185,8 @@ class VISUAL:
                 for swim in range(int(self.pars['NSWIM'])):
                     body_pos = body_states[7*swim : 7*swim+3]
                     R = util.rot_mat(body_states[7*swim+3 : 7*swim+7])
-                    R = np.linalg.inv(R)
-                    R = np.eye(3)
+                    # R = np.linalg.inv(R)
+                    # R = np.eye(3)
                     if(not self.big_sphere or self.check_overlap):
                         for blob in range(int(self.pars['NBLOB'])):
                             blob_x, blob_y, blob_z = util.blob_point_from_data(body_states[7*swim : 7*swim+7], self.blob_references[3*blob:3*blob+3])
@@ -195,6 +200,9 @@ class VISUAL:
 
                     if(self.big_sphere):
                         self.write_data(body_pos, self.radius, superpuntoDatafileName, self.periodic, color=16777215)
+                    
+                    if(self.show_poles):
+                        self.write_data(body_pos + np.matmul(R, np.array([0,0,self.radius])), 3*float(self.pars['RBLOB']), superpuntoDatafileName, self.periodic, color=0*65536+0*256+255)
 
                     for fil in range(int(self.pars['NFIL'])):
                         fil_color = int("000000", base=16)
@@ -340,13 +348,7 @@ class VISUAL:
         sm.set_array([])
         cbar = plt.colorbar(sm)
         cbar.ax.set_yticks(np.linspace(0, 2*np.pi, 7), ['0', 'π/3', '2π/3', 'π', '4π/3', '5π/3', '2π'])
-        cbar.set_label(r"phase")
-
-        
-        ax.set_xlim(-np.pi, np.pi)
-        ax.set_ylim(0, np.pi)
-        ax.set_xticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0', 'π/2', 'π'])
-        ax.set_yticks(np.linspace(0, np.pi, 5), ['0', 'π/4', 'π/2', '3π/4', 'π'])
+        cbar.set_label(r"phase")    
 
         global frame
         frame = 0
@@ -354,7 +356,6 @@ class VISUAL:
 
         def animation_func(t):
             global frame
-
             ax.cla()
             fil_phases_str = fil_phases_f.readline()
             fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
@@ -393,8 +394,8 @@ class VISUAL:
                     plt.rcParams['animation.ffmpeg_path'] = '/usr/bin/ffmpeg'
                     ani = animation.FuncAnimation(fig, animation_func, frames=500, interval=10, repeat=False)
                     plt.show()
-                    FFwriter = animation.FFMpegWriter(fps=10)
-                    ani.save(f'fig/fil_phase_{self.nfil}fil_anim.mp4', writer=FFwriter)
+                    # FFwriter = animation.FFMpegWriter(fps=10)
+                    # ani.save(f'fig/fil_phase_{self.nfil}fil_anim.mp4', writer=FFwriter)
                     break
                 else:
                     fil_phases_str = fil_phases_f.readline()
@@ -405,10 +406,15 @@ class VISUAL:
                     animation_func(i)
                 else:
                     fil_phases_str = fil_phases_f.readline()
+                    fil_angles_str = fil_angles_f.readline()
 
             ax.invert_yaxis()
             ax.set_ylabel(r"$\theta$")
             ax.set_xlabel(r"$\phi$")
+            ax.set_xlim(-np.pi, np.pi)
+            ax.set_ylim(0, np.pi)
+            ax.set_xticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0', 'π/2', 'π'])
+            ax.set_yticks(np.linspace(0, np.pi, 5), ['0', 'π/4', 'π/2', '3π/4', 'π'])
             plt.savefig(f'fig/fil_phase_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
             plt.show()
 

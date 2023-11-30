@@ -7,7 +7,7 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.date = '20231127'
+        self.date = '20231201'
         self.dir = f"data/expr_sims/{self.date}/"
         self.pars_list = {
                      "nswim": [],
@@ -15,10 +15,12 @@ class DRIVER:
                      "nfil": [],
                      "nblob": [],
                      "ar": [],
-                     "spring_factor": []}
+                     "spring_factor": [],
+                     "force_mag": []}
 
         # self.sweep_shape = (3, 8, 6, 1)
         self.sweep_shape = (1, 12, 4, 1)
+        self.sweep_shape = (16, 1, 1, 1)
 
         self.num_sim = 0
 
@@ -64,12 +66,13 @@ class DRIVER:
                         # ar = round(10*(1.6**k), 2)
                         # spring_factor = round(0.5+ 0.25*i, 2)
                         
-                        # nfil = int(3221)
-                        # nblob = int(76800)
-                        # ar = round(12, 2)
-                        # spring_factor = round(0.5*2**i, 2)
+                        nfil = int(480)
+                        nblob = int(12001)
+                        ar = round(12.65, 2)
+                        spring_factor = round(0.001 + 0.003*i, 3)
 
                         nseg = 20
+                        force_mag = 1
 
                         self.pars_list["nswim"].append(1)
                         self.pars_list["nseg"].append(nseg)
@@ -77,6 +80,7 @@ class DRIVER:
                         self.pars_list["nblob"].append(nblob)
                         self.pars_list["ar"].append(ar)
                         self.pars_list["spring_factor"].append(spring_factor)
+                        self.pars_list["force_mag"].append(force_mag)
         # Write rules to sim list file
         self.write_rules()
 
@@ -122,7 +126,7 @@ class DRIVER:
         for i in range(sim_index_start, sim_index_end):
             for key, value in self.pars_list.items():
                 self.write_ini("Parameters", key, float(self.pars_list[key][i]))
-            self.write_ini("Filenames", "simulation_file", f"ciliate_{self.pars_list['nfil'][i]:.0f}fil_{self.pars_list['nblob'][i]:.0f}blob_{self.pars_list['ar'][i]:.2f}R_{self.pars_list['spring_factor'][i]:.2f}torsion")
+            self.write_ini("Filenames", "simulation_file", f"ciliate_{self.pars_list['nfil'][i]:.0f}fil_{self.pars_list['nblob'][i]:.0f}blob_{self.pars_list['ar'][i]:.2f}R_{self.pars_list['spring_factor'][i]:.3f}torsion")
             self.write_ini("Filenames", "simulation_dir", self.dir)
 
             command = f"export OPENBLAS_NUM_THREADS=1; \

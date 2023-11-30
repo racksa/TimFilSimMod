@@ -59,6 +59,7 @@ int main(int argc, char** argv){
   NBLOB = std::stoi(data_from_ini("Parameters", "nblob"));
   AR = std::stof(data_from_ini("Parameters", "ar"));
   TORSIONAL_SPRING_MAGNITUDE_FACTOR = std::stof(data_from_ini("Parameters", "spring_factor"));
+  GEN_FORCE_MAGNITUDE_FACTOR = std::stof(data_from_ini("Parameters", "force_mag"));
   SIMULATION_DIR = data_from_ini("Filenames", "simulation_dir");
   SIMULATION_FILE = data_from_ini("Filenames", "simulation_file");
 

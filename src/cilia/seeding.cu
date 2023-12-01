@@ -803,7 +803,7 @@
 
     int num_iters = 0;
 
-    while (num_iters < 10000){
+    while (num_iters < 100000){
 
       // Sample from the uniform distribution on the surface.
       for (int n = 0; n < samples_per_iter; n++){

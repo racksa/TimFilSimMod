@@ -20,7 +20,7 @@ class DRIVER:
 
         # self.sweep_shape = (3, 8, 6, 1)
         self.sweep_shape = (1, 12, 4, 1)
-        self.sweep_shape = (16, 1, 1, 1)
+        self.sweep_shape = (1, 1, 1, 1)
 
         self.num_sim = 0
 
@@ -66,10 +66,10 @@ class DRIVER:
                         # ar = round(10*(1.6**k), 2)
                         # spring_factor = round(0.5+ 0.25*i, 2)
                         
-                        nfil = int(480)
+                        nfil = int(800)
                         nblob = int(12001)
-                        ar = round(12.65, 2)
-                        spring_factor = round(0.001 + 0.003*i, 3)
+                        ar = round(20.0, 2)
+                        spring_factor = round(0.01 + 0.003*i, 3)
 
                         nseg = 20
                         force_mag = 1

@@ -252,6 +252,7 @@ void filament::initial_setup(const Real *const base_pos,
           #if (INITIAL_PHASE==0)
             phase = distribution(gen);
           #elif (INITIAL_PHASE==1)
+            phase = 0;
           #elif (INITIAL_PHASE==2)
 
             // WARNING this is only correct if a spherical body is initialised at the origin!!

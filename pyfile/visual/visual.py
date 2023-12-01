@@ -24,7 +24,7 @@ class VISUAL:
     def __init__(self):
         self.globals_name = 'globals.ini'
         # self.dir = "/home/clustor2/ma/h/hs2216/20231027/"
-        self.date = '20231129'
+        self.date = '20231201'
         self.dir = f"data/expr_sims/{self.date}/"
         self.pars_list = {
                      "nswim": [],
@@ -44,8 +44,8 @@ class VISUAL:
         self.show_poles = True
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 750000
-        self.frames_setting = 2040
+        self.plot_end_frame_setting = 75000
+        self.frames_setting = 240
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -56,7 +56,6 @@ class VISUAL:
         self.Ly = 1000
         self.Lz = 1000
 
-        self.nrow = 12
         self.ncol = 4
         
         self.index = 0
@@ -98,9 +97,11 @@ class VISUAL:
 
             for key, value in self.pars_list.items():
                 if(key in sim["Parameter list"]):
+                    self.pars_list[key] = [float(x) for x in sim["Parameter list"][key].split(', ')]
                     # self.pars_list[key] = [float(x) for x in sim["Parameter list"][key].split(', ')][0::num_elst]
-                    self.pars_list[key] = [float(x) for x in sim["Parameter list"][key].split(', ')][num_per_elst*select_elst:num_per_elst*(select_elst+1)]
+                    # self.pars_list[key] = [float(x) for x in sim["Parameter list"][key].split(', ')][num_per_elst*select_elst:num_per_elst*(select_elst+1)]
             self.num_sim = len(self.pars_list["nfil"])
+            print(self.pars_list['nfil'])
         except:
             print("WARNING: " + self.dir + "rules.ini not found.")
 
@@ -374,15 +375,16 @@ class VISUAL:
 
             # Interpolation
             if (self.interpolate):
-                n1, n2 = 100, 100
+                n1, n2 = 50, 50
                 azim_grid = np.linspace(-np.pi, np.pi, n1)
                 polar_grid = np.linspace(0, np.pi, n2)
                 xx, yy = np.meshgrid(azim_grid, polar_grid)
-                zz = scipy.interpolate.griddata((fil_references_sphpolar[:,1],fil_references_sphpolar[:,2]), variables, (xx, yy), method='cubic')
-                ax.scatter(xx, yy, c=zz, cmap=colormap)
+                zz = scipy.interpolate.griddata((fil_references_sphpolar[:,1],fil_references_sphpolar[:,2]), variables, (xx, yy), method='nearest')
+                ax.scatter(xx, yy, c=zz, cmap=colormap, vmin=0, vmax=2*np.pi)
             else:
             # Individual filaments
-                ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=variables, cmap=colormap)
+                ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=variables, cmap=colormap, vmin=0, vmax=2*np.pi)
+                
 
             frame += 1
 
@@ -407,14 +409,16 @@ class VISUAL:
                 else:
                     fil_phases_str = fil_phases_f.readline()
                     fil_angles_str = fil_angles_f.readline()
+                
 
-            ax.invert_yaxis()
+            
             ax.set_ylabel(r"$\theta$")
             ax.set_xlabel(r"$\phi$")
             ax.set_xlim(-np.pi, np.pi)
             ax.set_ylim(0, np.pi)
             ax.set_xticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0', 'π/2', 'π'])
             ax.set_yticks(np.linspace(0, np.pi, 5), ['0', 'π/4', 'π/2', '3π/4', 'π'])
+            ax.invert_yaxis()
             plt.savefig(f'fig/fil_phase_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
             plt.show()
 
@@ -600,6 +604,92 @@ class VISUAL:
         fig3.savefig(f'fig/fil_clustering_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
+    def kymograph(self):
+        self.select_sim()
+        
+        fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
+        fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
+
+        # Plotting
+        colormap = 'cividis'
+        colormap = 'twilight_shifted'
+
+        # fig = plt.figure()
+        fig, axs = plt.subplots(2, 1, sharex=True)
+        # ax = fig.add_subplot(2,1,1)
+        # ax2 = fig.add_subplot(2,1,2)
+        fil_references_sphpolar = np.zeros((self.nfil,3))
+
+        # from matplotlib.colors import Normalize
+        # from matplotlib.cm import ScalarMappable
+        # norm = Normalize(vmin=0, vmax=2*np.pi)
+        # sm = ScalarMappable(cmap=colormap, norm=norm)
+        # sm.set_array([])
+        # cbar = plt.colorbar(sm)
+        # cbar.ax.set_yticks(np.linspace(0, 2*np.pi, 7), ['0', 'π/3', '2π/3', 'π', '4π/3', '5π/3', '2π'])
+        # cbar.set_label(r"phase")
+
+        import scipy.interpolate
+
+        n1, n2 = 100, 50 
+        azim_array = np.linspace(-np.pi, np.pi, n1)
+        polar_array = np.linspace(0, np.pi, n2)
+
+        phi_kymo = np.zeros((n1, self.frames))
+        theta_kymo = np.zeros((n2, self.frames))
+
+        time_array = np.arange(self.frames)/self.period
+        
+        phi_kymo_xx, phi_kymo_yy = np.meshgrid(time_array, azim_array,)
+        theta_kymo_xx, theta_kymo_yy = np.meshgrid(time_array, polar_array, )
+        
+        for m in range(self.nfil):
+            fil_references_sphpolar[m] = util.cartesian_to_spherical(self.fil_references[3*m: 3*m+3])
+        
+        for i in range(self.plot_end_frame):
+            print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
+            fil_phases_str = fil_phases_f.readline()
+            fil_angles_str = fil_angles_f.readline()
+            if(i>=self.plot_start_frame):
+                fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
+                fil_phases = util.box(fil_phases, 2*np.pi)
+                fil_angles = np.array(fil_angles_str.split()[1:], dtype=float)
+
+                if self.angle:
+                    variables = fil_angles
+                else:
+                    variables = fil_phases
+
+                # Interpolation
+                
+                xx, yy = np.meshgrid(azim_array, polar_array)
+                zz = scipy.interpolate.griddata((fil_references_sphpolar[:,1],fil_references_sphpolar[:,2]), variables, (xx, yy), method='nearest')
+
+                phi_kymo[:, i-self.plot_start_frame] = zz[n2//2]
+                theta_kymo[:, i-self.plot_start_frame] = zz[:, n1//2]
+            
+        # print(np.shape(phi_kymo_xx))
+        # print(np.shape(phi_kymo))
+
+        axs[0].scatter(phi_kymo_xx, phi_kymo_yy, c=phi_kymo, cmap=colormap, vmin=0, vmax=2*np.pi)
+        axs[1].scatter(theta_kymo_xx, theta_kymo_yy, c=theta_kymo, cmap=colormap, vmin=0, vmax=2*np.pi)       
+            
+        # axs[0].set_xlabel(r"$t$")
+        axs[0].set_ylabel(r"$\phi$")
+        axs[0].set_xlim(time_array[0], time_array[-1])
+        axs[0].set_ylim(-np.pi, np.pi)
+        axs[0].set_yticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0π', 'π/2', 'π'])
+        
+        axs[1].set_xlabel(r"$t/T$")
+        axs[1].set_ylabel(r"$\theta$")
+        axs[1].set_xlim(time_array[0], time_array[-1])
+        axs[1].set_ylim(0, np.pi)
+        axs[1].invert_yaxis()
+        axs[1].set_yticks(np.linspace(0, np.pi, 5), ['0', 'π/4', 'π/2', '3π/4', 'π'])
+
+        fig.savefig(f'fig/kymograph_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+        plt.show()
+
     def eckert(self):
         R = 1
         phi0 = np.pi
@@ -665,7 +755,7 @@ class VISUAL:
             projected_points = [eckert_projection(theta, phi) for theta, phi in zip(fil_references_sphpolar[:,2], fil_references_sphpolar[:,1])]
             projected_x, projected_y = zip(*projected_points)
             
-            ax.scatter(projected_x, projected_y, c=fil_phases, cmap=colormap)
+            ax.scatter(projected_x, projected_y, c=fil_phases, cmap=colormap, vmin=0, vmax=2*np.pi)
             frame += 1
 
         if(self.video):
@@ -1104,10 +1194,10 @@ class VISUAL:
         U, sigma, V = np.linalg.svd(X, full_matrices=False)
         Sigma = np.diag(sigma)
 
-        np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/X_phase_index{self.index}.txt', X, delimiter=', ')
+        np.savetxt(f'phase_data_20231201/spring_constant{spring_factor}/X_phase_index{self.index}.txt', X, delimiter=', ')
         # np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/X_rotation_angle_index{self.index}.txt', X_angle, delimiter=', ')
-        np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/azim_pos_index{self.index}.txt', azim_array_sorted, delimiter=', ')
-        np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/polar_pos_index{self.index}.txt', polar_array_sorted, delimiter=', ')
+        np.savetxt(f'phase_data_20231201/spring_constant{spring_factor}/azim_pos_index{self.index}.txt', azim_array_sorted, delimiter=', ')
+        np.savetxt(f'phase_data_20231201/spring_constant{spring_factor}/polar_pos_index{self.index}.txt', polar_array_sorted, delimiter=', ')
 
 
         # pc = U @ Sigma
@@ -1287,15 +1377,16 @@ class VISUAL:
         colormap = 'cividis'
         colormap = 'twilight_shifted'
 
-        nrow = len(np.unique(self.pars_list['nfil']))
-        ncol = len(np.unique(self.pars_list['ar']))
+        # nrow = len(np.unique(self.pars_list['nfil']))
+        # ncol = len(np.unique(self.pars_list['ar']))
         # if(ncol == 1 or nrow == 1):
             # nrow = int(self.num_sim**.5)
             # ncol = nrow + (1 if nrow**2 < self.num_sim else 0)
         
-        nrow = self.nrow
         ncol = self.ncol
-        print(f'nrow = {nrow} ncol = {ncol}')
+        nrow = self.num_sim//ncol
+
+        print(f'num sim = {self.num_sim} nrow = {nrow} ncol = {ncol}')
         spring_factor = self.pars_list['spring_factor'][0]
 
         
@@ -1342,18 +1433,17 @@ class VISUAL:
                                 polar_grid = np.linspace(0, np.pi, n2)
                                 xx, yy = np.meshgrid(azim_grid, polar_grid)
                                 zz = scipy.interpolate.griddata((fil_references_sphpolar[:,1],fil_references_sphpolar[:,2]), fil_phases, (xx, yy), method='cubic')
-                                ax.scatter(xx, yy, c=zz, cmap=colormap)
+                                ax.scatter(xx, yy, c=zz, cmap=colormap, vmin=0, vmax=2*np.pi)
                             else:
                             # Individual filaments
-                                ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=fil_phases, cmap=colormap)
-                            # ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=fil_phases, cmap=colormap)
+                                ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=fil_phases, cmap=colormap, vmin=0, vmax=2*np.pi)
                     # ax.set_ylabel(r"$\theta$")
                     # ax.set_xlabel(r"$\phi$")
                     # ax.set_xlim(-np.pi, np.pi)
                     # ax.set_ylim(0, np.pi)
                     # ax.set_xticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0', 'π/2', 'π'])
                     # ax.set_yticks(np.linspace(0, np.pi, 5), ['0', 'π/4', 'π/2', '3π/4', 'π'])
-                    ax.set_title(f"index={self.index} nfil={self.nfil} AR={self.ar} frames={self.plot_end_frame}")
+                    ax.set_title(f"ind={self.index} nfil={self.nfil} AR={self.ar} spr={self.spring_factor} {self.plot_end_frame}")
                 except:
                     print("WARNING: " + self.simName + " not found.")
         # for ax in axs_flat:
@@ -2097,9 +2187,12 @@ class VISUAL:
 
     def multi_ciliate_svd(self):
          # Plotting
-        nrow = len(np.unique(self.pars_list['nfil']))
-        ncol = len(np.unique(self.pars_list['ar']))
-        spring_factor = self.pars_list['spring_factor'][0]
+        # nrow = len(np.unique(self.pars_list['nfil']))
+        # ncol = len(np.unique(self.pars_list['ar']))
+        # spring_factor = self.pars_list['spring_factor'][0]
+
+        ncol = self.ncol
+        nrow = self.num_sim//ncol
 
         # nrow = int(self.num_sim**.5)
         # ncol = nrow + (1 if nrow**2 < self.num_sim else 0)
@@ -2150,10 +2243,11 @@ class VISUAL:
                             X[:,i-start] = fil_phases_sorted[:nfil]
                             X_angle[:,i-start] = fil_angles_sorted[:nfil]
                     
-                    np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/X_phase_index{self.index}.txt', X, delimiter=', ')
+                    print("save")
+                    np.savetxt(f'phase_data_20231201/spring_constant{self.spring_factor}/X_phase_index{self.index}.txt', X, delimiter=', ')
                     # np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/X_rotation_angle_index{self.index}.txt', X_angle, delimiter=', ')
-                    np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/azim_pos_index{self.index}.txt', azim_array_sorted, delimiter=', ')
-                    np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/polar_pos_index{self.index}.txt', polar_array_sorted, delimiter=', ')
+                    np.savetxt(f'phase_data_20231201/spring_constant{self.spring_factor}/azim_pos_index{self.index}.txt', azim_array_sorted, delimiter=', ')
+                    np.savetxt(f'phase_data_20231201/spring_constant{self.spring_factor}/polar_pos_index{self.index}.txt', polar_array_sorted, delimiter=', ')
 
                     # np.savetxt(f'phase_data/by_pars/spring_constant{spring_factor}/X_phase_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', X, delimiter=', ')
                     # np.savetxt(f'phase_data/by_pars/spring_constant{spring_factor}/X_rotation_angle_nfil{nfil}_rol{self.ar}_spring{self.spring_factor}.txt', X_angle, delimiter=', ')
@@ -2182,7 +2276,52 @@ class VISUAL:
         # plt.savefig(f'fig/multi_svd.pdf', bbox_inches = 'tight', format='pdf')
         # plt.show()
     
-   
+    def multi_output_phase(self):
+        for ind in range(self.num_sim):
+            try:
+                self.index = ind
+                self.select_sim()
+
+                fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
+                fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
+
+                X = np.zeros((self.nfil, self.frames))
+                X_angle = np.zeros((self.nfil, self.frames))
+
+                fil_references_sphpolar = np.zeros((self.nfil,3))
+                for fil in range(self.nfil):
+                    fil_references_sphpolar[fil] = util.cartesian_to_spherical(self.fil_references[3*fil: 3*fil+3])
+                azim_array = fil_references_sphpolar[:,1]
+                polar_array = fil_references_sphpolar[:,2]
+                sorted_indices = np.argsort(azim_array)
+                azim_array_sorted = azim_array[sorted_indices]
+                polar_array_sorted = polar_array[sorted_indices]
+
+                for i in range(self.plot_end_frame):
+                    print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
+                    fil_phases_str = fil_phases_f.readline()
+                    fil_angles_str = fil_angles_f.readline()
+                    
+                    if(i>=self.plot_start_frame):
+                        fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
+                        fil_phases_sorted = fil_phases[sorted_indices]
+                        fil_phases_sorted = util.box(fil_phases_sorted, 2*np.pi)
+
+                        fil_phases_sorted = np.sin(fil_phases_sorted)
+
+                        fil_angles = np.array(fil_angles_str.split()[1:], dtype=float)
+                        fil_angles_sorted = fil_angles[sorted_indices]
+
+                        X[:,i-self.plot_start_frame] = fil_phases_sorted[:self.nfil]
+                        X_angle[:,i-self.plot_start_frame] = fil_angles_sorted[:self.nfil]
+                
+                np.savetxt(f'phase_data_20231201/X_phase_index{self.index}.txt', X, delimiter=', ')
+                # np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/X_rotation_angle_index{self.index}.txt', X_angle, delimiter=', ')
+                np.savetxt(f'phase_data_20231201/azim_pos_index{self.index}.txt', azim_array_sorted, delimiter=', ')
+                np.savetxt(f'phase_data_20231201/polar_pos_index{self.index}.txt', polar_array_sorted, delimiter=', ')
+
+            except:
+                print("WARNING: " + self.simName + " not found.")
 
 # Summary plot
     def summary_ciliate_speed(self):

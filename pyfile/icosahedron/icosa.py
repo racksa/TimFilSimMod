@@ -73,9 +73,9 @@ def generate_icosahedral_grid(depth):
 
     return np.array(triangles)
 
-def project_onto_surface(vertices):
-    for i in range(len(vertices)):
-        vertices[i] = normalize(vertices[i])
+# def project_onto_surface(vertices):
+    
+    
 
 def plot_icosahedral_grid(vertices):
     fig = plt.figure()
@@ -90,9 +90,22 @@ def plot_icosahedral_grid(vertices):
     plt.show()
 
 if __name__ == "__main__":
-    depth = 5  # Adjust the depth of subdivision
+    depth = 4  # Adjust the depth of subdivision
     icosahedral_grid = generate_icosahedral_grid(depth)
     icosahedral_grid = np.unique(icosahedral_grid, axis=0)
-    project_onto_surface(icosahedral_grid)
+    # project_onto_surface(icosahedral_grid)
+    for i in range(len(icosahedral_grid)):
+        icosahedral_grid[i] = normalize(icosahedral_grid[i])
+    
+    for i, v in enumerate(icosahedral_grid):
+        if np.linalg.norm(v - np.array([0,0,1])) <1e-8:
+            icosahedral_grid = np.delete(icosahedral_grid, i, axis=0)
+            break
+    for i, v in enumerate(icosahedral_grid):
+        if np.linalg.norm(v - np.array([0,0,-1])) <1e-8:
+            icosahedral_grid = np.delete(icosahedral_grid, i, axis=0)
+            break
+
+    print(len(icosahedral_grid))
     np.savetxt(f'icosa_d{depth}_N{len(icosahedral_grid)}.dat', icosahedral_grid)
-    plot_icosahedral_grid(icosahedral_grid)
+    # plot_icosahedral_grid(icosahedral_grid)

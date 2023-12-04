@@ -983,51 +983,22 @@
 
   void icosa_seeding(Real *const pos_ref, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs, const int N, shape_fourier_description& shape){
     
-    /*Implement the mismatched algorithm here.*/
-    Real R = 1;
-    double theta0 = (0.05*PI);
-    int N0 = 64;
-    double dtheta = (0.023*PI);
-    Real dx = 2*R*PI*sin(theta0)/N0;
-    Real dy = R*sin(dtheta);
+    Real *X = (Real*) malloc(3*N*sizeof(Real));
 
-    int N_layer = ceil((0.5*PI-theta0)/dtheta);
-    
-    Real *theta_list = (Real*) malloc(N_layer*sizeof(Real));
-    Real *N_list = (Real*) malloc(N_layer*sizeof(Real));
-  
-    for(int i=0; i<N_layer; i++){
-      theta_list[i] = theta0;
-      N_list[i] = N0;
+    std::ifstream inputFile("data/icosahedron/icosa_d3_N640.dat"); // Replace "your_file.txt" with the actual file name
 
-      theta0 = theta0 + dtheta;
-      N0 = int(2*PI*sin(theta0)/dx);
-      
+    if (!inputFile.is_open()) {
+        std::cerr << "Error opening the file.\n";
     }
 
-    int num_fil = 0;
-    for (int i = 0; i < N_layer; i++) {
-        num_fil += N_list[i];
+    for(int i=0; i<N; i++){
+      inputFile >> X[3*i];
+      inputFile >> X[3*i+1];
+      inputFile >> X[3*i+2];
     }
-    Real *X = (Real*) malloc(6*num_fil*sizeof(Real));
-    int index = 0;
-    Real phi0 = 0;
-    Real dphi = 0;
 
-    for(int i=0; i<N_layer; i++){
-      phi0 += 0.5*dphi;
-      dphi = 2*PI/N_list[i];
-      for(int j=0; j<N_list[i]; j++){
-        CartesianCoordinates cartesian1 = spherical_to_cartesian(R, theta_list[i], phi0+dphi*j);
-        X[3*index] = 0.5*cartesian1.x;
-        X[3*index+1] = 0.5*cartesian1.y;
-        X[3*index+2] = 0.5*cartesian1.z;
-        CartesianCoordinates cartesian2 = spherical_to_cartesian(R, PI-theta_list[i], phi0+dphi*(0.5+j));
-        X[3*index+3*num_fil] = 0.5*cartesian2.x;
-        X[3*index+1+3*num_fil] = 0.5*cartesian2.y;
-        X[3*index+2+3*num_fil] = 0.5*cartesian2.z;
-        index ++;
-      }
+    for(int i=0; i<N; i++){
+      shape.project_onto_surface(&X[3*i]);
     }
 
     // Write the data for the final positions

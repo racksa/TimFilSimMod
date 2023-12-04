@@ -24,7 +24,7 @@ class VISUAL:
     def __init__(self):
         self.globals_name = 'globals.ini'
         # self.dir = "/home/clustor2/ma/h/hs2216/20231027/"
-        self.date = '20231204'
+        self.date = '20231204_hold'
         self.dir = f"data/expr_sims/{self.date}/"
         self.pars_list = {
                      "nswim": [],
@@ -45,7 +45,7 @@ class VISUAL:
         self.check_overlap = False
 
         self.plot_end_frame_setting = 75000
-        self.frames_setting = 360
+        self.frames_setting = 60
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting

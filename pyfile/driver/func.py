@@ -7,7 +7,7 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.date = '20231204_ico'
+        self.date = '20231204_free'
         self.afix = ''
         self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         self.pars_list = {
@@ -68,7 +68,7 @@ class DRIVER:
                         # spring_factor = round(0.5+ 0.25*i, 2)
                         
                         nfil = int(800)
-                        nblob = int(48001)
+                        nblob = int(96001)
                         ar = round(20.0, 2)
                         spring_factor = round(0.005 + 0.001*i, 3)
 

@@ -24,7 +24,7 @@ class VISUAL:
     def __init__(self):
         self.globals_name = 'globals.ini'
         # self.dir = "/home/clustor2/ma/h/hs2216/20231027/"
-        self.date = '20231201'
+        self.date = '20231105'
         self.dir = f"data/expr_sims/{self.date}/"
         self.pars_list = {
                      "nswim": [],

@@ -981,6 +981,82 @@
     }
   }
 
+  void icosa_seeding(Real *const pos_ref, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs, const int N, shape_fourier_description& shape){
+    
+    /*Implement the mismatched algorithm here.*/
+    Real R = 1;
+    double theta0 = (0.05*PI);
+    int N0 = 64;
+    double dtheta = (0.023*PI);
+    Real dx = 2*R*PI*sin(theta0)/N0;
+    Real dy = R*sin(dtheta);
+
+    int N_layer = ceil((0.5*PI-theta0)/dtheta);
+    
+    Real *theta_list = (Real*) malloc(N_layer*sizeof(Real));
+    Real *N_list = (Real*) malloc(N_layer*sizeof(Real));
+  
+    for(int i=0; i<N_layer; i++){
+      theta_list[i] = theta0;
+      N_list[i] = N0;
+
+      theta0 = theta0 + dtheta;
+      N0 = int(2*PI*sin(theta0)/dx);
+      
+    }
+
+    int num_fil = 0;
+    for (int i = 0; i < N_layer; i++) {
+        num_fil += N_list[i];
+    }
+    Real *X = (Real*) malloc(6*num_fil*sizeof(Real));
+    int index = 0;
+    Real phi0 = 0;
+    Real dphi = 0;
+
+    for(int i=0; i<N_layer; i++){
+      phi0 += 0.5*dphi;
+      dphi = 2*PI/N_list[i];
+      for(int j=0; j<N_list[i]; j++){
+        CartesianCoordinates cartesian1 = spherical_to_cartesian(R, theta_list[i], phi0+dphi*j);
+        X[3*index] = 0.5*cartesian1.x;
+        X[3*index+1] = 0.5*cartesian1.y;
+        X[3*index+2] = 0.5*cartesian1.z;
+        CartesianCoordinates cartesian2 = spherical_to_cartesian(R, PI-theta_list[i], phi0+dphi*(0.5+j));
+        X[3*index+3*num_fil] = 0.5*cartesian2.x;
+        X[3*index+1+3*num_fil] = 0.5*cartesian2.y;
+        X[3*index+2+3*num_fil] = 0.5*cartesian2.z;
+        index ++;
+      }
+    }
+
+    // Write the data for the final positions
+    for (int n = 0; n < N; n++){
+
+      pos_ref[3*n] = X[3*n];
+      pos_ref[3*n + 1] = X[3*n + 1];
+      pos_ref[3*n + 2] = X[3*n + 2];
+
+      const Real theta = std::atan2(std::sqrt(X[3*n]*X[3*n] + X[3*n + 1]*X[3*n + 1]), X[3*n + 2]);
+      const Real phi = std::atan2(X[3*n + 1], X[3*n]);
+
+      matrix frame = shape.full_frame(theta, phi);
+
+      polar_dir_refs[3*n] = frame(0);
+      polar_dir_refs[3*n + 1] = frame(1);
+      polar_dir_refs[3*n + 2] = frame(2);
+
+      azi_dir_refs[3*n] = frame(3);
+      azi_dir_refs[3*n + 1] = frame(4);
+      azi_dir_refs[3*n + 2] = frame(5);
+
+      normal_refs[3*n] = frame(6);
+      normal_refs[3*n + 1] = frame(7);
+      normal_refs[3*n + 2] = frame(8);
+
+    }
+  }
+
   void seed_blobs(Real *const blob_references, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs){
 
     const std::string file_name_trunk = GENERATRIX_FILE_NAME+std::to_string(NBLOB);
@@ -1233,43 +1309,9 @@
     
     #elif ICOSA_SEEDING
 
-      Real *X;
-      cudaMallocManaged(&X, 3*NFIL*sizeof(Real));
+      std::cout << "Seeking a icosahedron distribution for the filaments..." << std::endl;
 
-      std::ifstream pos_file(file_name_trunk + ".seed");
-      if (pos_file.good()){
-        for (int i = 0; i < 3*NFIL; i++){
-          pos_file >> X[i];
-        }
-      } else {
-        printf("ERROR: Icosahedron file missing.");
-      }
-
-      for (int n = 0; n < NFIL; n++){
-
-        filament_references[3*n] = X[3*n];
-        filament_references[3*n + 1] = X[3*n + 1];
-        filament_references[3*n + 2] = X[3*n + 2];
-
-        const Real theta = std::atan2(std::sqrt(X[3*n]*X[3*n] + X[3*n + 1]*X[3*n + 1]), X[3*n + 2]);
-        const Real phi = std::atan2(X[3*n + 1], X[3*n]);
-
-        matrix frame = shape.full_frame(theta, phi);
-
-        polar_dir_refs[3*n] = frame(0);
-        polar_dir_refs[3*n + 1] = frame(1);
-        polar_dir_refs[3*n + 2] = frame(2);
-
-        azi_dir_refs[3*n] = frame(3);
-        azi_dir_refs[3*n + 1] = frame(4);
-        azi_dir_refs[3*n + 2] = frame(5);
-
-        normal_refs[3*n] = frame(6);
-        normal_refs[3*n + 1] = frame(7);
-        normal_refs[3*n + 2] = frame(8);
-
-      }
-      pos_file.close();
+      icosa_seeding(filament_references, polar_dir_refs, azi_dir_refs, normal_refs, NFIL, shape);
     
     
     #elif MISMATCH_SEEDING

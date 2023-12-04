@@ -24,7 +24,7 @@ class VISUAL:
     def __init__(self):
         self.globals_name = 'globals.ini'
         # self.dir = "/home/clustor2/ma/h/hs2216/20231027/"
-        self.date = '20231105'
+        self.date = '20231204'
         self.dir = f"data/expr_sims/{self.date}/"
         self.pars_list = {
                      "nswim": [],
@@ -45,7 +45,7 @@ class VISUAL:
         self.check_overlap = False
 
         self.plot_end_frame_setting = 75000
-        self.frames_setting = 240
+        self.frames_setting = 360
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -419,7 +419,7 @@ class VISUAL:
             ax.set_xticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0', 'π/2', 'π'])
             ax.set_yticks(np.linspace(0, np.pi, 5), ['0', 'π/4', 'π/2', '3π/4', 'π'])
             ax.invert_yaxis()
-            plt.savefig(f'fig/fil_phase_{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
+            plt.savefig(f'fig/fil_phase_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
             plt.show()
 
     def phi_dot(self):
@@ -2055,8 +2055,7 @@ class VISUAL:
         fig3.savefig(f'fig/efficiency_vs_density.pdf', bbox_inches = 'tight', format='pdf')
         fig4.savefig(f'fig/dissipation_per_cilium_vs_density.pdf', bbox_inches = 'tight', format='pdf')
         
-        plt.show()
-                
+        plt.show()      
 
     def multi_order_parameter(self):
          # Plotting
@@ -2315,10 +2314,10 @@ class VISUAL:
                         X[:,i-self.plot_start_frame] = fil_phases_sorted[:self.nfil]
                         X_angle[:,i-self.plot_start_frame] = fil_angles_sorted[:self.nfil]
                 
-                np.savetxt(f'phase_data_20231201/X_phase_index{self.index}.txt', X, delimiter=', ')
+                np.savetxt(f'phase_data_20231204/X_phase_index{self.index}.txt', X, delimiter=', ')
                 # np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/X_rotation_angle_index{self.index}.txt', X_angle, delimiter=', ')
-                np.savetxt(f'phase_data_20231201/azim_pos_index{self.index}.txt', azim_array_sorted, delimiter=', ')
-                np.savetxt(f'phase_data_20231201/polar_pos_index{self.index}.txt', polar_array_sorted, delimiter=', ')
+                np.savetxt(f'phase_data_20231204/azim_pos_index{self.index}.txt', azim_array_sorted, delimiter=', ')
+                np.savetxt(f'phase_data_20231204/polar_pos_index{self.index}.txt', polar_array_sorted, delimiter=', ')
 
             except:
                 print("WARNING: " + self.simName + " not found.")

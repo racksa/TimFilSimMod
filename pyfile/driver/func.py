@@ -7,7 +7,7 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.date = '20231204_free'
+        self.date = '20231204_ico'
         self.afix = ''
         self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         self.pars_list = {
@@ -67,9 +67,11 @@ class DRIVER:
                         # ar = round(10*(1.6**k), 2)
                         # spring_factor = round(0.5+ 0.25*i, 2)
                         
-                        nfil = int(800)
-                        nblob = int(96001)
-                        ar = round(20.0, 2)
+                        nfil = int(640)
+                        nblob = int(40962)
+                        # nfil = int(480)
+                        # nblob = int(96001)
+                        ar = round(12.65, 2)
                         spring_factor = round(0.005 + 0.001*i, 3)
 
                         nseg = 20
@@ -132,7 +134,7 @@ class DRIVER:
 
             command = f"export OPENBLAS_NUM_THREADS=1; \
                         export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
-                        ./bin/cilia > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][i]:.0f}fil_{i}.out"
+                        ./bin/cilia_ico > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][i]:.0f}fil_{i}.out"
 
             # command = f"export OPENBLAS_NUM_THREADS=1; \
             #             export CUDA_VISIBLE_DEVICES={self.cuda_device}; \

@@ -985,7 +985,11 @@
     
     Real *X = (Real*) malloc(3*N*sizeof(Real));
 
-    std::ifstream inputFile("data/icosahedron/icosa_d3_N640.dat"); // Replace "your_file.txt" with the actual file name
+    const std::string ico_file = "data/icosahedron/icosa_d6_N40962.dat";
+
+    std::ifstream inputFile(ico_file); // Replace "your_file.txt" with the actual file name
+    std::cout << std::endl << std::endl << "Using icosahedroal grid as seeding function..." << std::endl;
+    std::cout << std::endl << std::endl << "Input file " << ico_file << std::endl;
 
     if (!inputFile.is_open()) {
         std::cerr << "Error opening the file.\n";
@@ -1038,6 +1042,7 @@
     shape_fourier_description shape;
 
     equal_area_seeding(blob_references, polar_dir_refs, azi_dir_refs, normal_refs, NBLOB, shape);
+    // icosa_seeding(blob_references, polar_dir_refs, azi_dir_refs, normal_refs, NBLOB, shape);
 
     std::ofstream blob_ref_file(file_name_trunk + ".seed");
     std::ofstream polar_file(file_name_trunk + ".polar_dir");

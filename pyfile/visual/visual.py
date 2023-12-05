@@ -23,9 +23,9 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        # self.dir = "/home/clustor2/ma/h/hs2216/20231027/"
-        self.date = '20231204_hold'
+        self.date = '20231204_free'
         self.dir = f"data/expr_sims/{self.date}/"
+        # self.dir = "/home/clustor/ma/h/hs2216/20231130_4by4_smallk/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -44,8 +44,8 @@ class VISUAL:
         self.show_poles = True
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 75000
-        self.frames_setting = 60
+        self.plot_end_frame_setting = 6000
+        self.frames_setting = 6000
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -204,6 +204,7 @@ class VISUAL:
                     
                     if(self.show_poles):
                         self.write_data(body_pos + np.matmul(R, np.array([0,0,self.radius])), 3*float(self.pars['RBLOB']), superpuntoDatafileName, self.periodic, color=0*65536+0*256+255)
+                        self.write_data(body_pos + np.matmul(R, np.array([0,0,-self.radius])), 3*float(self.pars['RBLOB']), superpuntoDatafileName, self.periodic, color=0*65536+0*256+255)
 
                     for fil in range(int(self.pars['NFIL'])):
                         fil_color = int("000000", base=16)
@@ -228,6 +229,7 @@ class VISUAL:
                             segs_list[fil*self.nseg] = old_seg_pos
                         else:
                             self.write_data(old_seg_pos, float(self.pars['RSEG']), superpuntoDatafileName, self.periodic, True, True, color=fil_color)
+                            # self.write_data(old_seg_pos, 10*float(self.pars['RSEG']), superpuntoDatafileName, self.periodic, True, True, color=255*65536+0*256+0)
 
                         for seg in range(1, int(self.pars['NSEG'])):
                             if (self.pars['PRESCRIBED_CILIA'] == 0):
@@ -249,7 +251,9 @@ class VISUAL:
                 if(self.check_overlap):
                     threshold = 1.0
                     cell_size = 10
-                    colliding_indices, colliding_particles = util.label_colliding_particles_with_3d_cell_list(segs_list, cell_size, threshold*float(self.pars['RSEG']))
+                    particle_list = np.concatenate([segs_list, blobs_list])
+
+                    colliding_indices, colliding_particles = util.label_colliding_particles_with_3d_cell_list(particle_list, cell_size, threshold*float(self.pars['RSEG']))
                     
                     self.write_data(body_pos, self.radius, superpuntoDatafileName, self.periodic, color=16777215)
                     print(f'Overlapping case at threshold {threshold} = {len(colliding_indices)}')
@@ -597,6 +601,8 @@ class VISUAL:
         
         
         ax3.scatter(azim_array_sorted, polar_array_sorted, c = cluster_assignments)
+        ax3.set_xlabel(r'$\phi$')
+        ax3.set_ylabel(r'$\theta$')
         
 
         fig.savefig(f'fig/fil_coordination_parameter_one_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
@@ -1446,8 +1452,8 @@ class VISUAL:
                     ax.set_title(f"ind={self.index} nfil={self.nfil} AR={self.ar} spr={self.spring_factor} {self.plot_end_frame}")
                 except:
                     print("WARNING: " + self.simName + " not found.")
-        # for ax in axs_flat:
-        #     ax.tick_params(axis='both', which='both', labelsize=18)
+        for ax in axs_flat:
+            ax.tick_params(axis='both', which='both', labelsize=18)
         plt.tight_layout()
         # plt.savefig(f'fig/ciliate_multi_phase_elst{spring_factor}.png', bbox_inches = 'tight', format='png')
         plt.savefig(f'fig/ciliate_multi_phase_elst{spring_factor}_{self.date}.pdf', bbox_inches = 'tight', format='pdf')

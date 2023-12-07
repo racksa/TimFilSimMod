@@ -7,7 +7,7 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.date = '20231204_ico'
+        self.date = '20231206_hold'
         self.afix = ''
         self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         self.pars_list = {
@@ -21,7 +21,7 @@ class DRIVER:
 
         # self.sweep_shape = (3, 8, 6, 1)
         self.sweep_shape = (1, 12, 4, 1)
-        self.sweep_shape = (8, 1, 1, 1)
+        self.sweep_shape = (32, 1, 1, 1)
 
         self.num_sim = 0
 
@@ -67,10 +67,10 @@ class DRIVER:
                         # ar = round(10*(1.6**k), 2)
                         # spring_factor = round(0.5+ 0.25*i, 2)
                         
-                        nfil = int(640)
-                        nblob = int(40962)
-                        # nfil = int(480)
-                        # nblob = int(96001)
+                        # nfil = int(640)
+                        # nblob = int(40962)
+                        nfil = int(480)
+                        nblob = int(12001)
                         ar = round(12.65, 2)
                         spring_factor = round(0.005 + 0.001*i, 3)
 
@@ -134,7 +134,7 @@ class DRIVER:
 
             command = f"export OPENBLAS_NUM_THREADS=1; \
                         export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
-                        ./bin/cilia_ico > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][i]:.0f}fil_{i}.out"
+                        ./bin/cilia_hold > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][i]:.0f}fil_{i}.out"
 
             # command = f"export OPENBLAS_NUM_THREADS=1; \
             #             export CUDA_VISIBLE_DEVICES={self.cuda_device}; \

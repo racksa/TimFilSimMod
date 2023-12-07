@@ -23,7 +23,7 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.date = '20231204_free'
+        self.date = '20231206_hold'
         self.dir = f"data/expr_sims/{self.date}/"
         # self.dir = "/home/clustor/ma/h/hs2216/20231130_4by4_smallk/"
         self.pars_list = {
@@ -44,8 +44,8 @@ class VISUAL:
         self.show_poles = True
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 6000
-        self.frames_setting = 6000
+        self.plot_end_frame_setting = 30000
+        self.frames_setting = 60
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -423,7 +423,7 @@ class VISUAL:
             ax.set_xticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0', 'π/2', 'π'])
             ax.set_yticks(np.linspace(0, np.pi, 5), ['0', 'π/4', 'π/2', '3π/4', 'π'])
             ax.invert_yaxis()
-            plt.savefig(f'fig/fil_phase_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+            plt.savefig(f'fig/fil_phase_index{self.index}_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
             plt.show()
 
     def phi_dot(self):
@@ -596,7 +596,7 @@ class VISUAL:
         ax2.plot(time_array, corr_array2)
         ax2.set_xlabel('t/T')
         ax2.set_ylabel('Coordination number 2')
-        ax.set_xlim(time_array[0], time_array[-1])
+        ax2.set_xlim(time_array[0], time_array[-1])
         ax2.set_ylim(0)
         
         
@@ -1456,7 +1456,7 @@ class VISUAL:
             ax.tick_params(axis='both', which='both', labelsize=18)
         plt.tight_layout()
         # plt.savefig(f'fig/ciliate_multi_phase_elst{spring_factor}.png', bbox_inches = 'tight', format='png')
-        plt.savefig(f'fig/ciliate_multi_phase_elst{spring_factor}_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
+        plt.savefig(f'fig/ciliate_multi_phase_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
     def multi_ciliate(self):

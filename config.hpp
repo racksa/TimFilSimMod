@@ -76,22 +76,18 @@ extern std::string SIMULATION_TETHERLAM_NAME;
   // Essentially, the cilia can 'tip backwards or forwards' in their beat planes.
   // If false, no such rotation ever occurs.
 
-  #define INITIAL_PHASE 1
-  // 0 = Random
-  // 1 = All zeros
-  // 2 = Ishikawa
-  // 3 = Diaplectic
-
   #define WRITE_GENERALISED_FORCES false
   // If true, this simulation will save its generalised forces to file for use as the reference values.
   // It will also generate reference s-values for shape sequences which don't result in inextensible filaments.
   // NOTE: This will overwrite any existing reference files unless their names have been changed.
 
-  #define CILIA_IC_TYPE 1
+  #define CILIA_IC_TYPE 0
   // Valid options:
   // 0 = All cilia start in-phase with phase 0.
   // 1 = Cilia start with a (uniformly) random initial phase.
   // 2 = A metachronal wave (MCW). Its wavelength and direction are defined below.
+  // 3 = Ishikawa MCW
+  // 4 = Diaplectic wave (will be deprecated later)
 
   #if CILIA_IC_TYPE==2
 
@@ -269,7 +265,7 @@ extern float END_FORCE_MAGNITUDE;
 
 #endif
 
-#define TOTAL_TIME_STEPS (1000*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
+#define TOTAL_TIME_STEPS (300*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
 #define NUM_EULER_STEPS 1 // Number of time-steps to use backwards-Euler before switching to BDF2.
 
 #if CILIA_TYPE==1

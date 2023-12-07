@@ -248,38 +248,7 @@ void filament::initial_setup(const Real *const base_pos,
           std::random_device rd{};
           std::mt19937 gen{rd()};
           std::uniform_real_distribution<Real> distribution(0.0, 2.0*PI);
-
-          #if (INITIAL_PHASE==0)
-            phase = distribution(gen);
-          #elif (INITIAL_PHASE==1)
-            phase = 0;
-          #elif (INITIAL_PHASE==2)
-
-            // WARNING this is only correct if a spherical body is initialised at the origin!!
-            const Real phi = atan2(base_pos[1], base_pos[0]);
-            const Real theta = acos(base_pos[2]/(sqrt(base_pos[0]*base_pos[0]+
-                                                      base_pos[1]*base_pos[1]+
-                                                      base_pos[2]*base_pos[2])));
-                                                      
-            Real k = 0.0;
-            Real v = 0.0;
-            std::ifstream in("ishikawa.dat"); // input
-            in >> k;
-            in >> v;
-            phase = Real(2.0)*PI*( sin(k*theta/2.0) + cos(v*phi/4.0) );
-            // printf("fil %d (%.4f %.4f %.4f) theta=%.4f phase=%.4f\n",
-            // fil_id, base_pos[0], base_pos[1], base_pos[2], theta, phase);
-          #elif (INITIAL_PHASE==3)
-
-            // WARNING this is only correct if a spherical body is initialised at the origin!!
-            const Real phi = atan2(base_pos[1], base_pos[0]);
-            const Real theta = acos(base_pos[2]/(sqrt(base_pos[0]*base_pos[0]+
-                                                      base_pos[1]*base_pos[1]+
-                                                      base_pos[2]*base_pos[2])));
-            phase = phi;
-            // printf("fil %d (%.4f %.4f %.4f) theta=%.4f phase=%.4f\n",
-            // fil_id, base_pos[0], base_pos[1], base_pos[2], theta, phase);
-          #endif
+          phase = distribution(gen);
 
         #elif (CILIA_IC_TYPE==2)
 
@@ -306,7 +275,35 @@ void filament::initial_setup(const Real *const base_pos,
 
           #endif
 
+        #elif (CILIA_IC_TYPE==3)
+          // WARNING this is only correct if a spherical body is initialised at the origin!!
+          const Real phi = atan2(base_pos[1], base_pos[0]);
+          const Real theta = acos(base_pos[2]/(sqrt(base_pos[0]*base_pos[0]+
+                                                    base_pos[1]*base_pos[1]+
+                                                    base_pos[2]*base_pos[2])));
+                                                    
+          Real k = 0.0;
+          Real v = 0.0;
+          std::ifstream in("ishikawa.dat"); // input
+          in >> k;
+          in >> v;
+          phase = Real(2.0)*PI*( sin(k*theta/2.0) + cos(v*phi/4.0) );
+          // printf("fil %d (%.4f %.4f %.4f) theta=%.4f phase=%.4f\n",
+          // fil_id, base_pos[0], base_pos[1], base_pos[2], theta, phase);
+            
         #endif
+
+        #if (CILIA_IC_TYPE==4)
+
+            // WARNING this is only correct if a spherical body is initialised at the origin!!
+            const Real phi = atan2(base_pos[1], base_pos[0]);
+            const Real theta = acos(base_pos[2]/(sqrt(base_pos[0]*base_pos[0]+
+                                                      base_pos[1]*base_pos[1]+
+                                                      base_pos[2]*base_pos[2])));
+            phase = phi;
+            // printf("fil %d (%.4f %.4f %.4f) theta=%.4f phase=%.4f\n",
+            // fil_id, base_pos[0], base_pos[1], base_pos[2], theta, phase);
+          #endif
 
         #if SURFACE_OF_REVOLUTION_BODIES
 

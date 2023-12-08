@@ -1104,10 +1104,15 @@
 
     #elif RIGIDWALL
 
+      Real blob_step;
+      std::ifstream in("separation.dat"); // input
+      in >> blob_step;
+      in >> blob_step;
+
       const int blob_grid_dim_x = int(sqrt(Real(NBLOB)));
       const int blob_grid_dim_y = std::max<int>(1, int(ceil(NBLOB/Real(blob_grid_dim_x))));
-      const double blob_grid_step_x = 2.2*RBLOB;
-      const double blob_grid_step_y = 2.2*RBLOB;
+      const double blob_grid_step_x = blob_step*RBLOB;
+      const double blob_grid_step_y = blob_step*RBLOB;
 
       for (int i = 0; i < blob_grid_dim_x; i++){
         for (int j = 0; j < blob_grid_dim_y; j++){
@@ -1116,7 +1121,7 @@
 
           if (blob_id < NBLOB){
 
-            X[3*blob_id + 0] = i*blob_grid_step_x + blob_grid_step_x;
+            X[3*blob_id + 0] = i*blob_grid_step_x + (1+0.5*(j % 2))*blob_grid_step_x;
             X[3*blob_id + 1] = j*blob_grid_step_y + blob_grid_step_y;
             X[3*blob_id + 2] = 0.0;
           }
@@ -1263,10 +1268,15 @@
 
     #elif HEXAGONAL_WALL_SEEDING
     
+      Real fil_grid_step_x;
+      Real blob_step;
+      std::ifstream in("separation.dat"); // input
+      in >> fil_grid_step_x;
+      in >> blob_step;
+      Real fil_grid_step_y = fil_grid_step_x;
+
       const int fil_grid_dim_x = int(sqrt(Real(NFIL)));
       const int fil_grid_dim_y = std::max<int>(1, int(ceil(NFIL/Real(fil_grid_dim_x))));
-      const double fil_grid_step_x = 40.0*RSEG;
-      const double fil_grid_step_y = 40.0*RSEG;
 
       for (int i = 0; i < fil_grid_dim_x; i++){
         for (int j = 0; j < fil_grid_dim_y; j++){
@@ -1275,7 +1285,7 @@
 
           if (fil_id < NFIL){
 
-            filament_references[3*fil_id + 0] = i*fil_grid_step_x + fil_grid_step_x;
+            filament_references[3*fil_id + 0] = i*fil_grid_step_x + (1+0.5*(j%2))*fil_grid_step_x;
             filament_references[3*fil_id + 1] = j*fil_grid_step_y + fil_grid_step_y;
             filament_references[3*fil_id + 2] = 2.1*BASE_HEIGHT_ABOVE_SURFACE;
 

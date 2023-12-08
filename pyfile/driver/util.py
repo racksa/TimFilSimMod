@@ -30,6 +30,21 @@ def delete_files_in_directory(directory_path):
             print("Deletion canceled. No files were deleted.")
     except Exception as e:
         print(f"Error occurred while deleting files: {e}")
+
+def view_files_in_directory(directory_path):
+    try:
+        file_list = list_files_in_directory(directory_path)
+
+        if not file_list:
+            print(f"No files found in '{directory_path}'.")
+            return
+
+        print("Files here:")
+        for file_path in file_list:
+            print(file_path)
+
+    except Exception as e:
+        print(f"Error occurred while viewing files: {e}")
         
 
 def even_list_index(n, m):

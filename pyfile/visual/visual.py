@@ -23,9 +23,9 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.date = '20231206_hold'
+        self.date = '20231208_plane'
         self.dir = f"data/expr_sims/{self.date}/"
-        # self.dir = "/home/clustor/ma/h/hs2216/20231130_4by4_smallk/"
+        # self.dir = "/home/clustor/ma/h/hs2216/20231105_4by4_widespread_sims/"
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -42,10 +42,16 @@ class VISUAL:
         self.periodic = False
         self.big_sphere = True
         self.show_poles = True
+
+        self.planar = True
+        if(self.planar):
+            self.big_sphere = False
+            self.show_poles = False
+
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 30000
-        self.frames_setting = 60
+        self.plot_end_frame_setting = 9000
+        self.frames_setting = 30
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -148,7 +154,7 @@ class VISUAL:
         self.select_sim()
         ax = plt.figure().add_subplot(projection='3d')
 
-        superpuntoDatafileName = self.simName + "_superpunto.dat"
+        superpuntoDatafileName = f"{self.simName}_superpunto_{self.date}.dat"
         myIo.clean_file(superpuntoDatafileName)
 
         seg_states_f = open(self.simName + '_seg_states.dat', "r")
@@ -398,7 +404,7 @@ class VISUAL:
                 if(i>=self.plot_start_frame):
                     frame = i
                     plt.rcParams['animation.ffmpeg_path'] = '/usr/bin/ffmpeg'
-                    ani = animation.FuncAnimation(fig, animation_func, frames=500, interval=10, repeat=False)
+                    ani = animation.FuncAnimation(fig, animation_func, frames=self.frames, interval=1, repeat=False)
                     plt.show()
                     # FFwriter = animation.FFMpegWriter(fps=10)
                     # ani.save(f'fig/fil_phase_{self.nfil}fil_anim.mp4', writer=FFwriter)
@@ -622,22 +628,11 @@ class VISUAL:
 
         # fig = plt.figure()
         fig, axs = plt.subplots(2, 1, sharex=True)
-        # ax = fig.add_subplot(2,1,1)
-        # ax2 = fig.add_subplot(2,1,2)
         fil_references_sphpolar = np.zeros((self.nfil,3))
-
-        # from matplotlib.colors import Normalize
-        # from matplotlib.cm import ScalarMappable
-        # norm = Normalize(vmin=0, vmax=2*np.pi)
-        # sm = ScalarMappable(cmap=colormap, norm=norm)
-        # sm.set_array([])
-        # cbar = plt.colorbar(sm)
-        # cbar.ax.set_yticks(np.linspace(0, 2*np.pi, 7), ['0', 'π/3', '2π/3', 'π', '4π/3', '5π/3', '2π'])
-        # cbar.set_label(r"phase")
 
         import scipy.interpolate
 
-        n1, n2 = 100, 50 
+        n1, n2 = 200, 100 
         azim_array = np.linspace(-np.pi, np.pi, n1)
         polar_array = np.linspace(0, np.pi, n2)
 
@@ -669,7 +664,7 @@ class VISUAL:
                 # Interpolation
                 
                 xx, yy = np.meshgrid(azim_array, polar_array)
-                zz = scipy.interpolate.griddata((fil_references_sphpolar[:,1],fil_references_sphpolar[:,2]), variables, (xx, yy), method='nearest')
+                zz = scipy.interpolate.griddata((fil_references_sphpolar[:,1],fil_references_sphpolar[:,2]), variables, (xx, yy), method='linear')
 
                 phi_kymo[:, i-self.plot_start_frame] = zz[n2//2]
                 theta_kymo[:, i-self.plot_start_frame] = zz[:, n1//2]
@@ -1457,6 +1452,89 @@ class VISUAL:
         plt.tight_layout()
         # plt.savefig(f'fig/ciliate_multi_phase_elst{spring_factor}.png', bbox_inches = 'tight', format='png')
         plt.savefig(f'fig/ciliate_multi_phase_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
+        plt.show()
+
+    def multi_kymograph(self):
+        # Plotting
+        colormap = 'cividis'
+        colormap = 'twilight_shifted'
+        
+        ncol = self.ncol
+        nrow = self.num_sim//ncol
+
+        print(f'num sim = {self.num_sim} nrow = {nrow} ncol = {ncol}')
+        
+        fig, axs = plt.subplots(nrow, ncol, figsize=(18, 18), sharex=True, sharey=True)
+        # fig2, axs2 = plt.subplots(nrow, ncol, figsize=(18, 18), sharex=True, sharey=True)
+        # cax = fig.add_axes([0.92, 0.1, 0.02, 0.8])  # [left, bottom, width, height] for the colorbar
+
+        axs_flat = axs.ravel()
+        # axs2_flat = axs2.ravel()
+        import scipy.interpolate
+
+        # fig.supxlabel(r"Azimuth position")
+        # fig.supylabel(r"Polar position")
+        # plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
+        # plt.ylabel(r"$\theta$")
+        # plt.xlabel(r"$\phi$")
+
+        
+        # plt.ylim(0, np.pi)
+        # plt.xticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0', 'π/2', 'π'])
+        plt.yticks(np.linspace(0, np.pi, 3), ['0', 'π/2', 'π'])
+        # plt.gca().invert_yaxis()
+
+        for ind, ax in enumerate(axs_flat):
+            if (ind < self.num_sim):
+                try:
+                    self.index = ind
+                    self.select_sim()
+
+                    ##
+                    time_array = np.arange(self.frames)/self.period
+                    n1, n2 = 100, 50 
+                    azim_array = np.linspace(-np.pi, np.pi, n1)
+                    polar_array = np.linspace(0, np.pi, n2)
+
+                    phi_kymo = np.zeros((n1, self.frames))
+                    theta_kymo = np.zeros((n2, self.frames))
+                    
+                    phi_kymo_xx, phi_kymo_yy = np.meshgrid(time_array, azim_array,)
+                    theta_kymo_xx, theta_kymo_yy = np.meshgrid(time_array, polar_array, )
+                    ##
+
+                    fil_references_sphpolar = np.zeros((self.nfil,3))
+                    for m in range(self.nfil):
+                        fil_references_sphpolar[m] = util.cartesian_to_spherical(self.fil_references[3*m: 3*m+3])
+        
+                    fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
+                    # fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
+                    for i in range(self.plot_end_frame):
+                        print(" index ", self.index,  " frame ", i, "/", self.plot_end_frame, "          ", end="\r")
+                        fil_phases_str = fil_phases_f.readline()
+                        # fil_angles_str = fil_angles_f.readline()
+                        if(i>=self.plot_start_frame):
+                            fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
+                            fil_phases = util.box(fil_phases, 2*np.pi)
+
+                            xx, yy = np.meshgrid(azim_array, polar_array)
+                            zz = scipy.interpolate.griddata((fil_references_sphpolar[:,1],fil_references_sphpolar[:,2]), fil_phases, (xx, yy), method='nearest')
+
+                            phi_kymo[:, i-self.plot_start_frame] = zz[n2//2]
+                            theta_kymo[:, i-self.plot_start_frame] = zz[:, n1//2]
+
+                    # ax.scatter(phi_kymo_xx, phi_kymo_yy, c=phi_kymo, cmap=colormap, vmin=0, vmax=2*np.pi)
+                    ax.scatter(theta_kymo_xx, theta_kymo_yy, c=theta_kymo, cmap=colormap, vmin=0, vmax=2*np.pi)       
+            
+                    ax.set_title(f"ind={self.index} nfil={self.nfil} AR={self.ar} spr={self.spring_factor} {self.plot_end_frame}")
+                except:
+                    print("WARNING: " + self.simName + " not found.")
+        for ax in axs_flat:
+            ax.tick_params(axis='both', which='both', labelsize=18)
+        plt.xlim(time_array[0], time_array[-1])
+        plt.tight_layout()
+        
+        plt.savefig(f'fig/ciliate_multi_kymograph_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
     def multi_ciliate(self):
@@ -2320,10 +2398,10 @@ class VISUAL:
                         X[:,i-self.plot_start_frame] = fil_phases_sorted[:self.nfil]
                         X_angle[:,i-self.plot_start_frame] = fil_angles_sorted[:self.nfil]
                 
-                np.savetxt(f'phase_data_20231204/X_phase_index{self.index}.txt', X, delimiter=', ')
+                np.savetxt(f'phase_data_20231208_free/X_phase_index{self.index}.txt', X, delimiter=', ')
                 # np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/X_rotation_angle_index{self.index}.txt', X_angle, delimiter=', ')
-                np.savetxt(f'phase_data_20231204/azim_pos_index{self.index}.txt', azim_array_sorted, delimiter=', ')
-                np.savetxt(f'phase_data_20231204/polar_pos_index{self.index}.txt', polar_array_sorted, delimiter=', ')
+                np.savetxt(f'phase_data_20231208_free/azim_pos_index{self.index}.txt', azim_array_sorted, delimiter=', ')
+                np.savetxt(f'phase_data_20231208_free/polar_pos_index{self.index}.txt', polar_array_sorted, delimiter=', ')
 
             except:
                 print("WARNING: " + self.simName + " not found.")

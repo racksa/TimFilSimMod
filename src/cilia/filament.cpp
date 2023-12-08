@@ -287,7 +287,7 @@ void filament::initial_setup(const Real *const base_pos,
           std::ifstream in("ishikawa.dat"); // input
           in >> k;
           in >> v;
-          phase = Real(2.0)*PI*( sin(k*theta/2.0) + cos(v*phi/4.0) );
+          phase = Real(2.0)*PI*( sin(k*theta/2.0) + sin(v*phi/4.0) );
           // printf("fil %d (%.4f %.4f %.4f) theta=%.4f phase=%.4f\n",
           // fil_id, base_pos[0], base_pos[1], base_pos[2], theta, phase);
             

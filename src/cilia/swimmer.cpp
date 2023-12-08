@@ -363,7 +363,9 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
     
 
     // Seed filaments anyway
-    // seed_filaments(&filament_references[0], &polar_dir_refs[0], &azi_dir_refs[0], &normal_refs[0]);
+    #if RIGIDWALL
+      seed_filaments(&filament_references[0], &polar_dir_refs[0], &azi_dir_refs[0], &normal_refs[0]);
+    #endif
 
 
     #if SURFACE_OF_REVOLUTION_BODIES

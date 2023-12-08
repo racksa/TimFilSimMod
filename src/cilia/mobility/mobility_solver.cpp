@@ -408,7 +408,7 @@ void mobility_solver::read_positions_and_forces(std::vector<swimmer>& swimmers){
 
             for (int k = 0; k < NSEG; k++){
 
-              const int id = 3*(n*NFIL*NSEG + m*NSEG + k); // Filament id (Segment id?)
+              const int id = 3*(n*NFIL*NSEG + m*NSEG + k); // Segment id
 
               matrix r(3,1);
 

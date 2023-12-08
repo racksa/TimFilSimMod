@@ -7,7 +7,7 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.date = '20231206_hold'
+        self.date = '20231208_plane'
         self.afix = ''
         self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         self.pars_list = {
@@ -69,8 +69,8 @@ class DRIVER:
                         
                         # nfil = int(640)
                         # nblob = int(40962)
-                        nfil = int(480)
-                        nblob = int(12001)
+                        nfil = int(64)
+                        nblob = int(8100)
                         ar = round(12.65, 2)
                         spring_factor = round(0.005 + 0.001*i, 3)
 
@@ -89,6 +89,9 @@ class DRIVER:
 
     def delete_files(self):
         util.delete_files_in_directory(self.dir)
+
+    def view_files(self):
+        util.view_files_in_directory(self.dir)
 
     def write_rules(self):
         sim = configparser.ConfigParser()
@@ -134,7 +137,7 @@ class DRIVER:
 
             command = f"export OPENBLAS_NUM_THREADS=1; \
                         export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
-                        ./bin/cilia_hold > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][i]:.0f}fil_{i}.out"
+                        ./bin/cilia_plane > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][i]:.0f}fil_{i}.out"
 
             # command = f"export OPENBLAS_NUM_THREADS=1; \
             #             export CUDA_VISIBLE_DEVICES={self.cuda_device}; \

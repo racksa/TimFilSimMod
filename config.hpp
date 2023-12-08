@@ -81,8 +81,9 @@ extern std::string SIMULATION_TETHERLAM_NAME;
   // It will also generate reference s-values for shape sequences which don't result in inextensible filaments.
   // NOTE: This will overwrite any existing reference files unless their names have been changed.
 
-  #define CILIA_IC_TYPE 0
+  #define CILIA_IC_TYPE 3
   // Valid options:
+  // if using 3, we should be able to derive all other cases.
   // 0 = All cilia start in-phase with phase 0.
   // 1 = Cilia start with a (uniformly) random initial phase.
   // 2 = A metachronal wave (MCW). Its wavelength and direction are defined below.
@@ -102,7 +103,7 @@ extern std::string SIMULATION_TETHERLAM_NAME;
 
 #endif
 
-#define BODY_OR_SURFACE_TYPE 2
+#define BODY_OR_SURFACE_TYPE 5
 // Valid options:
 // 0 = An infinite plane wall at z = 0. This choice has some sub-types (see below).
 // 1 = Deformed planes with 2 principal curvatures (partially implemented)
@@ -110,8 +111,6 @@ extern std::string SIMULATION_TETHERLAM_NAME;
 // 3 = Toroidal bodies (partially implemented)
 // 4 = Rigid Rod
 // 5 = Filament on rigid wall
-
-#define BASE_HEIGHT_ABOVE_SURFACE (0.5*DL)
 
 #if BODY_OR_SURFACE_TYPE==0
 
@@ -132,7 +131,7 @@ extern std::string SIMULATION_TETHERLAM_NAME;
 
 #elif BODY_OR_SURFACE_TYPE==2 or BODY_OR_SURFACE_TYPE==4 or BODY_OR_SURFACE_TYPE==5
 
-  #define SEEDING_TYPE 5
+  #define SEEDING_TYPE 3
   // Valid options:
   // 0 = Filaments are evenly distributed over the surface.
   // 1 = Filaments are seeded in an equatorial band.
@@ -265,7 +264,7 @@ extern float END_FORCE_MAGNITUDE;
 
 #endif
 
-#define TOTAL_TIME_STEPS (300*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
+#define TOTAL_TIME_STEPS (1000*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
 #define NUM_EULER_STEPS 1 // Number of time-steps to use backwards-Euler before switching to BDF2.
 
 #if CILIA_TYPE==1
@@ -281,6 +280,7 @@ extern float END_FORCE_MAGNITUDE;
 
 #endif
 
+#define BASE_HEIGHT_ABOVE_SURFACE (0.5*DL)
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Derived/redefined parameters (these should be left alone)

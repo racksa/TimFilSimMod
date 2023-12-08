@@ -8,6 +8,9 @@ if(len(sys.argv) > 1):
     if(sys.argv[1] == 'clean'):
         driver.delete_files()
 
+    if(sys.argv[1] == 'view'):
+        driver.view_files()
+
     if(sys.argv[1] == 'create_rules'):
         driver.create_rules()
 

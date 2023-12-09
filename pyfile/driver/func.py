@@ -67,12 +67,10 @@ class DRIVER:
                         # ar = round(10*(1.6**k), 2)
                         # spring_factor = round(0.5+ 0.25*i, 2)
                         
-                        # nfil = int(640)
-                        # nblob = int(40962)
-                        nfil = int(64)
-                        nblob = int(8100)
+                        nfil = int(64 + 64*i)
+                        nblob = int(6400 + 6400*i)
                         ar = round(12.65, 2)
-                        spring_factor = round(0.005 + 0.001*i, 3)
+                        spring_factor = round(0.005 + 0.00*i, 3)
 
                         nseg = 20
                         force_mag = 1

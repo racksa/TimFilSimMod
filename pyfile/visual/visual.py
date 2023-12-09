@@ -50,8 +50,8 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 9000
-        self.frames_setting = 30
+        self.plot_end_frame_setting = 30000
+        self.frames_setting = 240
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting

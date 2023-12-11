@@ -331,14 +331,16 @@ void rigid_body::initial_setup(const int id, Real *const f_address, const Real *
 
     #if ROD or RIGIDWALL
 
-      seed_rod_blobs(&blob_references[0], &polar_dir_refs[0], &azi_dir_refs[0], &normal_refs[0]);
+      seed_blobs(&blob_references[0], &polar_dir_refs[0], &azi_dir_refs[0], &normal_refs[0]);
 
     #endif
 
     #if SURFACE_OF_REVOLUTION_BODIES
 
       if (pos_file.good() && polar_file.good() && azi_file.good() && normal_file.good()){
-
+        
+        std::cout << std::endl << std::endl << "Using " << file_name_trunk + ".seed" << " as blob input file." << std::endl;
+        
         for (int i = 0; i < 3*NBLOB; i++){
 
           pos_file >> blob_references[i];
@@ -353,6 +355,8 @@ void rigid_body::initial_setup(const int id, Real *const f_address, const Real *
         seed_blobs(&blob_references[0], &polar_dir_refs[0], &azi_dir_refs[0], &normal_refs[0]);
 
       }
+    
+      
    
 
     // The seeding functions work on unit-length surfaces, so the scaling must be done after we read or calculate.

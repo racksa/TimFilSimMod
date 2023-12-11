@@ -23,7 +23,7 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.date = '20231208_plane'
+        self.date = '20231211_centric'
         self.dir = f"data/expr_sims/{self.date}/"
         # self.dir = "/home/clustor/ma/h/hs2216/20231105_4by4_widespread_sims/"
         self.pars_list = {
@@ -43,15 +43,17 @@ class VISUAL:
         self.big_sphere = True
         self.show_poles = True
 
+        self.ignore_blob = True
         self.planar = True
+
         if(self.planar):
             self.big_sphere = False
             self.show_poles = False
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 30000
-        self.frames_setting = 240
+        self.plot_end_frame_setting = 240000
+        self.frames_setting = 60
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -203,7 +205,8 @@ class VISUAL:
                                 color=16777215 #white
                                 color=13882323 # grey
                                 # color=0 # black
-                                self.write_data([blob_x, blob_y, blob_z], float(self.pars['RBLOB']), superpuntoDatafileName, self.periodic, color=color)
+                                if not self.ignore_blob:
+                                    self.write_data([blob_x, blob_y, blob_z], float(self.pars['RBLOB']), superpuntoDatafileName, self.periodic, color=color)
 
                     if(self.big_sphere):
                         self.write_data(body_pos, self.radius, superpuntoDatafileName, self.periodic, color=16777215)
@@ -664,7 +667,7 @@ class VISUAL:
                 # Interpolation
                 
                 xx, yy = np.meshgrid(azim_array, polar_array)
-                zz = scipy.interpolate.griddata((fil_references_sphpolar[:,1],fil_references_sphpolar[:,2]), variables, (xx, yy), method='linear')
+                zz = scipy.interpolate.griddata((fil_references_sphpolar[:,1],fil_references_sphpolar[:,2]), variables, (xx, yy), method='nearest')
 
                 phi_kymo[:, i-self.plot_start_frame] = zz[n2//2]
                 theta_kymo[:, i-self.plot_start_frame] = zz[:, n1//2]
@@ -688,7 +691,7 @@ class VISUAL:
         axs[1].invert_yaxis()
         axs[1].set_yticks(np.linspace(0, np.pi, 5), ['0', 'π/4', 'π/2', '3π/4', 'π'])
 
-        fig.savefig(f'fig/kymograph_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+        fig.savefig(f'fig/kymograph_index{self.index}_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
     def eckert(self):

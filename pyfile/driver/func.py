@@ -7,7 +7,7 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.date = '20231208_plane'
+        self.date = '20231211_centric'
         self.afix = ''
         self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         self.pars_list = {
@@ -21,7 +21,7 @@ class DRIVER:
 
         # self.sweep_shape = (3, 8, 6, 1)
         self.sweep_shape = (1, 12, 4, 1)
-        self.sweep_shape = (32, 1, 1, 1)
+        self.sweep_shape = (12, 1, 1, 1)
 
         self.num_sim = 0
 
@@ -55,22 +55,36 @@ class DRIVER:
                 for k in range(self.sweep_shape[2]):
                     for l in range(self.sweep_shape[3]):
 
-                        fil_density = 3.0 - 0.6*k
-                        blob_density = 75
-                        nfil = int( 192 + 96*j )
-                        ar = round( (nfil/fil_density)**.5 ,2)
-                        nblob = int(ar**2*blob_density)
-                        spring_factor = round(0.5+ 0.25*i, 2)
-
-                        # nfil = int( 192*(1.6**2)**j )
-                        # nblob = int(7500*((1.6**2)**k))
-                        # ar = round(10*(1.6**k), 2)
+                        # fil_density = 3.0 - 0.6*k
+                        # blob_density = 75
+                        # nfil = int( 192 + 96*j )
+                        # ar = round( (nfil/fil_density)**.5 ,2)
+                        # nblob = int(ar**2*blob_density)
                         # spring_factor = round(0.5+ 0.25*i, 2)
-                        
-                        nfil = int(64 + 64*i)
-                        nblob = int(6400 + 6400*i)
+
+                        # # planar
+                        # nfil = int(64 + 64*i)
+                        # nblob = int(1600 + 1600*i)
+                        # ar = round(12.65, 2)
+                        # spring_factor = round(0.005 + 0.00*i, 3)
+
+                        # # k-means
+                        # nfil = int(480 + 0*i)
+                        # nblob = int(12001 + 0*i)
+                        # ar = round(12.65, 2)
+                        # spring_factor = round(0.005 + 0.001*i, 3)
+
+                        # # icosahedral
+                        # nfil = int(640)
+                        # nblob = int(40962)
+                        # ar = round(15.0, 2)
+                        # spring_factor = round(0.005 + 0.008*i*(i//4+1), 3)
+
+                        # centric
+                        nfil = int(768)
+                        nblob = int(19200)
                         ar = round(12.65, 2)
-                        spring_factor = round(0.005 + 0.00*i, 3)
+                        spring_factor = round(0.005 + 0.008*i*(i//4+1), 3)
 
                         nseg = 20
                         force_mag = 1
@@ -135,7 +149,7 @@ class DRIVER:
 
             command = f"export OPENBLAS_NUM_THREADS=1; \
                         export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
-                        ./bin/cilia_plane > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][i]:.0f}fil_{i}.out"
+                        ./bin/cilia_centric > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][i]:.0f}fil_{i}.out"
 
             # command = f"export OPENBLAS_NUM_THREADS=1; \
             #             export CUDA_VISIBLE_DEVICES={self.cuda_device}; \

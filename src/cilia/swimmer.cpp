@@ -315,7 +315,9 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
     std::ifstream normal_file(file_name_trunk + ".normal");
 
     if (pos_file.good() && polar_file.good() && azi_file.good() && normal_file.good()){
-
+      
+      std::cout << std::endl << std::endl << "Using " << file_name_trunk + ".seed" << " as fil input file." << std::endl;
+        
       for (int i = 0; i < 3*NFIL; i++){
 
         pos_file >> filament_references[i];
@@ -367,6 +369,10 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
       seed_filaments(&filament_references[0], &polar_dir_refs[0], &azi_dir_refs[0], &normal_refs[0]);
     #endif
 
+    // Seed filaments anyway
+    // seed_filaments(&filament_references[0], &polar_dir_refs[0], &azi_dir_refs[0], &normal_refs[0]);
+    
+
 
     #if SURFACE_OF_REVOLUTION_BODIES
 
@@ -396,7 +402,7 @@ void swimmer::initial_setup(const int id, const Real *const data_from_file, Real
       Real *const fil_x_address = &x_segs_address[3*i*NSEG];
       Real *const fil_f_address = &f_segs_address[6*i*NSEG];
       
-      #if RIGIDWALL
+      #if RIGIDWALL and HEXAGONAL_WALL_SEEDING
         const Real dir[3] = {0.0, 0.0, 1.0};
       #else
         const Real *const dir = &normal_refs[3*i];

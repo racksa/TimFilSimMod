@@ -23,7 +23,7 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.date = '20231211_centric'
+        self.date = '20231209_ico_hold'
         self.dir = f"data/expr_sims/{self.date}/"
         # self.dir = "/home/clustor/ma/h/hs2216/20231105_4by4_widespread_sims/"
         self.pars_list = {
@@ -40,20 +40,23 @@ class VISUAL:
         self.output_to_fcm = False
         self.output_to_superpunto = True
         self.periodic = False
-        self.big_sphere = True
+        self.big_sphere = False
         self.show_poles = True
 
         self.ignore_blob = True
+
         self.planar = True
 
         if(self.planar):
             self.big_sphere = False
             self.show_poles = False
+        else:
+            self.ignore_blob = False
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 240000
-        self.frames_setting = 60
+        self.plot_end_frame_setting = 300000
+        self.frames_setting = 240
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -233,6 +236,7 @@ class VISUAL:
                             rgb_hex = mcolors.rgb2hex(rgb_color)[1:]  # Convert RGB to BGR hexadecimal format
                             bgr_hex = rgb_hex[4:]+rgb_hex[2:4]+rgb_hex[:2]
                             fil_color = int(bgr_hex, base=16)
+                            fil_color = color=0*65536+0*256+255
                             # print("\n", bgr_hex, fil_color, "\t")
                         if(self.check_overlap):
                             segs_list[fil*self.nseg] = old_seg_pos
@@ -345,7 +349,7 @@ class VISUAL:
         self.select_sim()
         
         fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
-        fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
+        # fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
 
         # Plotting
         colormap = 'cividis'
@@ -375,16 +379,15 @@ class VISUAL:
             fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
             fil_phases = util.box(fil_phases, 2*np.pi)
 
-            fil_angles_str = fil_angles_f.readline()
-            fil_angles = np.array(fil_angles_str.split()[1:], dtype=float)
+            # fil_angles_str = fil_angles_f.readline()
+            # fil_angles = np.array(fil_angles_str.split()[1:], dtype=float)
 
             for i in range(self.nfil):
                 fil_references_sphpolar[i] = util.cartesian_to_spherical(self.fil_references[3*i: 3*i+3])
 
-            if self.angle:
-                variables = fil_angles
-            else:
-                variables = fil_phases
+            variables = fil_phases
+            # if self.angle:
+            #     variables = fil_angles
 
             # Interpolation
             if (self.interpolate):
@@ -421,7 +424,7 @@ class VISUAL:
                     animation_func(i)
                 else:
                     fil_phases_str = fil_phases_f.readline()
-                    fil_angles_str = fil_angles_f.readline()
+                    # fil_angles_str = fil_angles_f.readline()
                 
 
             
@@ -901,13 +904,15 @@ class VISUAL:
         body_vels_f = open(self.simName + '_body_vels.dat', "r")
 
         # Plotting
-        fig = plt.figure()
-        ax = fig.add_subplot(1,1,1)
+        fig1 = plt.figure()
+        ax1 = fig1.add_subplot(1,1,1)
+        fig2 = plt.figure()
+        ax2 = fig2.add_subplot(1,1,1)
 
-        time_array = np.arange(self.plot_start_frame, self.plot_end_frame )
+        time_array = np.arange(self.plot_start_frame, self.plot_end_frame )/self.period
         
-        body_pos_array = np.zeros((len(time_array), 3))
-        # body_vel_array = np.zeros((len(time_array), 6))
+        # body_pos_array = np.zeros((len(time_array), 3))
+        body_vel_array = np.zeros((len(time_array), 6))
         body_speed_array = np.zeros(len(time_array))
 
         # pos = np.zeros(3)
@@ -922,8 +927,8 @@ class VISUAL:
                 body_states = np.array(body_states_str.split()[1:], dtype=float)
                 body_vels = np.array(body_vels_str.split(), dtype=float)
 
-                body_pos_array[i-self.plot_start_frame] = body_states[0:3]
-                # body_vel_array[i-self.plot_start_frame] = body_vels
+                # body_pos_array[i-self.plot_start_frame] = body_states[0:3]
+                body_vel_array[i-self.plot_start_frame] = body_vels
                 body_speed_array[i-self.plot_start_frame] = np.sqrt(np.sum(body_vels[0:3]*body_vels[0:3], 0))
 
             # pos += body_vels[0:3]
@@ -931,7 +936,8 @@ class VISUAL:
 
         # for i in range(len(body_vel_array[0])):
         #     # ax.plot(time_array, body_pos_array[:,i])
-        #     ax.plot(time_array, body_vel_array[:,i])
+
+        
 
         def find_period(signal):
             min_diff = 1e10
@@ -946,10 +952,17 @@ class VISUAL:
         avg_speed = np.mean(body_speed_array)/self.fillength
         print(f'index={self.index} avg speed={avg_speed}')
         
-        ax.set_title(f'index={self.index} avg speed={avg_speed}')
-        ax.set_xlim(time_array[0], time_array[-1])
-        ax.plot(time_array, body_speed_array/self.fillength)
-        plt.savefig(f'fig/ciliate_speed_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+        ax1.set_title(f'index={self.index} avg speed={avg_speed}')
+        ax1.set_xlim(time_array[0], time_array[-1])
+        ax1.plot(time_array, body_speed_array/self.fillength)
+        ax1.set_ylabel(r"$|V|T/L$")
+        ax1.set_xlabel(r"$t/T$")
+        ax2.set_xlim(time_array[0], time_array[-1])
+        ax2.plot(time_array, body_vel_array[:,2]/self.fillength)
+        ax2.set_ylabel(r"$V_zT/L$")
+        ax2.set_xlabel(r"$t/T$")
+        fig1.savefig(f'fig/ciliate_speed_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
+        
         plt.show()
 
     def ciliate_forcing(self):
@@ -2895,6 +2908,11 @@ class VISUAL:
                 "k0.0N636/",
                 "k0.0N2520/"]
         
+        top_dir = "data/expr_sims/20231212_ishikawa/"
+        N_dirs = ["N160_hres/",
+                  "N640_hres/",
+                  "N2560_hres/",]
+        
         ls = ['solid', 'dashed', 'dotted']
         markers = ["^", "s", "d"]
         labels = [r"$k=0$",r"$k=0.5$",r"$k=1$",r"$k=1.5$",r"$k=2$",]
@@ -2928,7 +2946,7 @@ class VISUAL:
                 print(f'dt={self.dt}')
                 print(f'L={L}')
                 start_time = 0
-                end_time = min(32, sum(1 for line in open(self.simName + '_body_states.dat')))
+                end_time = min(301, sum(1 for line in open(self.simName + '_body_states.dat')))
 
                 body_states_f = open(self.simName + '_body_states.dat', "r")
                 body_vels_f = open(self.simName + '_body_vels.dat', "r")

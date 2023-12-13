@@ -1082,9 +1082,10 @@
 
   };
 
-  void hexagonal_seeding(Real *const pos_ref, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs, const int N, shape_fourier_description& shape, Real step_x, Real dim_x){
+  void hexagonal_seeding(Real *const pos_ref, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs, const int N, shape_fourier_description& shape,
+                         Real step_x, int dim_x, int hex_num, float rev_ratio){
     
-    /*Implement the mismatched algorithm here.*/
+    /*Implement the hexagonal seeding algorithm here.*/
     Real *X = (Real*) malloc(3*N*sizeof(Real));
     Real blob_step = step_x;
     int blob_grid_dim_x = dim_x;
@@ -1100,7 +1101,7 @@
 
         if (blob_id < N){
 
-          X[3*blob_id + 0] = i*blob_grid_step_x + 0.5*(1+(j%2))*blob_grid_step_x;
+          X[3*blob_id + 0] = i*blob_grid_step_x + 0.5*(1+(j%hex_num))*blob_grid_step_x;
           X[3*blob_id + 1] = j*blob_grid_step_y + 0.5*blob_grid_step_y;
           X[3*blob_id + 2] = 0.0;
         }
@@ -1113,9 +1114,12 @@
       pos_ref[3*n] = X[3*n];
       pos_ref[3*n + 1] = X[3*n + 1];
       pos_ref[3*n + 2] = X[3*n + 2];
-
-      const Real theta = std::atan2(std::sqrt(X[3*n]*X[3*n] + X[3*n + 1]*X[3*n + 1]), X[3*n + 2]);
-      const Real phi = std::atan2(X[3*n + 1], X[3*n]);
+      
+      const Real theta = 0.001;
+      Real phi = 0.5*PI;
+      if(pos_ref[3*n + 1] >= rev_ratio*blob_grid_step_y*blob_grid_dim_y){
+        phi +=  PI;
+      }
 
       matrix frame = shape.full_frame(theta, phi);
 
@@ -1259,11 +1263,9 @@
     }
   }
 
-  void icosa_seeding(Real *const pos_ref, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs, const int N, shape_fourier_description& shape){
+  void icosa_seeding(Real *const pos_ref, Real *const polar_dir_refs, Real *const azi_dir_refs, Real *const normal_refs, const int N, shape_fourier_description& shape, const std::string ico_file){
     
     Real *X = (Real*) malloc(3*N*sizeof(Real));
-
-    const std::string ico_file = "data/icosahedron/icosa_d6_N40962.dat";
 
     std::ifstream inputFile(ico_file); 
     std::cout << std::endl << std::endl << "Using icosahedroal grid as seeding function..." << std::endl;
@@ -1322,7 +1324,8 @@
     
     #if ICOSA_SEEDING
       std::cout << "Seeking an icosahedral distribution for the blobs..." << std::endl;
-      icosa_seeding(blob_references, polar_dir_refs, azi_dir_refs, normal_refs, NBLOB, shape);
+      const std::string ico_file = "data/icosahedron/icosa_d4_N2562.dat";
+      icosa_seeding(blob_references, polar_dir_refs, azi_dir_refs, normal_refs, NBLOB, shape, ico_file);
     #elif ROD
       std::cout << "Seeking an rod placement for the blobs..." << std::endl;
       rod_seeding(blob_references, polar_dir_refs, azi_dir_refs, normal_refs, NBLOB, shape);
@@ -1332,12 +1335,18 @@
         std::cout << "Seeking an hexagonal placement for the blobs..." << std::endl;
         Real blob_step_x;
         int blob_grid_dim_x;
+        int hex_num;
+        Real rev_ratio;
         std::ifstream in("separation.dat"); // input
         in >> blob_step_x;
         in >> blob_step_x;
         in >> blob_grid_dim_x;
         in >> blob_grid_dim_x;
-        hexagonal_seeding(blob_references, polar_dir_refs, azi_dir_refs, normal_refs, NBLOB, shape, blob_step_x, blob_grid_dim_x);
+        in >> hex_num;
+        in >> hex_num;
+        in >> hex_num;
+        in >> rev_ratio;
+        hexagonal_seeding(blob_references, polar_dir_refs, azi_dir_refs, normal_refs, NBLOB, shape, blob_step_x, blob_grid_dim_x, hex_num, rev_ratio);
       #elif CENTRIC_WALL_SEEDING
         Real disc_radius;
         std::ifstream in("separation.dat"); // using the 6th number as input
@@ -1466,13 +1475,22 @@
       Real fil_grid_step_x;
       Real blob_step;
       int fil_grid_dim_x;
+      Real disc_radius;
+      int hex_num;
+      Real rev_ratio;
 
       std::ifstream in("separation.dat"); // input
       in >> fil_grid_step_x;
       in >> blob_step;
       in >> fil_grid_dim_x;
+      in >> blob_step;
+      in >> disc_radius;
+      in >> disc_radius;
+      in >> hex_num;
+      in >> rev_ratio;
 
-      hexagonal_seeding(filament_references, polar_dir_refs, azi_dir_refs, normal_refs, NFIL, shape, fil_grid_step_x, fil_grid_dim_x);
+      hexagonal_seeding(filament_references, polar_dir_refs, azi_dir_refs, normal_refs, NFIL, shape, 
+                        fil_grid_step_x, fil_grid_dim_x, hex_num, rev_ratio);
       
       for (int fil_id=0; fil_id < NFIL; fil_id++){
         filament_references[3*fil_id + 2] = 2.1*BASE_HEIGHT_ABOVE_SURFACE;
@@ -1495,8 +1513,8 @@
     #elif ICOSA_SEEDING
 
       std::cout << "Seeking a icosahedron distribution for the filaments..." << std::endl;
-
-      icosa_seeding(filament_references, polar_dir_refs, azi_dir_refs, normal_refs, NFIL, shape);
+      const std::string ico_file = "data/icosahedron/icosa_d2_N160.dat";
+      icosa_seeding(filament_references, polar_dir_refs, azi_dir_refs, normal_refs, NFIL, shape, ico_file);
     
     
     #elif MISMATCH_SEEDING

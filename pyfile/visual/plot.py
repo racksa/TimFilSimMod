@@ -17,7 +17,7 @@ list_of_multi_options = ['multi_phase', 'multi_ciliate', 'multi_ciliate_traj',
                          'multi_kymograph']
 list_of_summary_options = ['summary_ciliate_speed', 'summary_timing',
                            'summary_ciliate_dissipation', 'summary_check_overlap',
-                           'summary_ciliate_density']
+                           'summary_ciliate_density', 'summary_ciliate_k']
 
 list_of_special_options = ['ishikawa']
 list_of_all_options = list_of_single_options\

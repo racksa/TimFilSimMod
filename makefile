@@ -115,4 +115,4 @@ LINK=-lcublas -lcufft -llapacke -lcblas -lcurand -lcuda -lineinfo -lopenblas
 # 	nvcc $^ -DUSE_DOUBLE_PRECISION $(CFLAGS) $(NVCC_FLAGS) $(NVIDIA4_OPTS) $(LINK) $(GEN_FLAGS) -o bin/cilia
 
 cilia_nvidia4_CUFCM: $(CILIA_CPP) $(CILIA_CUDA)
-	nvcc $^ $(CFLAGS) $(NVCC_FLAGS) $(NVIDIA4_OPTS) $(LINK) $(GEN_FLAGS) -o bin/cilia_hex
+	nvcc $^ $(CFLAGS) $(NVCC_FLAGS) $(NVIDIA4_OPTS) $(LINK) $(GEN_FLAGS) -o bin/cilia_hold

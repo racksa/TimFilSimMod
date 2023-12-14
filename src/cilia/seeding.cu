@@ -1324,7 +1324,7 @@
     
     #if ICOSA_SEEDING
       std::cout << "Seeking an icosahedral distribution for the blobs..." << std::endl;
-      const std::string ico_file = "data/icosahedron/icosa_d4_N2562.dat";
+      const std::string ico_file = "data/icosahedron/icosa_d8_N655362.dat";
       icosa_seeding(blob_references, polar_dir_refs, azi_dir_refs, normal_refs, NBLOB, shape, ico_file);
     #elif ROD
       std::cout << "Seeking an rod placement for the blobs..." << std::endl;

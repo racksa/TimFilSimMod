@@ -7,8 +7,8 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.exe_name = 'cilia_hex'
-        self.date = '20231212_1d'
+        self.exe_name = 'cilia_hold'
+        self.date = '20231209_ico_hold_diagonal'
         self.afix = ''
         self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         # self.dir = f"data/expr_sims/{self.date}{self.afix}/"
@@ -64,23 +64,23 @@ class DRIVER:
                         # nblob = int(ar**2*blob_density)
                         # spring_factor = round(0.5+ 0.25*i, 2)
 
-                        # planar hexagonal
-                        nfil = int(128)
-                        nblob = int(12800)
-                        ar = round(12.65 + 0.01*i, 2)
-                        spring_factor = round(0.005 + 0.00*i, 3)
+                        # # planar hexagonal
+                        # nfil = int(128)
+                        # nblob = int(12800)
+                        # ar = round(12.65 + 0.01*i, 2)
+                        # spring_factor = round(0.005 + 0.00*i, 3)
 
                         # # k-means
                         # nfil = int(480 + 0*i)
                         # nblob = int(12001 + 0*i)
                         # ar = round(12.65, 2)
-                        # spring_factor = round(0.005 + 0.001*i, 3)
+                        # spring_factor = round(0.005 + 0.008*i*(i//4+1), 3)
 
                         # # icosahedral
-                        # nfil = int(640)
-                        # nblob = int(40962)
-                        # ar = round(15.0, 2)
-                        # spring_factor = round(0.005 + 0.008*i*(i//4+1), 3)
+                        nfil = int(640)
+                        nblob = int(40962)
+                        ar = round(15.0, 2)
+                        spring_factor = round(0.005 + 0.008*i*(i//4+1), 3)
 
                         # # centric
                         # nfil = int(768)
@@ -88,11 +88,11 @@ class DRIVER:
                         # ar = round(12.65, 2)
                         # spring_factor = round(0.005 + 0.008*i*(i//4+1), 3)
 
-                        # # ishikawa
-                        # nfil = int(160)
-                        # nblob = int(10242)
-                        # ar = round(20.0, 2)
-                        # spring_factor = round(0.005 + 0.008*i*(i//4+1), 3)
+                        # # # ishikawa
+                        # nfil = int(480)
+                        # nblob = int(10*4**(0.5*i)+2)
+                        # ar = round(12.65, 2)
+                        # spring_factor = round(0.005 + 0.00*i*(i//4+1), 3)
 
                         nseg = 20
                         force_mag = 1

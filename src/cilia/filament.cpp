@@ -291,19 +291,11 @@ void filament::initial_setup(const Real *const base_pos,
           // printf("fil %d (%.4f %.4f %.4f) theta=%.4f phase=%.4f\n",
           // fil_id, base_pos[0], base_pos[1], base_pos[2], theta, phase);
             
+        #elif (CILIA_IC_TYPE==4)
+          
+
         #endif
 
-        #if (CILIA_IC_TYPE==4)
-
-            // WARNING this is only correct if a spherical body is initialised at the origin!!
-            const Real phi = atan2(base_pos[1], base_pos[0]);
-            const Real theta = acos(base_pos[2]/(sqrt(base_pos[0]*base_pos[0]+
-                                                      base_pos[1]*base_pos[1]+
-                                                      base_pos[2]*base_pos[2])));
-            phase = phi;
-            // printf("fil %d (%.4f %.4f %.4f) theta=%.4f phase=%.4f\n",
-            // fil_id, base_pos[0], base_pos[1], base_pos[2], theta, phase);
-          #endif
 
         #if SURFACE_OF_REVOLUTION_BODIES
 

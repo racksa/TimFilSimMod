@@ -23,8 +23,11 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.date = '20231209_ico_hold_diagonal'
-        # self.date = '20231214_hold_diagonal'
+        self.date = '20231215_ico_resolution'
+        # self.date = '20231214_free_diagonal'
+        # self.date = '20231130_4by4_smallk'
+        self.date = '20231206_free_inphase'
+
         self.dir = f"data/expr_sims/{self.date}/"
         # self.dir = f"/home/clustor/ma/h/hs2216/{self.date}/"
         self.pars_list = {
@@ -41,7 +44,7 @@ class VISUAL:
         self.output_to_fcm = False
         self.output_to_superpunto = True
         self.periodic = False
-        self.big_sphere = False
+        self.big_sphere = True
         self.show_poles = True
 
         self.ignore_blob = True
@@ -56,8 +59,8 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 12000
-        self.frames_setting = 9000
+        self.plot_end_frame_setting = 9000
+        self.frames_setting = 240
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -237,7 +240,7 @@ class VISUAL:
                             rgb_hex = mcolors.rgb2hex(rgb_color)[1:]  # Convert RGB to BGR hexadecimal format
                             bgr_hex = rgb_hex[4:]+rgb_hex[2:4]+rgb_hex[:2]
                             fil_color = int(bgr_hex, base=16)
-                            fil_color = color=0*65536+0*256+255
+                            # fil_color = color=0*65536+0*256+255
                             # print("\n", bgr_hex, fil_color, "\t")
                         if(self.check_overlap):
                             segs_list[fil*self.nseg] = old_seg_pos
@@ -1731,6 +1734,8 @@ class VISUAL:
         fig3 = plt.figure()
         ax3 = fig3.add_subplot(1,1,1)
 
+        max_speed = np.zeros(self.num_sim)
+        some_speed = np.zeros(self.num_sim)
         max_dissipation = np.zeros(self.num_sim)
         some_dissipation = np.zeros(self.num_sim)
 
@@ -1783,11 +1788,15 @@ class VISUAL:
                 ax2.plot(time_array, dissipation_array/self.fillength**3, label=f"index={self.index}")
                 ax3.plot(time_array, efficiency_array, label=f"index={self.index}")
                 
+                max_speed[ind] = np.max(body_speed_array)
+                some_speed[ind] = body_speed_array[0]
                 max_dissipation[ind] = np.max(dissipation_array)
                 some_dissipation[ind] = dissipation_array[0]
             except:
                 print("WARNING: " + self.simName + " not found.")
         
+        print(", ".join((max_speed/self.fillength).astype(str)))
+        print(", ".join((some_speed/self.fillength).astype(str)))
         print(", ".join((max_dissipation/self.fillength**3).astype(str)))
         print(", ".join((some_dissipation/self.fillength**3).astype(str)))
 
@@ -2432,7 +2441,7 @@ class VISUAL:
                         X[:,i-self.plot_start_frame] = fil_phases_sorted[:self.nfil]
                         X_angle[:,i-self.plot_start_frame] = fil_angles_sorted[:self.nfil]
                 
-                fname = 'phase_data_20231213_ico_hold'
+                fname = 'phase_data_20231215_hold_diagonal'
                 np.savetxt(f'{fname}/X_phase_index{self.index}.txt', X, delimiter=', ')
                 # np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/X_rotation_angle_index{self.index}.txt', X_angle, delimiter=', ')
                 np.savetxt(f'{fname}/azim_pos_index{self.index}.txt', azim_array_sorted, delimiter=', ')
@@ -2924,7 +2933,7 @@ class VISUAL:
         dissipation_list = np.zeros(self.num_sim)
         efficiency_list = np.zeros(self.num_sim)
 
-        for ind in range(self.num_sim):
+        for ind in range(self.num_sim-8):
             try:
                 self.index = ind
                 self.select_sim()

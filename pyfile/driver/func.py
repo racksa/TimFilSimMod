@@ -7,8 +7,8 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.exe_name = 'cilia_hold'
-        self.date = '20231209_ico_hold_diagonal'
+        self.exe_name = 'cilia_ico_res'
+        self.date = '20231215_ico_resolution'
         self.afix = ''
         self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         # self.dir = f"data/expr_sims/{self.date}{self.afix}/"
@@ -23,7 +23,7 @@ class DRIVER:
 
         # self.sweep_shape = (3, 8, 6, 1)
         self.sweep_shape = (1, 12, 4, 1)
-        self.sweep_shape = (12, 1, 1, 1)
+        self.sweep_shape = (16, 1, 1, 1)
 
         self.num_sim = 0
 
@@ -77,10 +77,10 @@ class DRIVER:
                         # spring_factor = round(0.005 + 0.008*i*(i//4+1), 3)
 
                         # # icosahedral
-                        nfil = int(640)
-                        nblob = int(40962)
-                        ar = round(15.0, 2)
-                        spring_factor = round(0.005 + 0.008*i*(i//4+1), 3)
+                        # nfil = int(640)
+                        # nblob = int(40962)
+                        # ar = round(15.0, 2)
+                        # spring_factor = round(0.005 + 0.008*i*(i//4+1), 3)
 
                         # # centric
                         # nfil = int(768)
@@ -89,12 +89,12 @@ class DRIVER:
                         # spring_factor = round(0.005 + 0.008*i*(i//4+1), 3)
 
                         # # # ishikawa
-                        # nfil = int(480)
-                        # nblob = int(10*4**(0.5*i)+2)
-                        # ar = round(12.65, 2)
-                        # spring_factor = round(0.005 + 0.00*i*(i//4+1), 3)
+                        nfil = int(640)
+                        nblob = int(10*4**(0.5*i)+2)
+                        ar = round(20.00, 2)
+                        spring_factor = round(0.005 + 0.00*i*(i//4+1), 3)
 
-                        nseg = 20
+                        nseg = 40
                         force_mag = 1
 
                         self.pars_list["nswim"].append(1)

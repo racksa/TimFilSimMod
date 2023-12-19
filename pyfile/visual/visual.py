@@ -26,7 +26,7 @@ class VISUAL:
         self.date = '20231215_ico_resolution'
         # self.date = '20231214_free_diagonal'
         # self.date = '20231130_4by4_smallk'
-        self.date = '20231206_free_inphase'
+        self.date = '20231219_free_flip'
 
         self.dir = f"data/expr_sims/{self.date}/"
         # self.dir = f"/home/clustor/ma/h/hs2216/{self.date}/"
@@ -37,7 +37,8 @@ class VISUAL:
                      "nblob": [],
                      "ar": [],
                      "spring_factor": [],
-                     "force_mag": []}
+                     "force_mag": [],
+                     "seg_sep": []}
         self.video = False
         self.interpolate = False
         self.angle = False
@@ -59,8 +60,8 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 9000
-        self.frames_setting = 240
+        self.plot_end_frame_setting = 12000
+        self.frames_setting = 360
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -3005,6 +3006,11 @@ class VISUAL:
             ax3.plot(k_list[i::ncol], efficiency_list[i::ncol], marker='+', linestyle=linestyle_list[i], c='black')
             ax4.plot(k_list[i::ncol], dissipation_list[i::ncol]/nfil_list[i::ncol]/fillen_list[i::ncol]**3, marker='+', linestyle=linestyle_list[i], c='black')
             
+            np.savetxt(f'dis_data/speed_{self.date}.txt', (speed_list[i::ncol]/fillen_list[i::ncol])[:24], delimiter=', ')
+            np.savetxt(f'dis_data/dissipation_{self.date}.txt', (dissipation_list[i::ncol]/fillen_list[i::ncol]**3)[:24], delimiter=', ')
+            np.savetxt(f'dis_data/efficiency_{self.date}.txt', (efficiency_list[i::ncol])[:24], delimiter=', ')
+            np.savetxt(f'dis_data/k_{self.date}.txt', (k_list[i::ncol])[:24], delimiter=', ')
+        
 
         # fig.legend()
         # fig2.legend()

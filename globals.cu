@@ -14,6 +14,8 @@ float TORSIONAL_SPRING_MAGNITUDE_FACTOR = 2.0;
 float GEN_FORCE_MAGNITUDE_FACTOR = 1.0;
 int NTOTAL = (NSWIM*(NFIL_d*NSEG + NBLOB_d));
 float END_FORCE_MAGNITUDE = (DIMENSIONLESS_FORCE*KB/(DL*DL*NSEG*NSEG));
+float SEG_SEP = 2.6;
+float DL = SEG_SEP*RSEG;
 std::string SIMULATION_DIR = "data/expr_sims/global/";
 std::string SIMULATION_FILE = "cilia";
 

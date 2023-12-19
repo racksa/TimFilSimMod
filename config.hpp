@@ -70,11 +70,11 @@ extern std::string SIMULATION_TETHERLAM_NAME;
 
   #endif
 
-  #define DYNAMIC_PHASE_EVOLUTION false
+  #define DYNAMIC_PHASE_EVOLUTION true
   // If true, cilia phase speeds are solved for as part of the dynamics. Note that this requires having run a reference simulation with WRITE_GENERALISED_FORCES=true previously.
   // If false, phase_dot = omega0 is constant for each cilium.
 
-  #define DYNAMIC_SHAPE_ROTATION false
+  #define DYNAMIC_SHAPE_ROTATION true
   // If true, the vertical in the cilia reference configuration can rotate with respect to the surface normal.
   // Essentially, the cilia can 'tip backwards or forwards' in their beat planes.
   // If false, no such rotation ever occurs.
@@ -203,12 +203,15 @@ extern float TORSIONAL_SPRING_MAGNITUDE_FACTOR; // Pre-multiplies the mean gener
 extern float GEN_FORCE_MAGNITUDE_FACTOR; 
 extern int NTOTAL;
 extern float END_FORCE_MAGNITUDE;
+extern float SEG_SEP;
+extern float DL;
 
 #define MU 1.0 // Fluid viscosity.
 
 #define RSEG 1.0 // Segment radius.
-#define DL (2.6*RSEG) // Inter-segment distance.
 #define RBLOB 1.0 // Surface blob radius.
+// #define DL (seg_sep*RSEG) // Inter-segment distance.
+
 
 #define KB 1800.0 // Bending modulus.
 #define KT 1800.0 // Twist modulus.

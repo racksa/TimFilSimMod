@@ -2,6 +2,7 @@
 
 #include <random>
 #include <cmath>
+#include <string>
 #include "filament.hpp"
 #include "../../config.hpp"
 
@@ -1973,7 +1974,7 @@ void filament::write_backup(std::ofstream& data_file) const {
 
     #if FULFORD_AND_BLAKE_BEAT
 
-      return std::string("fulford_and_blake_reference_") + std::string(file_type) + std::string(".dat");
+      return std::string("data/forcing/fulford_and_blake_reference_") + std::string(file_type) + "_NSEG=" + std::to_string(NSEG) + "_SEP=" + std::to_string(SEG_SEP) + std::string(".dat");
 
     #elif CORAL_LARVAE_BEAT
 

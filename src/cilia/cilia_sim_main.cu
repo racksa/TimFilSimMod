@@ -58,6 +58,7 @@ int main(int argc, char** argv){
   NFIL = std::stoi(data_from_ini("Parameters", "nfil"));
   NBLOB = std::stoi(data_from_ini("Parameters", "nblob"));
   AR = std::stof(data_from_ini("Parameters", "ar"));
+  SEG_SEP = std::stof(data_from_ini("Parameters", "seg_sep"));
   TORSIONAL_SPRING_MAGNITUDE_FACTOR = std::stof(data_from_ini("Parameters", "spring_factor"));
   GEN_FORCE_MAGNITUDE_FACTOR = std::stof(data_from_ini("Parameters", "force_mag"));
   SIMULATION_DIR = data_from_ini("Filenames", "simulation_dir");
@@ -78,6 +79,7 @@ int main(int argc, char** argv){
   NTOTAL = (NSWIM*(NFIL*NSEG + NBLOB));
   AXIS_DIR_BODY_LENGTH = AR*FIL_LENGTH;
   END_FORCE_MAGNITUDE = (DIMENSIONLESS_FORCE*KB/(DL*DL*NSEG*NSEG));
+  DL = SEG_SEP*RSEG;
 
   // Filenames 
   SIMULATION_NAME = SIMULATION_DIR+SIMULATION_FILE;
@@ -92,7 +94,7 @@ int main(int argc, char** argv){
   SIMULATION_TIME_NAME = SIMULATION_NAME + "_time.dat";
   SIMULATION_TETHERLAM_NAME = SIMULATION_NAME + "_tether_force.dat";
 
-  sync_var<<<1, 1>>>(NSWIM, NSEG, NFIL, NBLOB, END_FORCE_MAGNITUDE);
+  sync_var<<<1, 1>>>(NSWIM, NSEG, NFIL, NBLOB, END_FORCE_MAGNITUDE, SEG_SEP);
   cudaDeviceSynchronize();
 
   float time_start;
@@ -288,7 +290,7 @@ int main(int argc, char** argv){
 
         std::cout << std::endl;
         std::cout << std::endl;
-        std::cout << "Required reference file for s-values was not found." << std::endl;
+        std::cout << "Required reference file '" << reference_s_values_file_name() << "' for s-values was not found." << std::endl;
         std::cout << "Run an appropriate simulation with the WRITE_GENERALISED_FORCES option enabled." << std::endl;
         std::cout << std::endl;
         std::cout << std::endl;

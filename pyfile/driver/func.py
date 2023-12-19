@@ -7,8 +7,8 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.exe_name = 'cilia_ico_res'
-        self.date = '20231215_ico_resolution'
+        self.exe_name = 'cilia_free'
+        self.date = '20231219_free_flip'
         self.afix = ''
         self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         # self.dir = f"data/expr_sims/{self.date}{self.afix}/"
@@ -19,7 +19,8 @@ class DRIVER:
                      "nblob": [],
                      "ar": [],
                      "spring_factor": [],
-                     "force_mag": []}
+                     "force_mag": [],
+                     "seg_sep": []}
 
         # self.sweep_shape = (3, 8, 6, 1)
         self.sweep_shape = (1, 12, 4, 1)
@@ -70,11 +71,11 @@ class DRIVER:
                         # ar = round(12.65 + 0.01*i, 2)
                         # spring_factor = round(0.005 + 0.00*i, 3)
 
-                        # # k-means
-                        # nfil = int(480 + 0*i)
-                        # nblob = int(12001 + 0*i)
-                        # ar = round(12.65, 2)
-                        # spring_factor = round(0.005 + 0.008*i*(i//4+1), 3)
+                        # k-means
+                        nfil = int(639 + 0*i)
+                        nblob = int(40961 + 0*i)
+                        ar = round(15.00, 2)
+                        spring_factor = round(0.008 + 0.002*i*(i//4+1), 3)
 
                         # # icosahedral
                         # nfil = int(640)
@@ -89,12 +90,17 @@ class DRIVER:
                         # spring_factor = round(0.005 + 0.008*i*(i//4+1), 3)
 
                         # # # ishikawa
-                        nfil = int(640)
-                        nblob = int(10*4**(0.5*i)+2)
-                        ar = round(20.00, 2)
-                        spring_factor = round(0.005 + 0.00*i*(i//4+1), 3)
+                        # nfil = int(160*4**i)
+                        # nblob = int(81922)
+                        # ar = round(20.00, 2)
+                        # spring_factor = round(0.005 + 0.00*i*(i//4+1), 3)
 
-                        nseg = 40
+
+                        if(self.exe_name == 'cilia_ref'):
+                            nfil = 1
+                            nblob = 0
+                        seg_sep = 2.6
+                        nseg = 20
                         force_mag = 1
 
                         self.pars_list["nswim"].append(1)
@@ -104,6 +110,7 @@ class DRIVER:
                         self.pars_list["ar"].append(ar)
                         self.pars_list["spring_factor"].append(spring_factor)
                         self.pars_list["force_mag"].append(force_mag)
+                        self.pars_list["seg_sep"].append(seg_sep)
         # Write rules to sim list file
         self.write_rules()
 

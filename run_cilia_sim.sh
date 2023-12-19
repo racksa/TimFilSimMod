@@ -13,5 +13,5 @@
 # as I run through cygwin anyway.
 #
 export OPENBLAS_NUM_THREADS=1
-export CUDA_VISIBLE_DEVICES=0
-./bin/cilia2
+export CUDA_VISIBLE_DEVICES=7
+./bin/cilia

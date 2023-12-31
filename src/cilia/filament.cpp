@@ -289,11 +289,33 @@ void filament::initial_setup(const Real *const base_pos,
           in >> k;
           in >> v;
           phase = Real(2.0)*PI*( sin(k*theta/2.0) + sin(v*phi/4.0) );
-          // printf("fil %d (%.4f %.4f %.4f) theta=%.4f phase=%.4f\n",
-          // fil_id, base_pos[0], base_pos[1], base_pos[2], theta, phase);
-            
+
         #elif (CILIA_IC_TYPE==4)
+
+          const Real phi = atan2(base_pos[1], base_pos[0]);
+          const Real theta = acos(base_pos[2]/(sqrt(base_pos[0]*base_pos[0]+
+                                                    base_pos[1]*base_pos[1]+
+                                                    base_pos[2]*base_pos[2])));
+                                                    
+          Real k = 0.0;
+          Real v = 0.0;
+          std::ifstream in("ishikawa.dat"); // input
+          in >> k;
+          in >> v;
+          phase = Real(2.0)*PI*( sin(k*theta/2.0) + sin(v*phi/4.0) );
           
+          // Try to read from file
+          std::ifstream input_file(SIMULATION_READPHASE_NAME);
+          if (input_file.is_open()) {
+            if(fil_id == 0){
+              std::cout << "Reading phases from file" << SIMULATION_READPHASE_NAME << std::endl;
+            }
+            input_file >> phase;
+            for (int fpos = 0; fpos < fil_id+1; fpos++){
+              input_file >> phase;
+            }
+            input_file.close();
+          }
 
         #endif
 

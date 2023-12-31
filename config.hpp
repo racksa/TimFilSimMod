@@ -28,6 +28,8 @@ extern std::string SIMULATION_SEG_FORCES_NAME;
 extern std::string SIMULATION_TIME_NAME;
 extern std::string SIMULATION_TETHERLAM_NAME;
 
+extern std::string SIMULATION_READPHASE_NAME;
+
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Simulation type
@@ -84,14 +86,14 @@ extern std::string SIMULATION_TETHERLAM_NAME;
   // It will also generate reference s-values for shape sequences which don't result in inextensible filaments.
   // NOTE: This will overwrite any existing reference files unless their names have been changed.
 
-  #define CILIA_IC_TYPE 3
+  #define CILIA_IC_TYPE 4
   // Valid options:
   // if using 3, we should be able to derive all other cases.
   // 0 = All cilia start in-phase with phase 0.
   // 1 = Cilia start with a (uniformly) random initial phase.
   // 2 = A metachronal wave (MCW). Its wavelength and direction are defined below.
   // 3 = Ishikawa MCW
-  // 4 = Read from file based on a phase plot
+  // 4 = Read from a file
 
   #if CILIA_IC_TYPE==2
 

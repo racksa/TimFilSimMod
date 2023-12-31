@@ -7,8 +7,8 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.exe_name = 'cilia_free'
-        self.date = '20231219_free_flip'
+        self.exe_name = 'cilia_readphase'
+        self.date = '20231231_readphase'
         self.afix = ''
         self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         # self.dir = f"data/expr_sims/{self.date}{self.afix}/"
@@ -159,14 +159,15 @@ class DRIVER:
         for i in range(sim_index_start, sim_index_end):
             for key, value in self.pars_list.items():
                 self.write_ini("Parameters", key, float(self.pars_list[key][i]))
-            self.write_ini("Filenames", "simulation_file", f"ciliate_{self.pars_list['nfil'][i]:.0f}fil_{self.pars_list['nblob'][i]:.0f}blob_{self.pars_list['ar'][i]:.2f}R_{self.pars_list['spring_factor'][i]:.3f}torsion")
+            self.simName = f"ciliate_{self.pars_list['nfil'][i]:.0f}fil_{self.pars_list['nblob'][i]:.0f}blob_{self.pars_list['ar'][i]:.2f}R_{self.pars_list['spring_factor'][i]:.3f}torsion"
+            self.write_ini("Filenames", "simulation_file", self.simName)
             self.write_ini("Filenames", "simulation_dir", self.dir)
+            self.write_ini("Filenames", "simulation_readphase_name", f"phases{int(i-1)}.dat")
 
             command = f"export OPENBLAS_NUM_THREADS=1; \
                         export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
                         ./bin/{self.exe_name} > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][i]:.0f}fil_{i}.out"
 
-            # command = f"export OPENBLAS_NUM_THREADS=1; \
-            #             export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
-            #             ./bin/cilia"
             os.system(command)
+            util.copy_last_line(self.dir + self.simName + '_filament_phases.dat', self.dir + f"phases{int(i)}.dat")
+            

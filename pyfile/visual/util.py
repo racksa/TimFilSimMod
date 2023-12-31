@@ -50,7 +50,6 @@ def find_t(quaternion):
     qsq = q**2
     return np.array([1-2*(qsq[2]+qsq[3]), 2*(q[1]*q[2]+q[3]*q[0]), 2*(q[1]*q[3]-q[2]*q[0])])
 
-
 def blob_point_from_data(body_states, blob_references):
     blob_pos = np.matmul(rot_mat(body_states[3:7]), blob_references)
     # print('blobref, blobpos', blob_references, blob_pos)

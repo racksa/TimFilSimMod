@@ -23,10 +23,8 @@ class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.date = '20231215_ico_resolution'
-        # self.date = '20231214_free_diagonal'
-        # self.date = '20231130_4by4_smallk'
-        self.date = '20231219_free_flip'
+        self.date = '20231219_hold_flip'
+        self.date = '20231231_readphase'
 
         self.dir = f"data/expr_sims/{self.date}/"
         # self.dir = f"/home/clustor/ma/h/hs2216/{self.date}/"

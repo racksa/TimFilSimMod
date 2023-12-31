@@ -33,3 +33,5 @@ std::string SIMULATION_BLOB_FORCES_NAME = SIMULATION_NAME + "_blob_forces.dat"; 
 std::string SIMULATION_SEG_FORCES_NAME = SIMULATION_NAME + "_seg_forces.dat";
 std::string SIMULATION_TIME_NAME = SIMULATION_NAME + "_time.dat";
 std::string SIMULATION_TETHERLAM_NAME = SIMULATION_NAME + "_tether_force.dat";
+
+std::string SIMULATION_READPHASE_NAME = "phases.dat";

@@ -64,6 +64,8 @@ int main(int argc, char** argv){
   SIMULATION_DIR = data_from_ini("Filenames", "simulation_dir");
   SIMULATION_FILE = data_from_ini("Filenames", "simulation_file");
 
+  SIMULATION_READPHASE_NAME = SIMULATION_DIR + data_from_ini("Filenames", "simulation_readphase_name");
+
   #if INFINITE_PLANE_WALL
     NSWIM = 1;
     NBLOB = 0;
@@ -82,7 +84,7 @@ int main(int argc, char** argv){
   DL = SEG_SEP*RSEG;
 
   // Filenames 
-  SIMULATION_NAME = SIMULATION_DIR+SIMULATION_FILE;
+  SIMULATION_NAME = SIMULATION_DIR + SIMULATION_FILE;
   SIMULATION_CONFIG_NAME = SIMULATION_NAME + ".par";
   SIMULATION_BACKUP_NAME = SIMULATION_NAME + ".backup";
   SIMULATION_BODY_STATE_NAME = SIMULATION_NAME + "_body_states.dat"; // Blob states are recoverable from body states.
@@ -93,6 +95,8 @@ int main(int argc, char** argv){
   SIMULATION_SEG_FORCES_NAME = SIMULATION_NAME + "_seg_forces.dat";
   SIMULATION_TIME_NAME = SIMULATION_NAME + "_time.dat";
   SIMULATION_TETHERLAM_NAME = SIMULATION_NAME + "_tether_force.dat";
+
+  
 
   sync_var<<<1, 1>>>(NSWIM, NSEG, NFIL, NBLOB, END_FORCE_MAGNITUDE, SEG_SEP);
   cudaDeviceSynchronize();

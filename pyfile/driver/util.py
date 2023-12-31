@@ -45,7 +45,30 @@ def view_files_in_directory(directory_path):
 
     except Exception as e:
         print(f"Error occurred while viewing files: {e}")
-        
+
+def copy_last_line(input_filename, output_filename):
+    try:
+        # Open the input file in read mode
+        with open(input_filename, 'r') as input_file:
+            # Read all lines from the file
+            lines = input_file.readlines()
+
+            # Check if the file is not empty
+            if lines:
+                # Extract the last line
+                last_line = lines[-1]
+
+                # Open the output file in write mode
+                with open(output_filename, 'w') as output_file:
+                    # Write the last line to the output file
+                    output_file.write(last_line)
+
+                print(f"Last line copied from '{input_filename}' to '{output_filename}'.")
+            else:
+                print(f"The file '{input_filename}' is empty.")
+    except FileNotFoundError:
+        print(f"Error: The file '{input_filename}' does not exist.")
+
 
 def even_list_index(n, m):
     sublist_length = n // m  # Floor division to get the length of each sublist

@@ -7,8 +7,9 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.exe_name = 'cilia_readphase'
+        self.exe_name = 'cilia_readphase_s'
         self.date = '20231231_readphase'
+        self.date = '20231231_readphase_s'
         self.afix = ''
         self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         # self.dir = f"data/expr_sims/{self.date}{self.afix}/"
@@ -24,7 +25,7 @@ class DRIVER:
 
         # self.sweep_shape = (3, 8, 6, 1)
         self.sweep_shape = (1, 12, 4, 1)
-        self.sweep_shape = (16, 1, 1, 1)
+        self.sweep_shape = (24, 1, 1, 1)
 
         self.num_sim = 0
 
@@ -75,7 +76,7 @@ class DRIVER:
                         nfil = int(639 + 0*i)
                         nblob = int(40961 + 0*i)
                         ar = round(15.00, 2)
-                        spring_factor = round(0.008 + 0.002*i*(i//4+1), 3)
+                        spring_factor = round(0.008 + 0.002*i*(i//6+1), 3)
 
                         # # icosahedral
                         # nfil = int(640)
@@ -169,5 +170,7 @@ class DRIVER:
                         ./bin/{self.exe_name} > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][i]:.0f}fil_{i}.out"
 
             os.system(command)
-            util.copy_last_line(self.dir + self.simName + '_filament_phases.dat', self.dir + f"phases{int(i)}.dat")
-            
+            try:
+                util.copy_last_line(self.dir + self.simName + '_filament_phases.dat', self.dir + f"phases{int(i)}.dat")
+            except:
+                print('**********phase file non-exist*********')

@@ -203,8 +203,6 @@ int main(int argc, char** argv){
 
   config_file.close();
 
-  printf("initialise\n");
-
   // Initialise the simulation
   chosen_mobility_solver mobility;
   mobility.initialise();
@@ -216,8 +214,6 @@ int main(int argc, char** argv){
   #endif
 
   std::vector<swimmer> swimmers(NSWIM);
-
-  printf("initial setup\n");
 
   for (int n = 0; n < NSWIM; n++){
     swimmers[n].initial_setup(n, &data_from_file[n*data_per_swimmer],
@@ -231,8 +227,6 @@ int main(int argc, char** argv){
     delete[] data_from_file;
 
   #endif
-
-  printf("write ref\n");
 
   // Swimmers are all identical
   swimmers[0].write_reference_positions();

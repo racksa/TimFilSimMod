@@ -25,6 +25,7 @@ class VISUAL:
         self.globals_name = 'globals.ini'
         self.date = '20231219_hold_flip'
         self.date = '20231231_readphase'
+        self.date = '20231231_readphase_s'
 
         self.dir = f"data/expr_sims/{self.date}/"
         # self.dir = f"/home/clustor/ma/h/hs2216/{self.date}/"
@@ -59,7 +60,7 @@ class VISUAL:
         self.check_overlap = False
 
         self.plot_end_frame_setting = 12000
-        self.frames_setting = 360
+        self.frames_setting = 36000
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting

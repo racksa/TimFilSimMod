@@ -35,3 +35,4 @@ std::string SIMULATION_TIME_NAME = SIMULATION_NAME + "_time.dat";
 std::string SIMULATION_TETHERLAM_NAME = SIMULATION_NAME + "_tether_force.dat";
 
 std::string SIMULATION_READPHASE_NAME = "phases.dat";
+std::string SIMULATION_READANGLE_NAME = "angles.dat";

@@ -8,13 +8,13 @@ visualiser = visual.VISUAL()
 # lists of available options
 list_of_single_options = ['plot', 'plot_fil', 'phase', 'order_parameter', 'eckert', 'ciliate', 'ciliate_speed', 'ciliate_traj', 
                    'timing', 'ciliate_forcing', 'ciliate_dissipation',
-                   'ciliate_svd', 'ciliate_dmd', 'kymograph']
+                   'ciliate_svd', 'ciliate_dmd', 'kymograph', 'copy_lastline_phases']
 list_of_multi_options = ['multi_phase', 'multi_ciliate', 'multi_ciliate_traj',
                          'multi_ciliate_speed', 'multi_timing', 'multi_ciliate_svd',
                          'multi_check_overlap', 'multi_ciliate_dissipation',
                          'multi_order_parameter', 'multi_ciliate_dissipation_generate',
                          'multi_ciliate_dissipation_plots', 'multi_output_phase',
-                         'multi_kymograph']
+                         'multi_kymograph', 'multi_copy_lastline_phases']
 list_of_summary_options = ['summary_ciliate_speed', 'summary_timing',
                            'summary_ciliate_dissipation', 'summary_check_overlap',
                            'summary_ciliate_density', 'summary_ciliate_k']

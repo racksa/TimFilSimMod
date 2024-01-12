@@ -65,6 +65,7 @@ int main(int argc, char** argv){
   SIMULATION_FILE = data_from_ini("Filenames", "simulation_file");
 
   SIMULATION_READPHASE_NAME = SIMULATION_DIR + data_from_ini("Filenames", "simulation_readphase_name");
+  SIMULATION_READANGLE_NAME = SIMULATION_DIR + data_from_ini("Filenames", "simulation_readangle_name");
 
   #if INFINITE_PLANE_WALL
     NSWIM = 1;

@@ -7,9 +7,9 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.exe_name = 'cilia_readphase_s'
-        self.date = '20231231_readphase'
-        self.date = '20231231_readphase_s'
+        self.exe_name = 'cilia_readphase'
+        self.date = '20240104_readphase_hold'
+        self.date = '20240112_readphase_free'
         self.afix = ''
         self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         # self.dir = f"data/expr_sims/{self.date}{self.afix}/"
@@ -59,6 +59,10 @@ class DRIVER:
                 for k in range(self.sweep_shape[2]):
                     for l in range(self.sweep_shape[3]):
 
+                        seg_sep = 2.6
+                        nseg = 20
+                        force_mag = 1
+
                         # fil_density = 3.0 - 0.6*k
                         # blob_density = 75
                         # nfil = int( 192 + 96*j )
@@ -91,19 +95,17 @@ class DRIVER:
                         # spring_factor = round(0.005 + 0.008*i*(i//4+1), 3)
 
                         # # # ishikawa
-                        # nfil = int(160*4**i)
-                        # nblob = int(81922)
-                        # ar = round(20.00, 2)
+                        # nfil = int(160)
+                        # nblob = int(10242)
+                        # ar = round(6.00, 2)
                         # spring_factor = round(0.005 + 0.00*i*(i//4+1), 3)
+                        # nseg = 40
 
 
                         if(self.exe_name == 'cilia_ref'):
                             nfil = 1
                             nblob = 0
-                        seg_sep = 2.6
-                        nseg = 20
-                        force_mag = 1
-
+                        
                         self.pars_list["nswim"].append(1)
                         self.pars_list["nseg"].append(nseg)
                         self.pars_list["nfil"].append(nfil)
@@ -163,7 +165,9 @@ class DRIVER:
             self.simName = f"ciliate_{self.pars_list['nfil'][i]:.0f}fil_{self.pars_list['nblob'][i]:.0f}blob_{self.pars_list['ar'][i]:.2f}R_{self.pars_list['spring_factor'][i]:.3f}torsion"
             self.write_ini("Filenames", "simulation_file", self.simName)
             self.write_ini("Filenames", "simulation_dir", self.dir)
-            self.write_ini("Filenames", "simulation_readphase_name", f"phases{int(i-1)}.dat")
+            self.write_ini("Filenames", "simulation_readphase_name", f"phases{int(i)}.dat")
+            self.write_ini("Filenames", "simulation_readangle_name", f"angles{int(i)}.dat")
+
 
             command = f"export OPENBLAS_NUM_THREADS=1; \
                         export CUDA_VISIBLE_DEVICES={self.cuda_device}; \

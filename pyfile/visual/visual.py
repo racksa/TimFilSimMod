@@ -18,14 +18,21 @@ mpl.rcParams['mathtext.rm'] = 'Bitstream Vera Sans'
 mpl.rcParams['mathtext.it'] = 'Bitstream Vera Sans:italic'
 mpl.rcParams['mathtext.bf'] = 'Bitstream Vera Sans:bold'
 
+# plt.rcParams.update({'font.size': 16})
+
 
 class VISUAL:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.date = '20231219_hold_flip'
-        self.date = '20231231_readphase'
-        self.date = '20231231_readphase_s'
+        self.date = '20240104_readphase_hold'
+        # self.date = '20231231_readphase'
+        self.date = '20240112_readphase_free'
+
+        # self.date = '20231219_free_flip'
+
+        # self.date = '20231209_ico_hold_diagonal'  # 6, 7
+        # self.date = '20231214_hold_diagonal'  # 3
 
         self.dir = f"data/expr_sims/{self.date}/"
         # self.dir = f"/home/clustor/ma/h/hs2216/{self.date}/"
@@ -59,8 +66,8 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 12000
-        self.frames_setting = 36000
+        self.plot_end_frame_setting = 6200
+        self.frames_setting = 300
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -393,9 +400,18 @@ class VISUAL:
             # if self.angle:
             #     variables = fil_angles
 
+            ax.set_ylabel(r"$\theta$")
+            ax.set_xlabel(r"$\phi$")
+            ax.set_xlim(-np.pi, np.pi)
+            ax.set_ylim(0, np.pi)
+            ax.set_xticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0', 'π/2', 'π'])
+            ax.set_yticks(np.linspace(0, np.pi, 5), ['0', 'π/4', 'π/2', '3π/4', 'π'])
+            ax.invert_yaxis()
+            fig.tight_layout()
+
             # Interpolation
             if (self.interpolate):
-                n1, n2 = 50, 50
+                n1, n2 = 100, 100
                 azim_grid = np.linspace(-np.pi, np.pi, n1)
                 polar_grid = np.linspace(0, np.pi, n2)
                 xx, yy = np.meshgrid(azim_grid, polar_grid)
@@ -405,7 +421,6 @@ class VISUAL:
             # Individual filaments
                 ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=variables, cmap=colormap, vmin=0, vmax=2*np.pi)
                 
-
             frame += 1
 
         if(self.video):
@@ -415,9 +430,10 @@ class VISUAL:
                     frame = i
                     plt.rcParams['animation.ffmpeg_path'] = '/usr/bin/ffmpeg'
                     ani = animation.FuncAnimation(fig, animation_func, frames=self.frames, interval=1, repeat=False)
-                    plt.show()
-                    # FFwriter = animation.FFMpegWriter(fps=10)
-                    # ani.save(f'fig/fil_phase_{self.nfil}fil_anim.mp4', writer=FFwriter)
+                    plt.show()    
+                    # FFwriter = animation.FFMpegWriter(fps=16)
+                    # ani.save(f'fig/fil_phase_index{self.index}_{self.date}_anim.mp4', writer=FFwriter)
+                    ## when save, need to comment out plt.show() and be patient!
                     break
                 else:
                     fil_phases_str = fil_phases_f.readline()
@@ -430,15 +446,6 @@ class VISUAL:
                     fil_phases_str = fil_phases_f.readline()
                     # fil_angles_str = fil_angles_f.readline()
                 
-
-            
-            ax.set_ylabel(r"$\theta$")
-            ax.set_xlabel(r"$\phi$")
-            ax.set_xlim(-np.pi, np.pi)
-            ax.set_ylim(0, np.pi)
-            ax.set_xticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0', 'π/2', 'π'])
-            ax.set_yticks(np.linspace(0, np.pi, 5), ['0', 'π/4', 'π/2', '3π/4', 'π'])
-            ax.invert_yaxis()
             plt.savefig(f'fig/fil_phase_index{self.index}_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
             plt.show()
 
@@ -628,6 +635,7 @@ class VISUAL:
 
     def kymograph(self):
         self.select_sim()
+
         
         fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
         fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
@@ -649,7 +657,7 @@ class VISUAL:
         phi_kymo = np.zeros((n1, self.frames))
         theta_kymo = np.zeros((n2, self.frames))
 
-        time_array = np.arange(self.frames)/self.period
+        time_array = (np.arange(self.frames) + self.plot_start_frame)/self.period
         
         phi_kymo_xx, phi_kymo_yy = np.meshgrid(time_array, azim_array,)
         theta_kymo_xx, theta_kymo_yy = np.meshgrid(time_array, polar_array, )
@@ -1028,7 +1036,7 @@ class VISUAL:
         blob_references = np.reshape(blob_references, (int(self.pars['NBLOB']), 3))
 
         for i in range(self.plot_end_frame):
-            # print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
+            print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
             seg_forces_str = seg_forces_f.readline()
             seg_vels_str = seg_vels_f.readline()
             blob_forces_str = blob_forces_f.readline()
@@ -1391,6 +1399,31 @@ class VISUAL:
         plt.savefig(f'fig/timings_{self.nfil}fil_{self.ar}ar.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
+    def copy_lastline_phases(self):
+        self.select_sim()
+        input_filename = self.simName + '_filament_phases.dat'
+        output_filename = self.dir + f"phases{int(self.index)}.dat"
+        try:
+            # Open the input file in read mode
+            with open(input_filename, 'r') as input_file:
+                # Read all lines from the file
+                lines = input_file.readlines()
+
+                # Check if the file is not empty
+                if lines:
+                    # Extract the last line
+                    last_line = lines[-1]
+
+                    # Open the output file in write mode
+                    with open(output_filename, 'w') as output_file:
+                        # Write the last line to the output file
+                        output_file.write(last_line)
+
+                    print(f"Success: last line copied from '{input_filename}' to '{output_filename}'.")
+                else:
+                    print(f"The file '{input_filename}' is empty.")
+        except FileNotFoundError:
+            print(f"Error: The file '{input_filename}' does not exist.")
 
 # Multi sims
     def multi_phase(self):
@@ -2441,12 +2474,44 @@ class VISUAL:
                         X[:,i-self.plot_start_frame] = fil_phases_sorted[:self.nfil]
                         X_angle[:,i-self.plot_start_frame] = fil_angles_sorted[:self.nfil]
                 
-                fname = 'phase_data_20231215_hold_diagonal'
+                fname = 'phase_data_20230104_held_fixed'
+                fname = 'phase_data_20231231_free'
                 np.savetxt(f'{fname}/X_phase_index{self.index}.txt', X, delimiter=', ')
                 # np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/X_rotation_angle_index{self.index}.txt', X_angle, delimiter=', ')
                 np.savetxt(f'{fname}/azim_pos_index{self.index}.txt', azim_array_sorted, delimiter=', ')
                 np.savetxt(f'{fname}/polar_pos_index{self.index}.txt', polar_array_sorted, delimiter=', ')
 
+            except:
+                print("WARNING: " + self.simName + " not found.")
+                
+    def multi_copy_lastline_phases(self):
+        for ind in range(self.num_sim):
+            self.index = ind
+            try:
+                self.select_sim()
+                input_filename = self.simName + '_filament_phases.dat'
+                output_filename = self.dir + f"phases{int(ind)}.dat"
+                try:
+                    # Open the input file in read mode
+                    with open(input_filename, 'r') as input_file:
+                        # Read all lines from the file
+                        lines = input_file.readlines()
+
+                        # Check if the file is not empty
+                        if lines:
+                            # Extract the last line
+                            last_line = lines[-1]
+
+                            # Open the output file in write mode
+                            with open(output_filename, 'w') as output_file:
+                                # Write the last line to the output file
+                                output_file.write(last_line)
+
+                            print(f"Success: last line copied from '{input_filename}' to '{output_filename}'.")
+                        else:
+                            print(f"The file '{input_filename}' is empty.")
+                except FileNotFoundError:
+                    print(f"Error: The file '{input_filename}' does not exist.")
             except:
                 print("WARNING: " + self.simName + " not found.")
 
@@ -2933,7 +2998,7 @@ class VISUAL:
         dissipation_list = np.zeros(self.num_sim)
         efficiency_list = np.zeros(self.num_sim)
 
-        for ind in range(self.num_sim-8):
+        for ind in range(self.num_sim):
             try:
                 self.index = ind
                 self.select_sim()
@@ -3190,8 +3255,8 @@ class VISUAL:
 
 
         # Make legends
-        legend_label = r'$Ito\ etc.\ (2019)$'
-        legend_label = r'$Omori\ etc.\ (2020)$'
+        legend_label = r'$Ito\ et al.\ (2019)$'
+        legend_label = r'$Omori\ et al.\ (2020)$'
         legend1 = ax.legend()
         line1a, = ax.plot([-1, -1.1], [-1, -1.1], ls='-', c='black', label=r'$data$' )
         line1b, = ax.plot([-1, -1.1], [-1, -1.1], ls='dotted', c='black', label=legend_label)

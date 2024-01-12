@@ -29,6 +29,7 @@ extern std::string SIMULATION_TIME_NAME;
 extern std::string SIMULATION_TETHERLAM_NAME;
 
 extern std::string SIMULATION_READPHASE_NAME;
+extern std::string SIMULATION_READANGLE_NAME;
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

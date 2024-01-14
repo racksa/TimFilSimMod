@@ -7,7 +7,7 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.exe_name = 'cilia_readphase'
+        self.exe_name = 'cilia_readphase_free'
         self.date = '20240104_readphase_hold'
         self.date = '20240112_readphase_free'
         self.afix = ''

@@ -26,7 +26,7 @@ class VISUAL:
     def __init__(self):
         self.globals_name = 'globals.ini'
         self.date = '20240104_readphase_hold'
-        # self.date = '20231231_readphase'
+        self.date = '20231231_readphase'
         self.date = '20240112_readphase_free'
 
         # self.date = '20231219_free_flip'
@@ -66,8 +66,8 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 6200
-        self.frames_setting = 300
+        self.plot_end_frame_setting = 1200000
+        self.frames_setting = 1000
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -1399,31 +1399,37 @@ class VISUAL:
         plt.savefig(f'fig/timings_{self.nfil}fil_{self.ar}ar.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
-    def copy_lastline_phases(self):
+    def copy_phases(self):
         self.select_sim()
-        input_filename = self.simName + '_filament_phases.dat'
-        output_filename = self.dir + f"phases{int(self.index)}.dat"
-        try:
-            # Open the input file in read mode
-            with open(input_filename, 'r') as input_file:
-                # Read all lines from the file
-                lines = input_file.readlines()
+        input_filenames = [self.simName + '_filament_phases.dat',
+                           self.simName + '_filament_shape_rotation_angles.dat']
+        output_filenames = [self.dir + f"phases{int(self.index)}.dat",
+                            self.dir + f"angles{int(self.index)}.dat"]
 
-                # Check if the file is not empty
-                if lines:
-                    # Extract the last line
-                    last_line = lines[-1]
+        for i, name in enumerate(input_filenames):
+            input_filename = name
+            output_filename = output_filenames[i]
+            try:
+                # Open the input file in read mode
+                with open(input_filename, 'r') as input_file:
+                    # Read all lines from the file
+                    lines = input_file.readlines()
 
-                    # Open the output file in write mode
-                    with open(output_filename, 'w') as output_file:
-                        # Write the last line to the output file
-                        output_file.write(last_line)
+                    # Check if the file is not empty
+                    if lines:
+                        # Extract the last line
+                        last_line = lines[-1]
 
-                    print(f"Success: last line copied from '{input_filename}' to '{output_filename}'.")
-                else:
-                    print(f"The file '{input_filename}' is empty.")
-        except FileNotFoundError:
-            print(f"Error: The file '{input_filename}' does not exist.")
+                        # Open the output file in write mode
+                        with open(output_filename, 'w') as output_file:
+                            # Write the last line to the output file
+                            output_file.write(last_line)
+
+                        print(f"[SUCCESS]: last line copied from '{input_filename}' to '{output_filename}'.")
+                    else:
+                        print(f"The file '{input_filename}' is empty.")
+            except FileNotFoundError:
+                print(f"Error: The file '{input_filename}' does not exist.")
 
 # Multi sims
     def multi_phase(self):

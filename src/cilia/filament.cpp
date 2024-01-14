@@ -309,8 +309,6 @@ void filament::initial_setup(const Real *const base_pos,
           if (input_file.is_open()) {
             if(fil_id == 0){
               std::cout << "Reading phases from file: " << SIMULATION_READPHASE_NAME << std::endl;
-              std::cout << "Reading angles from file: " << SIMULATION_READANGLE_NAME << std::endl;
-            
             }
             input_file >> phase;
             for (int fpos = 0; fpos < fil_id+1; fpos++){
@@ -319,6 +317,20 @@ void filament::initial_setup(const Real *const base_pos,
             input_file.close();
           }else{
             std::cout << "No phase input file found: " << SIMULATION_READPHASE_NAME << std::endl;
+          }
+
+          std::ifstream input_file_angle(SIMULATION_READANGLE_NAME);
+          if (input_file_angle.is_open()) {
+            if(fil_id == 0){
+              std::cout << "Reading angles from file: " << SIMULATION_READANGLE_NAME << std::endl;
+            }
+            input_file_angle >> shape_rotation_angle;
+            for (int fpos = 0; fpos < fil_id+1; fpos++){
+              input_file_angle >> shape_rotation_angle;
+            }
+            input_file_angle.close();
+          }else{
+            std::cout << "No angle input file found: " << SIMULATION_READANGLE_NAME << std::endl;
           }
 
         #endif

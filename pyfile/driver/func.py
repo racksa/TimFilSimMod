@@ -8,8 +8,11 @@ class DRIVER:
     def __init__(self):
         self.globals_name = 'globals.ini'
         self.exe_name = 'cilia_readphase_free'
-        self.date = '20240104_readphase_hold'
-        self.date = '20240112_readphase_free'
+        # self.exe_name = 'cilia_resolution'
+        # self.date = '20240104_readphase_hold'
+        # self.date = '20240112_readphase_free'
+        self.date = '20240114_readphase_free_hemisphere'
+        # self.date = '20240115_resolution'
         self.afix = ''
         self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         # self.dir = f"data/expr_sims/{self.date}{self.afix}/"
@@ -23,8 +26,7 @@ class DRIVER:
                      "force_mag": [],
                      "seg_sep": []}
 
-        # self.sweep_shape = (3, 8, 6, 1)
-        self.sweep_shape = (1, 12, 4, 1)
+        # self.sweep_shape = (1, 12, 4, 1)
         self.sweep_shape = (24, 1, 1, 1)
 
         self.num_sim = 0
@@ -81,6 +83,19 @@ class DRIVER:
                         nblob = int(40961 + 0*i)
                         ar = round(15.00, 2)
                         spring_factor = round(0.008 + 0.002*i*(i//6+1), 3)
+
+                        # find branches wider range
+                        nfil = int(639 + 0*i)
+                        nblob = int(40961 + 0*i)
+                        ar = round(15.00, 2)
+                        spring_factor = round(0.02 + 0.002*i, 3)
+
+                        # # resolution study
+                        # nfil = int(159)
+                        # nblob = int(60*1.7**i)
+                        # ar = round(6.00, 2)
+                        # spring_factor = round(0.001, 3)
+
 
                         # # icosahedral
                         # nfil = int(640)
@@ -160,13 +175,15 @@ class DRIVER:
 
         # Iterate through the sim list and write to .ini file and execute
         for i in range(sim_index_start, sim_index_end):
+            readphase_index = int(i)
+            readphase_index = ''
             for key, value in self.pars_list.items():
                 self.write_ini("Parameters", key, float(self.pars_list[key][i]))
             self.simName = f"ciliate_{self.pars_list['nfil'][i]:.0f}fil_{self.pars_list['nblob'][i]:.0f}blob_{self.pars_list['ar'][i]:.2f}R_{self.pars_list['spring_factor'][i]:.3f}torsion"
             self.write_ini("Filenames", "simulation_file", self.simName)
             self.write_ini("Filenames", "simulation_dir", self.dir)
-            self.write_ini("Filenames", "simulation_readphase_name", f"phases{int(i)}.dat")
-            self.write_ini("Filenames", "simulation_readangle_name", f"angles{int(i)}.dat")
+            self.write_ini("Filenames", "simulation_readphase_name", f"phases{readphase_index}.dat")
+            self.write_ini("Filenames", "simulation_readangle_name", f"angles{readphase_index}.dat")
 
 
             command = f"export OPENBLAS_NUM_THREADS=1; \
@@ -174,7 +191,7 @@ class DRIVER:
                         ./bin/{self.exe_name} > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][i]:.0f}fil_{i}.out"
 
             os.system(command)
-            try:
-                util.copy_last_line(self.dir + self.simName + '_filament_phases.dat', self.dir + f"phases{int(i)}.dat")
-            except:
-                print('**********phase file non-exist*********')
+            # try:
+            #     util.copy_last_line(self.dir + self.simName + '_filament_phases.dat', self.dir + f"phases{int(i)}.dat")
+            # except:
+            #     print('**********phase file non-exist*********')

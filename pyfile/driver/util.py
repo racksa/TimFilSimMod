@@ -14,7 +14,7 @@ def delete_files_in_directory(directory_path):
         file_list = list_files_in_directory(directory_path)
 
         if not file_list:
-            print(f"No files found in '{directory_path}'. Nothing to delete.")
+            print(f"No file found in '{directory_path}'. Nothing to delete.")
             return
 
         print("Files to be deleted:")
@@ -27,7 +27,7 @@ def delete_files_in_directory(directory_path):
                 os.remove(file_path)
             print("All files have been deleted.")
         else:
-            print("Deletion canceled. No files were deleted.")
+            print("Deletion canceled. No file was deleted.")
     except Exception as e:
         print(f"Error occurred while deleting files: {e}")
 
@@ -36,7 +36,7 @@ def view_files_in_directory(directory_path):
         file_list = list_files_in_directory(directory_path)
 
         if not file_list:
-            print(f"No files found in '{directory_path}'.")
+            print(f"No file found in '{directory_path}'.")
             return
 
         print("Files here:")

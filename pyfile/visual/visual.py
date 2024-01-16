@@ -27,7 +27,10 @@ class VISUAL:
         self.globals_name = 'globals.ini'
         self.date = '20240104_readphase_hold'
         self.date = '20231231_readphase'
-        self.date = '20240112_readphase_free'
+        # self.date = '20240112_readphase_free'
+        self.date = '20240114_readphase_free_hemisphere'
+        # self.date = '20240114_readphase_free_random'
+        self.date = '20240115_resolution'
 
         # self.date = '20231219_free_flip'
 
@@ -51,7 +54,7 @@ class VISUAL:
         self.output_to_fcm = False
         self.output_to_superpunto = True
         self.periodic = False
-        self.big_sphere = True
+        self.big_sphere = False
         self.show_poles = True
 
         self.ignore_blob = True
@@ -67,7 +70,7 @@ class VISUAL:
         self.check_overlap = False
 
         self.plot_end_frame_setting = 1200000
-        self.frames_setting = 1000
+        self.frames_setting = 100000
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -2643,6 +2646,62 @@ class VISUAL:
         plt.savefig(f'fig/multi_timing_summary.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
+    def summary_check_overlap(self):
+        # Plotting
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+
+        for ind in range(self.num_sim):
+            # try:
+            self.index = ind
+            self.select_sim()
+
+            seg_states_f = open(self.simName + '_seg_states.dat', "r")
+            body_states_f = open(self.simName + '_body_states.dat', "r")
+
+            for i in range(self.plot_end_frame):
+                print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
+                segs_list = np.zeros((int(self.nfil*self.nseg), 3))
+                blobs_list = np.zeros((int(self.nblob), 3))
+
+                body_states_str = body_states_f.readline()
+                seg_states_str = seg_states_f.readline()
+                
+                if(i==self.plot_end_frame-1):
+                    body_states = np.array(body_states_str.split()[1:], dtype=float)
+                    seg_states = np.array(seg_states_str.split()[1:], dtype=float)
+
+                    for swim in range(int(self.pars['NSWIM'])):
+                        body_pos = body_states[7*swim : 7*swim+3]
+                        R = util.rot_mat(body_states[7*swim+3 : 7*swim+7])
+                        R = np.linalg.inv(R)
+                        R = np.eye(3)
+                        for blob in range(int(self.pars['NBLOB'])):
+                            blob_x, blob_y, blob_z = util.blob_point_from_data(body_states[7*swim : 7*swim+7], self.blob_references[3*blob:3*blob+3])
+                            blobs_list[blob] = blob_x, blob_y, blob_z
+                        for fil in range(int(self.pars['NFIL'])):
+                            fil_i = int(3*fil*self.pars['NSEG'])
+                            old_seg_pos = seg_states[fil_i : fil_i+3]
+                            segs_list[fil*self.nseg] = old_seg_pos
+                            for seg in range(1, int(self.pars['NSEG'])):
+                                seg_pos = seg_states[fil_i+3*(seg) : fil_i+3*(seg+1)]
+                                segs_list[fil*self.nseg + seg] = seg_pos
+                    threshold = 0.95
+                    colliding_indices, colliding_particles = util.label_colliding_particles_with_3d_cell_list(segs_list, 5, threshold*float(self.pars['RSEG']))
+                    if not colliding_indices:
+                        print(f'index={ind} - No overlapping at threshold {threshold}\n')
+                    else:
+                        print(f'index={ind} - Overlapping at threshold {threshold}\n')
+            # except:
+            #     print("WARNING: " + self.simName + " not found.")
+        
+        # ax.scatter(nfil_list, speed_list, label=f"nfil={self.nfil} AR={self.ar}")
+        # ax.set_ylabel("Velocity")
+        # ax.set_xlabel("Number of filaments")
+        # fig.tight_layout()
+        # fig.savefig(f'fig/multi_ciliate_speed_summary.pdf', bbox_inches = 'tight', format='pdf')
+        plt.show()
+
     def summary_ciliate_dissipation(self):
         # Plotting
         fig = plt.figure()
@@ -2808,13 +2867,6 @@ class VISUAL:
         ax3 = fig3.add_subplot(1,1,1)
         fig4 = plt.figure()
         ax4 = fig4.add_subplot(1,1,1)
-        # fig4 = plt.figure()
-        # ax4 = fig4.add_subplot(1,1,1)
-        # fig5 = plt.figure()
-        # ax5 = fig5.add_subplot(1,1,1)
-
-        # nrow = len(np.unique(self.pars_list['nfil']))
-        # ncol = nrow + (1 if nrow**2 < self.num_sim else 0)
         
         ncol = self.ncol
         nrow = self.num_sim//ncol
@@ -2915,67 +2967,11 @@ class VISUAL:
         ax4.set_xlabel(r'$N_{fil}$')
         ax4.set_ylabel(r'$<PT^2/\mu L^3 N_{fil}>$')
 
-        fig.savefig(f'fig/ciliate_speed_summary_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
-        fig2.savefig(f'fig/ciliate_dissipation_summary_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
-        fig3.savefig(f'fig/ciliate_efficiency_summary_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
-        fig4.savefig(f'fig/ciliate_dissipation_per_cilium_summary_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
+        # fig.savefig(f'fig/ciliate_speed_summary_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
+        # fig2.savefig(f'fig/ciliate_dissipation_summary_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
+        # fig3.savefig(f'fig/ciliate_efficiency_summary_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
+        # fig4.savefig(f'fig/ciliate_dissipation_per_cilium_summary_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
 
-        plt.show()
-
-    def summary_check_overlap(self):
-        # Plotting
-        fig = plt.figure()
-        ax = fig.add_subplot(1,1,1)
-
-        for ind in range(self.num_sim):
-            # try:
-            self.index = ind
-            self.select_sim()
-
-            seg_states_f = open(self.simName + '_seg_states.dat', "r")
-            body_states_f = open(self.simName + '_body_states.dat', "r")
-
-            for i in range(self.plot_end_frame):
-                print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
-                segs_list = np.zeros((int(self.nfil*self.nseg), 3))
-                blobs_list = np.zeros((int(self.nblob), 3))
-
-                body_states_str = body_states_f.readline()
-                seg_states_str = seg_states_f.readline()
-                
-                if(i==self.plot_end_frame-1):
-                    body_states = np.array(body_states_str.split()[1:], dtype=float)
-                    seg_states = np.array(seg_states_str.split()[1:], dtype=float)
-
-                    for swim in range(int(self.pars['NSWIM'])):
-                        body_pos = body_states[7*swim : 7*swim+3]
-                        R = util.rot_mat(body_states[7*swim+3 : 7*swim+7])
-                        R = np.linalg.inv(R)
-                        R = np.eye(3)
-                        for blob in range(int(self.pars['NBLOB'])):
-                            blob_x, blob_y, blob_z = util.blob_point_from_data(body_states[7*swim : 7*swim+7], self.blob_references[3*blob:3*blob+3])
-                            blobs_list[blob] = blob_x, blob_y, blob_z
-                        for fil in range(int(self.pars['NFIL'])):
-                            fil_i = int(3*fil*self.pars['NSEG'])
-                            old_seg_pos = seg_states[fil_i : fil_i+3]
-                            segs_list[fil*self.nseg] = old_seg_pos
-                            for seg in range(1, int(self.pars['NSEG'])):
-                                seg_pos = seg_states[fil_i+3*(seg) : fil_i+3*(seg+1)]
-                                segs_list[fil*self.nseg + seg] = seg_pos
-                    threshold = 0.95
-                    colliding_indices, colliding_particles = util.label_colliding_particles_with_3d_cell_list(segs_list, 5, threshold*float(self.pars['RSEG']))
-                    if not colliding_indices:
-                        print(f'index={ind} - No overlapping at threshold {threshold}\n')
-                    else:
-                        print(f'index={ind} - Overlapping at threshold {threshold}\n')
-            # except:
-            #     print("WARNING: " + self.simName + " not found.")
-        
-        # ax.scatter(nfil_list, speed_list, label=f"nfil={self.nfil} AR={self.ar}")
-        # ax.set_ylabel("Velocity")
-        # ax.set_xlabel("Number of filaments")
-        # fig.tight_layout()
-        # fig.savefig(f'fig/multi_ciliate_speed_summary.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
     def summary_ciliate_k(self):
@@ -3102,6 +3098,142 @@ class VISUAL:
 
         plt.show()
 
+    def summary_ciliate_resolution(self):
+        # Plotting
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+        fig2 = plt.figure()
+        ax2 = fig2.add_subplot(1,1,1)
+        fig3 = plt.figure()
+        ax3 = fig3.add_subplot(1,1,1)
+        fig4 = plt.figure()
+        ax4 = fig4.add_subplot(1,1,1)
+
+        ncol = 1
+        nrow = self.num_sim//ncol
+        print(f'nrow = {nrow} ncol = {ncol}')
+
+        k_list = np.array(self.pars_list['spring_factor'])
+        nfil_list = np.array(self.pars_list['nfil'])
+        nblob_list = np.array(self.pars_list['nblob'])
+        density_list = np.zeros(self.num_sim)
+        ar_list = np.zeros(self.num_sim)
+        fillen_list = np.zeros(self.num_sim)
+        sphere_r_list = np.zeros(self.num_sim)
+        speed_list = np.zeros(self.num_sim)
+        angular_speed_list = np.zeros(self.num_sim)
+        dissipation_list = np.zeros(self.num_sim)
+        efficiency_list = np.zeros(self.num_sim)
+        error_list = np.zeros(self.num_sim)
+
+        for ind in range(self.num_sim):
+            try:
+                self.index = ind
+                self.select_sim()
+
+                seg_forces_f = open(self.simName + '_seg_forces.dat', "r")
+                seg_vels_f = open(self.simName + '_seg_vels.dat', "r")
+                blob_forces_f = open(self.simName + '_blob_forces.dat', "r")
+                blob_references_f = open(self.simName + '_blob_references.dat', "r")
+                body_vels_f = open(self.simName + '_body_vels.dat', "r")
+
+            except:
+                print("WARNING: " + self.simName + " not found.")
+                continue
+                # raise FileExistsError("WARNING: " + self.simName + " not found.")
+                
+            body_speed_array = np.zeros(self.frames)
+            dissipation_array = np.zeros(self.frames)
+            efficiency_array = np.zeros(self.frames)
+
+            blob_references_str = blob_references_f.readline()
+            blob_references = np.array(blob_references_str.split(), dtype=float)
+            blob_references = np.reshape(blob_references, (int(self.pars['NBLOB']), 3))
+        
+            for i in range(self.plot_end_frame):
+                print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
+                seg_forces_str = seg_forces_f.readline()
+                seg_vels_str = seg_vels_f.readline()
+                blob_forces_str = blob_forces_f.readline()
+                body_vels_str = body_vels_f.readline()
+
+                if(i>=self.plot_start_frame):
+                    phases = 0
+                    seg_forces = np.array(seg_forces_str.split()[1:], dtype=float)
+                    seg_vels = np.array(seg_vels_str.split()[1:], dtype=float)
+                    blob_forces= np.array(blob_forces_str.split()[1:], dtype=float)
+                    body_vels= np.array(body_vels_str.split(), dtype=float)
+
+                    seg_forces = np.reshape(seg_forces, (int(self.pars['NSEG']*self.pars['NFIL']), 6))
+                    seg_vels = np.reshape(seg_vels, (int(self.pars['NSEG']*self.pars['NFIL']), 6))
+                    blob_forces = np.reshape(blob_forces, (int(self.pars['NBLOB']), 3))
+                    body_vels_tile = np.tile(body_vels, (int(self.pars['NBLOB']), 1))
+                    blob_vels = body_vels_tile[:, 0:3] + np.cross(body_vels_tile[:, 3:6], blob_references)
+
+                    body_speed_array[i-self.plot_start_frame] = np.sqrt(np.sum(body_vels[0:3]*body_vels[0:3], 0))
+                    dissipation_array[i-self.plot_start_frame] = np.sum(blob_forces * blob_vels) + np.sum(seg_forces * seg_vels)
+                    # efficiency_array[i-self.plot_start_frame] = 6*np.pi*self.radius*body_speed_array[i-self.plot_start_frame]**2/dissipation_array[i-self.plot_start_frame]
+
+            seg_forces_f.close()
+            seg_vels_f.close()
+            blob_forces_f.close()
+            blob_references_f.close()
+            body_vels_f.close()
+            
+            speed_list[ind] = np.mean(body_speed_array)
+            dissipation_list[ind] = np.mean(dissipation_array)
+            # efficiency_array[ind] = np.mean(efficiency_array)
+            sphere_r_list[ind] = self.radius
+            ar_list[ind] = self.ar
+            fillen_list[ind] = self.fillength
+            density_list[ind] = self.fildensity
+
+        efficiency_list = 6*np.pi*sphere_r_list*speed_list**2/dissipation_list
+
+        ref_error = dissipation_list[14]
+        error_list = np.abs(dissipation_list - ref_error)/ref_error
+        
+        linestyle_list = ['solid', 'dotted', 'dashed', 'dashdot', '' ]
+        
+        for i in range(ncol):
+            label = f'k='
+            ax.plot(nblob_list[i::ncol], speed_list[i::ncol]/fillen_list[i::ncol], marker='+', linestyle=linestyle_list[i], c='black')
+            ax2.plot(nblob_list[i::ncol], dissipation_list[i::ncol]/fillen_list[i::ncol]**3, marker='+', linestyle=linestyle_list[i], c='black')
+            ax3.plot(nblob_list[i::ncol], efficiency_list[i::ncol], marker='+', linestyle=linestyle_list[i], c='black')
+            
+            ax4.plot(nblob_list[i::ncol], error_list[i::ncol], marker='+', linestyle=linestyle_list[i], c='black')
+            
+            np.savetxt(f'dis_data/speed_{self.date}.txt', (speed_list[i::ncol]/fillen_list[i::ncol])[:24], delimiter=', ')
+            np.savetxt(f'dis_data/dissipation_{self.date}.txt', (dissipation_list[i::ncol]/fillen_list[i::ncol]**3)[:24], delimiter=', ')
+            np.savetxt(f'dis_data/efficiency_{self.date}.txt', (efficiency_list[i::ncol])[:24], delimiter=', ')
+            np.savetxt(f'dis_data/k_{self.date}.txt', (k_list[i::ncol])[:24], delimiter=', ')
+        
+
+        # fig.legend()
+        # fig2.legend()
+        # fig3.legend()
+        # fig4.legend()
+        ax.set_xscale("log")
+        ax2.set_xscale("log")
+        ax3.set_xscale("log")
+        ax4.set_xscale("log")
+        ax4.set_yscale("log")
+            
+        ax.set_xlabel(r'$N_{blob}$')
+        ax.set_ylabel(r'$<VT/L>$')
+        ax2.set_xlabel(r'$N_{blob}$')
+        ax2.set_ylabel(r'$<PT^2/\mu L^3>$')
+        ax3.set_xlabel(r'$N_{blob}$')
+        ax3.set_ylabel(r'$<Efficiency>$')
+        ax4.set_xlabel(r'$N_{blob}$')
+        ax4.set_ylabel(r'$\% error in dissipation$')
+
+        fig.savefig(f'fig/ciliate_speed_summary_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
+        fig2.savefig(f'fig/ciliate_dissipation_summary_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
+        fig3.savefig(f'fig/ciliate_efficiency_summary_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
+        fig4.savefig(f'fig/ciliate_dissipation_per_cilium_summary_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
+
+        plt.show()
 
 # 
 # density for different elsticity

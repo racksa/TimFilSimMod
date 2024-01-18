@@ -29,8 +29,9 @@ class VISUAL:
         self.date = '20231231_readphase'
         # self.date = '20240112_readphase_free'
         self.date = '20240114_readphase_free_hemisphere'
+        self.date = '20240114_readphase_free_diaplectic'
         # self.date = '20240114_readphase_free_random'
-        self.date = '20240115_resolution'
+        # self.date = '20240115_resolution'
 
         # self.date = '20231219_free_flip'
 
@@ -54,7 +55,7 @@ class VISUAL:
         self.output_to_fcm = False
         self.output_to_superpunto = True
         self.periodic = False
-        self.big_sphere = False
+        self.big_sphere = True
         self.show_poles = True
 
         self.ignore_blob = True
@@ -69,7 +70,7 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 1200000
+        self.plot_end_frame_setting = 4000
         self.frames_setting = 100000
 
         self.plot_end_frame = self.plot_end_frame_setting
@@ -363,7 +364,7 @@ class VISUAL:
         self.select_sim()
         
         fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
-        # fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
+        fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
 
         # Plotting
         colormap = 'cividis'
@@ -375,11 +376,16 @@ class VISUAL:
 
         from matplotlib.colors import Normalize
         from matplotlib.cm import ScalarMappable
-        norm = Normalize(vmin=0, vmax=2*np.pi)
+        vmin = 0
+        vmax = 2*np.pi
+        if(self.angle):
+            vmin = -.2*np.pi
+            vmax = .2*np.pi
+        norm = Normalize(vmin=vmin, vmax=vmax)
         sm = ScalarMappable(cmap=colormap, norm=norm)
         sm.set_array([])
         cbar = plt.colorbar(sm)
-        cbar.ax.set_yticks(np.linspace(0, 2*np.pi, 7), ['0', 'π/3', '2π/3', 'π', '4π/3', '5π/3', '2π'])
+        cbar.ax.set_yticks(np.linspace(vmin, vmax, 7), ['0', 'π/3', '2π/3', 'π', '4π/3', '5π/3', '2π'])
         cbar.set_label(r"phase")    
 
         global frame
@@ -393,15 +399,16 @@ class VISUAL:
             fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
             fil_phases = util.box(fil_phases, 2*np.pi)
 
-            # fil_angles_str = fil_angles_f.readline()
-            # fil_angles = np.array(fil_angles_str.split()[1:], dtype=float)
+            if(self.angle):
+                fil_angles_str = fil_angles_f.readline()
+                fil_angles = np.array(fil_angles_str.split()[1:], dtype=float)
 
             for i in range(self.nfil):
                 fil_references_sphpolar[i] = util.cartesian_to_spherical(self.fil_references[3*i: 3*i+3])
 
             variables = fil_phases
-            # if self.angle:
-            #     variables = fil_angles
+            if self.angle:
+                variables = fil_angles
 
             ax.set_ylabel(r"$\theta$")
             ax.set_xlabel(r"$\phi$")
@@ -419,10 +426,10 @@ class VISUAL:
                 polar_grid = np.linspace(0, np.pi, n2)
                 xx, yy = np.meshgrid(azim_grid, polar_grid)
                 zz = scipy.interpolate.griddata((fil_references_sphpolar[:,1],fil_references_sphpolar[:,2]), variables, (xx, yy), method='nearest')
-                ax.scatter(xx, yy, c=zz, cmap=colormap, vmin=0, vmax=2*np.pi)
+                ax.scatter(xx, yy, c=zz, cmap=colormap, vmin=vmin, vmax=vmax)
             else:
             # Individual filaments
-                ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=variables, cmap=colormap, vmin=0, vmax=2*np.pi)
+                ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=variables, cmap=colormap, vmin=vmin, vmax=vmax)
                 
             frame += 1
 
@@ -1408,6 +1415,7 @@ class VISUAL:
                            self.simName + '_filament_shape_rotation_angles.dat']
         output_filenames = [self.dir + f"phases{int(self.index)}.dat",
                             self.dir + f"angles{int(self.index)}.dat"]
+        combine_text = list()
 
         for i, name in enumerate(input_filenames):
             input_filename = name
@@ -1422,6 +1430,7 @@ class VISUAL:
                     if lines:
                         # Extract the last line
                         last_line = lines[-1]
+                        combine_text.append(last_line)
 
                         # Open the output file in write mode
                         with open(output_filename, 'w') as output_file:
@@ -1433,6 +1442,10 @@ class VISUAL:
                         print(f"The file '{input_filename}' is empty.")
             except FileNotFoundError:
                 print(f"Error: The file '{input_filename}' does not exist.")
+
+        combined_filename = self.dir + f"psi{int(self.index)}.dat"
+        with open(combined_filename, 'w') as output_file:
+            output_file.writelines(combine_text)
 
 # Multi sims
     def multi_phase(self):

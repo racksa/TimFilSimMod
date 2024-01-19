@@ -14,5 +14,7 @@ __device__ int NTOTAL_d;
 __device__ int END_FORCE_MAGNITUDE_d;
 __device__ float SEG_SEP_d;
 __device__ float DL_d;
+__device__ float PERIOD_d;
+__device__ float DT_d;
 
 #endif // MY_GLOBALS_HEADER_INCLUDED

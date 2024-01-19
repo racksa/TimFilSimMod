@@ -27,6 +27,7 @@ extern std::string SIMULATION_BLOB_FORCES_NAME; // Body forces are recoverable f
 extern std::string SIMULATION_SEG_FORCES_NAME;
 extern std::string SIMULATION_TIME_NAME;
 extern std::string SIMULATION_TETHERLAM_NAME;
+extern std::string SIMULATION_TRUESTATE_NAME;
 
 extern std::string SIMULATION_READPHASE_NAME;
 extern std::string SIMULATION_READANGLE_NAME;
@@ -148,6 +149,7 @@ extern std::string SIMULATION_READANGLE_NAME;
   // 6 = Mismatched seeding
   // 7 = Filaments are evenly distributed over the surface but with potential at poles
   // 8 = Equal-area centric seeding (rigidbody plane)
+  // 9 = Read from files
 
   #if BODY_OR_SURFACE_TYPE==5
     #define FOURIER_DIR "data/rigidwall_seeding/"
@@ -208,6 +210,8 @@ extern int NTOTAL;
 extern float END_FORCE_MAGNITUDE;
 extern float SEG_SEP;
 extern float DL;
+extern float PERIOD;
+extern float DT;
 
 #define MU 1.0 // Fluid viscosity.
 
@@ -280,7 +284,7 @@ extern float DL;
 
 #endif
 
-#define TOTAL_TIME_STEPS (2*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
+#define TOTAL_TIME_STEPS (500*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
 #define NUM_EULER_STEPS 1 // Number of time-steps to use backwards-Euler before switching to BDF2.
 
 #if CILIA_TYPE==1
@@ -370,7 +374,7 @@ extern float DL;
 
 #elif PRESCRIBED_CILIA
 
-  #define DT (1.0/STEPS_PER_PERIOD) // Pick T = 1.
+  // #define DT (T/STEPS_PER_PERIOD) // Pick T = 1.
 
   #if USE_BROYDEN_FOR_EVERYTHING
 
@@ -440,6 +444,7 @@ extern float DL;
   #define MISMATCH_SEEDING (SEEDING_TYPE==6)
   #define UNIFORM_SEEDING_POLE (SEEDING_TYPE==7)
   #define CENTRIC_WALL_SEEDING (SEEDING_TYPE==8)
+  #define READ_PLACEMENT_FROM_FILE (SEEDING_TYPE==9)
 
 #endif
 

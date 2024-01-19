@@ -7,10 +7,9 @@ import time
 
 class NEWTON_SOLVER:
     
-    def __init__(self, new_x, epsJ, ndts, fixT, k, follower_force, NSEG, NFIL, y_spacing_const, x_spacing_const):
+    def __init__(self, new_x, epsJ, ndts, fixT, k, NSEG, NFIL, y_spacing_const, x_spacing_const):
         self.new_x = new_x
         self.ndts = ndts
-        self.follower_force = follower_force
         self.k = k
         self.NSEG = NSEG
         self.NFIL = NFIL
@@ -24,6 +23,9 @@ class NEWTON_SOLVER:
         self.new_nits = 0
         self.new_gits = 0
         self.dt = []
+        self.period = 1.0
+
+        self.d = driver.DRIVER()
 
 
     def dotprd(self, n_, a, b):
@@ -43,24 +45,24 @@ class NEWTON_SOLVER:
     
     def save_configuration_to_file(self,initial_condition):
          
-        simulation_dir = "../filament/" 
+        simulation_dir = "data/find_periodic/" 
         input_filename = simulation_dir + "input_liealgebra_configuration.dat"
 
         np.savetxt(input_filename, initial_condition, newline = " ")
 
         return
 
-    def change_variables(self,d,ndts):
+    def change_variables(self,ndts):
 
         # These are always changed at the beginning of each Arnoldi iteration 
-        d.change_variables(self.NSEG, self.NFIL, self.follower_force, self.k, self.y_spacing_const, self.x_spacing_const, ndts, self.dt)
-        simulation_file = d.update_globals_file()
+        self.d.change_variables(self.k, self.period)
+        simulation_file = self.d.update_globals_file()
 
         return simulation_file
     
     def read_data_from_file(self,sim_dir_and_name):
         
-        output_filename = sim_dir_and_name + "_liealgebra_configuration.dat"
+        output_filename = sim_dir_and_name + "_true_states.dat"
         return np.loadtxt(output_filename)
 
     def run_filament_code(self,a,ndts):
@@ -69,35 +71,39 @@ class NEWTON_SOLVER:
         self.save_configuration_to_file(a)
 
         # Debugging
-        print('here!!')
-        filename = "../stability/saving_intermidate_liealg"
-        with open(filename, "ab") as f:
-            np.savetxt(f, a, newline = " ")
-            f.write(b"\n")
+        # filename = "data/find_periodic/saving_intermidate_liealg"
+        # with open(filename, "ab") as f:
+        #     np.savetxt(f, a, newline = " ")
+        #     f.write(b"\n")
         
         # Change globals.ini file
-        d = driver.DRIVER()
-        sim_name = self.change_variables(d,ndts)
+        sim_name = self.change_variables(ndts)
 
         # Run code
-        os.chdir('../filament')
-        command = "./run_cilia_sim.sh"
+        # os.chdir('../filament')
+        # command = "./run_cilia_sim.sh"
 
-        subprocess.run(['sh', './run_cilia_sim.sh'])
+        # subprocess.run(['sh', './run_cilia_sim.sh'])
         #os.system(command)
 
+        self.d.run()
+
         # Return output
-        return self.read_data_from_file(d.dir + sim_name)
+        return self.read_data_from_file(self.d.dir + sim_name)
 
 
     def steporbit(self, ndts, x):
-
+        
         if ndts != 1:
             self.dt = x[0] / self.ndts
 
+        # x[1:] is the phases
         a = self.run_filament_code(x[1:],ndts)
+        
+        a = a[-1][2:]
 
         y = np.zeros_like(x)
+        
 
         y[1:] = a
         
@@ -107,9 +113,14 @@ class NEWTON_SOLVER:
     def getrhs(self, n_, x):
         # function to be minimised
         y_ = self.steporbit(self.ndts, x)
-        y = y_ - x  # Calculate the difference
+        y_[:639] = (y_[:639] - np.floor(y_[:639]/(2*np.pi))*(2*np.pi)) 
+        x[:639] = (x[:639] - np.floor(x[:639]/(2*np.pi))*(2*np.pi))
+
+        # print('y', y_)
+        # print('x', x)
+
+        y = y_ - x # Calculate the difference
         y[0] = 0.0  # Set the first element to 0 (constraints, rhs=0)
-        
         return y
 
     def saveorbit(self):
@@ -125,6 +136,8 @@ class NEWTON_SOLVER:
         print(f'norm x = {norm_x}, new tolerance = {self.new_tol}')
         print(f'relative error: {relative_err}')
 #        time.sleep(1)
+        
+        self.d.save_orbit()
 
         # SAVE current solution, new_x (You can add your saving logic here)
     
@@ -137,7 +150,7 @@ class NEWTON_SOLVER:
         # Use approximation    dF(x_n)/dx . dx = (F(x_n+eps.dx)-F(x_n))/eps
 
         # (F(x0+eps*x) - F(x0))/eps
-        eps = np.sqrt(self.dotprd(1,dx, dx))
+        eps = np.sqrt(self.dotprd(1, dx, dx))
         eps = self.epsJ * np.sqrt(self.dotprd(1,self.new_x, self.new_x)) / eps
         y = self.new_x + eps * dx
         s = self.getrhs(n_, y)
@@ -155,9 +168,7 @@ class NEWTON_SOLVER:
 
 
     def NewtonHook(self, m, n, gtol, tol, del_value, mndl, mxdl, nits, info):
-
         g = gmres.GMRES()
-
         self.new_fx = self.getrhs(n, self.new_x)
         self.new_tol= np.sqrt(self.dotprd(n, self.new_fx, self.new_fx))
         self.new_del = del_value

@@ -9,19 +9,18 @@ def main():
     #ndts = 200   # Number of timesteps taken in period T
     #fixT = 1   # Fix T for equilibrium, rather than PO solution
     #follower_force = 50      # Follower force (parameter of dynamical system)
-    k = 1000                 # Spring constant
     NSEG = 20      # Number of segments
     NFIL = 1       # Number of filaments
     y_spacing_const = 5
     x_spacing_const = y_spacing_const
-    #input_filename = "beating_f_150_liealgebra_configuration.dat"
-    output_filename = "psi15.dat"
+    output_filename = "psi.dat"
 
     # Number of time steps (ndts) and fixT
-    ndts = 200
+    ndts = 300
     fixT = 0
  
-    n = 3*(NSEG-1)*NFIL+1 #4#3 * (N - 1) * Nf + 1  # Dimension of system, including unknown params
+    # n = 3*(NSEG-1)*NFIL+1 #4#3 * (N - 1) * Nf + 1  # Dimension of system, including unknown params
+    n = 2*639+1
     mgmres = 5  # 10  # max GMRES iterations
     nits = 150  # max Newton iterations
     rel_err = 1e-6  # 1e-8 Relative error |F|/|x|
@@ -30,31 +29,26 @@ def main():
     mxdl = 1e20
     gtol = 1e-3  # 1e-4
 
-    #f_range = np.array([150,140,130,120,110,100])
-    f_range = np.array([90,80,70,60,55,50,45,40])
-    #f_range = np.array([150,160,170,180,190,200,210,220,230,240,250,260,270,280,290,300,310,320,330,340,350,360,370,380,400])
-    f_range = np.array([200])
-    for follower_force in f_range:
+    f_range = np.array([0.06])
+    for k in f_range:
 
-        print('Follower force = ' + str(follower_force))
+        print('-----------Spring constant = ' + str(k))
     
         new_x = find_new_x(fixT,NSEG,NFIL,output_filename)
-    #     newton = newton_solver.NEWTON_SOLVER(new_x,epsJ,ndts,fixT,k,follower_force,NSEG,NFIL, y_spacing_const, x_spacing_const)
+        newton = newton_solver.NEWTON_SOLVER(new_x,epsJ,ndts,fixT,k,NSEG,NFIL, y_spacing_const, x_spacing_const)
 
-    #    # Scale parameters by |x| then call black box
-    #     d = np.sqrt(np.sum(newton.new_x[1:] * newton.new_x[1:]))
-    #     # Do we want rel_err?
-    #     tol = rel_err * d
-    #     del_value = del_value * d
-    #     mndl = mndl * d
-    #     mxdl = mxdl * d
+       # Scale parameters by |x| then call black box
+        d = np.sqrt(np.sum(newton.new_x[1:] * newton.new_x[1:]))
+        # Do we want rel_err?
+        tol = rel_err * d
+        del_value = del_value * d
+        mndl = mndl * d
+        mxdl = mxdl * d
 
-    #     info = 1
+        info = 1
 
-    #     info = newton.NewtonHook(mgmres, n, gtol, tol, del_value, mndl, mxdl, nits, info)
-
-    #     print(newton.new_x)
-
+        info = newton.NewtonHook(mgmres, n, gtol, tol, del_value, mndl, mxdl, nits, info)
+        
     #     save_solution(np.concatenate(([follower_force],newton.new_x)),output_filename)
 
 def find_new_x(fixT,NSEG,NFIL,input_filename):
@@ -65,11 +59,13 @@ def find_new_x(fixT,NSEG,NFIL,input_filename):
     
     else:
 
-        print(os.getcwd())
-        print(input_filename)
+        # print(os.getcwd())
+        # print(input_filename)
         new_x = np.loadtxt(input_filename) #TODO: fix this!
-        print(np.shape(new_x))
-        print(new_x[-1,1:])
+        
+        new_x[-1,2:2+639] = new_x[-1,2:2+639] - np.floor(new_x[-1,2:2+639]/(2*np.pi))*2*np.pi
+        # print(np.shape(new_x))
+        # print(new_x[-1,1:])
         return new_x[-1,1:]
 
 def save_solution(data,filename):

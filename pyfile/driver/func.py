@@ -7,12 +7,15 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
+        self.exe_name = 'cilia_periodic'
         self.exe_name = 'cilia_readphase_free'
         # self.exe_name = 'cilia_resolution'
         # self.date = '20240104_readphase_hold'
         # self.date = '20240112_readphase_free'
-        self.date = '20240114_readphase_free_hemisphere'
+        # self.date = '20240114_readphase_free_hemisphere'
         # self.date = '20240115_resolution'
+        self.date = '20240118_periodic'
+        self.date = '20240119_example_for_periodic'
         self.afix = ''
         self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         # self.dir = f"data/expr_sims/{self.date}{self.afix}/"
@@ -24,10 +27,11 @@ class DRIVER:
                      "ar": [],
                      "spring_factor": [],
                      "force_mag": [],
-                     "seg_sep": []}
+                     "seg_sep": [],
+                     "period": []}
 
         # self.sweep_shape = (1, 12, 4, 1)
-        self.sweep_shape = (24, 1, 1, 1)
+        self.sweep_shape = (36, 1, 1, 1)
 
         self.num_sim = 0
 
@@ -42,7 +46,6 @@ class DRIVER:
         with open(self.globals_name, 'w') as configfile:
             ini.write(configfile, space_around_delimiters=False)
         
-
     def write_ini(self, section, variable, value):
         ini = configparser.ConfigParser()
         ini.read(self.globals_name)
@@ -79,16 +82,16 @@ class DRIVER:
                         # spring_factor = round(0.005 + 0.00*i, 3)
 
                         # k-means
-                        nfil = int(639 + 0*i)
-                        nblob = int(40961 + 0*i)
-                        ar = round(15.00, 2)
-                        spring_factor = round(0.008 + 0.002*i*(i//6+1), 3)
-
-                        # find branches wider range
-                        nfil = int(639 + 0*i)
-                        nblob = int(40961 + 0*i)
-                        ar = round(15.00, 2)
+                        nfil = int(159 + 0*i)
+                        nblob = int(5000 + 0*i)
+                        ar = round(6.00, 2)
                         spring_factor = round(0.02 + 0.002*i, 3)
+
+                        # # find branches wider range
+                        # nfil = int(639 + 0*i)
+                        # nblob = int(40961 + 0*i)
+                        # ar = round(15.00, 2)
+                        # spring_factor = round(0.02 + 0.002*i, 3)
 
                         # # resolution study
                         # nfil = int(159)
@@ -120,6 +123,7 @@ class DRIVER:
                         if(self.exe_name == 'cilia_ref'):
                             nfil = 1
                             nblob = 0
+                        period = 1
                         
                         self.pars_list["nswim"].append(1)
                         self.pars_list["nseg"].append(nseg)
@@ -129,6 +133,7 @@ class DRIVER:
                         self.pars_list["spring_factor"].append(spring_factor)
                         self.pars_list["force_mag"].append(force_mag)
                         self.pars_list["seg_sep"].append(seg_sep)
+                        self.pars_list["period"].append(period)
         # Write rules to sim list file
         self.write_rules()
 

@@ -32,6 +32,8 @@ class VISUAL:
         self.date = '20240114_readphase_free_diaplectic'
         # self.date = '20240114_readphase_free_random'
         # self.date = '20240115_resolution'
+        self.date = '20240118_periodic'
+        self.date = '20240119_example_for_periodic'
 
         # self.date = '20231219_free_flip'
 
@@ -48,7 +50,8 @@ class VISUAL:
                      "ar": [],
                      "spring_factor": [],
                      "force_mag": [],
-                     "seg_sep": []}
+                     "seg_sep": [],
+                     "period": []}
         self.video = False
         self.interpolate = False
         self.angle = False
@@ -70,7 +73,7 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 4000
+        self.plot_end_frame_setting = 3000000
         self.frames_setting = 100000
 
         self.plot_end_frame = self.plot_end_frame_setting
@@ -454,7 +457,8 @@ class VISUAL:
                     animation_func(i)
                 else:
                     fil_phases_str = fil_phases_f.readline()
-                    # fil_angles_str = fil_angles_f.readline()
+                    if(self.angle):
+                        fil_angles_str = fil_angles_f.readline()
                 
             plt.savefig(f'fig/fil_phase_index{self.index}_{self.date}.pdf', bbox_inches = 'tight', format='pdf')
             plt.show()
@@ -1415,9 +1419,9 @@ class VISUAL:
                            self.simName + '_filament_shape_rotation_angles.dat']
         output_filenames = [self.dir + f"phases{int(self.index)}.dat",
                             self.dir + f"angles{int(self.index)}.dat"]
-        combine_text = list()
 
         for i, name in enumerate(input_filenames):
+            print(name)
             input_filename = name
             output_filename = output_filenames[i]
             try:
@@ -1430,12 +1434,15 @@ class VISUAL:
                     if lines:
                         # Extract the last line
                         last_line = lines[-1]
-                        combine_text.append(last_line)
 
-                        # Open the output file in write mode
-                        with open(output_filename, 'w') as output_file:
-                            # Write the last line to the output file
-                            output_file.write(last_line)
+                        data = np.array(last_line.split()[1:], dtype=float)
+
+                        np.savetxt(output_filename, data, delimiter=' ', newline=' ')
+
+                        # # Open the output file in write mode
+                        # with open(output_filename, 'w') as output_file:
+                        #     # Write the last line to the output file
+                        #     output_file.write(last_line)
 
                         print(f"[SUCCESS]: last line copied from '{input_filename}' to '{output_filename}'.")
                     else:
@@ -1443,9 +1450,12 @@ class VISUAL:
             except FileNotFoundError:
                 print(f"Error: The file '{input_filename}' does not exist.")
 
-        combined_filename = self.dir + f"psi{int(self.index)}.dat"
-        with open(combined_filename, 'w') as output_file:
-            output_file.writelines(combine_text)
+        # fil_phases = np.array(combine_text[0].split()[1:], dtype=float)
+        # fil_phases = util.box(fil_phases, 2*np.pi)
+        # fil_angles = np.array(combine_text[1].split()[1:], dtype=float)
+        # combined_par = np.concatenate((fil_phases, fil_angles))
+        # np.savetxt(self.dir + f"psi{int(self.index)}.dat", combined_par, delimiter=' ', newline=' ')       
+
 
 # Multi sims
     def multi_phase(self):
@@ -2524,10 +2534,14 @@ class VISUAL:
                             # Extract the last line
                             last_line = lines[-1]
 
-                            # Open the output file in write mode
-                            with open(output_filename, 'w') as output_file:
-                                # Write the last line to the output file
-                                output_file.write(last_line)
+                            data = np.array(last_line.split()[1:], dtype=float)
+
+                            np.savetxt(output_filename, data, delimiter=' ', newline=' ')
+
+                            # # Open the output file in write mode
+                            # with open(output_filename, 'w') as output_file:
+                            #     # Write the last line to the output file
+                            #     output_file.write(last_line)
 
                             print(f"Success: last line copied from '{input_filename}' to '{output_filename}'.")
                         else:

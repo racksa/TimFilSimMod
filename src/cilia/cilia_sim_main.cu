@@ -59,6 +59,7 @@ int main(int argc, char** argv){
   NBLOB = std::stoi(data_from_ini("Parameters", "nblob"));
   AR = std::stof(data_from_ini("Parameters", "ar"));
   SEG_SEP = std::stof(data_from_ini("Parameters", "seg_sep"));
+  PERIOD = std::stoi(data_from_ini("Parameters", "period"));
   TORSIONAL_SPRING_MAGNITUDE_FACTOR = std::stof(data_from_ini("Parameters", "spring_factor"));
   GEN_FORCE_MAGNITUDE_FACTOR = std::stof(data_from_ini("Parameters", "force_mag"));
   SIMULATION_DIR = data_from_ini("Filenames", "simulation_dir");
@@ -83,6 +84,7 @@ int main(int argc, char** argv){
   AXIS_DIR_BODY_LENGTH = AR*FIL_LENGTH;
   END_FORCE_MAGNITUDE = (DIMENSIONLESS_FORCE*KB/(DL*DL*NSEG*NSEG));
   DL = SEG_SEP*RSEG;
+  DT = PERIOD/STEPS_PER_PERIOD;
 
   // Filenames 
   SIMULATION_NAME = SIMULATION_DIR + SIMULATION_FILE;
@@ -96,10 +98,11 @@ int main(int argc, char** argv){
   SIMULATION_SEG_FORCES_NAME = SIMULATION_NAME + "_seg_forces.dat";
   SIMULATION_TIME_NAME = SIMULATION_NAME + "_time.dat";
   SIMULATION_TETHERLAM_NAME = SIMULATION_NAME + "_tether_force.dat";
+  SIMULATION_TRUESTATE_NAME = SIMULATION_NAME + "_true_states.dat";
 
   
 
-  sync_var<<<1, 1>>>(NSWIM, NSEG, NFIL, NBLOB, END_FORCE_MAGNITUDE, SEG_SEP);
+  sync_var<<<1, 1>>>(NSWIM, NSEG, NFIL, NBLOB, END_FORCE_MAGNITUDE, SEG_SEP, PERIOD);
   cudaDeviceSynchronize();
 
   float time_start;
@@ -588,7 +591,6 @@ int main(int argc, char** argv){
       tether_force_file << save_step << " ";
       tether_force_file << std::scientific << std::setprecision(10);
 
-
       for (int n = 0; n < NSWIM; n++){
 
         swimmers[n].write_data(seg_state_file, body_state_file, tether_force_file);
@@ -625,11 +627,16 @@ int main(int argc, char** argv){
         fil_phase_file << save_step << " ";
         fil_phase_file << std::scientific << std::setprecision(10);
 
+        std::ofstream true_states_file(SIMULATION_TRUESTATE_NAME, std::ios::app);
+        true_states_file << std::scientific << std::setprecision(10);
+        true_states_file << TORSIONAL_SPRING_MAGNITUDE_FACTOR << " " << PERIOD << " ";
+
         for (int n = 0; n < NSWIM; n++){
 
           for (int m = 0; m < NFIL; m++){
 
             fil_phase_file << swimmers[n].filaments[m].phase << " ";
+            true_states_file << swimmers[n].filaments[m].phase << " ";
 
           }
 
@@ -649,6 +656,7 @@ int main(int argc, char** argv){
             for (int m = 0; m < NFIL; m++){
 
               fil_angle_file << swimmers[n].filaments[m].shape_rotation_angle << " ";
+              true_states_file << swimmers[n].filaments[m].shape_rotation_angle << " ";
 
             }
 
@@ -658,6 +666,9 @@ int main(int argc, char** argv){
           fil_angle_file.close();
 
         #endif
+
+        true_states_file << std::endl;
+        true_states_file.close();
 
       #endif
 

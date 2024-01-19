@@ -16,6 +16,8 @@ int NTOTAL = (NSWIM*(NFIL_d*NSEG + NBLOB_d));
 float END_FORCE_MAGNITUDE = (DIMENSIONLESS_FORCE*KB/(DL*DL*NSEG*NSEG));
 float SEG_SEP = 2.6;
 float DL = SEG_SEP*RSEG;
+float PERIOD = 2.6;
+float DT = 2.6;
 std::string SIMULATION_DIR = "data/expr_sims/global/";
 std::string SIMULATION_FILE = "cilia";
 
@@ -33,6 +35,7 @@ std::string SIMULATION_BLOB_FORCES_NAME = SIMULATION_NAME + "_blob_forces.dat"; 
 std::string SIMULATION_SEG_FORCES_NAME = SIMULATION_NAME + "_seg_forces.dat";
 std::string SIMULATION_TIME_NAME = SIMULATION_NAME + "_time.dat";
 std::string SIMULATION_TETHERLAM_NAME = SIMULATION_NAME + "_tether_force.dat";
+std::string SIMULATION_TRUESTATE_NAME = SIMULATION_NAME + "_true_states.dat";
 
 std::string SIMULATION_READPHASE_NAME = "phases.dat";
 std::string SIMULATION_READANGLE_NAME = "angles.dat";

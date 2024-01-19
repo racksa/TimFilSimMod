@@ -1,23 +1,31 @@
 import configparser
+import subprocess
 import os
 import math
+import numpy as np
 
 class DRIVER:
 
     def __init__(self):
-        self.globals_name = '../filament/globals.ini' # name and directory!
-        self.dir = "data/"
+        self.globals_name = 'globals.ini'
+        self.exe_name = 'cilia_periodic'
+        self.date = '20240118_periodic'
+        self.afix = ''
+        self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         self.pars_list = {
+                     "nswim": [],
                      "nseg": [],
                      "nfil": [],
-                     "follower_force_nondim": [],
-                     "spring_const": [],
-                     "seeding_y_spacing_const": [],
-                     "seeding_x_spacing_const": [],
-                     "ndts": [],
-                     "dt": []}
+                     "nblob": [],
+                     "ar": [],
+                     "spring_factor": [],
+                     "force_mag": [],
+                     "seg_sep": [],
+                     "period": []}
         
-        # self.sweep_shape = (3, 8, 6, 1)
+        self.current_thread = 0
+        self.num_thread = 1
+        self.cuda_device = 1
     
     def create_ini(self):
         ini = configparser.ConfigParser()
@@ -37,34 +45,114 @@ class DRIVER:
         with open(self.globals_name, 'w') as configfile:
             ini.write(configfile, space_around_delimiters=False)
 
-    def change_variables(self, nseg, nfil, f, k, y_spacing_const, x_spacing_const, ndts, dt):
-        # nfil = int( 400+12*j)
-        
+    def change_variables(self, k, period):
+        nseg = 20
+        nfil = 639
+        nblob = 40961
+        ar = 15
+        force_mag = 1
+        seg_sep = 2.6
+        self.pars_list["nswim"].append(1)
         self.pars_list["nseg"].append(nseg)
         self.pars_list["nfil"].append(nfil)
-        self.pars_list["follower_force_nondim"].append(f)
-        self.pars_list["spring_const"].append(k)
-        self.pars_list["seeding_y_spacing_const"].append(y_spacing_const)
-        self.pars_list["seeding_x_spacing_const"].append(x_spacing_const)
-        self.pars_list["ndts"].append(ndts)
-        self.pars_list["dt"].append(dt)
+        self.pars_list["nblob"].append(nblob)
+        self.pars_list["ar"].append(ar)
+        self.pars_list["spring_factor"].append(k)
+        self.pars_list["force_mag"].append(force_mag)
+        self.pars_list["seg_sep"].append(seg_sep)
+        self.pars_list["period"].append(period)
 
+    def save_orbit(self):
+        input_filenames = self.simName + '_true_states.dat'
+        output_filenames = [self.dir + f"phases.dat",
+                            self.dir + f"angles.dat"]
+        
+        input_filename = self.dir + input_filenames
+
+        # Open the input file in read mode
+        with open(input_filename, 'r') as input_file:
+            # Read all lines from the file
+            lines = input_file.readlines()
+
+            # Check if the file is not empty
+            if lines:
+                # Extract the last line
+                first_line = lines[0]
+                last_line = lines[-1]
+                true_states_start = np.array(first_line.split(), dtype=float)
+                true_states = np.array(last_line.split(), dtype=float)
+
+                np.savetxt(self.dir + f"phases.dat", true_states[2:self.pars_list["nfil"][0]+2], delimiter=' ', newline=' ')
+                np.savetxt(self.dir + f"angles.dat", true_states[self.pars_list["nfil"][0]+2:], delimiter=' ', newline=' ')
+                np.savetxt(self.dir + f"psi.dat", true_states, delimiter=' ', newline=' ')
+
+
+                # np.savetxt(self.dir + f"phases_start.dat", true_states_start[:self.pars_list["nfil"][0]], delimiter=' ', newline=' ')
+                # np.savetxt(self.dir + f"angles_start.dat", true_states_start[self.pars_list["nfil"][0]:], delimiter=' ', newline=' ')
+
+
+                # print(f"[SUCCESS]: last line copied from '{input_filename}' to '{output_filenames[0]}'.")
+            else:
+                print(f"The file '{input_filename}' is empty.")
+
+        # try:
+        #     # Open the input file in read mode
+        #     with open(input_filename, 'r') as input_file:
+        #         # Read all lines from the file
+        #         lines = input_file.readlines()
+
+        #         # Check if the file is not empty
+        #         if lines:
+        #             # Extract the last line
+        #             last_line = lines[-1]
+        #             true_states = np.array(last_line.split()[1:], dtype=float)
+        #             print(true_states)
+        #             print(np.shape(true_states))
+
+        #             # Open the output file in write mode
+        #             with open(output_filename[0], 'w') as output_file:
+        #                 # Write the last line to the output file
+
+        #                 output_file.write(last_line)
+
+        #             print(f"[SUCCESS]: last line copied from '{input_filename}' to '{output_filename[0]}'.")
+        #         else:
+        #             print(f"The file '{input_filename}' is empty.")
+        # except FileNotFoundError:
+        #     print(f"Error: The file '{input_filename}' does not exist.")
 
     def update_globals_file(self):
         self.create_ini()
 
+        readphase_index = ''
         # Iterate through the sim list and write to .ini file and execute
         for key, value in self.pars_list.items():
             self.write_ini("Parameters", key, float(self.pars_list[key][0]))
-        simulation_file = f"FFLength_{self.pars_list['nfil'][0]:.0f}fil_{self.pars_list['nseg'][0]:.0f}seg_{self.pars_list['follower_force_nondim'][0]:.0f}f_{self.pars_list['spring_const'][0]:.0f}k"
-        self.write_ini("Filenames", "simulation_file", simulation_file)
+        self.simName = f"ciliate_{self.pars_list['nfil'][0]:.0f}fil_{self.pars_list['nblob'][0]:.0f}blob_{self.pars_list['ar'][0]:.2f}R_{self.pars_list['spring_factor'][0]:.3f}torsion"
+        simulation_file = self.simName
+        self.write_ini("Filenames", "simulation_file", self.simName)
         self.write_ini("Filenames", "simulation_dir", self.dir)
+        self.write_ini("Filenames", "simulation_readphase_name", f"phases.dat")
+        self.write_ini("Filenames", "simulation_readangle_name", f"angles.dat")
+
+
+        # for key, value in self.pars_list.items():
+        #     self.write_ini("Parameters", key, float(self.pars_list[key][0]))
+        # simulation_file = f"FFLength_{self.pars_list['nfil'][0]:.0f}fil_{self.pars_list['nseg'][0]:.0f}seg_{self.pars_list['follower_force_nondim'][0]:.0f}f_{self.pars_list['spring_const'][0]:.0f}k"
+        # self.write_ini("Filenames", "simulation_file", simulation_file)
+        # self.write_ini("Filenames", "simulation_dir", self.dir)
         return simulation_file
 
     def run(self):
-        self.update_globals_file()
-
-        os.chdir('../filament')
-        command = f"nohup ./run_cilia_sim.sh > nohup_FFLength_{self.pars_list['nfil'][0]:.0f}fil_{self.pars_list['nseg'][0]:.0f}seg_{self.pars_list['follower_force_nondim'][0]:.0f}f_{self.pars_list['spring_const'][0]:.0f}k.out &"
         
+        # for key, value in self.pars_list.items():
+        #     self.write_ini("Parameters", key, float(self.pars_list[key][0]))
+        # self.simName = f"ciliate_{self.pars_list['nfil'][0]:.0f}fil_{self.pars_list['nblob'][0]:.0f}blob_{self.pars_list['ar'][0]:.2f}R_{self.pars_list['spring_factor'][0]:.3f}torsion"
+        # self.write_ini("Filenames", "simulation_file", self.simName)
+        # self.write_ini("Filenames", "simulation_dir", self.dir)
+
+        command = f"export OPENBLAS_NUM_THREADS=1; \
+                    export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
+                    ./bin/{self.exe_name} > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][0]:.0f}fil__{self.pars_list['period'][0]:.0f}fil{0}.out"
+        # subprocess.run(command)
         os.system(command)

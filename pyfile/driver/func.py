@@ -28,7 +28,7 @@ class DRIVER:
                      "spring_factor": [],
                      "force_mag": [],
                      "seg_sep": [],
-                     "period": []}
+                     "sim_length": []}
 
         # self.sweep_shape = (1, 12, 4, 1)
         self.sweep_shape = (36, 1, 1, 1)
@@ -123,7 +123,7 @@ class DRIVER:
                         if(self.exe_name == 'cilia_ref'):
                             nfil = 1
                             nblob = 0
-                        period = 1
+                        sim_length = 1.0
                         
                         self.pars_list["nswim"].append(1)
                         self.pars_list["nseg"].append(nseg)
@@ -133,7 +133,7 @@ class DRIVER:
                         self.pars_list["spring_factor"].append(spring_factor)
                         self.pars_list["force_mag"].append(force_mag)
                         self.pars_list["seg_sep"].append(seg_sep)
-                        self.pars_list["period"].append(period)
+                        self.pars_list["sim_length"].append(sim_length)
         # Write rules to sim list file
         self.write_rules()
 

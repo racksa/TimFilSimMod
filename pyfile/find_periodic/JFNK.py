@@ -10,17 +10,18 @@ def main():
     #fixT = 1   # Fix T for equilibrium, rather than PO solution
     #follower_force = 50      # Follower force (parameter of dynamical system)
     NSEG = 20      # Number of segments
-    NFIL = 1       # Number of filaments
-    y_spacing_const = 5
-    x_spacing_const = y_spacing_const
-    output_filename = "psi.dat"
+    NFIL = 159       # Number of filaments
+    NBLOB = 5000
+    AR = 6
+
+    output_filename = "data/expr_sims/20240118_periodic/psi.dat"
 
     # Number of time steps (ndts) and fixT
     ndts = 300
     fixT = 0
  
     # n = 3*(NSEG-1)*NFIL+1 #4#3 * (N - 1) * Nf + 1  # Dimension of system, including unknown params
-    n = 2*639+1
+    n = 2*NFIL+1
     mgmres = 5  # 10  # max GMRES iterations
     nits = 150  # max Newton iterations
     rel_err = 1e-6  # 1e-8 Relative error |F|/|x|
@@ -29,13 +30,13 @@ def main():
     mxdl = 1e20
     gtol = 1e-3  # 1e-4
 
-    f_range = np.array([0.06])
+    f_range = np.array([0.08])
     for k in f_range:
 
         print('-----------Spring constant = ' + str(k))
     
         new_x = find_new_x(fixT,NSEG,NFIL,output_filename)
-        newton = newton_solver.NEWTON_SOLVER(new_x,epsJ,ndts,fixT,k,NSEG,NFIL, y_spacing_const, x_spacing_const)
+        newton = newton_solver.NEWTON_SOLVER(new_x,epsJ,ndts,fixT,k,NFIL, NSEG, NBLOB, AR)
 
        # Scale parameters by |x| then call black box
         d = np.sqrt(np.sum(newton.new_x[1:] * newton.new_x[1:]))
@@ -59,14 +60,14 @@ def find_new_x(fixT,NSEG,NFIL,input_filename):
     
     else:
 
-        # print(os.getcwd())
-        # print(input_filename)
         new_x = np.loadtxt(input_filename) #TODO: fix this!
         
-        new_x[-1,2:2+639] = new_x[-1,2:2+639] - np.floor(new_x[-1,2:2+639]/(2*np.pi))*2*np.pi
-        # print(np.shape(new_x))
-        # print(new_x[-1,1:])
-        return new_x[-1,1:]
+        # boxsize = 100*np.pi
+        # new_x[-1,2:2+NFIL] = new_x[-1,2:2+NFIL] - np.floor(new_x[-1,2:2+NFIL]/boxsize)*boxsize
+        new_x[2:2+NFIL] = np.sin(new_x[2:2+NFIL])
+
+
+        return new_x[1:]
 
 def save_solution(data,filename):
     print(data)

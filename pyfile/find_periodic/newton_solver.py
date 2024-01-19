@@ -7,14 +7,14 @@ import time
 
 class NEWTON_SOLVER:
     
-    def __init__(self, new_x, epsJ, ndts, fixT, k, NSEG, NFIL, y_spacing_const, x_spacing_const):
+    def __init__(self, new_x, epsJ, ndts, fixT, k, NFIL, NSEG, NBLOB, AR):
         self.new_x = new_x
         self.ndts = ndts
         self.k = k
         self.NSEG = NSEG
         self.NFIL = NFIL
-        self.y_spacing_const = y_spacing_const 
-        self.x_spacing_const = x_spacing_const
+        self.NBLOB = NBLOB
+        self.AR = AR
         self.epsJ = epsJ
         self.fixT = fixT
         self.new_fx = []
@@ -52,20 +52,15 @@ class NEWTON_SOLVER:
 
         return
 
-    def change_variables(self,ndts):
+    def change_variables(self):
 
         # These are always changed at the beginning of each Arnoldi iteration 
-        self.d.change_variables(self.k, self.period)
+        self.d.change_variables(self.NFIL, self.NSEG, self.NBLOB, self.AR, self.k, self.period)
         simulation_file = self.d.update_globals_file()
 
         return simulation_file
-    
-    def read_data_from_file(self,sim_dir_and_name):
-        
-        output_filename = sim_dir_and_name + "_true_states.dat"
-        return np.loadtxt(output_filename)
 
-    def run_filament_code(self,a,ndts):
+    def run_filament_code(self,a):
 
         # Save Lie alg elements
         self.save_configuration_to_file(a)
@@ -77,34 +72,29 @@ class NEWTON_SOLVER:
         #     f.write(b"\n")
         
         # Change globals.ini file
-        sim_name = self.change_variables(ndts)
+        sim_name = self.change_variables()
 
         # Run code
-        # os.chdir('../filament')
-        # command = "./run_cilia_sim.sh"
-
-        # subprocess.run(['sh', './run_cilia_sim.sh'])
-        #os.system(command)
 
         self.d.run()
 
         # Return output
-        return self.read_data_from_file(self.d.dir + sim_name)
-
+        output_filename = self.d.dir + sim_name + "_true_states.dat"
+        return np.loadtxt(output_filename)
 
     def steporbit(self, ndts, x):
         
         if ndts != 1:
-            self.dt = x[0] / self.ndts
+            self.dt = 1.0 / self.ndts
+            # self.dt = x[0] / self.ndts
 
         # x[1:] is the phases
-        a = self.run_filament_code(x[1:],ndts)
+        a = self.run_filament_code(x[1:])
         
         a = a[-1][2:]
 
         y = np.zeros_like(x)
         
-
         y[1:] = a
         
         return y
@@ -113,11 +103,12 @@ class NEWTON_SOLVER:
     def getrhs(self, n_, x):
         # function to be minimised
         y_ = self.steporbit(self.ndts, x)
-        y_[:639] = (y_[:639] - np.floor(y_[:639]/(2*np.pi))*(2*np.pi)) 
-        x[:639] = (x[:639] - np.floor(x[:639]/(2*np.pi))*(2*np.pi))
+        y_[1:self.NFIL+1] = np.sin(y_[1:self.NFIL+1])
+        x[1:self.NFIL+1] = np.sin(x[1:self.NFIL+1])
 
         # print('y', y_)
         # print('x', x)
+        # print(np.shape(y_), np.shape(x))
 
         y = y_ - x # Calculate the difference
         y[0] = 0.0  # Set the first element to 0 (constraints, rhs=0)
@@ -160,7 +151,7 @@ class NEWTON_SOLVER:
             y[0] = 0.0
         else: # Constrant: dx . \dot{x} = 0
             s = self.steporbit(1,self.new_x)
-            self.dt = self.new_x[0] / self.ndts
+            # self.dt = self.new_x[0] / self.ndts
             s = (s - self.new_x) / self.dt
             y[0] = self.dotprd(-1, s, dx)
     
@@ -172,7 +163,8 @@ class NEWTON_SOLVER:
         self.new_fx = self.getrhs(n, self.new_x)
         self.new_tol= np.sqrt(self.dotprd(n, self.new_fx, self.new_fx))
         self.new_del = del_value
-        self.dt = self.new_x[0] / self.ndts
+        self.dt = 1.0/300.
+        # self.dt = self.new_x[0] / self.ndts
 
         v = np.zeros((n, m + 1))
         mxdl_ = mxdl

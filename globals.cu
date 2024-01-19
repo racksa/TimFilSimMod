@@ -16,8 +16,8 @@ int NTOTAL = (NSWIM*(NFIL_d*NSEG + NBLOB_d));
 float END_FORCE_MAGNITUDE = (DIMENSIONLESS_FORCE*KB/(DL*DL*NSEG*NSEG));
 float SEG_SEP = 2.6;
 float DL = SEG_SEP*RSEG;
-float PERIOD = 2.6;
-float DT = 2.6;
+float SIM_LENGTH = 1.0;
+float DT = 1.0/STEPS_PER_PERIOD;
 std::string SIMULATION_DIR = "data/expr_sims/global/";
 std::string SIMULATION_FILE = "cilia";
 

@@ -210,7 +210,7 @@ extern int NTOTAL;
 extern float END_FORCE_MAGNITUDE;
 extern float SEG_SEP;
 extern float DL;
-extern float PERIOD;
+extern float SIM_LENGTH;
 extern float DT;
 
 #define MU 1.0 // Fluid viscosity.
@@ -284,7 +284,7 @@ extern float DT;
 
 #endif
 
-#define TOTAL_TIME_STEPS (500*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
+#define TOTAL_TIME_STEPS int(SIM_LENGTH*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
 #define NUM_EULER_STEPS 1 // Number of time-steps to use backwards-Euler before switching to BDF2.
 
 #if CILIA_TYPE==1
@@ -296,7 +296,7 @@ extern float DT;
 #else
 
   #define STEPS_PER_PERIOD 300
-  #define SAVES_PER_PERIOD 30
+  #define SAVES_PER_PERIOD 300
 
 #endif
 

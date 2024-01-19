@@ -51,7 +51,7 @@ class VISUAL:
                      "spring_factor": [],
                      "force_mag": [],
                      "seg_sep": [],
-                     "period": []}
+                     "sim_length": []}
         self.video = False
         self.interpolate = False
         self.angle = False
@@ -73,7 +73,7 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 3000000
+        self.plot_end_frame_setting = 120000
         self.frames_setting = 100000
 
         self.plot_end_frame = self.plot_end_frame_setting
@@ -1416,12 +1416,13 @@ class VISUAL:
     def copy_phases(self):
         self.select_sim()
         input_filenames = [self.simName + '_filament_phases.dat',
-                           self.simName + '_filament_shape_rotation_angles.dat']
+                           self.simName + '_filament_shape_rotation_angles.dat',
+                           self.simName + '_true_states.dat']
         output_filenames = [self.dir + f"phases{int(self.index)}.dat",
-                            self.dir + f"angles{int(self.index)}.dat"]
+                            self.dir + f"angles{int(self.index)}.dat",
+                            self.dir + f"psi{int(self.index)}.dat"]
 
         for i, name in enumerate(input_filenames):
-            print(name)
             input_filename = name
             output_filename = output_filenames[i]
             try:
@@ -1435,14 +1436,13 @@ class VISUAL:
                         # Extract the last line
                         last_line = lines[-1]
 
-                        data = np.array(last_line.split()[1:], dtype=float)
+                        ispsi = 1
+                        if name == self.simName + '_true_states.dat':
+                            ispsi = 0
+
+                        data = np.array(last_line.split()[ispsi:], dtype=float)
 
                         np.savetxt(output_filename, data, delimiter=' ', newline=' ')
-
-                        # # Open the output file in write mode
-                        # with open(output_filename, 'w') as output_file:
-                        #     # Write the last line to the output file
-                        #     output_file.write(last_line)
 
                         print(f"[SUCCESS]: last line copied from '{input_filename}' to '{output_filename}'.")
                     else:

@@ -59,7 +59,7 @@ int main(int argc, char** argv){
   NBLOB = std::stoi(data_from_ini("Parameters", "nblob"));
   AR = std::stof(data_from_ini("Parameters", "ar"));
   SEG_SEP = std::stof(data_from_ini("Parameters", "seg_sep"));
-  PERIOD = std::stoi(data_from_ini("Parameters", "period"));
+  SIM_LENGTH = std::stof(data_from_ini("Parameters", "sim_length"));
   TORSIONAL_SPRING_MAGNITUDE_FACTOR = std::stof(data_from_ini("Parameters", "spring_factor"));
   GEN_FORCE_MAGNITUDE_FACTOR = std::stof(data_from_ini("Parameters", "force_mag"));
   SIMULATION_DIR = data_from_ini("Filenames", "simulation_dir");
@@ -84,7 +84,7 @@ int main(int argc, char** argv){
   AXIS_DIR_BODY_LENGTH = AR*FIL_LENGTH;
   END_FORCE_MAGNITUDE = (DIMENSIONLESS_FORCE*KB/(DL*DL*NSEG*NSEG));
   DL = SEG_SEP*RSEG;
-  DT = PERIOD/STEPS_PER_PERIOD;
+  DT = 1.0/STEPS_PER_PERIOD;
 
   // Filenames 
   SIMULATION_NAME = SIMULATION_DIR + SIMULATION_FILE;
@@ -102,7 +102,7 @@ int main(int argc, char** argv){
 
   
 
-  sync_var<<<1, 1>>>(NSWIM, NSEG, NFIL, NBLOB, END_FORCE_MAGNITUDE, SEG_SEP, PERIOD);
+  sync_var<<<1, 1>>>(NSWIM, NSEG, NFIL, NBLOB, END_FORCE_MAGNITUDE, SEG_SEP, SIM_LENGTH);
   cudaDeviceSynchronize();
 
   float time_start;
@@ -629,7 +629,7 @@ int main(int argc, char** argv){
 
         std::ofstream true_states_file(SIMULATION_TRUESTATE_NAME, std::ios::app);
         true_states_file << std::scientific << std::setprecision(10);
-        true_states_file << TORSIONAL_SPRING_MAGNITUDE_FACTOR << " " << PERIOD << " ";
+        true_states_file << TORSIONAL_SPRING_MAGNITUDE_FACTOR << " " << SIM_LENGTH << " ";
 
         for (int n = 0; n < NSWIM; n++){
 

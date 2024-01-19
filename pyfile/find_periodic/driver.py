@@ -21,7 +21,7 @@ class DRIVER:
                      "spring_factor": [],
                      "force_mag": [],
                      "seg_sep": [],
-                     "period": []}
+                     "sim_length": []}
         
         self.current_thread = 0
         self.num_thread = 1
@@ -45,11 +45,11 @@ class DRIVER:
         with open(self.globals_name, 'w') as configfile:
             ini.write(configfile, space_around_delimiters=False)
 
-    def change_variables(self, k, period):
-        nseg = 20
-        nfil = 639
-        nblob = 40961
-        ar = 15
+    def change_variables(self, nfil, nseg, nblob, ar, k, sim_length):
+        nseg = nseg
+        nfil = nfil
+        nblob = nblob
+        ar = ar
         force_mag = 1
         seg_sep = 2.6
         self.pars_list["nswim"].append(1)
@@ -60,7 +60,7 @@ class DRIVER:
         self.pars_list["spring_factor"].append(k)
         self.pars_list["force_mag"].append(force_mag)
         self.pars_list["seg_sep"].append(seg_sep)
-        self.pars_list["period"].append(period)
+        self.pars_list["sim_length"].append(sim_length)
 
     def save_orbit(self):
         input_filenames = self.simName + '_true_states.dat'
@@ -87,8 +87,8 @@ class DRIVER:
                 np.savetxt(self.dir + f"psi.dat", true_states, delimiter=' ', newline=' ')
 
 
-                # np.savetxt(self.dir + f"phases_start.dat", true_states_start[:self.pars_list["nfil"][0]], delimiter=' ', newline=' ')
-                # np.savetxt(self.dir + f"angles_start.dat", true_states_start[self.pars_list["nfil"][0]:], delimiter=' ', newline=' ')
+                np.savetxt(self.dir + f"phases_start.dat", true_states_start[2:self.pars_list["nfil"][0]+2], delimiter=' ', newline=' ')
+                np.savetxt(self.dir + f"angles_start.dat", true_states_start[self.pars_list["nfil"][0]+2:], delimiter=' ', newline=' ')
 
 
                 # print(f"[SUCCESS]: last line copied from '{input_filename}' to '{output_filenames[0]}'.")
@@ -153,6 +153,6 @@ class DRIVER:
 
         command = f"export OPENBLAS_NUM_THREADS=1; \
                     export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
-                    ./bin/{self.exe_name} > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][0]:.0f}fil__{self.pars_list['period'][0]:.0f}fil{0}.out"
+                    ./bin/{self.exe_name} > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][0]:.0f}fil__{self.pars_list['sim_length'][0]:.0f}fil{0}.out"
         # subprocess.run(command)
         os.system(command)

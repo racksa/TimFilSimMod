@@ -2,6 +2,7 @@ import numpy as np
 import newton_solver
 import os
 import time
+import util
 
 def main():
     # Define 'global variables'
@@ -14,7 +15,7 @@ def main():
     NBLOB = 5000
     AR = 6
 
-    output_filename = "data/expr_sims/20240118_periodic/psi.dat"
+    output_filename = "data/expr_sims/20240118_periodic/psi_guess.dat"
 
     # Number of time steps (ndts) and fixT
     ndts = 300
@@ -22,9 +23,9 @@ def main():
  
     # n = 3*(NSEG-1)*NFIL+1 #4#3 * (N - 1) * Nf + 1  # Dimension of system, including unknown params
     n = 2*NFIL+1
-    mgmres = 5  # 10  # max GMRES iterations
+    mgmres = 2  # 10  # max GMRES iterations
     nits = 150  # max Newton iterations
-    rel_err = 1e-6  # 1e-8 Relative error |F|/|x|
+    rel_err = 1e-3  # 1e-8 Relative error |F|/|x|
     del_value = -1  # These rarely need changing for any problem
     mndl = 1e-20
     mxdl = 1e20
@@ -34,7 +35,7 @@ def main():
     for k in f_range:
 
         print('-----------Spring constant = ' + str(k))
-    
+
         new_x = find_new_x(fixT,NSEG,NFIL,output_filename)
         newton = newton_solver.NEWTON_SOLVER(new_x,epsJ,ndts,fixT,k,NFIL, NSEG, NBLOB, AR)
 
@@ -42,6 +43,7 @@ def main():
         d = np.sqrt(np.sum(newton.new_x[1:] * newton.new_x[1:]))
         # Do we want rel_err?
         tol = rel_err * d
+        print(f"Requested tol={tol}")
         del_value = del_value * d
         mndl = mndl * d
         mxdl = mxdl * d
@@ -60,14 +62,13 @@ def find_new_x(fixT,NSEG,NFIL,input_filename):
     
     else:
 
-        new_x = np.loadtxt(input_filename) #TODO: fix this!
+        full_input = np.loadtxt(input_filename) #TODO: fix this!
         
-        # boxsize = 100*np.pi
-        # new_x[-1,2:2+NFIL] = new_x[-1,2:2+NFIL] - np.floor(new_x[-1,2:2+NFIL]/boxsize)*boxsize
-        new_x[2:2+NFIL] = np.sin(new_x[2:2+NFIL])
+        # full_input[2:2+NFIL] = np.sin(full_input[2:2+NFIL])
+        # full_input[2:2+NFIL] = np.exp(1j*full_input[2:2+NFIL])
+        full_input[2:2+NFIL] = util.box(full_input[2:2+NFIL], 2*np.pi)
 
-
-        return new_x[1:]
+        return full_input[1:]
 
 def save_solution(data,filename):
     print(data)

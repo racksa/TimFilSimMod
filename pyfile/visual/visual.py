@@ -51,6 +51,7 @@ class VISUAL:
                      "spring_factor": [],
                      "force_mag": [],
                      "seg_sep": [],
+                     "period": [],
                      "sim_length": []}
         self.video = False
         self.interpolate = False
@@ -74,7 +75,7 @@ class VISUAL:
         self.check_overlap = False
 
         self.plot_end_frame_setting = 120000
-        self.frames_setting = 100000
+        self.frames_setting = 1500
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -572,12 +573,16 @@ class VISUAL:
         ax2 = fig2.add_subplot(1,1,1)
         fig3 = plt.figure()
         ax3 = fig3.add_subplot(1,1,1)
+        fig4 = plt.figure()
+        ax4 = fig4.add_subplot(1,1,1)
 
         fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
+        fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
 
         time_array = np.arange(self.plot_start_frame, self.plot_end_frame )/self.period
         corr_array = np.zeros(self.frames)
         corr_array2 = np.zeros(self.frames)
+        corr_array_angle = np.zeros(self.frames)
 
         fil_references_sphpolar = np.zeros((self.nfil,3))
         for fil in range(self.nfil):
@@ -588,6 +593,7 @@ class VISUAL:
         azim_array_sorted = azim_array[sorted_indices]
         polar_array_sorted = polar_array[sorted_indices]
         fil_phases_sorted = np.array([])
+        fil_angles_sorted = np.array([])
 
         #########################
         # Combine x and y into a single array
@@ -596,6 +602,7 @@ class VISUAL:
         # Specify the number of clusters you want
         n_clusters = int(self.nfil/10) 
         variance_array = np.zeros(n_clusters) # correlation within each cluster
+        variance_array_angle = np.zeros(n_clusters) # correlation within each cluster
 
         # Create and fit a K-Means model
         kmeans = KMeans(n_clusters=n_clusters)
@@ -606,9 +613,13 @@ class VISUAL:
         for i in range(self.plot_end_frame):
             print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
             fil_phases_str = fil_phases_f.readline()
+            fil_angles_str = fil_angles_f.readline()
 
             if(i>=self.plot_start_frame):
                 fil_phases = np.array(fil_phases_str.split()[1:], dtype=float)
+                fil_angles = np.array(fil_angles_str.split()[1:], dtype=float)
+
+                fil_angles_sorted = fil_angles[sorted_indices]
                 fil_phases_sorted = fil_phases[sorted_indices]
                 sin_phases_sorted = np.sin(fil_phases_sorted)
 
@@ -623,6 +634,13 @@ class VISUAL:
                     variance_array[m] = np.var(phases_in_group)
                 
                 corr_array2[i-self.plot_start_frame] = np.mean(variance_array)
+
+                # Coordination number for angle
+                for m in range(n_clusters):
+                    angles_in_group = fil_angles_sorted[np.where(cluster_assignments==m)]
+                    variance_array_angle[m] = np.var(angles_in_group)
+                
+                corr_array_angle[i-self.plot_start_frame] = np.mean(variance_array_angle)
 
         ax.plot(time_array, corr_array)
         ax.set_xlabel('t/T')
@@ -640,8 +658,13 @@ class VISUAL:
         ax3.scatter(azim_array_sorted, polar_array_sorted, c = cluster_assignments)
         ax3.set_xlabel(r'$\phi$')
         ax3.set_ylabel(r'$\theta$')
-        
 
+        ax4.plot(time_array, corr_array_angle)
+        ax4.set_xlabel('t/T')
+        ax4.set_ylabel('Coordination number 2 (angle)')
+        ax4.set_xlim(time_array[0], time_array[-1])
+        ax4.set_ylim(0)
+        
         fig.savefig(f'fig/fil_coordination_parameter_one_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
         fig2.savefig(f'fig/fil_coordination_parameter_two_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
         fig3.savefig(f'fig/fil_clustering_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
@@ -1433,14 +1456,41 @@ class VISUAL:
 
                     # Check if the file is not empty
                     if lines:
+
                         # Extract the last line
+                        first_line = lines[0]
                         last_line = lines[-1]
 
                         ispsi = 1
                         if name == self.simName + '_true_states.dat':
                             ispsi = 0
 
+                        data_start = np.array(first_line.split()[ispsi:], dtype=float)
                         data = np.array(last_line.split()[ispsi:], dtype=float)
+
+                        # Compute the difference x(T) - x(0)
+                        if name == self.simName + '_true_states.dat':
+                            stt = 0
+
+                            sin_data_start = data_start[1:]
+                            sin_data_end = data[1:]
+                            print(sin_data_end[stt:stt+10])
+                            print(sin_data_start[stt:stt+10])
+                            print((sin_data_end - sin_data_start)[stt:stt+10], '\n')
+                            sin_data_start[1:self.nfil+1] = np.sin(sin_data_start[1:self.nfil+1])
+                            sin_data_end[1:self.nfil+1] = np.sin(sin_data_end[1:self.nfil+1])
+                            sin_data_start[0] = 0.9
+                            sin_data_end[0] = 0
+                            
+                            print('x(T)', sin_data_end[stt:stt+10])
+                            print('x(0)',sin_data_start[stt:stt+10])
+                            diff = sin_data_end - sin_data_start
+                            diff[0] = 0
+                            print('x(T)-x(0)', diff[stt:stt+10])
+                            diff_norm = np.sqrt(np.sum(diff*diff))
+                            data_norm = np.sqrt(np.sum(sin_data_end*sin_data_end))
+                            print(f"norm x = {data_norm}  norm diff = {diff_norm}")
+                            print('=======rel error ',diff_norm/data_norm)
 
                         np.savetxt(output_filename, data, delimiter=' ', newline=' ')
 

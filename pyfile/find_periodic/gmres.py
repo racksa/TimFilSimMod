@@ -121,7 +121,7 @@ class GMRES:
 
 #                        print("info: " + str(info) + ", m: " + str(m) + ", j: " + str(j))
 
-                        y, temp = self.GMREShook(m, del_value)
+                        y, del_value = self.GMREShook(m, del_value)
                     z = np.dot(self.v[:, :j], y[:j])
                     z = psolve(n, z)
                     x = x + z

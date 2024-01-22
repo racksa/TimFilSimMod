@@ -88,7 +88,7 @@ extern std::string SIMULATION_READANGLE_NAME;
   // It will also generate reference s-values for shape sequences which don't result in inextensible filaments.
   // NOTE: This will overwrite any existing reference files unless their names have been changed.
 
-  #define CILIA_IC_TYPE 4
+  #define CILIA_IC_TYPE 5
   // Valid options:
   // if using 3, we should be able to derive all other cases.
   // 0 = All cilia start in-phase with phase 0.
@@ -96,6 +96,7 @@ extern std::string SIMULATION_READANGLE_NAME;
   // 2 = A metachronal wave (MCW). Its wavelength and direction are defined below.
   // 3 = Ishikawa MCW
   // 4 = Read from a file
+  // 5 = Reserved for finding the periodic solution
 
   #if CILIA_IC_TYPE==2
 
@@ -211,7 +212,10 @@ extern float END_FORCE_MAGNITUDE;
 extern float SEG_SEP;
 extern float DL;
 extern float SIM_LENGTH;
+extern float PERIOD;
 extern float DT;
+extern int TOTAL_TIME_STEPS;
+
 
 #define MU 1.0 // Fluid viscosity.
 
@@ -284,7 +288,7 @@ extern float DT;
 
 #endif
 
-#define TOTAL_TIME_STEPS int(SIM_LENGTH*STEPS_PER_PERIOD) // Total number of time-steps in the simulation.
+// #define TOTAL_TIME_STEPS int(float(SIM_LENGTH*STEPS_PER_PERIOD)) // Total number of time-steps in the simulation.
 #define NUM_EULER_STEPS 1 // Number of time-steps to use backwards-Euler before switching to BDF2.
 
 #if CILIA_TYPE==1

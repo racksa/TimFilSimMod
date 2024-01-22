@@ -17,7 +17,10 @@ float END_FORCE_MAGNITUDE = (DIMENSIONLESS_FORCE*KB/(DL*DL*NSEG*NSEG));
 float SEG_SEP = 2.6;
 float DL = SEG_SEP*RSEG;
 float SIM_LENGTH = 1.0;
-float DT = 1.0/STEPS_PER_PERIOD;
+float PERIOD = 1.0;
+float DT = PERIOD/STEPS_PER_PERIOD;
+int TOTAL_TIME_STEPS = 1;
+
 std::string SIMULATION_DIR = "data/expr_sims/global/";
 std::string SIMULATION_FILE = "cilia";
 

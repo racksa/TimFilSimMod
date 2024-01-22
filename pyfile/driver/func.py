@@ -8,7 +8,7 @@ class DRIVER:
     def __init__(self):
         self.globals_name = 'globals.ini'
         self.exe_name = 'cilia_periodic'
-        self.exe_name = 'cilia_readphase_free'
+        # self.exe_name = 'cilia_readphase_free'
         # self.exe_name = 'cilia_resolution'
         # self.date = '20240104_readphase_hold'
         # self.date = '20240112_readphase_free'
@@ -28,6 +28,7 @@ class DRIVER:
                      "spring_factor": [],
                      "force_mag": [],
                      "seg_sep": [],
+                     "period": [],
                      "sim_length": []}
 
         # self.sweep_shape = (1, 12, 4, 1)
@@ -123,6 +124,8 @@ class DRIVER:
                         if(self.exe_name == 'cilia_ref'):
                             nfil = 1
                             nblob = 0
+                            
+                        period = 0.9
                         sim_length = 1.0
                         
                         self.pars_list["nswim"].append(1)
@@ -133,6 +136,7 @@ class DRIVER:
                         self.pars_list["spring_factor"].append(spring_factor)
                         self.pars_list["force_mag"].append(force_mag)
                         self.pars_list["seg_sep"].append(seg_sep)
+                        self.pars_list["period"].append(period)
                         self.pars_list["sim_length"].append(sim_length)
         # Write rules to sim list file
         self.write_rules()
@@ -180,7 +184,7 @@ class DRIVER:
 
         # Iterate through the sim list and write to .ini file and execute
         for i in range(sim_index_start, sim_index_end):
-            readphase_index = int(i)
+            # readphase_index = int(i)
             readphase_index = ''
             for key, value in self.pars_list.items():
                 self.write_ini("Parameters", key, float(self.pars_list[key][i]))

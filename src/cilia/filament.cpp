@@ -330,6 +330,31 @@ void filament::initial_setup(const Real *const base_pos,
           }else{
             std::cout << "No angle input file found: " << SIMULATION_READANGLE_NAME << std::endl;
           }
+        
+        #elif (CILIA_IC_TYPE==5)
+
+          // Try to read from file
+          std::ifstream input_file(SIMULATION_DIR + "psi.dat");
+          if (input_file.is_open()) {
+            if(fil_id == 0){
+              std::cout << "Reading all states from file: " << SIMULATION_DIR + "psi.dat" << std::endl;
+            }
+            input_file >> TORSIONAL_SPRING_MAGNITUDE_FACTOR;
+            input_file >> PERIOD;
+            float buffer;
+            for (int fpos = 0; fpos < 2*NFIL; fpos++){
+              input_file >> buffer;
+              if(fpos == fil_id){
+                phase = buffer;
+              }
+              if(fpos == NFIL + fil_id){
+                shape_rotation_angle = buffer;
+              }
+            }
+            input_file.close();
+          }else{
+            std::cout << "No true_states file found: " << SIMULATION_DIR + "psi.dat" << std::endl;
+          }
 
         #endif
 

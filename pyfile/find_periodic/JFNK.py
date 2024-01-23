@@ -19,17 +19,17 @@ def main():
 
     # Number of time steps (ndts) and fixT
     ndts = 300
-    fixT = 0
+    fixT = False
  
     # n = 3*(NSEG-1)*NFIL+1 #4#3 * (N - 1) * Nf + 1  # Dimension of system, including unknown params
     n = 2*NFIL+1
-    mgmres = 2  # 10  # max GMRES iterations
+    mgmres = 5  # 10  # max GMRES iterations
     nits = 150  # max Newton iterations
-    rel_err = 1e-3  # 1e-8 Relative error |F|/|x|
+    rel_err = 1e-5  # 1e-8 Relative error |F|/|x|
     del_value = -1  # These rarely need changing for any problem
     mndl = 1e-20
     mxdl = 1e20
-    gtol = 1e-3  # 1e-4
+    gtol = 1e-1  # 1e-4
 
     f_range = np.array([0.08])
     for k in f_range:

@@ -23,6 +23,8 @@ class DRIVER:
                      "seg_sep": [],
                      "period": [],
                      "sim_length": []}
+    
+        self.ite = 0
         
         self.current_thread = 0
         self.num_thread = 1
@@ -71,47 +73,47 @@ class DRIVER:
     def update_globals_file(self):
         self.create_ini()
 
+        # ite = len(self.pars_list['period'])
         readphase_index = ''
         # Iterate through the sim list and write to .ini file and execute
         for key, value in self.pars_list.items():
-            self.write_ini("Parameters", key, float(self.pars_list[key][0]))
+            self.write_ini("Parameters", key, float(self.pars_list[key][-1]))
         self.simName = f"ciliate_{self.pars_list['nfil'][0]:.0f}fil_{self.pars_list['nblob'][0]:.0f}blob_{self.pars_list['ar'][0]:.2f}R_{self.pars_list['spring_factor'][0]:.3f}torsion"
-        simulation_file = self.simName
         self.write_ini("Filenames", "simulation_file", self.simName)
         self.write_ini("Filenames", "simulation_dir", self.dir)
         self.write_ini("Filenames", "simulation_readphase_name", f"phases.dat")
         self.write_ini("Filenames", "simulation_readangle_name", f"angles.dat")
 
-        return simulation_file
+        return True
     
-    def save_orbit(self):
-        # print("Saving orbits using the driver....")
-        input_filenames = self.simName + '_true_states.dat'
+    # def save_orbit(self):
+    #     # print("Saving orbits using the driver....")
+    #     input_filenames = self.simName + '_true_states.dat'
         
-        input_filename = self.dir + input_filenames
+    #     input_filename = self.dir + input_filenames
 
-        # Open the input file in read mode
-        with open(input_filename, 'r') as input_file:
-            # Read all lines from the file
-            lines = input_file.readlines()
+    #     # Open the input file in read mode
+    #     with open(input_filename, 'r') as input_file:
+    #         # Read all lines from the file
+    #         lines = input_file.readlines()
 
-            # Check if the file is not empty
-            if lines:
-                # Extract the last line
-                first_line = lines[0]
-                last_line = lines[-1]
-                true_states_start = np.array(first_line.split(), dtype=float)
-                true_states = np.array(last_line.split(), dtype=float)
+    #         # Check if the file is not empty
+    #         if lines:
+    #             # Extract the last line
+    #             first_line = lines[0]
+    #             last_line = lines[-1]
+    #             true_states_start = np.array(first_line.split(), dtype=float)
+    #             true_states = np.array(last_line.split(), dtype=float)
 
-                np.savetxt(self.dir + f"phases.dat", true_states[2:self.pars_list["nfil"][0]+2], delimiter=' ', newline=' ')
-                np.savetxt(self.dir + f"angles.dat", true_states[self.pars_list["nfil"][0]+2:], delimiter=' ', newline=' ')
+    #             np.savetxt(self.dir + f"phases.dat", true_states[2:self.pars_list["nfil"][0]+2], delimiter=' ', newline=' ')
+    #             np.savetxt(self.dir + f"angles.dat", true_states[self.pars_list["nfil"][0]+2:], delimiter=' ', newline=' ')
                 
-                # np.savetxt(self.dir + f"psi.dat", true_states, delimiter=' ', newline=' ')
-                # np.savetxt(self.dir + f"psi_start.dat", true_states_start, delimiter=' ', newline=' ')
+    #             # np.savetxt(self.dir + f"psi.dat", true_states, delimiter=' ', newline=' ')
+    #             # np.savetxt(self.dir + f"psi_start.dat", true_states_start, delimiter=' ', newline=' ')
 
-                # print(f"[SUCCESS]: last line copied from '{input_filename}' to '{output_filenames[0]}'.")
-            else:
-                print(f"The file '{input_filename}' is empty.")
+    #             # print(f"[SUCCESS]: last line copied from '{input_filename}' to '{output_filenames[0]}'.")
+    #         else:
+    #             print(f"The file '{input_filename}' is empty.")
 
     def run(self):
         
@@ -122,9 +124,11 @@ class DRIVER:
         # self.write_ini("Filenames", "simulation_dir", self.dir)
 
         # print(self.pars_list)
+        
 
         command = f"export OPENBLAS_NUM_THREADS=1; \
                     export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
-                    ./bin/{self.exe_name} > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][0]:.0f}fil_{self.pars_list['sim_length'][0]:.0f}period_{0}.out"
+                    ./bin/{self.exe_name} > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][0]:.0f}fil_{self.ite}.out"
         # subprocess.run(command)
         os.system(command)
+        self.ite += 1

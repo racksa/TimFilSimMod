@@ -83,7 +83,7 @@ class DRIVER:
                         # spring_factor = round(0.005 + 0.00*i, 3)
 
                         # k-means
-                        nfil = int(159 + 0*i)
+                        nfil = int(1 + 0*i)
                         nblob = int(5000 + 0*i)
                         ar = round(6.00, 2)
                         spring_factor = round(0.02 + 0.002*i, 3)
@@ -125,7 +125,7 @@ class DRIVER:
                             nfil = 1
                             nblob = 0
                             
-                        period = 0.9
+                        period = 1.0
                         sim_length = 1.0
                         
                         self.pars_list["nswim"].append(1)

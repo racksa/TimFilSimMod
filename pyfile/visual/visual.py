@@ -33,7 +33,7 @@ class VISUAL:
         # self.date = '20240114_readphase_free_random'
         # self.date = '20240115_resolution'
         self.date = '20240118_periodic'
-        self.date = '20240119_example_for_periodic'
+        # self.date = '20240119_example_for_periodic'
 
         # self.date = '20231219_free_flip'
 
@@ -75,7 +75,7 @@ class VISUAL:
         self.check_overlap = False
 
         self.plot_end_frame_setting = 120000
-        self.frames_setting = 1500
+        self.frames_setting = 30000
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -1456,11 +1456,9 @@ class VISUAL:
 
                     # Check if the file is not empty
                     if lines:
-
                         # Extract the last line
                         first_line = lines[0]
                         last_line = lines[-1]
-
                         ispsi = 1
                         if name == self.simName + '_true_states.dat':
                             ispsi = 0
@@ -1472,23 +1470,36 @@ class VISUAL:
                         if name == self.simName + '_true_states.dat':
                             stt = 0
 
+                            
                             sin_data_start = data_start[1:]
                             sin_data_end = data[1:]
+
+                            # print(sin_data_start)
+
+                            sin_data_start[1:self.nfil+1] = util.box(sin_data_start[1:self.nfil+1], 2*np.pi)
+                            sin_data_end[1:self.nfil+1] = util.box(sin_data_end[1:self.nfil+1], 2*np.pi)
+                            
+
                             print(sin_data_end[stt:stt+10])
                             print(sin_data_start[stt:stt+10])
-                            print((sin_data_end - sin_data_start)[stt:stt+10], '\n')
-                            sin_data_start[1:self.nfil+1] = np.sin(sin_data_start[1:self.nfil+1])
-                            sin_data_end[1:self.nfil+1] = np.sin(sin_data_end[1:self.nfil+1])
-                            sin_data_start[0] = 0.9
-                            sin_data_end[0] = 0
+                            # print((sin_data_end - sin_data_start)[stt:stt+10], '\n')
+
+
+                            # sin_data_start[1:self.nfil+1] = np.sin(sin_data_start[1:self.nfil+1])
+                            # sin_data_end[1:self.nfil+1] = np.sin(sin_data_end[1:self.nfil+1])
+                            # sin_data_start[0] = 0.9
+                            # sin_data_end[0] = 0
                             
-                            print('x(T)', sin_data_end[stt:stt+10])
-                            print('x(0)',sin_data_start[stt:stt+10])
+                            # print('x(T)', sin_data_end[stt:stt+10])
+                            # print('x(0)',sin_data_start[stt:stt+10])
+
                             diff = sin_data_end - sin_data_start
+                            # diff[1:self.nfil+1] -= 2*np.pi
                             diff[0] = 0
                             print('x(T)-x(0)', diff[stt:stt+10])
-                            diff_norm = np.sqrt(np.sum(diff*diff))
-                            data_norm = np.sqrt(np.sum(sin_data_end*sin_data_end))
+                            diff_norm = np.linalg.norm(diff[1:])
+                            sin_data_start[1:self.nfil+1] = util.box(sin_data_start[1:self.nfil+1], 2*np.pi)
+                            data_norm = np.linalg.norm(sin_data_start[1:])
                             print(f"norm x = {data_norm}  norm diff = {diff_norm}")
                             print('=======rel error ',diff_norm/data_norm)
 

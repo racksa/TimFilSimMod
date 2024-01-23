@@ -108,7 +108,7 @@ class GMRES:
                 res = np.sqrt(np.sum(p * p))
                 #print("res" + str(res))
                 if info == 1:
-                    print(f'gmresm: it={its}  res={res}')
+                    print(f'[\033[34mgmres\033[m] it={its}  res={res}')
                 #time.sleep(1)
                 #time.sleep(10)
       #          print("Res: " + str(res) + ", tol: " + str(tol) + ", its: " + str(its) + ", imx: " + str(imx) + ", res_: " + str(res_) + ", del_value: " + str(del_value) + ", j = " + str(j))
@@ -134,7 +134,7 @@ class GMRES:
                     if done:
                         return x, res, del_value, its, info
                     if del_value > 0.0:
-                        print('gmres: WARNING: m too small. restart affects hookstep.')
+                        print('[\033[34mgmres\033[m] WARNING: m too small. restart affects hookstep.')
 
                 res_ = res * stgn
         

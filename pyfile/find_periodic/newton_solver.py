@@ -5,6 +5,7 @@ import os
 import subprocess
 import time
 import util
+import configparser
 
 class NEWTON_SOLVER:
     
@@ -43,7 +44,7 @@ class NEWTON_SOLVER:
         dx[2] = x[0] * x[1] - self.p[2] * x[2]
         return dx
     
-    def run_filament_code(self, x):
+    def run_filament_code(self, ndts, x):
 
         # Save states to a file to read and run
         x = np.insert(x, 0, self.k)
@@ -53,15 +54,17 @@ class NEWTON_SOLVER:
         np.savetxt(self.d.dir + "psi.dat", x, newline = " ")
 
         # Change globals.ini file
-        self.d.change_variables(self.NFIL, self.NSEG, self.NBLOB, self.AR, self.k, x[1], 1.0)
-        sim_name = self.d.update_globals_file()
+        self.d.change_variables(self.NFIL, self.NSEG, self.NBLOB, self.AR, self.k, x[1], 1./300*ndts)
+        self.d.update_globals_file()
 
         # Run code
-        print(f"Running new sim with T={x[1]}")
+        # config = configparser.ConfigParser()
+        # config.read(self.d.globals_name)
+        # print(config['Parameters']['sim_length'])
         self.d.run()
 
         # Return output
-        output_filename = self.d.dir + sim_name + "_true_states.dat"
+        output_filename = self.d.dir + self.d.simName + "_true_states.dat"
         return np.loadtxt(output_filename)
 
     def steporbit(self, ndts, x):
@@ -70,13 +73,17 @@ class NEWTON_SOLVER:
             self.dt = x[0] / self.ndts
 
         # x[1:] is the phases
-        a = self.run_filament_code(x)
+        a = self.run_filament_code(ndts, x)
         
         a = a[-1][2:]
 
         y = np.zeros_like(x)
         
         y[1:] = a
+
+        # Take into account the periodicity of the phase
+        if ndts != 1:
+            y[1:self.NFIL+1] -= 2*np.pi 
         
         return y
         
@@ -89,7 +96,6 @@ class NEWTON_SOLVER:
         # y_[1:self.NFIL+1] = util.box(y_[1:self.NFIL+1], 2*np.pi)
 
         y = y_ - x # Calculate the difference
-        y[1:self.NFIL+1] -= 2*np.pi # Take into account the periodicity of the phase
 
         y[0] = 0.0  # Set the first element to 0 (constraints, rhs=0)
 
@@ -101,7 +107,7 @@ class NEWTON_SOLVER:
 
     def saveorbit(self):
         # called each Newton iteration
-        print(f'newton: iteration {self.new_nits}')
+        print(f'[\033[32mnewton\033[m]: iteration {self.new_nits}')
 
         norm_x = np.sqrt(self.dotprd(-1, self.new_x, self.new_x))
         if self.fixT == 1:
@@ -109,9 +115,11 @@ class NEWTON_SOLVER:
         else:
             relative_err = self.new_tol / norm_x
 
-        print(f'norm x = {norm_x}, new tolerance = {self.new_tol}')
-        print(f'relative error: {relative_err}')
+        print(f'[\033[32mnewton\033[m]: norm x = {norm_x}, new tolerance = {self.new_tol}')
+        print(f'[\033[32mnewton\033[m]: relative error: {relative_err}')
 
+        np.savetxt(self.d.dir + f"last_psi.dat", self.new_x, delimiter=' ', newline=' ')
+                
         # SAVE current solution, new_x (You can add your saving logic here)
     
     def multJp(self, n, x):
@@ -122,27 +130,30 @@ class NEWTON_SOLVER:
         # Action of Jacobian on update dx, and evaluation of constraint on update.
         # Use approximation    dF(x_n)/dx . dx = (F(x_n+eps.dx)-F(x_n))/eps
 
+        # print(f"////////////dx = {dx[0]}, {dx[1]}, {dx[2]}")
         # (F(x0+eps*x) - F(x0))/eps
         eps = np.sqrt(self.dotprd(1, dx, dx))
         eps = self.epsJ * np.sqrt(self.dotprd(1,self.new_x, self.new_x)) / eps
         y = self.new_x + eps * dx
-        s = self.getrhs(n_, y)
-        y = (s - self.new_fx) / eps
+        # print(f"computing F(x_i + eps * dx) with {y}")
+        s = self.getrhs(n_, y) # F(x_i + eps * dx)
+        y = (s - self.new_fx) / eps 
     
         if self.fixT: # No extra constraint if T fixed
             y[0] = 0.0
         else: # Constrant: dx . \dot{x} = 0
-            s = self.steporbit(1,self.new_x)
+            # print(f"computing \dot(x) with {self.new_x}")
+            s = self.steporbit(1, self.new_x) 
             self.dt = self.new_x[0] / self.ndts
             s = (s - self.new_x) / self.dt
-            y[0] = self.dotprd(-1, s, dx)
+            y[0] = self.dotprd(-1, s, dx) # s = \dot{x}
     
         return y
 
 
     def NewtonHook(self, m, n, gtol, tol, del_value, mndl, mxdl, nits, info):
-        
         g = gmres.GMRES()
+        # print(f"computing F(x_i) with {self.new_x}")
         self.new_fx = self.getrhs(n, self.new_x)
         self.new_tol = np.sqrt(self.dotprd(n, self.new_fx, self.new_fx))
         self.new_del = del_value
@@ -157,7 +168,7 @@ class NEWTON_SOLVER:
             mxdl_ = 1e99
 
         if info == 1:
-            print(f'newton: nits={self.new_nits}  res={self.new_tol}')
+            print(f'[\033[32mnewton\033[m]: nits={self.new_nits}  res={self.new_tol}')
 
         # stt = 0
         # print('new_x (x(0))', self.new_x[stt:stt+10])
@@ -171,7 +182,7 @@ class NEWTON_SOLVER:
 
         if self.new_tol < tol:
             if info == 1:
-                print('newton: input already converged')
+                print('[\033[32mnewton\033[m]: input already converged')
             info = 0
             return info
 
@@ -179,7 +190,7 @@ class NEWTON_SOLVER:
         while True:
             if self.new_del < mndl:
                 if info == 1:
-                    print('newton: trust region too small')
+                    print('[\033[32mnewton\033[m]: trust region too small')
                 info = 3
                 return info
 
@@ -198,6 +209,7 @@ class NEWTON_SOLVER:
             ginfo = info
             self.new_x = x_ - s
 
+            # print(f"computing F(x_i) with {self.new_x}")
             self.new_fx = self.getrhs(n, self.new_x)
             self.new_tol = np.sqrt(self.dotprd(n, self.new_fx, self.new_fx))
             snrm = np.sqrt(self.dotprd(n, s, s))
@@ -205,30 +217,30 @@ class NEWTON_SOLVER:
             pred = tol_ - gdel
 
             if info == 1:
-                print(f'newton: nits={self.new_nits}  res={self.new_tol}')
-                print(f'newton: gits={self.new_gits}  del={self.new_del}')
-                print(f'newton: |s|={snrm}  pred={pred}')
-                print(f'newton: ared/pred={ared/pred}')
+                print(f'[\033[32mnewton\033[m]: nits={self.new_nits}  res={self.new_tol}')
+                print(f'[\033[32mnewton\033[m]: gits={self.new_gits}  del={self.new_del}')
+                print(f'[\033[32mnewton\033[m]: |s|={snrm}  pred={pred}')
+                print(f'[\033[32mnewton\033[m]: ared/pred={ared/pred}')
 
             if del_value == 0.0:
                 if info == 1:
-                    print('newton: took full newton step')
+                    print('[\033[32mnewton\033[m]: took full newton step')
 
             elif self.new_tol > tol__:
                 if info == 1:
-                    print('newton: accepting the previous step')
+                    print('[\033[32mnewton\033[m]: accepting the previous step')
                 self.new_x = x__
                 self.new_fx = fx__
                 self.new_tol = tol__
                 self.new_del = del__
             elif ared < 0.0:
                 if info == 1:
-                    print('newton: norm increased, try a smaller step')
+                    print('[\033[32mnewton\033[m]: norm increased, try a smaller step')
                 self.new_del = snrm * 0.5
                 ginfo = 2
             elif ared / pred < 0.75:
                 if info == 1:
-                    print('newton: step is okay, trying a smaller step')
+                    print('[\033[32mnewton\033[m]: step is okay, trying a smaller step')
                 x__ = self.new_x
                 fx__ = self.new_fx
                 tol__ = self.new_tol
@@ -240,11 +252,11 @@ class NEWTON_SOLVER:
                 ginfo = 2
             elif snrm < self.new_del * 0.9:
                 if info == 1:
-                    print('newton: step is good, took a full newton step')
+                    print('[\033[32mnewton\033[m]: step is good, took a full newton step')
                 self.new_del = min(mxdl_, snrm * 2.0)
             elif self.new_del < mxdl_ * 0.9:
                 if info == 1:
-                    print('newton: step is good, trying a larger step')
+                    print('[\033[32mnewton\033[m]: step is good, trying a larger step')
                 x__ = self.new_x
                 fx__ = self.new_fx
                 tol__ = self.new_tol
@@ -266,11 +278,11 @@ class NEWTON_SOLVER:
 
             if self.new_tol < tol:
                 if info == 1:
-                    print('newton: converged')
+                    print('[\033[32mnewton\033[m]: converged')
                 info = 0
                 return info
             elif self.new_nits == nits:
                 if info == 1:
-                    print('newton: reached max its')
+                    print('[\033[32mnewton\033[m]: reached max its')
                 info = 2
                 return info

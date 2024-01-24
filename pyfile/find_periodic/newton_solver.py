@@ -118,7 +118,8 @@ class NEWTON_SOLVER:
         print(f'[\033[32mnewton\033[m]: norm x = {norm_x}, new tolerance = {self.new_tol}')
         print(f'[\033[32mnewton\033[m]: relative error: {relative_err}')
 
-        np.savetxt(self.d.dir + f"last_psi.dat", self.new_x, delimiter=' ', newline=' ')
+        save_x = np.insert(self.new_x, 0, self.k)
+        # np.savetxt(self.d.dir + f"last_psi.dat", save_x, delimiter=' ', newline=' ')
                 
         # SAVE current solution, new_x (You can add your saving logic here)
     

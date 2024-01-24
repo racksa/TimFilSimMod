@@ -88,7 +88,7 @@ extern std::string SIMULATION_READANGLE_NAME;
   // It will also generate reference s-values for shape sequences which don't result in inextensible filaments.
   // NOTE: This will overwrite any existing reference files unless their names have been changed.
 
-  #define CILIA_IC_TYPE 5
+  #define CILIA_IC_TYPE 4
   // Valid options:
   // if using 3, we should be able to derive all other cases.
   // 0 = All cilia start in-phase with phase 0.
@@ -300,7 +300,7 @@ extern int TOTAL_TIME_STEPS;
 #else
 
   #define STEPS_PER_PERIOD 300
-  #define SAVES_PER_PERIOD 300
+  #define SAVES_PER_PERIOD 30
 
 #endif
 

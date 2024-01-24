@@ -33,7 +33,8 @@ class VISUAL:
         # self.date = '20240114_readphase_free_random'
         # self.date = '20240115_resolution'
         self.date = '20240118_periodic'
-        # self.date = '20240119_example_for_periodic'
+        self.date = '20240119_example_for_periodic'
+        self.date = '20240124_test_solution'
 
         # self.date = '20231219_free_flip'
 

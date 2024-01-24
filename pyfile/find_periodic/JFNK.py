@@ -23,15 +23,16 @@ def main():
  
     # n = 3*(NSEG-1)*NFIL+1 #4#3 * (N - 1) * Nf + 1  # Dimension of system, including unknown params
     n = 2*NFIL+1
-    mgmres = 5  # 10  # max GMRES iterations
+    mgmres = 7  # 10  # max GMRES iterations
     nits = 150  # max Newton iterations
-    rel_err = 1e-5  # 1e-8 Relative error |F|/|x|
-    del_value = -1  # These rarely need changing for any problem
-    mndl = 1e-20
-    mxdl = 1e20
-    gtol = 1e-1  # 1e-4
+    rel_err_ini = 2e-3  # 1e-8 Relative error |F|/|x|
+    del_value_ini = -1  # These rarely need changing for any problem
+    mndl_ini = 1e-20
+    mxdl_ini = 1e20
+    gtol = 5e-1  # 1e-4
 
-    f_range = np.array([0.08])
+    f_range = np.arange(0.01, 0.08, 0.002)[::-1]
+    # print(f_range)
     for k in f_range:
 
         print('-----------Spring constant = ' + str(k))
@@ -42,17 +43,21 @@ def main():
        # Scale parameters by |x| then call black box
         d = np.sqrt(np.sum(newton.new_x[1:] * newton.new_x[1:]))
         # Do we want rel_err?
-        tol = rel_err * d
+        tol = rel_err_ini * d
         print(f"Requested tol={tol}")
-        del_value = del_value * d
-        mndl = mndl * d
-        mxdl = mxdl * d
+        del_value = del_value_ini * d
+        mndl = mndl_ini * d # this is a bug
+        mxdl = mxdl_ini * d
 
         info = 1
 
         info = newton.NewtonHook(mgmres, n, gtol, tol, del_value, mndl, mxdl, nits, info)
         
-    #     save_solution(np.concatenate(([follower_force],newton.new_x)),output_filename)
+        with open(output_filename, "ab") as f:
+            f.write(b"\n")
+            np.savetxt(f, np.concatenate(([k], newton.new_x)), newline = " ")
+        
+        # save_solution(np.concatenate(([k],newton.new_x)), output_filename)
 
 def find_new_x(fixT,NSEG,NFIL,input_filename):
 
@@ -61,13 +66,17 @@ def find_new_x(fixT,NSEG,NFIL,input_filename):
         return np.concatenate(([0.2],1e-8 * np.random.standard_normal(3*(NSEG-1)*NFIL))) # Current best x
     
     else:
+        with open(input_filename, 'r') as file:
+            num_lines = sum(1 for line in file)
 
-        full_input = np.loadtxt(input_filename) #TODO: fix this!
-        
-        # full_input[2:2+NFIL] = np.sin(full_input[2:2+NFIL])
-        # full_input[2:2+NFIL] = np.exp(1j*full_input[2:2+NFIL])
+        if num_lines == 1:
+            full_input = np.loadtxt(input_filename)
+        else:
+            full_input = np.loadtxt(input_filename)[-1]
+            
         full_input[2:2+NFIL] = util.box(full_input[2:2+NFIL], 2*np.pi)
 
+        print(len(full_input))
         return full_input[1:]
 
 def save_solution(data,filename):

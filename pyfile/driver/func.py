@@ -16,6 +16,7 @@ class DRIVER:
         # self.date = '20240115_resolution'
         self.date = '20240118_periodic'
         self.date = '20240119_example_for_periodic'
+        self.date = '20240124_test_solution'
         self.afix = ''
         self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         # self.dir = f"data/expr_sims/{self.date}{self.afix}/"
@@ -83,7 +84,7 @@ class DRIVER:
                         # spring_factor = round(0.005 + 0.00*i, 3)
 
                         # k-means
-                        nfil = int(1 + 0*i)
+                        nfil = int(159 + 0*i)
                         nblob = int(5000 + 0*i)
                         ar = round(6.00, 2)
                         spring_factor = round(0.02 + 0.002*i, 3)
@@ -126,7 +127,7 @@ class DRIVER:
                             nblob = 0
                             
                         period = 1.0
-                        sim_length = 1.0
+                        sim_length = 1000.0
                         
                         self.pars_list["nswim"].append(1)
                         self.pars_list["nseg"].append(nseg)

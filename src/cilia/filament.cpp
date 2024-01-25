@@ -341,7 +341,7 @@ void filament::initial_setup(const Real *const base_pos,
             }
             input_file >> TORSIONAL_SPRING_MAGNITUDE_FACTOR;
             input_file >> PERIOD;
-            float buffer;
+            Real buffer;
             for (int fpos = 0; fpos < 2*NFIL; fpos++){
               input_file >> buffer;
               if(fpos == fil_id){

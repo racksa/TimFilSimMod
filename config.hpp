@@ -33,6 +33,40 @@ extern std::string SIMULATION_READPHASE_NAME;
 extern std::string SIMULATION_READANGLE_NAME;
 
 
+#define FIL_USE_DOUBLE_PRECISION false
+
+#if FIL_USE_DOUBLE_PRECISION
+    typedef double Real;
+    typedef long Integer;
+    #define myfil_sqrt sqrt
+    #define myfil_rint rint
+    #define myfil_exp exp
+    #define myfil_floor floor
+    #define myfil_ceil ceil
+    #define myfil_fmod fmod
+    #define myfil_getrf_ dgetrf_
+    #define myfil_getri_ dgetri_
+    #define myfil_gemm_ dgemm_
+    #define myfil_cos cos
+    #define myfil_sin sin
+#else
+    typedef float Real;
+    typedef int Integer;
+    #define myfil_sqrt sqrtf
+    #define myfil_rint rintf
+    #define myfil_exp expf
+    #define myfil_floor floorf
+    #define myfil_ceil ceilf
+    #define myfil_fmod fmodf
+    #define myfil_getrf_ sgetrf_
+    #define myfil_getri_ sgetri_
+    #define myfil_gemm_ sgemm_
+    #define myfil_cos cosf
+    #define myfil_sin sinf
+    
+#endif
+
+
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Simulation type
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,7 +79,7 @@ extern std::string SIMULATION_READANGLE_NAME;
 // 4 = Squirmer-type simulation; i.e. there aren't actually any filaments/cilia. The slip velocity can be set in the mobility solver.
 
 // Define whether the motion of the rigid bodies is imposed or allowed to evolve dynamically.
-#define PRESCRIBED_BODY_VELOCITIES false
+#define PRESCRIBED_BODY_VELOCITIES true
 
 #if CILIA_TYPE==0
 
@@ -88,7 +122,7 @@ extern std::string SIMULATION_READANGLE_NAME;
   // It will also generate reference s-values for shape sequences which don't result in inextensible filaments.
   // NOTE: This will overwrite any existing reference files unless their names have been changed.
 
-  #define CILIA_IC_TYPE 4
+  #define CILIA_IC_TYPE 5
   // Valid options:
   // if using 3, we should be able to derive all other cases.
   // 0 = All cilia start in-phase with phase 0.
@@ -203,17 +237,17 @@ extern int NSWIM;
 extern int NSEG;
 extern int NFIL;
 extern int NBLOB;
-extern float AR;
-extern float AXIS_DIR_BODY_LENGTH;
-extern float TORSIONAL_SPRING_MAGNITUDE_FACTOR; // Pre-multiplies the mean generalised driving force magnitude to give the spring constant that resists rigid-body rotations of the shape.
-extern float GEN_FORCE_MAGNITUDE_FACTOR; 
+extern Real AR;
+extern Real AXIS_DIR_BODY_LENGTH;
+extern Real TORSIONAL_SPRING_MAGNITUDE_FACTOR; // Pre-multiplies the mean generalised driving force magnitude to give the spring constant that resists rigid-body rotations of the shape.
+extern Real GEN_FORCE_MAGNITUDE_FACTOR; 
 extern int NTOTAL;
-extern float END_FORCE_MAGNITUDE;
-extern float SEG_SEP;
-extern float DL;
-extern float SIM_LENGTH;
-extern float PERIOD;
-extern float DT;
+extern Real END_FORCE_MAGNITUDE;
+extern Real SEG_SEP;
+extern Real DL;
+extern Real SIM_LENGTH;
+extern Real PERIOD;
+extern Real DT;
 extern int TOTAL_TIME_STEPS;
 
 
@@ -300,7 +334,7 @@ extern int TOTAL_TIME_STEPS;
 #else
 
   #define STEPS_PER_PERIOD 300
-  #define SAVES_PER_PERIOD 30
+  #define SAVES_PER_PERIOD 300
 
 #endif
 
@@ -496,37 +530,5 @@ extern int TOTAL_TIME_STEPS;
 
 #define DISPLAYTIME true
 
-#define FIL_USE_DOUBLE_PRECISION false
-
-#if FIL_USE_DOUBLE_PRECISION
-    typedef double Real;
-    typedef long Integer;
-    #define myfil_sqrt sqrt
-    #define myfil_rint rint
-    #define myfil_exp exp
-    #define myfil_floor floor
-    #define myfil_ceil ceil
-    #define myfil_fmod fmod
-    #define myfil_getrf_ dgetrf_
-    #define myfil_getri_ dgetri_
-    #define myfil_gemm_ dgemm_
-    #define myfil_cos cos
-    #define myfil_sin sin
-#else
-    typedef float Real;
-    typedef int Integer;
-    #define myfil_sqrt sqrtf
-    #define myfil_rint rintf
-    #define myfil_exp expf
-    #define myfil_floor floorf
-    #define myfil_ceil ceilf
-    #define myfil_fmod fmodf
-    #define myfil_getrf_ sgetrf_
-    #define myfil_getri_ sgetri_
-    #define myfil_gemm_ sgemm_
-    #define myfil_cos cosf
-    #define myfil_sin sinf
-    
-#endif
 
 #endif // MY_CONFIG_HEADER_INCLUDED

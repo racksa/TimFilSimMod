@@ -6,7 +6,6 @@ import util
 
 def main():
     # Define 'global variables'
-    epsJ = 1e-5 # 1e-6  # epsilon used in Jacobian approximation
     #ndts = 200   # Number of timesteps taken in period T
     #fixT = 1   # Fix T for equilibrium, rather than PO solution
     #follower_force = 50      # Follower force (parameter of dynamical system)
@@ -15,7 +14,7 @@ def main():
     NBLOB = 5000
     AR = 6
 
-    output_filename = "data/expr_sims/20240118_periodic/psi_guess.dat"
+    output_filename = f"data/expr_sims/20240118_periodic/psi_guess{NFIL}.dat"
 
     # Number of time steps (ndts) and fixT
     ndts = 300
@@ -23,15 +22,17 @@ def main():
  
     # n = 3*(NSEG-1)*NFIL+1 #4#3 * (N - 1) * Nf + 1  # Dimension of system, including unknown params
     n = 2*NFIL+1
-    mgmres = 7  # 10  # max GMRES iterations
+    mgmres = 5  # 10  # max GMRES iterations
     nits = 150  # max Newton iterations
     rel_err_ini = 2e-3  # 1e-8 Relative error |F|/|x|
     del_value_ini = -1  # These rarely need changing for any problem
     mndl_ini = 1e-20
     mxdl_ini = 1e20
-    gtol = 5e-1  # 1e-4
+    gtol = 1e-2  # 1e-4
+    epsJ = 1e-4 # 1e-6  # epsilon used in Jacobian approximation
 
-    f_range = np.arange(0.01, 0.08, 0.002)[::-1]
+    f_range = np.arange(0.01, 0.082, 0.002)[::-1]
+    # f_range = [0.08]
     # print(f_range)
     for k in f_range:
 
@@ -56,8 +57,6 @@ def main():
         with open(output_filename, "ab") as f:
             f.write(b"\n")
             np.savetxt(f, np.concatenate(([k], newton.new_x)), newline = " ")
-        
-        # save_solution(np.concatenate(([k],newton.new_x)), output_filename)
 
 def find_new_x(fixT,NSEG,NFIL,input_filename):
 
@@ -76,20 +75,19 @@ def find_new_x(fixT,NSEG,NFIL,input_filename):
             
         full_input[2:2+NFIL] = util.box(full_input[2:2+NFIL], 2*np.pi)
 
-        print(len(full_input))
         return full_input[1:]
 
-def save_solution(data,filename):
-    print(data)
-    os.chdir("../stability/")
-    input_filename = filename
-    print(input_filename)
+# def save_solution(data,filename):
+#     print(data)
+#     os.chdir("../stability/")
+#     input_filename = filename
+#     print(input_filename)
 
-    with open(input_filename, "ab") as  f:
-        f.write(b"\n")
-        np.savetxt(f, data, newline = " ")
+#     with open(input_filename, "ab") as  f:
+#         f.write(b"\n")
+#         np.savetxt(f, data, newline = " ")
 
-    return
+#     return
 
 # Run code
 main()

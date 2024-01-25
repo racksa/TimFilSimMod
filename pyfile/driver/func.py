@@ -8,15 +8,15 @@ class DRIVER:
     def __init__(self):
         self.globals_name = 'globals.ini'
         self.exe_name = 'cilia_periodic'
-        # self.exe_name = 'cilia_readphase_free'
+        self.exe_name = 'cilia_readphase_free'
         # self.exe_name = 'cilia_resolution'
         # self.date = '20240104_readphase_hold'
         # self.date = '20240112_readphase_free'
-        # self.date = '20240114_readphase_free_hemisphere'
+        self.date = '20240114_readphase_free_random'
         # self.date = '20240115_resolution'
-        self.date = '20240118_periodic'
-        self.date = '20240119_example_for_periodic'
-        self.date = '20240124_test_solution'
+        # self.date = '20240118_periodic'
+        # self.date = '20240119_example_for_periodic'
+        # self.date = '20240124_test_solution'
         self.afix = ''
         self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         # self.dir = f"data/expr_sims/{self.date}{self.afix}/"
@@ -89,11 +89,11 @@ class DRIVER:
                         ar = round(6.00, 2)
                         spring_factor = round(0.02 + 0.002*i, 3)
 
-                        # # find branches wider range
-                        # nfil = int(639 + 0*i)
-                        # nblob = int(40961 + 0*i)
-                        # ar = round(15.00, 2)
-                        # spring_factor = round(0.02 + 0.002*i, 3)
+                        # find branches wider range
+                        nfil = int(639 + 0*i)
+                        nblob = int(40961 + 0*i)
+                        ar = round(15.00, 2)
+                        spring_factor = round(0.02 + 0.002*i, 3)
 
                         # # resolution study
                         # nfil = int(159)
@@ -127,7 +127,7 @@ class DRIVER:
                             nblob = 0
                             
                         period = 1.0
-                        sim_length = 1000.0
+                        sim_length = 500.0
                         
                         self.pars_list["nswim"].append(1)
                         self.pars_list["nseg"].append(nseg)
@@ -186,7 +186,7 @@ class DRIVER:
         # Iterate through the sim list and write to .ini file and execute
         for i in range(sim_index_start, sim_index_end):
             # readphase_index = int(i)
-            readphase_index = ''
+            readphase_index = '15'
             for key, value in self.pars_list.items():
                 self.write_ini("Parameters", key, float(self.pars_list[key][i]))
             self.simName = f"ciliate_{self.pars_list['nfil'][i]:.0f}fil_{self.pars_list['nblob'][i]:.0f}blob_{self.pars_list['ar'][i]:.2f}R_{self.pars_list['spring_factor'][i]:.3f}torsion"

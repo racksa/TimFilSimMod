@@ -13,6 +13,7 @@ from sklearn.cluster import KMeans
 import math
 import sys
 import matplotlib as mpl
+import os
 mpl.rcParams['mathtext.fontset'] = 'stix'
 mpl.rcParams['mathtext.rm'] = 'Bitstream Vera Sans'
 mpl.rcParams['mathtext.it'] = 'Bitstream Vera Sans:italic'
@@ -26,15 +27,15 @@ class VISUAL:
     def __init__(self):
         self.globals_name = 'globals.ini'
         self.date = '20240104_readphase_hold'
-        self.date = '20231231_readphase'
+        # self.date = '20231231_readphase'
         # self.date = '20240112_readphase_free'
         self.date = '20240114_readphase_free_hemisphere'
-        self.date = '20240114_readphase_free_diaplectic'
-        # self.date = '20240114_readphase_free_random'
+        # self.date = '20240114_readphase_free_diaplectic'
+        self.date = '20240114_readphase_free_random'
         # self.date = '20240115_resolution'
-        self.date = '20240118_periodic'
-        self.date = '20240119_example_for_periodic'
-        self.date = '20240124_test_solution'
+        # self.date = '20240118_periodic'
+        # self.date = '20240119_example_for_periodic'
+        # self.date = '20240124_test_solution'
 
         # self.date = '20231219_free_flip'
 
@@ -75,8 +76,8 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 120000
-        self.frames_setting = 30000
+        self.plot_end_frame_setting = 6000
+        self.frames_setting = 3000
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -88,6 +89,8 @@ class VISUAL:
         self.Lz = 1000
 
         self.ncol = 4
+
+        self.plot_interval = 1
         
         self.index = 0
 
@@ -172,7 +175,7 @@ class VISUAL:
         self.plot_end_frame = min(self.plot_end_frame_setting, sum(1 for line in open(self.simName + '_body_states.dat')))
         self.plot_start_frame = max(0, self.plot_end_frame-self.frames_setting)
         self.frames = self.plot_end_frame - self.plot_start_frame
-        self.plot_interval = 1
+        
         print(f'index={self.index} file={self.simName}')
         
     def plot(self):
@@ -1518,6 +1521,30 @@ class VISUAL:
         # combined_par = np.concatenate((fil_phases, fil_angles))
         # np.savetxt(self.dir + f"psi{int(self.index)}.dat", combined_par, delimiter=' ', newline=' ')       
 
+    def periodic_solution(self):
+
+        input_filename = self.dir + f"psi_guess.dat"
+
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+
+        try:
+            # Open the input file in read mode
+            with open(input_filename, 'r') as input_file:
+                # Read all lines from the file
+                lines = np.loadtxt(input_filename)
+                
+                k_list = lines[:,0]
+                T_list = lines[:,1]
+                ax.plot(k_list, T_list, marker='+')
+                ax.set_xlabel(r'$k$')
+                ax.set_ylabel(r'$T$')
+                fig.savefig(f'fig/T_solution.pdf', bbox_inches = 'tight', format='pdf')
+        
+        except FileNotFoundError:
+            print(f"Error: The file '{input_filename}' does not exist.")
+        
+        plt.show()
 
 # Multi sims
     def multi_phase(self):
@@ -2570,6 +2597,11 @@ class VISUAL:
                 
                 fname = 'phase_data_20230104_held_fixed'
                 fname = 'phase_data_20231231_free'
+                fname = 'phase_data_20240114_readphase_free_diaplectic'
+                fname = f'phase_data_{self.date}'
+                if not os. path. exists(fname):
+                    print("Creating folder")
+                    os.system(f"mkdir {fname}")
                 np.savetxt(f'{fname}/X_phase_index{self.index}.txt', X, delimiter=', ')
                 # np.savetxt(f'phase_data_20231107/by_index/spring_constant{spring_factor}/X_rotation_angle_index{self.index}.txt', X_angle, delimiter=', ')
                 np.savetxt(f'{fname}/azim_pos_index{self.index}.txt', azim_array_sorted, delimiter=', ')

@@ -133,10 +133,12 @@ class NEWTON_SOLVER:
 
         # print(f"////////////dx = {dx[0]}, {dx[1]}, {dx[2]}")
         # (F(x0+eps*x) - F(x0))/eps
-        eps = np.sqrt(self.dotprd(1, dx, dx))
+        eps = np.sqrt(self.dotprd(1, dx, dx)) 
         eps = self.epsJ * np.sqrt(self.dotprd(1,self.new_x, self.new_x)) / eps
-        y = self.new_x + eps * dx
+        # should eps include \del period?
+        y = self.new_x + eps * dx 
         # print(f"computing F(x_i + eps * dx) with {y}")
+        print(f'[\033[34mgmres\033[m]: computing F(x_i + eps * dx) with eps={eps} T={self.new_x[0]} eps*dT={eps * dx[0]}')
         s = self.getrhs(n_, y) # F(x_i + eps * dx)
         y = (s - self.new_fx) / eps 
     
@@ -146,7 +148,8 @@ class NEWTON_SOLVER:
             # print(f"computing \dot(x) with {self.new_x}")
             s = self.steporbit(1, self.new_x) 
             self.dt = self.new_x[0] / self.ndts
-            s = (s - self.new_x) / self.dt
+            # s = (s - self.new_x) / self.dt
+            s = (s - self.new_x) / self.dt - 2*np.pi/self.new_x[0]
             y[0] = self.dotprd(-1, s, dx) # s = \dot{x}
     
         return y

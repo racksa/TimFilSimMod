@@ -1531,7 +1531,7 @@ void box_images(Real &x, Real box_size){
 }
 
 __global__
-void sync_var(int nswim, int nseg, int nfil, int nblob, int end_force_magnitude, float seg_sep){
+void sync_var(int nswim, int nseg, int nfil, int nblob, int end_force_magnitude, Real seg_sep){
 
   NSWIM_d = nswim;
   NSEG_d = nseg;

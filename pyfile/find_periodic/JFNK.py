@@ -10,7 +10,7 @@ def main():
     #fixT = 1   # Fix T for equilibrium, rather than PO solution
     #follower_force = 50      # Follower force (parameter of dynamical system)
     NSEG = 20      # Number of segments
-    NFIL = 159       # Number of filaments
+    NFIL = 15       # Number of filaments
     NBLOB = 5000
     AR = 6
 
@@ -32,7 +32,7 @@ def main():
     epsJ = 1e-4 # 1e-6  # epsilon used in Jacobian approximation
 
     f_range = np.arange(0.01, 0.082, 0.002)[::-1]
-    # f_range = [0.08]
+    f_range = [0.08]
     # print(f_range)
     for k in f_range:
 
@@ -52,8 +52,10 @@ def main():
 
         info = 1
 
-        info = newton.NewtonHook(mgmres, n, gtol, tol, del_value, mndl, mxdl, nits, info)
+        # info = newton.NewtonHook(mgmres, n, gtol, tol, del_value, mndl, mxdl, nits, info)
+        info = newton.NewtonLinalg(mgmres, n, gtol, tol, del_value, mndl, mxdl, nits, info)
         
+
         with open(output_filename, "ab") as f:
             f.write(b"\n")
             np.savetxt(f, np.concatenate(([k], newton.new_x)), newline = " ")

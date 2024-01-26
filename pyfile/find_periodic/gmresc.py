@@ -47,10 +47,9 @@ class GMRES:
         if info == 2:
             y, del_value = self.GMREShook(m, del_value)
             z = np.dot(self.v[:, :self.j], y[:self.j])
-            x = psolve(n, z)
+            x = psolve(z)
             info = 0
             return x, res, del_value, its, info
-
         tol = res
         imx = its
         its = 0
@@ -64,7 +63,7 @@ class GMRES:
             if self.beta == 0.0:
                 w = np.zeros(n)
             else:
-                w = matvec(n, x)
+                w = matvec(x)
             w = b - w
             self.beta = np.sqrt(dotprd(n, w, w))
             self.v[:, 0] = w / self.beta
@@ -74,11 +73,11 @@ class GMRES:
                 
                 self.j = j+1
                 its += 1
-                z = self.v[:, j]
+                z = self.v[:, j] # z is the Krylov sub-vector
                 #print("z = " +str(z))
-                z = psolve(n, z)
+                z = psolve(z)
                 #print("z = " +str(z))
-                w = matvec(n, z)
+                w = matvec(z)
                 #print("w = " +str(w))
 
                 for i in range(j+1):
@@ -123,7 +122,7 @@ class GMRES:
 
                         y, del_value = self.GMREShook(m, del_value)
                     z = np.dot(self.v[:, :j], y[:j])
-                    z = psolve(n, z)
+                    z = psolve(z)
                     x = x + z
                     if its == imx:
                         info = 2

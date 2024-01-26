@@ -27,15 +27,15 @@ class VISUAL:
     def __init__(self):
         self.globals_name = 'globals.ini'
         self.date = '20240104_readphase_hold'
-        # self.date = '20231231_readphase'
+        self.date = '20231231_readphase'
         # self.date = '20240112_readphase_free'
-        self.date = '20240114_readphase_free_hemisphere'
+        # self.date = '20240114_readphase_free_hemisphere'
         # self.date = '20240114_readphase_free_diaplectic'
-        self.date = '20240114_readphase_free_random'
+        # self.date = '20240114_readphase_free_random'
         # self.date = '20240115_resolution'
         # self.date = '20240118_periodic'
         # self.date = '20240119_example_for_periodic'
-        # self.date = '20240124_test_solution'
+        self.date = '20240124_test_solution'
 
         # self.date = '20231219_free_flip'
 
@@ -76,8 +76,8 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 6000
-        self.frames_setting = 3000
+        self.plot_end_frame_setting = 120000
+        self.frames_setting = 1200
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -1520,6 +1520,43 @@ class VISUAL:
         # fil_angles = np.array(combine_text[1].split()[1:], dtype=float)
         # combined_par = np.concatenate((fil_phases, fil_angles))
         # np.savetxt(self.dir + f"psi{int(self.index)}.dat", combined_par, delimiter=' ', newline=' ')       
+
+    def find_periodicity(self):
+        self.select_sim()
+
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+
+        fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
+        fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
+
+        phases = np.zeros((self.frames, self.nfil))
+        T_array = np.linspace(0.8, 1.2, 40)
+        error_array = np.zeros(np.shape(T_array))
+
+        for i in range(self.plot_end_frame):
+            print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
+            fil_phases_str = fil_phases_f.readline()
+            # fil_angles_str = fil_angles_f.readline()
+
+            if(i>=self.plot_start_frame):
+                phases[i-self.plot_start_frame] = np.array(fil_phases_str.split()[1:], dtype=float)
+                # fil_angles = np.array(fil_angles_str.split()[1:], dtype=float)
+            
+        for ti, T in enumerate(T_array):
+            frame_diff = int(T*self.period)
+
+            for frame in range(frame_diff, self.frames):
+                error_array[ti] += float(np.linalg.norm(phases[frame] - phases[frame-frame_diff] - 2*np.pi))\
+                    /float(np.linalg.norm(util.box(phases[frame], 2*np.pi)))
+            
+            error_array[ti] /= (self.frames - frame_diff)
+        
+
+        ax.plot(T_array, error_array)
+        print(f'The period is T={T_array[np.where(error_array==error_array.min())]} with rel error={error_array.min()}')
+
+        plt.show()
 
     def periodic_solution(self):
 

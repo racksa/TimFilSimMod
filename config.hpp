@@ -33,7 +33,7 @@ extern std::string SIMULATION_READPHASE_NAME;
 extern std::string SIMULATION_READANGLE_NAME;
 
 
-#define FIL_USE_DOUBLE_PRECISION false
+#define FIL_USE_DOUBLE_PRECISION true
 
 #if FIL_USE_DOUBLE_PRECISION
     typedef double Real;
@@ -333,8 +333,8 @@ extern int TOTAL_TIME_STEPS;
 
 #else
 
-  #define STEPS_PER_PERIOD 300
-  #define SAVES_PER_PERIOD 300
+  #define STEPS_PER_PERIOD 600
+  #define SAVES_PER_PERIOD 600
 
 #endif
 

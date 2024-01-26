@@ -9,7 +9,7 @@ visualiser = visual.VISUAL()
 list_of_single_options = ['plot', 'plot_fil', 'phase', 'order_parameter', 'eckert', 'ciliate', 'ciliate_speed', 'ciliate_traj', 
                    'timing', 'ciliate_forcing', 'ciliate_dissipation',
                    'ciliate_svd', 'ciliate_dmd', 'kymograph', 'copy_phases',
-                   'periodic_solution']
+                   'periodic_solution', 'find_periodicity']
 list_of_multi_options = ['multi_phase', 'multi_ciliate', 'multi_ciliate_traj',
                          'multi_ciliate_speed', 'multi_timing', 'multi_ciliate_svd',
                          'multi_check_overlap', 'multi_ciliate_dissipation',

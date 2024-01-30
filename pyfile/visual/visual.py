@@ -29,13 +29,14 @@ class VISUAL:
         self.date = '20240104_readphase_hold'
         self.date = '20231231_readphase'
         # self.date = '20240112_readphase_free'
-        # self.date = '20240114_readphase_free_hemisphere'
-        # self.date = '20240114_readphase_free_diaplectic'
+        self.date = '20240114_readphase_free_hemisphere'
+        self.date = '20240114_readphase_free_diaplectic'
         # self.date = '20240114_readphase_free_random'
         # self.date = '20240115_resolution'
         # self.date = '20240118_periodic'
         # self.date = '20240119_example_for_periodic'
-        self.date = '20240124_test_solution'
+        # self.date = '20240124_test_solution'
+        self.date = '20240129_test_solution'
 
         # self.date = '20231219_free_flip'
 
@@ -76,8 +77,8 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 120000
-        self.frames_setting = 1200
+        self.plot_end_frame_setting = 9000
+        self.frames_setting = 3001
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -1445,9 +1446,11 @@ class VISUAL:
         input_filenames = [self.simName + '_filament_phases.dat',
                            self.simName + '_filament_shape_rotation_angles.dat',
                            self.simName + '_true_states.dat']
-        output_filenames = [self.dir + f"phases{int(self.index)}.dat",
-                            self.dir + f"angles{int(self.index)}.dat",
-                            self.dir + f"psi{int(self.index)}.dat"]
+        afix = int(self.index)
+        afix = ''
+        output_filenames = [self.dir + f"phases{afix}.dat",
+                            self.dir + f"angles{afix}.dat",
+                            self.dir + f"psi{afix}.dat"]
 
         for i, name in enumerate(input_filenames):
             input_filename = name
@@ -1530,31 +1533,54 @@ class VISUAL:
         fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
         fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
 
-        phases = np.zeros((self.frames, self.nfil))
-        T_array = np.linspace(0.8, 1.2, 40)
+        # phases = np.zeros((self.frames, self.nfil))
+        states = np.zeros((self.frames, 2*self.nfil))
+        pi_diff = np.zeros(2*self.nfil)
+        pi_diff[:self.nfil] = 2*np.pi
+
+        T_min, T_max = 0.8, 1.1
+        T_array = np.linspace(T_min, T_max, int((T_max-T_min)*self.period)+1)
         error_array = np.zeros(np.shape(T_array))
 
         for i in range(self.plot_end_frame):
             print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
             fil_phases_str = fil_phases_f.readline()
-            # fil_angles_str = fil_angles_f.readline()
+            fil_angles_str = fil_angles_f.readline()
 
             if(i>=self.plot_start_frame):
-                phases[i-self.plot_start_frame] = np.array(fil_phases_str.split()[1:], dtype=float)
-                # fil_angles = np.array(fil_angles_str.split()[1:], dtype=float)
+                states[i-self.plot_start_frame][:self.nfil] = np.array(fil_phases_str.split()[1:], dtype=float)
+                states[i-self.plot_start_frame][self.nfil:] = np.array(fil_angles_str.split()[1:], dtype=float)
             
         for ti, T in enumerate(T_array):
             frame_diff = int(T*self.period)
-
-            for frame in range(frame_diff, self.frames):
-                error_array[ti] += float(np.linalg.norm(phases[frame] - phases[frame-frame_diff] - 2*np.pi))\
-                    /float(np.linalg.norm(util.box(phases[frame], 2*np.pi)))
+            frame_ = -1
+            # for frame in range(frame_diff, self.frames):
+            for frame in range(frame_, frame_ +1):
+                aux = np.copy(states[frame-frame_diff]) # using the F(x) norm instead of F(x+T)
+                aux[:self.nfil] = util.box(aux[:self.nfil], 2*np.pi)
+                error_array[ti] += float(np.linalg.norm(states[frame] - states[frame-frame_diff] - pi_diff))\
+                    /float(np.linalg.norm(aux))
             
-            error_array[ti] /= (self.frames - frame_diff)
+            # error_array[ti] /= (self.frames - frame_diff)
+
+        T_soln = T_array[np.where(error_array==error_array.min())][0]
+
+        np.savetxt(self.dir + f"psi{int(self.index)}.dat", np.concatenate(([self.spring_factor, T_soln], states[-1])), delimiter=' ', newline=' ')
         
+        frames_per_period = int(T_soln*self.period)
+
+        # Calculate the error |F(x) - x| of the period.
+        print(-1, -1-frames_per_period)
+        aux = np.copy(states[-1-frames_per_period])
+        aux[:self.nfil] = util.box(aux[:self.nfil], 2*np.pi)
+        error_of_final_period = float(np.linalg.norm(states[-1] - states[-1-frames_per_period] - pi_diff))\
+                    /float(np.linalg.norm(aux))
+
+        print(f'Error of the final period = {error_of_final_period}')
 
         ax.plot(T_array, error_array)
-        print(f'The period is T={T_array[np.where(error_array==error_array.min())]} with rel error={error_array.min()}')
+
+        print(f'\033[32mThe period is T={T_soln}({frames_per_period} frames) with rel error={error_array.min()}\033[m')
 
         plt.show()
 

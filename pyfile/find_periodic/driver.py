@@ -28,7 +28,7 @@ class DRIVER:
         
         self.current_thread = 0
         self.num_thread = 1
-        self.cuda_device = 1
+        self.cuda_device = 3
     
     def create_ini(self):
         ini = configparser.ConfigParser()
@@ -126,9 +126,13 @@ class DRIVER:
         # print(self.pars_list)
         
 
+        # command = f"export OPENBLAS_NUM_THREADS=1; \
+        #             export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
+        #             ./bin/{self.exe_name} > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][0]:.0f}fil_{self.ite}.out"
+        k = float(self.pars_list["spring_factor"][0])
         command = f"export OPENBLAS_NUM_THREADS=1; \
                     export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
-                    ./bin/{self.exe_name} > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][0]:.0f}fil_{self.ite}.out"
-        # subprocess.run(command)
+                    ./bin/{self.exe_name} > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][0]:.0f}fil_{k}.out"
+       
         os.system(command)
         self.ite += 1

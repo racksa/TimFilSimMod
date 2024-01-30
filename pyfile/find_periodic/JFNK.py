@@ -10,7 +10,7 @@ def main():
     #fixT = 1   # Fix T for equilibrium, rather than PO solution
     #follower_force = 50      # Follower force (parameter of dynamical system)
     NSEG = 20      # Number of segments
-    NFIL = 15       # Number of filaments
+    NFIL = 159       # Number of filaments
     NBLOB = 5000
     AR = 6
 
@@ -24,15 +24,15 @@ def main():
     n = 2*NFIL+1
     mgmres = 5  # 10  # max GMRES iterations
     nits = 150  # max Newton iterations
-    rel_err_ini = 2e-3  # 1e-8 Relative error |F|/|x|
+    rel_err_ini = 1e-2  # 1e-8 Relative error |F|/|x|
     del_value_ini = -1  # These rarely need changing for any problem
     mndl_ini = 1e-20
     mxdl_ini = 1e20
     gtol = 1e-2  # 1e-4
-    epsJ = 1e-4 # 1e-6  # epsilon used in Jacobian approximation
+    epsJ = 1e-5 # 1e-6  # epsilon used in Jacobian approximation
 
-    f_range = np.arange(0.01, 0.082, 0.002)[::-1]
-    f_range = [0.08]
+    f_range = np.arange(0.01, 0.064, 0.002)[::-1]
+    # f_range = [0.08]
     # print(f_range)
     for k in f_range:
 
@@ -53,7 +53,7 @@ def main():
         info = 1
 
         # info = newton.NewtonHook(mgmres, n, gtol, tol, del_value, mndl, mxdl, nits, info)
-        info = newton.NewtonLinalg(mgmres, n, gtol, tol, del_value, mndl, mxdl, nits, info)
+        info = newton.NewtonHook(mgmres, n, gtol, tol, del_value, mndl, mxdl, nits, info)
         
 
         with open(output_filename, "ab") as f:
@@ -62,13 +62,8 @@ def main():
 
 def find_new_x(fixT,NSEG,NFIL,input_filename):
 
-    if (fixT == 1):
-        
-        return np.concatenate(([0.2],1e-8 * np.random.standard_normal(3*(NSEG-1)*NFIL))) # Current best x
-    
-    else:
-        with open(input_filename, 'r') as file:
-            num_lines = sum(1 for line in file)
+    with open(input_filename, 'r') as file:
+        num_lines = sum(1 for line in file)
 
         if num_lines == 1:
             full_input = np.loadtxt(input_filename)
@@ -78,6 +73,13 @@ def find_new_x(fixT,NSEG,NFIL,input_filename):
         full_input[2:2+NFIL] = util.box(full_input[2:2+NFIL], 2*np.pi)
 
         return full_input[1:]
+
+    # if (fixT == 1):
+        
+    #     return np.concatenate(([0.2],1e-8 * np.random.standard_normal(3*(NSEG-1)*NFIL))) # Current best x
+    
+    # else:
+        
 
 # def save_solution(data,filename):
 #     print(data)

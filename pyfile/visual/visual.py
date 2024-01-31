@@ -36,7 +36,7 @@ class VISUAL:
         # self.date = '20240118_periodic'
         # self.date = '20240119_example_for_periodic'
         # self.date = '20240124_test_solution'
-        self.date = '20240129_test_solution'
+        # self.date = '20240129_test_solution'
 
         # self.date = '20231219_free_flip'
 
@@ -77,8 +77,8 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 9000
-        self.frames_setting = 3001
+        self.plot_end_frame_setting = 31000000
+        self.frames_setting = 340
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -1533,14 +1533,13 @@ class VISUAL:
         fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
         fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
 
-        # phases = np.zeros((self.frames, self.nfil))
         states = np.zeros((self.frames, 2*self.nfil))
         pi_diff = np.zeros(2*self.nfil)
         pi_diff[:self.nfil] = 2*np.pi
 
-        T_min, T_max = 0.8, 1.1
-        T_array = np.linspace(T_min, T_max, int((T_max-T_min)*self.period)+1)
-        error_array = np.zeros(np.shape(T_array))
+        dframe_min, dframe_max = 0.8, 1.0
+        dframe_array = np.arange(int(dframe_min*self.period), int(dframe_max*self.period)+1)
+        error_array = np.zeros(np.shape(dframe_array))
 
         for i in range(self.plot_end_frame):
             print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
@@ -1551,36 +1550,35 @@ class VISUAL:
                 states[i-self.plot_start_frame][:self.nfil] = np.array(fil_phases_str.split()[1:], dtype=float)
                 states[i-self.plot_start_frame][self.nfil:] = np.array(fil_angles_str.split()[1:], dtype=float)
             
-        for ti, T in enumerate(T_array):
-            frame_diff = int(T*self.period)
-            frame_ = -1
-            # for frame in range(frame_diff, self.frames):
-            for frame in range(frame_, frame_ +1):
-                aux = np.copy(states[frame-frame_diff]) # using the F(x) norm instead of F(x+T)
+        for ti, dframe in enumerate(dframe_array):
+            scan_range = np.arange(dframe, self.frames, dtype=int)
+            scan_range = [-1]
+            for frame in scan_range:
+                aux = np.copy(states[frame-dframe]) # using the F(x) norm instead of F(x+T)
                 aux[:self.nfil] = util.box(aux[:self.nfil], 2*np.pi)
-                error_array[ti] += float(np.linalg.norm(states[frame] - states[frame-frame_diff] - pi_diff))\
+                error_array[ti] += float(np.linalg.norm(states[frame] - states[frame-dframe] - pi_diff))\
                     /float(np.linalg.norm(aux))
-            
-            # error_array[ti] /= (self.frames - frame_diff)
 
-        T_soln = T_array[np.where(error_array==error_array.min())][0]
+            error_array[ti] /= len(scan_range)
+
+        dframe_soln = dframe_array [np.where(error_array==error_array.min())][0]
+        print(type(dframe_soln))
+        T_soln = dframe_soln * self.dt
 
         np.savetxt(self.dir + f"psi{int(self.index)}.dat", np.concatenate(([self.spring_factor, T_soln], states[-1])), delimiter=' ', newline=' ')
         
-        frames_per_period = int(T_soln*self.period)
-
         # Calculate the error |F(x) - x| of the period.
-        print(-1, -1-frames_per_period)
-        aux = np.copy(states[-1-frames_per_period])
+        aux = np.copy(states[-1-dframe_soln])
         aux[:self.nfil] = util.box(aux[:self.nfil], 2*np.pi)
-        error_of_final_period = float(np.linalg.norm(states[-1] - states[-1-frames_per_period] - pi_diff))\
+        error_of_final_period = float(np.linalg.norm(states[-1] - states[-1-dframe_soln] - pi_diff))\
                     /float(np.linalg.norm(aux))
 
         print(f'Error of the final period = {error_of_final_period}')
 
-        ax.plot(T_array, error_array)
+        ax.plot(dframe_array*self.dt, error_array)
 
-        print(f'\033[32mThe period is T={T_soln}({frames_per_period} frames) with rel error={error_array.min()}\033[m')
+        print(f'\033[32mThe period is T= {T_soln}({dframe_soln} frames)\
+               with rel error |x({self.plot_end_frame})-x({self.plot_end_frame-dframe_soln})|/|x({self.plot_end_frame-dframe_soln})|={error_array.min()}\033[m')
 
         plt.show()
 

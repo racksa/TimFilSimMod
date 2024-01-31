@@ -8,16 +8,16 @@ class DRIVER:
     def __init__(self):
         self.globals_name = 'globals.ini'
         self.exe_name = 'cilia_periodic'
-        # self.exe_name = 'cilia_readphase_free'
+        self.exe_name = 'cilia_readphase_free'
         # self.exe_name = 'cilia_resolution'
         # self.date = '20240104_readphase_hold'
         # self.date = '20240112_readphase_free'
         self.date = '20240114_readphase_free_hemisphere'
-        # self.date = '20240114_readphase_free_diaplectic'
+        self.date = '20240114_readphase_free_diaplectic'
         # self.date = '20240115_resolution'
         # self.date = '20240118_periodic'
         # self.date = '20240119_example_for_periodic'
-        self.date = '20240124_test_solution'
+        # self.date = '20240124_test_solution'
         self.afix = ''
         self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         # self.dir = f"data/expr_sims/{self.date}{self.afix}/"
@@ -90,11 +90,11 @@ class DRIVER:
                         ar = round(6.00, 2)
                         spring_factor = round(0.02 + 0.002*i, 3)
 
-                        # # find branches wider range
-                        # nfil = int(639 + 0*i)
-                        # nblob = int(40961 + 0*i)
-                        # ar = round(15.00, 2)
-                        # spring_factor = round(0.02 + 0.002*i, 3)
+                        # find branches wider range
+                        nfil = int(639 + 0*i)
+                        nblob = int(40961 + 0*i)
+                        ar = round(15.00, 2)
+                        spring_factor = round(0.02 + 0.002*i, 3)
 
                         # # resolution study
                         # nfil = int(159)
@@ -128,7 +128,7 @@ class DRIVER:
                             nblob = 0
                             
                         period = 1.0
-                        sim_length = 1.0
+                        sim_length = 500
                         
                         self.pars_list["nswim"].append(1)
                         self.pars_list["nseg"].append(nseg)

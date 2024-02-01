@@ -30,7 +30,7 @@ class VISUAL:
         self.date = '20231231_readphase'
         # self.date = '20240112_readphase_free'
         self.date = '20240114_readphase_free_hemisphere'
-        self.date = '20240114_readphase_free_diaplectic'
+        # self.date = '20240114_readphase_free_diaplectic'
         # self.date = '20240114_readphase_free_random'
         # self.date = '20240115_resolution'
         # self.date = '20240118_periodic'
@@ -77,8 +77,8 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 31000000
-        self.frames_setting = 340
+        self.plot_end_frame_setting = 30100000
+        self.frames_setting = 1500
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -1466,49 +1466,39 @@ class VISUAL:
                         # Extract the last line
                         first_line = lines[0]
                         last_line = lines[-1]
-                        ispsi = 1
+                        # ispsi = 1
+                        # if name == self.simName + '_true_states.dat':
+                        #     ispsi = 0
+
+                        data_start = np.array(first_line.split()[1:], dtype=float)
+                        data = np.array(last_line.split()[1:], dtype=float)
+
+                        # # Compute the difference x(T) - x(0)
+                        # if name == self.simName + '_true_states.dat':
+                        #     stt = 0
+
+                            
+                        #     sin_data_start = data_start[1:]
+                        #     sin_data_end = data[1:]
+
+                        #     sin_data_start[1:self.nfil+1] = util.box(sin_data_start[1:self.nfil+1], 2*np.pi)
+                        #     sin_data_end[1:self.nfil+1] = util.box(sin_data_end[1:self.nfil+1], 2*np.pi)
+                            
+
+                        #     print(sin_data_end[stt:stt+10])
+                        #     print(sin_data_start[stt:stt+10])
+
+                        #     diff = sin_data_end - sin_data_start
+                        #     # diff[1:self.nfil+1] -= 2*np.pi
+                        #     diff[0] = 0
+                        #     print('x(T)-x(0)', diff[stt:stt+10])
+                        #     diff_norm = np.linalg.norm(diff[1:])
+                        #     sin_data_start[1:self.nfil+1] = util.box(sin_data_start[1:self.nfil+1], 2*np.pi)
+                        #     data_norm = np.linalg.norm(sin_data_start[1:])
+                        #     print(f"norm x = {data_norm}  norm diff = {diff_norm}")
+                        #     print('=======rel error ',diff_norm/data_norm)
                         if name == self.simName + '_true_states.dat':
-                            ispsi = 0
-
-                        data_start = np.array(first_line.split()[ispsi:], dtype=float)
-                        data = np.array(last_line.split()[ispsi:], dtype=float)
-
-                        # Compute the difference x(T) - x(0)
-                        if name == self.simName + '_true_states.dat':
-                            stt = 0
-
-                            
-                            sin_data_start = data_start[1:]
-                            sin_data_end = data[1:]
-
-                            # print(sin_data_start)
-
-                            sin_data_start[1:self.nfil+1] = util.box(sin_data_start[1:self.nfil+1], 2*np.pi)
-                            sin_data_end[1:self.nfil+1] = util.box(sin_data_end[1:self.nfil+1], 2*np.pi)
-                            
-
-                            print(sin_data_end[stt:stt+10])
-                            print(sin_data_start[stt:stt+10])
-                            # print((sin_data_end - sin_data_start)[stt:stt+10], '\n')
-
-
-                            # sin_data_start[1:self.nfil+1] = np.sin(sin_data_start[1:self.nfil+1])
-                            # sin_data_end[1:self.nfil+1] = np.sin(sin_data_end[1:self.nfil+1])
-                            # sin_data_start[0] = 0.9
-                            # sin_data_end[0] = 0
-                            
-                            # print('x(T)', sin_data_end[stt:stt+10])
-                            # print('x(0)',sin_data_start[stt:stt+10])
-
-                            diff = sin_data_end - sin_data_start
-                            # diff[1:self.nfil+1] -= 2*np.pi
-                            diff[0] = 0
-                            print('x(T)-x(0)', diff[stt:stt+10])
-                            diff_norm = np.linalg.norm(diff[1:])
-                            sin_data_start[1:self.nfil+1] = util.box(sin_data_start[1:self.nfil+1], 2*np.pi)
-                            data_norm = np.linalg.norm(sin_data_start[1:])
-                            print(f"norm x = {data_norm}  norm diff = {diff_norm}")
-                            print('=======rel error ',diff_norm/data_norm)
+                            data = np.concatenate(([self.spring_factor], data))
 
                         np.savetxt(output_filename, data, delimiter=' ', newline=' ')
 
@@ -1565,7 +1555,7 @@ class VISUAL:
         print(type(dframe_soln))
         T_soln = dframe_soln * self.dt
 
-        np.savetxt(self.dir + f"psi{int(self.index)}.dat", np.concatenate(([self.spring_factor, T_soln], states[-1])), delimiter=' ', newline=' ')
+        # np.savetxt(self.dir + f"psi{int(self.index)}.dat", np.concatenate(([self.spring_factor, T_soln], states[-1])), delimiter=' ', newline=' ')
         
         # Calculate the error |F(x) - x| of the period.
         aux = np.copy(states[-1-dframe_soln])
@@ -1578,7 +1568,7 @@ class VISUAL:
         ax.plot(dframe_array*self.dt, error_array)
 
         print(f'\033[32mThe period is T= {T_soln}({dframe_soln} frames)\
-               with rel error |x({self.plot_end_frame})-x({self.plot_end_frame-dframe_soln})|/|x({self.plot_end_frame-dframe_soln})|={error_array.min()}\033[m')
+               with rel error |x({self.plot_end_frame-1})-x({self.plot_end_frame-1-dframe_soln})|/|x({self.plot_end_frame-1-dframe_soln})|={error_array.min()}\033[m')
 
         plt.show()
 

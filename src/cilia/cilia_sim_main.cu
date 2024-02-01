@@ -631,7 +631,7 @@ int main(int argc, char** argv){
 
         std::ofstream true_states_file(SIMULATION_TRUESTATE_NAME, std::ios::app);
         true_states_file << std::scientific << std::setprecision(10);
-        true_states_file << TORSIONAL_SPRING_MAGNITUDE_FACTOR << " " << PERIOD << " ";
+        true_states_file << save_step << " " << PERIOD << " ";
 
         for (int n = 0; n < NSWIM; n++){
 

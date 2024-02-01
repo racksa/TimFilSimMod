@@ -339,13 +339,15 @@ void filament::initial_setup(const Real *const base_pos,
             if(fil_id == 0){
               std::cout << "Reading all states from file: " << SIMULATION_DIR + "psi.dat" << std::endl;
             }
-            input_file >> TORSIONAL_SPRING_MAGNITUDE_FACTOR;
-            input_file >> PERIOD;
+            float bin;
+            input_file >> bin;
+            input_file >> bin;
             Real buffer;
             for (int fpos = 0; fpos < 2*NFIL; fpos++){
               input_file >> buffer;
               if(fpos == fil_id){
                 phase = buffer;
+                std::cout << fil_id << "  " << phase << std::endl;
               }
               if(fpos == NFIL + fil_id){
                 shape_rotation_angle = buffer;

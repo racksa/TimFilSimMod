@@ -347,7 +347,6 @@ void filament::initial_setup(const Real *const base_pos,
               input_file >> buffer;
               if(fpos == fil_id){
                 phase = buffer;
-                std::cout << fil_id << "  " << phase << std::endl;
               }
               if(fpos == NFIL + fil_id){
                 shape_rotation_angle = buffer;

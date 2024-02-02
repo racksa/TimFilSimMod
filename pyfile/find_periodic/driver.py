@@ -8,7 +8,7 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.exe_name = 'cilia_periodic'
+        self.exe_name = 'cilia_periodic_300'
         self.date = '20240118_periodic'
         self.afix = ''
         self.dir = f"data/expr_sims/{self.date}{self.afix}/"
@@ -28,7 +28,7 @@ class DRIVER:
         
         self.current_thread = 0
         self.num_thread = 1
-        self.cuda_device = 7
+        self.cuda_device = 2
     
     def create_ini(self):
         ini = configparser.ConfigParser()
@@ -79,8 +79,8 @@ class DRIVER:
         for key, value in self.pars_list.items():
             self.write_ini("Parameters", key, float(self.pars_list[key][-1]))
         self.simName = f"ciliate_{self.pars_list['nfil'][0]:.0f}fil_{self.pars_list['nblob'][0]:.0f}blob_{self.pars_list['ar'][0]:.2f}R_{self.pars_list['spring_factor'][0]:.3f}torsion"
-        self.write_ini("Filenames", "simulation_file", self.simName)
         self.write_ini("Filenames", "simulation_dir", self.dir)
+        self.write_ini("Filenames", "simulation_file", self.simName)
         self.write_ini("Filenames", "simulation_readphase_name", f"phases.dat")
         self.write_ini("Filenames", "simulation_readangle_name", f"angles.dat")
 

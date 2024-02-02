@@ -30,12 +30,12 @@ class VISUAL:
         self.date = '20231231_readphase'
         # self.date = '20240112_readphase_free'
         self.date = '20240114_readphase_free_hemisphere'
-        # self.date = '20240114_readphase_free_diaplectic'
+        self.date = '20240114_readphase_free_diaplectic'
         # self.date = '20240114_readphase_free_random'
         # self.date = '20240115_resolution'
         # self.date = '20240118_periodic'
         # self.date = '20240119_example_for_periodic'
-        # self.date = '20240124_test_solution'
+        self.date = '20240124_test_solution'
         # self.date = '20240129_test_solution'
 
         # self.date = '20231219_free_flip'
@@ -77,8 +77,8 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 30100000
-        self.frames_setting = 1500
+        self.plot_end_frame_setting = 30001
+        self.frames_setting = 300031
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -1527,8 +1527,9 @@ class VISUAL:
         pi_diff = np.zeros(2*self.nfil)
         pi_diff[:self.nfil] = 2*np.pi
 
-        dframe_min, dframe_max = 0.8, 1.0
+        dframe_min, dframe_max = 0.9, 1.05
         dframe_array = np.arange(int(dframe_min*self.period), int(dframe_max*self.period)+1)
+        print(dframe_array)
         error_array = np.zeros(np.shape(dframe_array))
 
         for i in range(self.plot_end_frame):
@@ -1548,11 +1549,15 @@ class VISUAL:
                 aux[:self.nfil] = util.box(aux[:self.nfil], 2*np.pi)
                 error_array[ti] += float(np.linalg.norm(states[frame] - states[frame-dframe] - pi_diff))\
                     /float(np.linalg.norm(aux))
+                
+                if (dframe == 0):
+                    print(error_array[ti])
+                
+
 
             error_array[ti] /= len(scan_range)
 
         dframe_soln = dframe_array [np.where(error_array==error_array.min())][0]
-        print(type(dframe_soln))
         T_soln = dframe_soln * self.dt
 
         # np.savetxt(self.dir + f"psi{int(self.index)}.dat", np.concatenate(([self.spring_factor, T_soln], states[-1])), delimiter=' ', newline=' ')

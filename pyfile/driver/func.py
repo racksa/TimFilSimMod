@@ -7,7 +7,7 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
-        self.exe_name = 'cilia_periodic'
+        self.exe_name = 'cilia_periodic_300'
         # self.exe_name = 'cilia_readphase_free'
         # self.exe_name = 'cilia_resolution'
         # self.date = '20240104_readphase_hold'
@@ -89,12 +89,16 @@ class DRIVER:
                         nblob = int(5000 + 0*i)
                         ar = round(6.00, 2)
                         spring_factor = round(0.02 + 0.002*i, 3)
+                        period = 9.333333373100000108e-01
+                        sim_length = 10.1
 
                         # # find branches wider range
                         # nfil = int(639 + 0*i)
                         # nblob = int(40961 + 0*i)
                         # ar = round(15.00, 2)
                         # spring_factor = round(0.02 + 0.002*i, 3)
+                        # period = 1.0
+                        # sim_length = 500.
 
                         # # resolution study
                         # nfil = int(159)
@@ -127,8 +131,7 @@ class DRIVER:
                             nfil = 1
                             nblob = 0
                             
-                        period = 9.417853271992605579e-01
-                        sim_length = 1.0
+                        
                         
                         self.pars_list["nswim"].append(1)
                         self.pars_list["nseg"].append(nseg)
@@ -148,6 +151,8 @@ class DRIVER:
 
     def view_files(self):
         util.view_files_in_directory(self.dir)
+        print(f"\033[32m{self.dir}\033[m")
+        print(f"\033[34m{self.exe_name}\033[m")
 
     def write_rules(self):
         sim = configparser.ConfigParser()

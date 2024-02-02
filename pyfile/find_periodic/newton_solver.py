@@ -55,14 +55,15 @@ class NEWTON_SOLVER:
         np.savetxt(self.d.dir + "psi.dat", x, newline = " ")
 
         # Change globals.ini file
-        self.d.change_variables(self.NFIL, self.NSEG, self.NBLOB, self.AR, self.k, x[1], 1./300*ndts)
+        self.d.change_variables(self.NFIL, self.NSEG, self.NBLOB, self.AR, self.k, x[1], ndts/self.ndts)
         self.d.update_globals_file()
 
         with open(self.d.dir + "pars.dat", "ab") as f:
             f.write(b"\n")
-            np.savetxt(f, [x[1], 1./300*ndts], newline = " ")
+            np.savetxt(f, [x[1], ndts/self.ndts], newline = " ")
 
         # Run code
+        print(f"running new sim with T = {x[1]}/ steps = {ndts}")
         # config = configparser.ConfigParser()
         # config.read(self.d.globals_name)
         # print(config['Parameters']['sim_length'])
@@ -85,29 +86,18 @@ class NEWTON_SOLVER:
         y = np.zeros_like(x)
         
         y[1:] = a
-
-        # Take into account the periodicity of the phase
-        # if ndts != 1:
-        #     y[1:self.NFIL+1] -= 2*np.pi 
         
         return y
 
     def getrhs(self, x):
         # function to be minimised
         y_ = self.steporbit(self.ndts, x)
-        # y_[1:self.NFIL+1] = np.sin(y_[1:self.NFIL+1])
-        # y_[1:self.NFIL+1] = np.exp(1j*y_[1:self.NFIL+1])
-        # y_[1:self.NFIL+1] = util.box(y_[1:self.NFIL+1], 2*np.pi)
 
         y = y_ - x # Calculate the difference
         y[1:self.NFIL+1] -= 2*np.pi
 
         y[0] = 0.0  # Set the first element to 0 (constraints, rhs=0)
 
-        # stt = 0
-        # print('x(T)', y_[stt:stt+10])
-        # print('x(0)', x[stt:stt+10])
-        # print('x(T)-x(0)', y[stt:stt+10])
         return y
 
     def steporbit_and_estimate_T(self, ndts, x):
@@ -170,7 +160,7 @@ class NEWTON_SOLVER:
         print(f'[\033[32mnewton\033[m]: norm x = {norm_x}, new tolerance = {self.new_tol}')
         print(f'[\033[32mnewton\033[m]: relative error: {relative_err}')
 
-        save_x = np.insert(self.new_x, 0, self.k)
+        # save_x = np.insert(self.new_x, 0, self.k)
         # np.savetxt(self.d.dir + f"last_psi.dat", save_x, delimiter=' ', newline=' ')
                 
         # SAVE current solution, new_x (You can add your saving logic here)

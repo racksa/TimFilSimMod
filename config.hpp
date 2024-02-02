@@ -333,8 +333,8 @@ extern int TOTAL_TIME_STEPS;
 
 #else
 
-  #define STEPS_PER_PERIOD 300
-  #define SAVES_PER_PERIOD 300
+  #define STEPS_PER_PERIOD 900
+  #define SAVES_PER_PERIOD 900
 
 #endif
 

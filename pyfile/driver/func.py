@@ -8,7 +8,7 @@ class DRIVER:
     def __init__(self):
         self.globals_name = 'globals.ini'
         self.exe_name = 'cilia_periodic_300'
-        # self.exe_name = 'cilia_readphase_free'
+        self.exe_name = 'cilia_readphase_free'
         # self.exe_name = 'cilia_resolution'
         # self.date = '20240104_readphase_hold'
         # self.date = '20240112_readphase_free'
@@ -17,7 +17,7 @@ class DRIVER:
         # self.date = '20240115_resolution'
         # self.date = '20240118_periodic'
         # self.date = '20240119_example_for_periodic'
-        self.date = '20240124_test_solution'
+        # self.date = '20240124_test_solution'
         self.afix = ''
         self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         # self.dir = f"data/expr_sims/{self.date}{self.afix}/"
@@ -92,13 +92,13 @@ class DRIVER:
                         period = 9.333333373100000108e-01
                         sim_length = 10.1
 
-                        # # find branches wider range
-                        # nfil = int(639 + 0*i)
-                        # nblob = int(40961 + 0*i)
-                        # ar = round(15.00, 2)
-                        # spring_factor = round(0.02 + 0.002*i, 3)
-                        # period = 1.0
-                        # sim_length = 500.
+                        # find branches wider range
+                        nfil = int(639 + 0*i)
+                        nblob = int(40961 + 0*i)
+                        ar = round(15.00, 2)
+                        spring_factor = round(0.02 + 0.002*i, 3)
+                        period = 1.0
+                        sim_length = 500.
 
                         # # resolution study
                         # nfil = int(159)

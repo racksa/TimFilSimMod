@@ -80,6 +80,8 @@ class NEWTON_SOLVER:
 
         # x[1:] is the phases
         a = self.run_filament_code(ndts, x)
+
+        # update self.new_x[0] here
         
         a = a[-1][2:]
 

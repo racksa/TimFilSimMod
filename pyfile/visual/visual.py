@@ -35,7 +35,7 @@ class VISUAL:
         # self.date = '20240115_resolution'
         # self.date = '20240118_periodic'
         # self.date = '20240119_example_for_periodic'
-        self.date = '20240124_test_solution'
+        # self.date = '20240124_test_solution'
         # self.date = '20240129_test_solution'
 
         # self.date = '20231219_free_flip'
@@ -77,8 +77,8 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 30001
-        self.frames_setting = 300031
+        self.plot_end_frame_setting = 47000
+        self.frames_setting = 301
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -1527,7 +1527,7 @@ class VISUAL:
         pi_diff = np.zeros(2*self.nfil)
         pi_diff[:self.nfil] = 2*np.pi
 
-        dframe_min, dframe_max = 0.9, 1.05
+        dframe_min, dframe_max = 0.8, 1.05
         dframe_array = np.arange(int(dframe_min*self.period), int(dframe_max*self.period)+1)
         print(dframe_array)
         error_array = np.zeros(np.shape(dframe_array))

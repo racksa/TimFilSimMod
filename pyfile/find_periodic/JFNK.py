@@ -31,7 +31,7 @@ def main():
     gtol = 1e-2  # 1e-4
     epsJ = 1e-5 # 1e-6  # epsilon used in Jacobian approximation
 
-    f_range = np.arange(0.01, 0.062, 0.002)[::-1]
+    f_range = np.arange(0.01, 0.05, 0.002)[::-1]
     # f_range = [0.06]
     # print(f_range)
     for k in f_range:

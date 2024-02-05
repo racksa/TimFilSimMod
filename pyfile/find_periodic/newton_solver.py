@@ -80,8 +80,6 @@ class NEWTON_SOLVER:
 
         # x[1:] is the phases
         a = self.run_filament_code(ndts, x)
-
-        # update self.new_x[0] here
         
         a = a[-1][2:]
 
@@ -102,52 +100,32 @@ class NEWTON_SOLVER:
 
         return y
 
-    def steporbit_and_estimate_T(self, ndts, x):
+    # def steporbit_and_estimate_T(self, ndts, x):
+    #     if ndts != 1:
+    #         self.dt = x[0] / self.ndts
+
+    #     # x[1:] is the phases
+    #     a = self.run_filament_code(ndts, x)
+
+    #     # update T (self.new_x[0]) here if ndts != 1
         
-        if ndts != 1:
-            self.dt = x[0] / self.ndts
+    #     a = a[-1][2:]
 
-        # Save states to a file to read and run
-        x = np.insert(x, 0, self.k)
-        # x[2:self.NFIL+2] = np.arcsin(x[2:self.NFIL+2]) + 2*np.pi
-        # x[2:self.NFIL+2] = util.box(x[2:self.NFIL+2], 2*np.pi)
-        np.savetxt(self.d.dir + "psi.dat", x, newline = " ")
-
-        # Change globals.ini file
-        self.d.change_variables(self.NFIL, self.NSEG, self.NBLOB, self.AR, self.k, x[1], 1./300*ndts)
-        self.d.update_globals_file()
-
-        # Run code
-        # config = configparser.ConfigParser()
-        # config.read(self.d.globals_name)
-        # print(config['Parameters']['sim_length'])
-        self.d.run()
-
-        # Return output
-        output_filename = self.d.dir + self.d.simName + "_true_states.dat"
-        a = np.loadtxt(output_filename)
-    
+    #     y = np.zeros_like(x)
         
-        a = a[-1][2:]
-
-        y = np.zeros_like(x)
+    #     y[1:] = a
         
-        y[1:] = a
-        
-        return y
+    #     return y
 
-    def getrhs_and_estimate_T(self, x):
+    # def getrhs_and_estimate_T(self, x):
         # function to be minimised
-        y_ = self.steporbit_and_estimate_T(self.ndts, x)
+        y_ = self.steporbit(self.ndts, x)
 
         y = y_ - x # Calculate the difference
+        y[1:self.NFIL+1] -= 2*np.pi
 
         y[0] = 0.0  # Set the first element to 0 (constraints, rhs=0)
 
-        # stt = 0
-        # print('x(T)', y_[stt:stt+10])
-        # print('x(0)', x[stt:stt+10])
-        # print('x(T)-x(0)', y[stt:stt+10])
         return y
 
     def saveorbit(self):

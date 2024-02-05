@@ -310,7 +310,7 @@ extern int TOTAL_TIME_STEPS;
 #if SOLVER_TYPE==1
 
   #define MAX_LINEAR_SYSTEM_ITER 350 // Maximum number of iterations used to solve the linear system in each mobility solve.
-  #define LINEAR_SYSTEM_TOL 1e-4 // Relative tolerance in the linear system solves.
+  #define LINEAR_SYSTEM_TOL 1e-6 // Relative tolerance in the linear system solves.
 
   // GMRES preconditioner type.
   // Uses left preconditioning if set to false; if you don't want a preconditioner,
@@ -333,8 +333,8 @@ extern int TOTAL_TIME_STEPS;
 
 #else
 
-  #define STEPS_PER_PERIOD 900
-  #define SAVES_PER_PERIOD 900
+  #define STEPS_PER_PERIOD 300
+  #define SAVES_PER_PERIOD 300
 
 #endif
 

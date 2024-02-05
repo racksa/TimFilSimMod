@@ -30,7 +30,7 @@ class VISUAL:
         self.date = '20231231_readphase'
         # self.date = '20240112_readphase_free'
         self.date = '20240114_readphase_free_hemisphere'
-        self.date = '20240114_readphase_free_diaplectic'
+        # self.date = '20240114_readphase_free_diaplectic'
         # self.date = '20240114_readphase_free_random'
         # self.date = '20240115_resolution'
         # self.date = '20240118_periodic'
@@ -77,8 +77,8 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 47000
-        self.frames_setting = 301
+        self.plot_end_frame_setting = 3000000
+        self.frames_setting = 300000
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -1519,6 +1519,18 @@ class VISUAL:
 
         fig = plt.figure()
         ax = fig.add_subplot(1,1,1)
+        fig2 = plt.figure()
+        ax2 = fig2.add_subplot(1,1,1)
+
+        fil_references_sphpolar = np.zeros((self.nfil,3))
+        for i in range(self.nfil):
+            fil_references_sphpolar[i] = util.cartesian_to_spherical(self.fil_references[3*i: 3*i+3])
+
+        near_pole_ind = []
+        near_pole_ind = np.where(np.sin(fil_references_sphpolar[:,2]) <0.2 )
+        print(near_pole_ind)
+        print(fil_references_sphpolar[:,1][near_pole_ind])
+            
 
         fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
         fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
@@ -1529,7 +1541,6 @@ class VISUAL:
 
         dframe_min, dframe_max = 0.8, 1.05
         dframe_array = np.arange(int(dframe_min*self.period), int(dframe_max*self.period)+1)
-        print(dframe_array)
         error_array = np.zeros(np.shape(dframe_array))
 
         for i in range(self.plot_end_frame):
@@ -1540,40 +1551,61 @@ class VISUAL:
             if(i>=self.plot_start_frame):
                 states[i-self.plot_start_frame][:self.nfil] = np.array(fil_phases_str.split()[1:], dtype=float)
                 states[i-self.plot_start_frame][self.nfil:] = np.array(fil_angles_str.split()[1:], dtype=float)
-            
-        for ti, dframe in enumerate(dframe_array):
-            scan_range = np.arange(dframe, self.frames, dtype=int)
-            scan_range = [-1]
-            for frame in scan_range:
-                aux = np.copy(states[frame-dframe]) # using the F(x) norm instead of F(x+T)
-                aux[:self.nfil] = util.box(aux[:self.nfil], 2*np.pi)
-                error_array[ti] += float(np.linalg.norm(states[frame] - states[frame-dframe] - pi_diff))\
-                    /float(np.linalg.norm(aux))
-                
-                if (dframe == 0):
-                    print(error_array[ti])
-                
 
+        def compute_diff(arr, frame1, frame2):
+            aux = np.copy(arr[frame1]) # using the F(x) norm instead of F(x+T)
+            aux[:self.nfil] = util.box(aux[:self.nfil], 2*np.pi)
+            diff = states[frame2] - states[frame1] - pi_diff
+            # Excluding fils near the pole
+            for ind in near_pole_ind:
+                diff[ind] = 0.
+                diff[ind+self.nfil] = 0.
+            return float(np.linalg.norm(diff)) / float(np.linalg.norm(aux))
+        
+        try:
+            for ti, dframe in enumerate(dframe_array):
+                scan_range = np.arange(dframe, self.frames, dtype=int)
+                scan_range = [-1]
+                for frame in scan_range:
+                    error_array[ti] += compute_diff(states, frame-dframe, frame)
 
-            error_array[ti] /= len(scan_range)
+                error_array[ti] /= len(scan_range)
+        except:
+            print("No. of frames not enough to find the period")
 
         dframe_soln = dframe_array [np.where(error_array==error_array.min())][0]
         T_soln = dframe_soln * self.dt
 
-        # np.savetxt(self.dir + f"psi{int(self.index)}.dat", np.concatenate(([self.spring_factor, T_soln], states[-1])), delimiter=' ', newline=' ')
-        
-        # Calculate the error |F(x) - x| of the period.
-        aux = np.copy(states[-1-dframe_soln])
-        aux[:self.nfil] = util.box(aux[:self.nfil], 2*np.pi)
-        error_of_final_period = float(np.linalg.norm(states[-1] - states[-1-dframe_soln] - pi_diff))\
-                    /float(np.linalg.norm(aux))
-
-        print(f'Error of the final period = {error_of_final_period}')
 
         ax.plot(dframe_array*self.dt, error_array)
 
-        print(f'\033[32mThe period is T= {T_soln}({dframe_soln} frames)\
-               with rel error |x({self.plot_end_frame-1})-x({self.plot_end_frame-1-dframe_soln})|/|x({self.plot_end_frame-1-dframe_soln})|={error_array.min()}\033[m')
+        print(f'\033[32mThe real period is T= {T_soln}({dframe_soln} frames)\
+               \nwith rel error |x({self.plot_end_frame-1})-x({self.plot_end_frame-1-dframe_soln})|/|x({self.plot_end_frame-1-dframe_soln})|={error_array.min()}\033[m')
+        
+        # Calculate the error |F(x) - x| of the beat period.
+        possible_period = int(min(self.period, self.frames-1))
+        error_of_final_period = compute_diff(states, -1-int(possible_period), self.plot_end_frame-1)
+        
+        print(f'\033[33mThe beat period is T= {self.dt*self.period}({int(self.period)} frames)\
+               \nwith rel error |x({self.plot_end_frame-1})-x({self.plot_end_frame-1-possible_period})|/|x({self.plot_end_frame-1-possible_period})|={error_of_final_period}\033[m')
+
+
+        # plot error over time for the computed period
+        ts = np.arange(self.plot_start_frame+dframe_soln, self.plot_end_frame)/self.period
+        diffs = np.zeros(self.frames-dframe_soln)
+        for i in range(self.frames-dframe_soln):
+            aux = np.copy(states[i])
+            aux[:self.nfil] = util.box(aux[:self.nfil], 2*np.pi)
+            diff = states[dframe_soln+i] - states[i]
+            diff[:self.nfil] -= 2*np.pi
+            diffs[i] = float(np.linalg.norm(diff)) / float(np.linalg.norm(aux))
+        ax2.plot(ts, diffs)
+
+        ax.set_xlabel(r"$T$")
+        ax.set_ylabel(r"<$|\psi(t_0+T)|/|\psi(t_0)|$>")
+
+        ax2.set_xlabel(r"$t/T$")
+        ax2.set_ylabel(r"$<|\psi(t+T)|/|\psi(t)|>$")
 
         plt.show()
 

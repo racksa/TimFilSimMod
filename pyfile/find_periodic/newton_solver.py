@@ -63,7 +63,7 @@ class NEWTON_SOLVER:
             np.savetxt(f, [x[1], ndts/self.ndts], newline = " ")
 
         # Run code
-        print(f"running new sim with T = {x[1]}/ steps = {ndts}")
+        # print(f"running new sim with T = {x[1]}/ steps = {ndts}")
         # config = configparser.ConfigParser()
         # config.read(self.d.globals_name)
         # print(config['Parameters']['sim_length'])

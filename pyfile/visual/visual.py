@@ -42,6 +42,7 @@ class VISUAL:
 
         # self.date = '20231209_ico_hold_diagonal'  # 6, 7
         # self.date = '20231214_hold_diagonal'  # 3
+        self.date = '20240207_159fil_hold'
 
         self.dir = f"data/expr_sims/{self.date}/"
         # self.dir = f"/home/clustor/ma/h/hs2216/{self.date}/"
@@ -1527,7 +1528,7 @@ class VISUAL:
             fil_references_sphpolar[i] = util.cartesian_to_spherical(self.fil_references[3*i: 3*i+3])
 
         near_pole_ind = []
-        near_pole_ind = np.where(np.sin(fil_references_sphpolar[:,2]) <0.2 )
+        near_pole_ind = np.where(np.sin(fil_references_sphpolar[:,2]) < 0.5 )
         print(near_pole_ind)
         print(fil_references_sphpolar[:,1][near_pole_ind])
             
@@ -1539,7 +1540,7 @@ class VISUAL:
         pi_diff = np.zeros(2*self.nfil)
         pi_diff[:self.nfil] = 2*np.pi
 
-        dframe_min, dframe_max = 0.8, 1.05
+        dframe_min, dframe_max = 0.8, 1.2
         dframe_array = np.arange(int(dframe_min*self.period), int(dframe_max*self.period)+1)
         error_array = np.zeros(np.shape(dframe_array))
 

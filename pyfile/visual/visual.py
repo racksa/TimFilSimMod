@@ -38,11 +38,8 @@ class VISUAL:
         # self.date = '20240124_test_solution'
         # self.date = '20240129_test_solution'
 
-        # self.date = '20231219_free_flip'
-
-        # self.date = '20231209_ico_hold_diagonal'  # 6, 7
-        # self.date = '20231214_hold_diagonal'  # 3
         self.date = '20240207_159fil_hold'
+        # self.date = '20240208_test_solution'
 
         self.dir = f"data/expr_sims/{self.date}/"
         # self.dir = f"/home/clustor/ma/h/hs2216/{self.date}/"
@@ -79,7 +76,7 @@ class VISUAL:
         self.check_overlap = False
 
         self.plot_end_frame_setting = 3000000
-        self.frames_setting = 300000
+        self.frames_setting = 900
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -92,7 +89,7 @@ class VISUAL:
 
         self.ncol = 4
 
-        self.plot_interval = 1
+        self.plot_interval = 10
         
         self.index = 0
 
@@ -1444,6 +1441,9 @@ class VISUAL:
 
     def copy_phases(self):
         self.select_sim()
+
+        print(self.radius)
+
         input_filenames = [self.simName + '_filament_phases.dat',
                            self.simName + '_filament_shape_rotation_angles.dat',
                            self.simName + '_true_states.dat']
@@ -1527,8 +1527,7 @@ class VISUAL:
         for i in range(self.nfil):
             fil_references_sphpolar[i] = util.cartesian_to_spherical(self.fil_references[3*i: 3*i+3])
 
-        near_pole_ind = []
-        near_pole_ind = np.where(np.sin(fil_references_sphpolar[:,2]) < 0.5 )
+        near_pole_ind = np.where(np.sin(fil_references_sphpolar[:,2]) < 0.0 )
         print(near_pole_ind)
         print(fil_references_sphpolar[:,1][near_pole_ind])
             
@@ -1584,11 +1583,13 @@ class VISUAL:
                \nwith rel error |x({self.plot_end_frame-1})-x({self.plot_end_frame-1-dframe_soln})|/|x({self.plot_end_frame-1-dframe_soln})|={error_array.min()}\033[m')
         
         # Calculate the error |F(x) - x| of the beat period.
-        possible_period = int(min(self.period, self.frames-1))
-        error_of_final_period = compute_diff(states, -1-int(possible_period), self.plot_end_frame-1)
+        possible_length = int(min(self.period, self.frames-1))
+        error_of_final_period = compute_diff(states, -1-int(possible_length), -1)
+
+        
         
         print(f'\033[33mThe beat period is T= {self.dt*self.period}({int(self.period)} frames)\
-               \nwith rel error |x({self.plot_end_frame-1})-x({self.plot_end_frame-1-possible_period})|/|x({self.plot_end_frame-1-possible_period})|={error_of_final_period}\033[m')
+               \nwith rel error |x({self.plot_end_frame-1})-x({self.plot_end_frame-1-possible_length})|/|x({self.plot_end_frame-1-possible_length})|={error_of_final_period}\033[m')
 
 
         # plot error over time for the computed period

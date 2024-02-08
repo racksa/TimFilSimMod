@@ -9,7 +9,7 @@ class DRIVER:
     def __init__(self):
         self.globals_name = 'globals.ini'
         self.exe_name = 'cilia_periodic_300'
-        self.date = '20240118_periodic'
+        self.date = '20240208_periodic'
         self.afix = ''
         self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         self.pars_list = {
@@ -28,7 +28,7 @@ class DRIVER:
         
         self.current_thread = 0
         self.num_thread = 1
-        self.cuda_device = 0
+        self.cuda_device = 4
     
     def create_ini(self):
         ini = configparser.ConfigParser()

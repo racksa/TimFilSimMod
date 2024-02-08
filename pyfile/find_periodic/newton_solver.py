@@ -48,10 +48,10 @@ class NEWTON_SOLVER:
     
     def run_filament_code(self, ndts, x):
 
-        # Save states to a file to read and run
+        # Insert the spring constant to the left of the array
         x = np.insert(x, 0, self.k)
-        # x[2:self.NFIL+2] = np.arcsin(x[2:self.NFIL+2]) + 2*np.pi
-        # x[2:self.NFIL+2] = util.box(x[2:self.NFIL+2], 2*np.pi)
+
+        # Save states to a file to read and run
         np.savetxt(self.d.dir + "psi.dat", x, newline = " ")
 
         # Change globals.ini file
@@ -78,7 +78,7 @@ class NEWTON_SOLVER:
         if ndts != 1:
             self.dt = x[0] / self.ndts
 
-        # x[1:] is the phases
+        # passing the states as the initial condition
         a = self.run_filament_code(ndts, x)
         
         a = a[-1][2:]
@@ -90,41 +90,39 @@ class NEWTON_SOLVER:
         return y
 
     def getrhs(self, x):
-        # function to be minimised
+        # Function to be minimised
         y_ = self.steporbit(self.ndts, x)
 
-        y = y_ - x # Calculate the difference
+        # Calculate the difference
+        y = y_ - x 
+
+        # Take into account the periodicity and remove fils near the pole
         y[1:self.NFIL+1] -= 2*np.pi
 
-        y[0] = 0.0  # Set the first element to 0 (constraints, rhs=0)
+        # Remove the fils near the poles
+        fil_references = util.read_fil_references(self.d.dir + self.d.simName + '_fil_references.dat')
+        fil_references_sphpolar = np.zeros((self.NFIL,3))
+        for i in range(self.NFIL):
+            fil_references_sphpolar[i] = util.cartesian_to_spherical(fil_references[3*i: 3*i+3])
 
-        return y
-
-    # def steporbit_and_estimate_T(self, ndts, x):
-    #     if ndts != 1:
-    #         self.dt = x[0] / self.ndts
-
-    #     # x[1:] is the phases
-    #     a = self.run_filament_code(ndts, x)
-
-    #     # update T (self.new_x[0]) here if ndts != 1
+        near_pole_ind = np.where(np.sin(fil_references_sphpolar[:,2]) < 0.0 )
+        print(near_pole_ind)
+        # print('-------------')
         
-    #     a = a[-1][2:]
-
-    #     y = np.zeros_like(x)
+        # print(y[1:][near_pole_ind])
+        # print(y[(1+self.NFIL):][near_pole_ind])
+        # print('-------------')
         
-    #     y[1:] = a
         
-    #     return y
+        y[1:][near_pole_ind] = 0
+        y[(1+self.NFIL):][near_pole_ind] = 0
 
-    # def getrhs_and_estimate_T(self, x):
-        # function to be minimised
-        y_ = self.steporbit(self.ndts, x)
+        # print(y[1:][near_pole_ind])
+        # print(y[(1+self.NFIL):][near_pole_ind])
+        # print('-------------')
 
-        y = y_ - x # Calculate the difference
-        y[1:self.NFIL+1] -= 2*np.pi
-
-        y[0] = 0.0  # Set the first element to 0 (constraints, rhs=0)
+        # Set the period to 0 (constraints, rhs=0)
+        y[0] = 0.0  
 
         return y
 

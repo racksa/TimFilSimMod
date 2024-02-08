@@ -20,7 +20,8 @@ def main():
     # NBLOB = 40961
     # AR = 15
 
-    output_filename = f"data/expr_sims/20240118_periodic/psi_guess{NFIL}.dat"
+    # output_filename = f"data/expr_sims/20240118_periodic/psi_guess{NFIL}.dat"
+    output_filename = f"data/expr_sims/20240208_periodic/psi_guess{NFIL}.dat"
 
     # Number of time steps (ndts) and fixT
     ndts = 300
@@ -34,12 +35,13 @@ def main():
     del_value_ini = -1  # These rarely need changing for any problem
     mndl_ini = 1e-20
     mxdl_ini = 1e20
-    gtol = 5e-2  # 1e-4
+    gtol = 5e-3  # 1e-4
     epsJ = 1e-5 # 1e-6  # epsilon used in Jacobian approximation
 
-    f_range = np.arange(0.002, 0.028, 0.002)[::-1]
+    f_range = np.arange(0.002, 0.022, 0.002)[::-1]
     # f_range = np.arange(0.035, 0.042, 0.001)[::-1]
-    # print(f_range)
+    f_range = np.arange(0.01, 0.04, 0.002)
+    # f_range = [0.01]
     for k in f_range:
 
         print('-----------Spring constant = ' + str(k))

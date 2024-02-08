@@ -332,7 +332,11 @@ void filament::initial_setup(const Real *const base_pos,
           }
         
         #elif (CILIA_IC_TYPE==5)
-
+          std::random_device rd{};
+          std::mt19937 gen{rd()};
+          std::uniform_real_distribution<Real> distribution(0.0, 2.0*PI);
+          phase = distribution(gen);
+          
           // Try to read from file
           std::ifstream input_file(SIMULATION_DIR + "psi.dat");
           if (input_file.is_open()) {

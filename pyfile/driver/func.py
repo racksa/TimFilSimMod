@@ -8,7 +8,7 @@ class DRIVER:
     def __init__(self):
         self.globals_name = 'globals.ini'
         self.exe_name = 'cilia_periodic_300'
-        self.exe_name = 'cilia_readphase_free'
+        # self.exe_name = 'cilia_readphase_free'
         # self.exe_name = 'cilia_resolution'
         # self.date = '20240104_readphase_hold'
         # self.date = '20240112_readphase_free'
@@ -20,6 +20,7 @@ class DRIVER:
         # self.date = '20240124_test_solution'
         # self.date = '20240129_test_solution'
         self.date = '20240207_159fil_hold'
+        # self.date = '20240208_test_solution'
         self.afix = ''
         self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         # self.dir = f"data/expr_sims/{self.date}{self.afix}/"
@@ -207,6 +208,11 @@ class DRIVER:
             command = f"export OPENBLAS_NUM_THREADS=1; \
                         export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
                         ./bin/{self.exe_name} > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][i]:.0f}fil_{i}.out"
+
+            # command = f"export OPENBLAS_NUM_THREADS=1; \
+            #             export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
+            #             ./bin/{self.exe_name}"
+
 
             os.system(command)
             # try:

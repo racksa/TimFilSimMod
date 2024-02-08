@@ -803,12 +803,14 @@
 
     int num_iters = 0;
 
+    Real shift_ratio = (0.471*FIL_LENGTH)/(0.5*AXIS_DIR_BODY_LENGTH*PI);
+
     while (num_iters < 100000){
 
       // Sample from the uniform distribution on the surface.
       for (int n = 0; n < samples_per_iter; n++){
 
-        const matrix sample = shape.random_point_away_from_poles(0.02);
+        const matrix sample = shape.random_point_away_from_poles(shift_ratio);
         // const matrix sample = shape.random_point_away_from_poles_and_inhomogeneous(0.02, 10);
 
         samples[3*n] = sample(0);

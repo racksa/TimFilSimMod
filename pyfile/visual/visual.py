@@ -35,7 +35,7 @@ class VISUAL:
         # self.date = '20240115_resolution'
         # self.date = '20240118_periodic'
         # self.date = '20240119_example_for_periodic'
-        # self.date = '20240124_test_solution'
+        self.date = '20240124_test_solution'
         # self.date = '20240129_test_solution'
 
         self.date = '20240207_159fil_hold'
@@ -75,8 +75,8 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 3000000
-        self.frames_setting = 900
+        self.plot_end_frame_setting = 1200001
+        self.frames_setting = 1200
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -1522,12 +1522,14 @@ class VISUAL:
         ax = fig.add_subplot(1,1,1)
         fig2 = plt.figure()
         ax2 = fig2.add_subplot(1,1,1)
+        fig3 = plt.figure()
+        ax3 = fig3.add_subplot(1,1,1)
 
         fil_references_sphpolar = np.zeros((self.nfil,3))
         for i in range(self.nfil):
             fil_references_sphpolar[i] = util.cartesian_to_spherical(self.fil_references[3*i: 3*i+3])
 
-        near_pole_ind = np.where(np.sin(fil_references_sphpolar[:,2]) < 0.0 )
+        near_pole_ind = np.where(np.sin(fil_references_sphpolar[:,2]) < 0.5 )
         print(near_pole_ind)
         print(fil_references_sphpolar[:,1][near_pole_ind])
             
@@ -1586,29 +1588,43 @@ class VISUAL:
         possible_length = int(min(self.period, self.frames-1))
         error_of_final_period = compute_diff(states, -1-int(possible_length), -1)
 
-        
-        
+    
         print(f'\033[33mThe beat period is T= {self.dt*self.period}({int(self.period)} frames)\
                \nwith rel error |x({self.plot_end_frame-1})-x({self.plot_end_frame-1-possible_length})|/|x({self.plot_end_frame-1-possible_length})|={error_of_final_period}\033[m')
 
 
         # plot error over time for the computed period
         ts = np.arange(self.plot_start_frame+dframe_soln, self.plot_end_frame)/self.period
-        diffs = np.zeros(self.frames-dframe_soln)
+        diff_norms = np.zeros(self.frames-dframe_soln)
+        norms = np.zeros(self.frames-dframe_soln)
+        rel_error = np.zeros(self.frames-dframe_soln)
         for i in range(self.frames-dframe_soln):
             aux = np.copy(states[i])
             aux[:self.nfil] = util.box(aux[:self.nfil], 2*np.pi)
             diff = states[dframe_soln+i] - states[i]
             diff[:self.nfil] -= 2*np.pi
-            diffs[i] = float(np.linalg.norm(diff)) / float(np.linalg.norm(aux))
-        ax2.plot(ts, diffs)
+            diff_norms[i] = float(np.linalg.norm(diff)) 
+            norms[i] = float(np.linalg.norm(aux))
+            rel_error[i] = diff_norms[i] / norms[i]
+        ax2.plot(ts, rel_error)
+        ax3.plot(ts, norms, label='Norm of states')
+
+        ax3_right = ax3.twinx()
+        ax3_right.plot(ts, diff_norms, c='r', label=r'Norm of diff')
 
         ax.set_xlabel(r"$T$")
-        ax.set_ylabel(r"<$|\psi(t_0+T)|/|\psi(t_0)|$>")
+        ax.set_ylabel(r"<$|\psi(t_0+T)-\psi(t_0)|/|\psi(t_0)|$>")
 
         ax2.set_xlabel(r"$t/T$")
-        ax2.set_ylabel(r"$<|\psi(t+T)|/|\psi(t)|>$")
+        ax2.set_ylabel(r"<$|\psi(t_0+T)-\psi(t_0)|/|\psi(t_0)|$>")
 
+        ax3.set_xlabel(r"$t/T$")
+        ax3.set_ylabel(r"$<|\psi(t)|>$")
+        ax3_right.set_ylabel(r"$<|\psi(t_0+T)-\psi(t_0)|>$")
+        ax3.legend(loc='upper left')
+        ax3_right.legend(loc=1)
+
+        plt.tight_layout()
         plt.show()
 
     def periodic_solution(self):
@@ -3446,12 +3462,6 @@ class VISUAL:
 
         plt.show()
 
-# 
-# density for different elsticity
-# efficiency/disspation
-# one big sim start from random
-# phi dot data - constant omega
-# 
 
 # Special plot
     def ishikawa(self):

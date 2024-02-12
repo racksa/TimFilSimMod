@@ -17,10 +17,10 @@ class DRIVER:
         # self.date = '20240115_resolution'
         # self.date = '20240118_periodic'
         # self.date = '20240119_example_for_periodic'
-        # self.date = '20240124_test_solution'
+        self.date = '20240124_test_solution'
         # self.date = '20240129_test_solution'
-        self.date = '20240207_159fil_hold'
-        # self.date = '20240208_test_solution'
+        # self.date = '20240207_159fil_hold'
+        self.date = '20240208_test_solution'
         self.afix = ''
         self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         # self.dir = f"data/expr_sims/{self.date}{self.afix}/"
@@ -92,8 +92,8 @@ class DRIVER:
                         nblob = int(5000 + 0*i)
                         ar = round(6.00, 2)
                         spring_factor = round(0.004 + 0.002*i, 3)
-                        period = 1.0
-                        sim_length = 500.
+                        period = 9.908846523665537642e-01
+                        sim_length = 30.
 
                         # # find branches wider range
                         # nfil = int(639 + 0*i)

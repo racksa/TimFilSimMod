@@ -106,7 +106,7 @@ class NEWTON_SOLVER:
             fil_references_sphpolar[i] = util.cartesian_to_spherical(fil_references[3*i: 3*i+3])
 
         near_pole_ind = np.where(np.sin(fil_references_sphpolar[:,2]) < 0.0 )
-        print(near_pole_ind)
+        # print(near_pole_ind)
         # print('-------------')
         
         # print(y[1:][near_pole_ind])

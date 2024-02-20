@@ -7,6 +7,10 @@ class DRIVER:
 
     def __init__(self):
         self.globals_name = 'globals.ini'
+        self.afix = ''
+        # self.category = 'expr_sims/'
+        self.category = 'JFNK_sims/'
+        
         self.exe_name = 'cilia_periodic_300'
         # self.exe_name = 'cilia_readphase_free'
         # self.exe_name = 'cilia_resolution'
@@ -21,9 +25,13 @@ class DRIVER:
         # self.date = '20240129_test_solution'
         # self.date = '20240207_159fil_hold'
         self.date = '20240208_test_solution'
-        self.afix = ''
-        self.dir = f"data/expr_sims/{self.date}{self.afix}/"
-        # self.dir = f"data/expr_sims/{self.date}{self.afix}/"
+
+
+        self.date = '20240214_hold'
+        self.date = '20240214_test_solution_d'
+        self.dir = f"data/{self.category}{self.date}{self.afix}/"
+
+
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -37,7 +45,7 @@ class DRIVER:
                      "sim_length": []}
 
         # self.sweep_shape = (1, 12, 4, 1)
-        self.sweep_shape = (36, 1, 1, 1)
+        self.sweep_shape = (72, 1, 1, 1)
 
         self.num_sim = 0
 
@@ -89,11 +97,11 @@ class DRIVER:
 
                         # k-means
                         nfil = int(159 + 0*i)
-                        nblob = int(5000 + 0*i)
-                        ar = round(6.00, 2)
+                        nblob = int(9000 + 0*i)
+                        ar = round(8.00, 2)
                         spring_factor = round(0.004 + 0.002*i, 3)
-                        period = 9.908846523665537642e-01
-                        sim_length = 30.
+                        period = 9.918525875650020529e-01
+                        sim_length = 500.
 
                         # # find branches wider range
                         # nfil = int(639 + 0*i)
@@ -215,7 +223,3 @@ class DRIVER:
 
 
             os.system(command)
-            # try:
-            #     util.copy_last_line(self.dir + self.simName + '_filament_phases.dat', self.dir + f"phases{int(i)}.dat")
-            # except:
-            #     print('**********phase file non-exist*********')

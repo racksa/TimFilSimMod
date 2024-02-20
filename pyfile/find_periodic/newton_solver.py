@@ -58,9 +58,9 @@ class NEWTON_SOLVER:
         self.d.change_variables(self.NFIL, self.NSEG, self.NBLOB, self.AR, self.k, x[1], ndts/self.ndts)
         self.d.update_globals_file()
 
-        with open(self.d.dir + "pars.dat", "ab") as f:
-            f.write(b"\n")
-            np.savetxt(f, [x[1], ndts/self.ndts], newline = " ")
+        # with open(self.d.dir + "pars.dat", "ab") as f:
+        #     f.write(b"\n")
+        #     np.savetxt(f, [x[1], ndts/self.ndts], newline = " ")
 
         # Run code
         # print(f"running new sim with T = {x[1]}/ steps = {ndts}")
@@ -126,11 +126,16 @@ class NEWTON_SOLVER:
 
         return y
 
-    def saveorbit(self):
+    def saveorbit(self, save):
         # called each Newton iteration
         print(f'[\033[32mnewton\033[m]: iteration {self.new_nits}')
 
-        norm_x = np.sqrt(self.dotprd(-1, self.new_x, self.new_x))
+        aux = np.copy(self.new_x[1:]) # using the F(x) norm instead of F(x+T)
+        # detach error from norm
+        aux[:self.NFIL] = np.ones(self.NFIL)*np.pi
+        norm_x = np.linalg.norm(aux)
+
+        # norm_x = np.sqrt(self.dotprd(-1, self.new_x, self.new_x))
 
         relative_err = self.new_tol / norm_x
 
@@ -139,7 +144,10 @@ class NEWTON_SOLVER:
         print(f'[\033[32mnewton\033[m]: relative error: {relative_err}')
 
         # save_x = np.insert(self.new_x, 0, self.k)
-        # np.savetxt(self.d.dir + f"last_psi.dat", save_x, delimiter=' ', newline=' ')
+        if (save==1):
+            with open(self.d.dir + f"errors.dat", "ab") as f:
+                f.write(b"\n")
+                np.savetxt(self.d.dir + f"errors.dat", [self.k, relative_err], newline=" ")
                 
         # SAVE current solution, new_x (You can add your saving logic here)
     
@@ -153,8 +161,8 @@ class NEWTON_SOLVER:
 
         # print(f"////////////dx = {dx[0]}, {dx[1]}, {dx[2]}")
         # (F(x0+eps*x) - F(x0))/eps
-        eps = np.sqrt(self.dotprd(1, dx, dx)) 
-        eps = self.epsJ * np.sqrt(self.dotprd(1,self.new_x, self.new_x)) / eps
+        eps = np.sqrt(self.dotprd(-1, dx, dx)) 
+        eps = self.epsJ * np.sqrt(self.dotprd(-1, self.new_x, self.new_x)) / eps
         # should eps include \del period?
         y = self.new_x + eps * dx 
         # print(f"computing F(x_i + eps * dx) with {y}")
@@ -180,8 +188,7 @@ class NEWTON_SOLVER:
         # print(f"computing F(x_i) with {self.new_x}")
         self.new_x[1:self.NFIL+1] = util.box(self.new_x[1:self.NFIL+1], 2*np.pi)
         self.new_fx = self.getrhs(self.new_x)
-        # after getting rhs, find the period that corresponds to the smallest error
-        self.new_tol = np.sqrt(self.dotprd(n, self.new_fx, self.new_fx))
+        self.new_tol = np.sqrt(self.dotprd(-1, self.new_fx, self.new_fx))
         self.new_del = del_value
         self.dt = self.new_x[0] / self.ndts
 
@@ -200,7 +207,7 @@ class NEWTON_SOLVER:
         # print('new_x (x(0))', self.new_x[stt:stt+10])
         # print('new_fx (x(T)-x(0))', self.new_fx[stt:stt+10])
 
-        self.saveorbit()
+        self.saveorbit(0)
         x_ = np.copy(self.new_x)
         fx_ = np.copy(self.new_fx)
         tol_ = self.new_tol
@@ -209,6 +216,7 @@ class NEWTON_SOLVER:
         if self.new_tol < tol:
             if info == 1:
                 print('[\033[32mnewton\033[m]: input already converged')
+                self.saveorbit(1)
             info = 0
             return info
 
@@ -240,8 +248,8 @@ class NEWTON_SOLVER:
 
             # print(f"computing F(x_i) with {self.new_x}")
             self.new_fx = self.getrhs(self.new_x)
-            self.new_tol = np.sqrt(self.dotprd(n, self.new_fx, self.new_fx))
-            snrm = np.sqrt(self.dotprd(n, s, s))
+            self.new_tol = np.sqrt(self.dotprd(-1, self.new_fx, self.new_fx))
+            snrm = np.sqrt(self.dotprd(-1, s, s))
             ared = tol_ - self.new_tol
             pred = tol_ - gdel
 
@@ -299,7 +307,7 @@ class NEWTON_SOLVER:
 
             # End of iteration
             self.new_nits += 1
-            self.saveorbit()
+            self.saveorbit(1)
             x_ = self.new_x
             fx_ = self.new_fx
             tol_ = self.new_tol

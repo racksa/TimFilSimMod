@@ -39,10 +39,15 @@ class VISUAL:
         # self.date = '20240129_test_solution'
 
         self.date = '20240207_159fil_hold'
-        # self.date = '20240208_test_solution'
+        self.date = '20240208_test_solution'
 
         self.dir = f"data/expr_sims/{self.date}/"
         # self.dir = f"/home/clustor/ma/h/hs2216/{self.date}/"
+
+        self.date = '20240214_hold'
+        self.date = '20240214_test_solution'
+        self.dir = f"data/JFNK_sims/{self.date}/"
+
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -75,8 +80,8 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 1200001
-        self.frames_setting = 1200
+        self.plot_end_frame_setting = 301000
+        self.frames_setting = 150000
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -437,7 +442,9 @@ class VISUAL:
             else:
             # Individual filaments
                 ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=variables, cmap=colormap, vmin=vmin, vmax=vmax)
+                # ax.scatter(fil_references_sphpolar[98,1], fil_references_sphpolar[98,2], c=variables[98], s=100)
                 
+
             frame += 1
 
         if(self.video):
@@ -1524,15 +1531,14 @@ class VISUAL:
         ax2 = fig2.add_subplot(1,1,1)
         fig3 = plt.figure()
         ax3 = fig3.add_subplot(1,1,1)
+        # fig4 = plt.figure()
+        # ax4 = fig4.add_subplot(1,1,1)
 
         fil_references_sphpolar = np.zeros((self.nfil,3))
         for i in range(self.nfil):
             fil_references_sphpolar[i] = util.cartesian_to_spherical(self.fil_references[3*i: 3*i+3])
 
-        near_pole_ind = np.where(np.sin(fil_references_sphpolar[:,2]) < 0.5 )
-        print(near_pole_ind)
-        print(fil_references_sphpolar[:,1][near_pole_ind])
-            
+        near_pole_ind = np.where(np.sin(fil_references_sphpolar[:,2]) < 0.0 )            
 
         fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
         fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
@@ -1541,7 +1547,7 @@ class VISUAL:
         pi_diff = np.zeros(2*self.nfil)
         pi_diff[:self.nfil] = 2*np.pi
 
-        dframe_min, dframe_max = 0.8, 1.2
+        dframe_min, dframe_max = 0.8, 1.05
         dframe_array = np.arange(int(dframe_min*self.period), int(dframe_max*self.period)+1)
         error_array = np.zeros(np.shape(dframe_array))
 
@@ -1554,22 +1560,30 @@ class VISUAL:
                 states[i-self.plot_start_frame][:self.nfil] = np.array(fil_phases_str.split()[1:], dtype=float)
                 states[i-self.plot_start_frame][self.nfil:] = np.array(fil_angles_str.split()[1:], dtype=float)
 
+
         def compute_diff(arr, frame1, frame2):
             aux = np.copy(arr[frame1]) # using the F(x) norm instead of F(x+T)
             aux[:self.nfil] = util.box(aux[:self.nfil], 2*np.pi)
-            diff = states[frame2] - states[frame1] - pi_diff
+            # detach error from norm
+            aux[:self.nfil] = np.ones(self.nfil)*np.pi
+            
+            diff = arr[frame2] - arr[frame1] - pi_diff
             # Excluding fils near the pole
             for ind in near_pole_ind:
                 diff[ind] = 0.
                 diff[ind+self.nfil] = 0.
-            return float(np.linalg.norm(diff)) / float(np.linalg.norm(aux))
+
+            diff_norm = float(np.linalg.norm(diff)) 
+            norm = float(np.linalg.norm(aux))
+            rel_error = diff_norm / norm
+            return diff_norm, norm, rel_error
         
         try:
             for ti, dframe in enumerate(dframe_array):
                 scan_range = np.arange(dframe, self.frames, dtype=int)
                 scan_range = [-1]
                 for frame in scan_range:
-                    error_array[ti] += compute_diff(states, frame-dframe, frame)
+                    error_array[ti] += compute_diff(states, frame-dframe, frame)[2]
 
                 error_array[ti] /= len(scan_range)
         except:
@@ -1586,7 +1600,7 @@ class VISUAL:
         
         # Calculate the error |F(x) - x| of the beat period.
         possible_length = int(min(self.period, self.frames-1))
-        error_of_final_period = compute_diff(states, -1-int(possible_length), -1)
+        error_of_final_period = compute_diff(states, -1-int(possible_length), -1)[2]
 
     
         print(f'\033[33mThe beat period is T= {self.dt*self.period}({int(self.period)} frames)\
@@ -1597,20 +1611,33 @@ class VISUAL:
         ts = np.arange(self.plot_start_frame+dframe_soln, self.plot_end_frame)/self.period
         diff_norms = np.zeros(self.frames-dframe_soln)
         norms = np.zeros(self.frames-dframe_soln)
+        phase_avgs = np.zeros(self.frames-dframe_soln)
+        angle_avgs = np.zeros(self.frames-dframe_soln)
+        diff_avgs = np.zeros(self.frames-dframe_soln)
         rel_error = np.zeros(self.frames-dframe_soln)
+        order_parameters = np.zeros(self.frames-dframe_soln)
         for i in range(self.frames-dframe_soln):
-            aux = np.copy(states[i])
-            aux[:self.nfil] = util.box(aux[:self.nfil], 2*np.pi)
-            diff = states[dframe_soln+i] - states[i]
-            diff[:self.nfil] -= 2*np.pi
-            diff_norms[i] = float(np.linalg.norm(diff)) 
-            norms[i] = float(np.linalg.norm(aux))
-            rel_error[i] = diff_norms[i] / norms[i]
+            diff_norms[i], norms[i], rel_error[i] = compute_diff(states, i, dframe_soln+i )
+
+            # order_parameters[i] = np.abs(np.mean(np.exp(1j*states[i][:self.nfil])))
+
+            # phase_avgs[i] = np.mean(aux[:self.nfil])
+            # angle_avgs[i] = np.mean(aux[self.nfil:])
+            # diff_avgs[i] = np.mean(diff[:self.nfil])
+            
         ax2.plot(ts, rel_error)
+
+        # print(f'phase avg = {np.mean(phase_avgs)}')
+        # print(min(np.abs(diff_norms)))
+        # print(min(np.abs(diff_norms))/min(norms))
         ax3.plot(ts, norms, label='Norm of states')
+        # ax3.plot(ts, phase_avgs, label='Phase avg')
+        # ax3.plot(ts, angle_avgs, label='Angle avg')
 
         ax3_right = ax3.twinx()
         ax3_right.plot(ts, diff_norms, c='r', label=r'Norm of diff')
+
+        # ax4.plot(ts, order_parameters)
 
         ax.set_xlabel(r"$T$")
         ax.set_ylabel(r"<$|\psi(t_0+T)-\psi(t_0)|/|\psi(t_0)|$>")
@@ -3634,4 +3661,85 @@ class VISUAL:
         # fig2.savefig(f'fig/ishikawa_dissipation{self.nfil}fil.pdf', bbox_inches = 'tight', format='pdf')
         plt.show()
 
+    def view_solution(self):
+        # Plotting
+        colormap = 'cividis'
+        colormap = 'twilight_shifted'
+
+        sim_dir = '20240214_periodic_s'
+        dir = 'data/JFNK_sims/' + sim_dir
+
+        fil_references = myIo.read_fil_references(dir + '/fil_references.dat')
+        input_filename = dir + '/psi_guess159.dat'
+        nfil = int(len(fil_references)/3)
+
+        with open(input_filename, 'r') as input_file:
+            lines = input_file.readlines()
+
+        nsol = len(lines)
+        nrow = int(nsol**.5)
+        ncol = nrow + (1 if nrow**2 <nsol else 0)
+        print(f'num sol = {nsol} nrow = {nrow} ncol = {ncol}')
+
+        fil_references_sphpolar = np.zeros((nfil,3))
+        for i in range(nfil):
+            fil_references_sphpolar[i] = util.cartesian_to_spherical(fil_references[3*i: 3*i+3])
+
+        T_array = np.zeros(nsol)
+        k_array = np.zeros(nsol)
+        diff_array = np.zeros(nsol)
+        
+        fig, axs = plt.subplots(nrow, ncol,sharex=True, sharey=True)
+        fig2 = plt.figure()
+        ax2  = fig2.add_subplot()
+
+        axs_flat = axs.ravel()
+        import scipy.interpolate
+
+        from matplotlib.colors import Normalize
+        from matplotlib.cm import ScalarMappable
+        vmin = 0
+        vmax = 2*np.pi
+        if(self.angle):
+            vmin = -.2*np.pi
+            vmax = .2*np.pi
+
+        for ind, ax in enumerate(axs_flat):
+            ax.invert_yaxis()
+            if (ind < nsol):
+                if(ind > 0):
+                    old_data = data
+                data = np.array(lines[ind].split(), dtype=float)
+                k = data[0]
+                T = data[1]
+                phase = data[2:2+nfil]
+                phase = util.box(phase, 2*np.pi)
+                angle = data[2+nfil:]
+
+                k_array[ind] = k
+                T_array[ind] = T
+                if(ind > 0):
+                    diff_array[ind] = np.linalg.norm((data-old_data)[2:])/np.linalg.norm(old_data[2:])
+                
+                var = phase
+                if(self.angle):
+                    var = angle
+
+                ax.scatter(fil_references_sphpolar[:,1], fil_references_sphpolar[:,2], c=var, cmap=colormap, vmin=vmin, vmax=vmax)
+
+                ax.set_title(f"k={k:.3f} T={T:.3f}")
+                ax.set_xlim(-np.pi, np.pi)
+                ax.set_ylim(0, np.pi)
+                ax.set_xticks(np.linspace(-np.pi, np.pi, 5), ['-π', '-π/2', '0', 'π/2', 'π'])
+                ax.set_yticks(np.linspace(0, np.pi, 5), ['0', 'π/4', 'π/2', '3π/4', 'π'])
+                ax.invert_yaxis()
+
+        for ax in axs_flat:
+            ax.tick_params(axis='both', which='both', labelsize=18)
+
+        ax2.plot(k_array, T_array)
+
+        plt.tight_layout()
+        plt.savefig(f'fig/ciliate_periodic_soln_{sim_dir}.pdf', bbox_inches = 'tight', format='pdf')
+        plt.show()
 #

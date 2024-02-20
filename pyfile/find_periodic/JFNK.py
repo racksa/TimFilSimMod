@@ -13,15 +13,18 @@ def main():
     NSEG = 20      # Number of segments
 
     NFIL = 159       # Number of filaments
-    NBLOB = 5000
-    AR = 6
+    # NBLOB = 5000
+    # AR = 6
+
+    NBLOB = 9000
+    AR = 8
 
     # NFIL = 639       # Number of filaments
     # NBLOB = 40961
     # AR = 15
 
-    # output_filename = f"data/expr_sims/20240118_periodic/psi_guess{NFIL}.dat"
-    output_filename = f"data/expr_sims/20240208_periodic/psi_guess{NFIL}.dat"
+    # output_filename = f"data/expr_sims/20240208_periodic/psi_guess{NFIL}.dat"
+    output_filename = f"data/JFNK_sims/20240214_periodic_s/psi_guess{NFIL}.dat"
 
     # Number of time steps (ndts) and fixT
     ndts = 300
@@ -31,17 +34,16 @@ def main():
     n = 2*NFIL+1
     mgmres = 5  # 10  # max GMRES iterations
     nits = 150  # max Newton iterations
-    rel_err_ini = 1e-3  # 1e-8 Relative error |F|/|x|
+    rel_err_ini = 1.5e-3  # 1e-8 Relative error |F|/|x|
     del_value_ini = -1  # These rarely need changing for any problem
     mndl_ini = 1e-20
     mxdl_ini = 1e20
     gtol = 5e-3  # 1e-4
     epsJ = 1e-5 # 1e-6  # epsilon used in Jacobian approximation
 
-    f_range = np.arange(0.002, 0.022, 0.002)[::-1]
+    f_range = np.arange(0.008, 0.062, 0.002)[::-1]
     # f_range = np.arange(0.035, 0.042, 0.001)[::-1]
-    f_range = np.arange(0.018, 0.04, 0.002)
-    # f_range = [0.01]
+    f_range = np.arange(0.030, 0.062, 0.002)
     for k in f_range:
 
         print('-----------Spring constant = ' + str(k))
@@ -50,12 +52,17 @@ def main():
         newton = newton_solver.NEWTON_SOLVER(new_x,epsJ,ndts,fixT,k,NFIL, NSEG, NBLOB, AR)
 
        # Scale parameters by |x| then call black box
-        d = np.sqrt(np.sum(newton.new_x[1:] * newton.new_x[1:]))
+        aux = np.copy(newton.new_x[1:]) # using the F(x) norm instead of F(x+T)
+        # detach error from norm
+        aux[:NFIL] = np.ones(NFIL)*np.pi
+        d = np.linalg.norm(aux)
+        
+
         # Do we want rel_err?
         tol = rel_err_ini * d
         print(f"Requested tol={tol}")
         del_value = del_value_ini * d
-        mndl = mndl_ini * d # this is a bug
+        mndl = mndl_ini * d
         mxdl = mxdl_ini * d
 
         info = 1

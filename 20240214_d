@@ -1,0 +1,1485 @@
+-----------Spring constant = 0.060000000000000005
+Requested tol=0.04495327268635994
+[[32mnewton[m]: nits=0  res=0.11793888191971523
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9566
+[[32mnewton[m]: norm x = 44.95327268635994, new tolerance = 0.11793888191971523
+[[32mnewton[m]: relative error: 0.002623588336773112
+[[34mgmres[m] it=1  res=0.11793887173932138
+[[34mgmres[m] it=2  res=0.020046274299745922
+[[34mgmres[m] it=3  res=0.01925669802864414
+[[34mgmres[m] it=4  res=0.01698043793474177
+[[34mgmres[m] it=5  res=0.012683889857026367
+[[32mnewton[m]: nits=0  res=0.019116713789549874
+[[32mnewton[m]: gits=5  del=0.011793888191971523
+[[32mnewton[m]: |s|=0.010087737226519025  pred=0.10005486336407922
+[[32mnewton[m]: ared/pred=0.9876798069332389
+[[32mnewton[m]: step is good, took a full newton step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9552309404905184
+[[32mnewton[m]: norm x = 44.95458935175513, new tolerance = 0.019116713789549874
+[[32mnewton[m]: relative error: 0.0004252449875577278
+[[32mnewton[m]: converged
+-----------Spring constant = 0.058
+Requested tol=0.044954589351755135
+[[32mnewton[m]: nits=0  res=0.09125312194082907
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9552309404905184
+[[32mnewton[m]: norm x = 44.95458935175513, new tolerance = 0.09125312194082907
+[[32mnewton[m]: relative error: 0.0020298955736599636
+[[34mgmres[m] it=1  res=0.09125301696067316
+[[34mgmres[m] it=2  res=0.05220435538061512
+[[34mgmres[m] it=3  res=0.026930561178885617
+[[34mgmres[m] it=4  res=0.024471435339212245
+[[34mgmres[m] it=5  res=0.023913118675569646
+[[32mnewton[m]: nits=0  res=0.04535691080787607
+[[32mnewton[m]: gits=5  del=0.009125312194082908
+[[32mnewton[m]: |s|=0.009096073939240322  pred=0.04599895055014517
+[[32mnewton[m]: ared/pred=0.9977664834531351
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.039690403044339136
+[[32mnewton[m]: gits=5  del=0.018192147878480645
+[[32mnewton[m]: |s|=0.01798310807400292  pred=0.05170292413355041
+[[32mnewton[m]: ared/pred=0.9972882532388629
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.032027188686705566
+[[32mnewton[m]: gits=5  del=0.03596621614800584
+[[32mnewton[m]: |s|=0.035652728726470635  pred=0.058939709652388324
+[[32mnewton[m]: ared/pred=1.0048562099037008
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.025327623708173246
+[[32mnewton[m]: gits=5  del=0.07130545745294127
+[[32mnewton[m]: |s|=0.07099946998003923  pred=0.06449894718144149
+[[32mnewton[m]: ared/pred=1.0221174315791748
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.026232794516112264
+[[32mnewton[m]: gits=5  del=0.14199893996007845
+[[32mnewton[m]: |s|=0.1324023040837317  pred=0.06734000326524767
+[[32mnewton[m]: ared/pred=0.9655527809912064
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9564377529782967
+[[32mnewton[m]: norm x = 44.94969376892228, new tolerance = 0.025327623708173246
+[[32mnewton[m]: relative error: 0.0005634659901884467
+[[32mnewton[m]: converged
+-----------Spring constant = 0.056
+Requested tol=0.04494969376892228
+[[32mnewton[m]: nits=0  res=0.09316438231856515
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9564377529782967
+[[32mnewton[m]: norm x = 44.94969376892228, new tolerance = 0.09316438231856515
+[[32mnewton[m]: relative error: 0.0020726366412528925
+[[34mgmres[m] it=1  res=0.09316434641241757
+[[34mgmres[m] it=2  res=0.056681785388585273
+[[34mgmres[m] it=3  res=0.03835261730688531
+[[34mgmres[m] it=4  res=0.03689136117779334
+[[34mgmres[m] it=5  res=0.03689012836079205
+[[32mnewton[m]: nits=0  res=0.05182305987598635
+[[32mnewton[m]: gits=5  del=0.009316438231856515
+[[32mnewton[m]: |s|=0.009120862866976037  pred=0.04127038020893545
+[[32mnewton[m]: ared/pred=1.0017189624443537
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.048063866084695706
+[[32mnewton[m]: gits=5  del=0.018241725733952073
+[[32mnewton[m]: |s|=0.01751864325361461  pred=0.04486205409334014
+[[32mnewton[m]: ared/pred=1.0053154530114283
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.04257264584818288
+[[32mnewton[m]: gits=5  del=0.03503728650722922
+[[32mnewton[m]: |s|=0.03483402333304363  pred=0.049979158740820734
+[[32mnewton[m]: ared/pred=1.0122566634772348
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.03653354263319772
+[[32mnewton[m]: gits=5  del=0.06966804666608727
+[[32mnewton[m]: |s|=0.06762943750073218  pred=0.05448222227046843
+[[32mnewton[m]: ared/pred=1.0394370369885526
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.03483130669295996
+[[32mnewton[m]: gits=5  del=0.13525887500146436
+[[32mnewton[m]: |s|=0.1190083138505414  pred=0.05627425395776694
+[[32mnewton[m]: ared/pred=1.0365854991055656
+[[32mnewton[m]: step is good, took a full newton step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9573418689682901
+[[32mnewton[m]: norm x = 45.38825788384958, new tolerance = 0.03483130669295996
+[[32mnewton[m]: relative error: 0.0007674078785331374
+[[32mnewton[m]: converged
+-----------Spring constant = 0.054
+Requested tol=0.045388257883849585
+[[32mnewton[m]: nits=0  res=0.10773181624998977
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9573418689682901
+[[32mnewton[m]: norm x = 45.38825788384958, new tolerance = 0.10773181624998977
+[[32mnewton[m]: relative error: 0.00237356138509832
+[[34mgmres[m] it=1  res=0.10773181526833803
+[[34mgmres[m] it=2  res=0.06116202697559251
+[[34mgmres[m] it=3  res=0.03919240767413555
+[[34mgmres[m] it=4  res=0.0333693933467096
+[[34mgmres[m] it=5  res=0.02923381037533574
+[[32mnewton[m]: nits=0  res=0.05616727824631514
+[[32mnewton[m]: gits=5  del=0.010773181624998978
+[[32mnewton[m]: |s|=0.009616152685044826  pred=0.05230034403299565
+[[32mnewton[m]: ared/pred=0.9859311436105122
+[[32mnewton[m]: step is good, took a full newton step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9584778215845717
+[[32mnewton[m]: norm x = 45.38742471739335, new tolerance = 0.05616727824631514
+[[32mnewton[m]: relative error: 0.00123750749455478
+[[34mgmres[m] it=1  res=0.05571507451601637
+[[34mgmres[m] it=2  res=0.055714556118236266
+[[34mgmres[m] it=3  res=0.040135740038225315
+[[34mgmres[m] it=4  res=0.03771651132784405
+[[34mgmres[m] it=5  res=0.035594319115825925
+[[32mnewton[m]: nits=1  res=0.04938055426003909
+[[32mnewton[m]: gits=5  del=0.01923230537008965
+[[32mnewton[m]: |s|=0.017909315916752287  pred=0.007637522933307245
+[[32mnewton[m]: ared/pred=0.8886027636891466
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.04534751892351491
+[[32mnewton[m]: gits=5  del=0.035818631833504574
+[[32mnewton[m]: |s|=0.03441913698988712  pred=0.01090265470387753
+[[32mnewton[m]: ared/pred=0.9923967709398508
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.04049829169644556
+[[32mnewton[m]: gits=5  del=0.06883827397977424
+[[32mnewton[m]: |s|=0.06589259734595379  pred=0.014690967841922566
+[[32mnewton[m]: ared/pred=1.0665727893812493
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.035021444589795156
+[[32mnewton[m]: gits=5  del=0.13178519469190758
+[[32mnewton[m]: |s|=0.12934219940045708  pred=0.019069901429294767
+[[32mnewton[m]: ared/pred=1.1088590958334068
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.03543602407004474
+[[32mnewton[m]: gits=5  del=0.25868439880091415
+[[32mnewton[m]: |s|=0.19503276594735594  pred=0.020572959130475167
+[[32mnewton[m]: ared/pred=1.0076943255849253
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 2
+[[32mnewton[m]: T = 0.9586060190472596
+[[32mnewton[m]: norm x = 45.40535762645434, new tolerance = 0.035021444589795156
+[[32mnewton[m]: relative error: 0.0007713064365204064
+terminate called after throwing an instance of 'std::invalid_argument'
+  what():  stoi
+Aborted (core dumped)
+[[32mnewton[m]: converged
+-----------Spring constant = 0.052
+Requested tol=0.04540535762645434
+[[32mnewton[m]: nits=0  res=0.09651926367837976
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9586060190472596
+[[32mnewton[m]: norm x = 45.40535762645434, new tolerance = 0.09651926367837976
+[[32mnewton[m]: relative error: 0.0021257241154763007
+[[34mgmres[m] it=1  res=0.09651895055538867
+[[34mgmres[m] it=2  res=0.06271217822679259
+[[34mgmres[m] it=3  res=0.0432558025439602
+[[34mgmres[m] it=4  res=0.03775096041694545
+[[34mgmres[m] it=5  res=0.03553972659145577
+[[32mnewton[m]: nits=0  res=0.05804062907916627
+[[32mnewton[m]: gits=5  del=0.009651926367837977
+[[32mnewton[m]: |s|=0.009251768490012717  pred=0.03875766840189429
+[[32mnewton[m]: ared/pred=0.9928005524019821
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.05394444684556258
+[[32mnewton[m]: gits=5  del=0.018503536980025433
+[[32mnewton[m]: |s|=0.01833569681768848  pred=0.042458849862556734
+[[32mnewton[m]: ared/pred=1.0027312791240424
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.04880887758383636
+[[32mnewton[m]: gits=5  del=0.03667139363537696
+[[32mnewton[m]: |s|=0.036422694759385886  pred=0.047863978559081366
+[[32mnewton[m]: ared/pred=0.9967910635688512
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.0425090216318673
+[[32mnewton[m]: gits=5  del=0.07284538951877177
+[[32mnewton[m]: |s|=0.07087707575199367  pred=0.05379971638083013
+[[32mnewton[m]: ared/pred=1.003913137091506
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.03537217512450552
+[[32mnewton[m]: gits=5  del=0.14175415150398735
+[[32mnewton[m]: |s|=0.14170832533967093  pred=0.059644811891028916
+[[32mnewton[m]: ared/pred=1.0251870467055875
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.03638511109159211
+[[32mnewton[m]: gits=5  del=0.28341665067934185
+[[32mnewton[m]: |s|=0.1978728231783605  pred=0.06097953708690801
+[[32mnewton[m]: ared/pred=0.9861365871158466
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9596923852716265
+[[32mnewton[m]: norm x = 45.437510601152184, new tolerance = 0.03537217512450552
+[[32mnewton[m]: relative error: 0.0007784796010283313
+[[32mnewton[m]: converged
+-----------Spring constant = 0.05
+Requested tol=0.045437510601152184
+[[32mnewton[m]: nits=0  res=0.09413262863655478
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9596923852716265
+[[32mnewton[m]: norm x = 45.437510601152184, new tolerance = 0.09413262863655478
+[[32mnewton[m]: relative error: 0.0020716942321696605
+[[34mgmres[m] it=1  res=0.09413262245094911
+[[34mgmres[m] it=2  res=0.0627170458936391
+[[34mgmres[m] it=3  res=0.04151583966721691
+[[34mgmres[m] it=4  res=0.033260062427587826
+[[34mgmres[m] it=5  res=0.028136921281191603
+[[32mnewton[m]: nits=0  res=0.05783714809675891
+[[32mnewton[m]: gits=5  del=0.009413262863655477
+[[32mnewton[m]: |s|=0.008682836016776916  pred=0.036838225921458884
+[[32mnewton[m]: ared/pred=0.9852667882861629
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.05347505436778565
+[[32mnewton[m]: gits=5  del=0.017365672033553832
+[[32mnewton[m]: |s|=0.016790220761511206  pred=0.04074104126345342
+[[32mnewton[m]: ared/pred=0.9979512797882473
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.047435307288404574
+[[32mnewton[m]: gits=5  del=0.03358044152302241
+[[32mnewton[m]: |s|=0.03208613871195595  pred=0.04663394345363729
+[[32mnewton[m]: ared/pred=1.00135905072184
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.040133217701010186
+[[32mnewton[m]: gits=5  del=0.0641722774239119
+[[32mnewton[m]: |s|=0.06265977641267433  pred=0.054055916769465896
+[[32mnewton[m]: ared/pred=0.9989546780944945
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.033455737235677054
+[[32mnewton[m]: gits=5  del=0.12531955282534865
+[[32mnewton[m]: |s|=0.1247973913744303  pred=0.06292335147371748
+[[32mnewton[m]: ared/pred=0.9642984675764118
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.034752526854271576
+[[32mnewton[m]: gits=5  del=0.2495947827488606
+[[32mnewton[m]: |s|=0.18602136963735197  pred=0.06599570735533365
+[[32mnewton[m]: ared/pred=0.8997570321137593
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9606242981598425
+[[32mnewton[m]: norm x = 45.473641337286324, new tolerance = 0.033455737235677054
+[[32mnewton[m]: relative error: 0.0007357171374847623
+[[32mnewton[m]: converged
+-----------Spring constant = 0.048
+Requested tol=0.045473641337286326
+[[32mnewton[m]: nits=0  res=0.1054806468716219
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9606242981598425
+[[32mnewton[m]: norm x = 45.473641337286324, new tolerance = 0.1054806468716219
+[[32mnewton[m]: relative error: 0.0023195997454712857
+[[34mgmres[m] it=1  res=0.10548063929227319
+[[34mgmres[m] it=2  res=0.06730478578423628
+[[34mgmres[m] it=3  res=0.04343907036173028
+[[34mgmres[m] it=4  res=0.027281755912100494
+[[34mgmres[m] it=5  res=0.020296210580914874
+[[32mnewton[m]: nits=0  res=0.11038898836210072
+[[32mnewton[m]: gits=5  del=0.01054806468716219
+[[32mnewton[m]: |s|=0.009910784367715232  pred=0.043756392622494915
+[[32mnewton[m]: ared/pred=-0.11217427206180315
+[[32mnewton[m]: norm increased, try a smaller step
+[[32mnewton[m]: nits=0  res=0.10767954791693997
+[[32mnewton[m]: gits=5  del=0.004955392183857616
+[[32mnewton[m]: |s|=0.004618364565729693  pred=0.04083855799972427
+[[32mnewton[m]: ared/pred=-0.05384374848232688
+[[32mnewton[m]: norm increased, try a smaller step
+[[32mnewton[m]: nits=0  res=0.10651081895159652
+[[32mnewton[m]: gits=5  del=0.0023091822828648465
+[[32mnewton[m]: |s|=0.0022478038321729395  pred=0.03948551827666587
+[[32mnewton[m]: ared/pred=-0.026089871044782626
+[[32mnewton[m]: norm increased, try a smaller step
+[[32mnewton[m]: nits=0  res=0.10594380118955012
+[[32mnewton[m]: gits=5  del=0.0011239019160864698
+[[32mnewton[m]: |s|=0.0010709816940352279  pred=0.03880282914599416
+[[32mnewton[m]: ared/pred=-0.011936096622893615
+[[32mnewton[m]: norm increased, try a smaller step
+[[32mnewton[m]: nits=0  res=0.1056717122822626
+[[32mnewton[m]: gits=5  del=0.0005354908470176139
+[[32mnewton[m]: |s|=0.0005047269583793864  pred=0.03847169548420326
+[[32mnewton[m]: ared/pred=-0.0049663891397549375
+[[32mnewton[m]: norm increased, try a smaller step
+[[32mnewton[m]: nits=0  res=0.10556464800172165
+[[32mnewton[m]: gits=5  del=0.0002523634791896932
+[[32mnewton[m]: |s|=0.0002365962955326512  pred=0.03831429468723595
+[[32mnewton[m]: ared/pred=-0.002192422718086334
+[[32mnewton[m]: norm increased, try a smaller step
+[[32mnewton[m]: nits=0  res=0.10549837358962914
+[[32mnewton[m]: gits=5  del=0.0001182981477663256
+[[32mnewton[m]: |s|=0.00011062489394301532  pred=0.03824021097581093
+[[32mnewton[m]: ared/pred=-0.00046356224390235994
+[[32mnewton[m]: norm increased, try a smaller step
+[[32mnewton[m]: nits=0  res=0.1054706387776553
+[[32mnewton[m]: gits=5  del=5.531244697150766e-05
+[[32mnewton[m]: |s|=5.166377440388268e-05  pred=0.038205505853219995
+[[32mnewton[m]: ared/pred=0.0002619542325925469
+[[32mnewton[m]: step is okay, trying a smaller step
+[[32mnewton[m]: nits=0  res=0.10546421460218096
+[[32mnewton[m]: gits=5  del=3.6164642082717874e-05
+[[32mnewton[m]: |s|=3.5299145325821664e-05  pred=0.038195869708840036
+[[32mnewton[m]: ared/pred=0.00043021063707146024
+[[32mnewton[m]: step is okay, trying a smaller step
+[[32mnewton[m]: nits=0  res=0.10545566362828421
+[[32mnewton[m]: gits=5  del=2.4709401728075163e-05
+[[32mnewton[m]: |s|=2.4117130165904053e-05  pred=0.03818928399112209
+[[32mnewton[m]: ared/pred=0.0006541951229956921
+[[32mnewton[m]: step is okay, trying a smaller step
+[[32mnewton[m]: nits=0  res=0.10545545707756011
+[[32mnewton[m]: gits=5  del=1.6881991116132836e-05
+[[32mnewton[m]: |s|=1.6478215076176277e-05  pred=0.03818478393510559
+[[32mnewton[m]: ared/pred=0.0006596814611965094
+[[32mnewton[m]: step is okay, trying a smaller step
+[[32mnewton[m]: nits=0  res=0.10545051412269338
+[[32mnewton[m]: gits=5  del=1.1534750553323394e-05
+[[32mnewton[m]: |s|=1.1261179225093004e-05  pred=0.038181709428997665
+[[32mnewton[m]: ared/pred=0.0007891932912158674
+[[32mnewton[m]: step is okay, trying a smaller step
+[[32mnewton[m]: nits=0  res=0.10545811281159943
+[[32mnewton[m]: gits=5  del=7.882825457565103e-06
+[[32mnewton[m]: |s|=7.699715450706919e-06  pred=0.03817960906372818
+[[32mnewton[m]: ared/pred=0.0005902119108881053
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9606246980144251
+[[32mnewton[m]: norm x = 45.4736429857675, new tolerance = 0.10545051412269338
+[[32mnewton[m]: relative error: 0.0023189370193124324
+[[34mgmres[m] it=1  res=0.10545050461924528
+[[34mgmres[m] it=2  res=0.0621037921978993
+[[34mgmres[m] it=3  res=0.03906343721173893
+[[34mgmres[m] it=4  res=0.027951655239444907
+[[34mgmres[m] it=5  res=0.021570111782874643
+[[32mnewton[m]: nits=1  res=0.10507545150969004
+[[32mnewton[m]: gits=5  del=5.630589612546502e-06
+[[32mnewton[m]: |s|=5.502443015752618e-06  pred=0.00037546977433282336
+[[32mnewton[m]: ared/pred=0.998915594923163
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.10472255794912694
+[[32mnewton[m]: gits=5  del=1.1004886031505237e-05
+[[32mnewton[m]: |s|=1.0667513298762428e-05  pred=0.0007272612270109446
+[[32mnewton[m]: ared/pred=1.0009555666240484
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.10405440751467997
+[[32mnewton[m]: gits=5  del=2.1335026597524857e-05
+[[32mnewton[m]: |s|=2.058137740167395e-05  pred=0.0014006951981312549
+[[32mnewton[m]: ared/pred=0.9967240623627716
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.10277742760480228
+[[32mnewton[m]: gits=5  del=4.11627548033479e-05
+[[32mnewton[m]: |s|=3.934531783998932e-05  pred=0.0026686806677522212
+[[32mnewton[m]: ared/pred=1.0016509469237418
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.10046336095518923
+[[32mnewton[m]: gits=5  del=7.869063567997863e-05
+[[32mnewton[m]: |s|=7.393565535853967e-05  pred=0.004982473426461312
+[[32mnewton[m]: ared/pred=1.0009392405422533
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.0957423233476029
+[[32mnewton[m]: gits=5  del=0.00014787131071707934
+[[32mnewton[m]: |s|=0.00014622534282868568  pred=0.009710269938692409
+[[32mnewton[m]: ared/pred=0.9997858799379366
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.08698364142351712
+[[32mnewton[m]: gits=5  del=0.00029245068565737135
+[[32mnewton[m]: |s|=0.0002880623073077293  pred=0.01848460470542314
+[[32mnewton[m]: ared/pred=0.9990407148797895
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.07269551124064857
+[[32mnewton[m]: gits=5  del=0.0005761246146154586
+[[32mnewton[m]: |s|=0.0005612233765312249  pred=0.03275004565060868
+[[32mnewton[m]: ared/pred=1.0001513656343874
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.06174720655118822
+[[32mnewton[m]: gits=5  del=0.0011224467530624499
+[[32mnewton[m]: |s|=0.0011163427232602303  pred=0.043679542406908904
+[[32mnewton[m]: ared/pred=1.0005440799808492
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.06080795531934533
+[[32mnewton[m]: gits=5  del=0.0022326854465204607
+[[32mnewton[m]: |s|=0.0021035459550883106  pred=0.044619760910085474
+[[32mnewton[m]: ared/pred=1.0005109371452823
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.059509482074924014
+[[32mnewton[m]: gits=5  del=0.004207091910176621
+[[32mnewton[m]: |s|=0.0038979736634954026  pred=0.0459189768429229
+[[32mnewton[m]: ared/pred=1.0004803069746504
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.057193956655625613
+[[32mnewton[m]: gits=5  del=0.007795947326990805
+[[32mnewton[m]: |s|=0.0073913301904720815  pred=0.04822609064371788
+[[32mnewton[m]: ared/pred=1.0006317498047888
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.053121646648166855
+[[32mnewton[m]: gits=5  del=0.014782660380944163
+[[32mnewton[m]: |s|=0.014193631841887008  pred=0.05227802251641475
+[[32mnewton[m]: ared/pred=1.0009725876317492
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.04665751361208257
+[[32mnewton[m]: gits=5  del=0.028387263683774016
+[[32mnewton[m]: |s|=0.02728912236284951  pred=0.058686022128219786
+[[32mnewton[m]: ared/pred=1.001822893740477
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.03769858651219434
+[[32mnewton[m]: gits=5  del=0.05457824472569902
+[[32mnewton[m]: |s|=0.05370734803178594  pred=0.06764964777197145
+[[32mnewton[m]: ared/pred=1.0015119049676702
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.0275827370124789
+[[32mnewton[m]: gits=5  del=0.10741469606357187
+[[32mnewton[m]: |s|=0.10704354555573369  pred=0.07865072422929036
+[[32mnewton[m]: ared/pred=0.9900452649769206
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.02543471279380016
+[[32mnewton[m]: gits=5  del=0.21408709111146737
+[[32mnewton[m]: |s|=0.17193240980467955  pred=0.08388040233978133
+[[32mnewton[m]: ared/pred=0.9539272475681094
+[[32mnewton[m]: step is good, took a full newton step
+[[32mnewton[m]: iteration 2
+[[32mnewton[m]: T = 0.9618176854462293
+[[32mnewton[m]: norm x = 45.090051478717534, new tolerance = 0.02543471279380016
+[[32mnewton[m]: relative error: 0.000564087020521707
+[[32mnewton[m]: converged
+-----------Spring constant = 0.046
+Requested tol=0.04509005147871754
+[[32mnewton[m]: nits=0  res=0.09649357218459408
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9618176854462293
+[[32mnewton[m]: norm x = 45.090051478717534, new tolerance = 0.09649357218459408
+[[32mnewton[m]: relative error: 0.002140019117745717
+[[34mgmres[m] it=1  res=0.09649355468523128
+[[34mgmres[m] it=2  res=0.05482535676126412
+[[34mgmres[m] it=3  res=0.02859800295068296
+[[34mgmres[m] it=4  res=0.02164039128730601
+[[34mgmres[m] it=5  res=0.01779920735275518
+[[32mnewton[m]: nits=0  res=0.04719450468225807
+[[32mnewton[m]: gits=5  del=0.009649357218459408
+[[32mnewton[m]: |s|=0.009160771924229134  pred=0.04945863190772012
+[[32mnewton[m]: ared/pred=0.9967737804458112
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.04005827123565968
+[[32mnewton[m]: gits=5  del=0.018321543848458268
+[[32mnewton[m]: |s|=0.01816631359389063  pred=0.056157246461363476
+[[32mnewton[m]: ared/pred=1.0049513554365994
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.029132059955153913
+[[32mnewton[m]: gits=5  del=0.03633262718778126
+[[32mnewton[m]: |s|=0.03611814462418616  pred=0.06662764286484361
+[[32mnewton[m]: ared/pred=1.0110144878768295
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.019071928675837638
+[[32mnewton[m]: gits=5  del=0.07223628924837232
+[[32mnewton[m]: |s|=0.07165217049637755  pred=0.07622211783689413
+[[32mnewton[m]: ared/pred=1.0157372388212715
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.01961299478203475
+[[32mnewton[m]: gits=5  del=0.1433043409927551
+[[32mnewton[m]: |s|=0.10591883344076362  pred=0.07869436483182232
+[[32mnewton[m]: ared/pred=0.9769514954070823
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9631010525219927
+[[32mnewton[m]: norm x = 45.10163579375004, new tolerance = 0.019071928675837638
+[[32mnewton[m]: relative error: 0.000422865564412201
+[[32mnewton[m]: converged
+-----------Spring constant = 0.044000000000000004
+Requested tol=0.045101635793750046
+[[32mnewton[m]: nits=0  res=0.09470106293918754
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9631010525219927
+[[32mnewton[m]: norm x = 45.10163579375004, new tolerance = 0.09470106293918754
+[[32mnewton[m]: relative error: 0.002099725681176086
+[[34mgmres[m] it=1  res=0.09470106293849422
+[[34mgmres[m] it=2  res=0.05804553304316697
+[[34mgmres[m] it=3  res=0.03061148033295568
+[[34mgmres[m] it=4  res=0.019439391859442642
+[[34mgmres[m] it=5  res=0.01266682110661387
+[[32mnewton[m]: nits=0  res=0.05132448016639009
+[[32mnewton[m]: gits=5  del=0.009470106293918753
+[[32mnewton[m]: |s|=0.008958297464739681  pred=0.04333525712617189
+[[32mnewton[m]: ared/pred=1.0009536264318275
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.0456525944257795
+[[32mnewton[m]: gits=5  del=0.017916594929479362
+[[32mnewton[m]: |s|=0.01702186995790196  pred=0.04885913487835519
+[[32mnewton[m]: ared/pred=1.0038750918436077
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.03624980693715514
+[[32mnewton[m]: gits=5  del=0.03404373991580392
+[[32mnewton[m]: |s|=0.03276956402309296  pred=0.05789828632943392
+[[32mnewton[m]: ared/pred=1.009550708797358
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.02347486294517653
+[[32mnewton[m]: gits=5  del=0.06553912804618592
+[[32mnewton[m]: |s|=0.06535063212385041  pred=0.07021131715391662
+[[32mnewton[m]: ared/pred=1.0144546902299179
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.0184849835250611
+[[32mnewton[m]: gits=5  del=0.13070126424770082
+[[32mnewton[m]: |s|=0.13054799559019759  pred=0.08197341672448868
+[[32mnewton[m]: ared/pred=0.9297658004214638
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.019084218093794614
+[[32mnewton[m]: gits=5  del=0.26109599118039517
+[[32mnewton[m]: |s|=0.13496821381532909  pred=0.08203424183252217
+[[32mnewton[m]: ared/pred=0.921771727954398
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9643669762932793
+[[32mnewton[m]: norm x = 45.10866846810107, new tolerance = 0.0184849835250611
+[[32mnewton[m]: relative error: 0.0004097878335321046
+[[32mnewton[m]: converged
+-----------Spring constant = 0.042
+Requested tol=0.045108668468101076
+[[32mnewton[m]: nits=0  res=0.09101202421304744
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9643669762932793
+[[32mnewton[m]: norm x = 45.10866846810107, new tolerance = 0.09101202421304744
+[[32mnewton[m]: relative error: 0.002017617174344378
+[[34mgmres[m] it=1  res=0.09101202420880601
+[[34mgmres[m] it=2  res=0.05403679104460129
+[[34mgmres[m] it=3  res=0.02305679882245555
+[[34mgmres[m] it=4  res=0.013042232281727396
+[[34mgmres[m] it=5  res=0.0077397313041240616
+[[32mnewton[m]: nits=0  res=0.04700340820998118
+[[32mnewton[m]: gits=5  del=0.009101202421304744
+[[32mnewton[m]: |s|=0.008898498319960922  pred=0.04433801772530444
+[[32mnewton[m]: ared/pred=0.9925706709695731
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.04068674595986834
+[[32mnewton[m]: gits=5  del=0.017796996639921844
+[[32mnewton[m]: |s|=0.017057413338011695  pred=0.050388442375920516
+[[32mnewton[m]: ared/pred=0.9987464561363063
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.030679257414597396
+[[32mnewton[m]: gits=5  del=0.03411482667602339
+[[32mnewton[m]: |s|=0.03301302556121107  pred=0.06055423394552856
+[[32mnewton[m]: ared/pred=0.9963426645397292
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.018350073683155468
+[[32mnewton[m]: gits=5  del=0.06602605112242214
+[[32mnewton[m]: |s|=0.0652967302093108  pred=0.07326895820678163
+[[32mnewton[m]: ared/pred=0.9917153499688566
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.01143409841095436
+[[32mnewton[m]: gits=5  del=0.1305934604186216
+[[32mnewton[m]: |s|=0.1188180556959148  pred=0.08327229290885976
+[[32mnewton[m]: ared/pred=0.9556350980894677
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.011435681177791361
+[[32mnewton[m]: gits=5  del=0.2376361113918296
+[[32mnewton[m]: |s|=0.1188180556959148  pred=0.08327229290885976
+[[32mnewton[m]: ared/pred=0.9556160909649881
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9655794599277172
+[[32mnewton[m]: norm x = 45.10678398018134, new tolerance = 0.01143409841095436
+[[32mnewton[m]: relative error: 0.00025348955083958507
+[[32mnewton[m]: converged
+-----------Spring constant = 0.04
+Requested tol=0.04510678398018134
+[[32mnewton[m]: nits=0  res=0.09630234923883574
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9655794599277172
+[[32mnewton[m]: norm x = 45.10678398018134, new tolerance = 0.09630234923883574
+[[32mnewton[m]: relative error: 0.0021349859320750576
+[[34mgmres[m] it=1  res=0.09630233135470428
+[[34mgmres[m] it=2  res=0.05515957205882221
+[[34mgmres[m] it=3  res=0.02434504345456085
+[[34mgmres[m] it=4  res=0.016887262767400584
+[[34mgmres[m] it=5  res=0.014040219578125226
+[[32mnewton[m]: nits=0  res=0.04790798008231747
+[[32mnewton[m]: gits=5  del=0.009630234923883573
+[[32mnewton[m]: |s|=0.00945799501192187  pred=0.04845907050084382
+[[32mnewton[m]: ared/pred=0.9986648248995114
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.04128570193316221
+[[32mnewton[m]: gits=5  del=0.01891599002384374
+[[32mnewton[m]: |s|=0.018840467036868435  pred=0.05505551382839406
+[[32mnewton[m]: ared/pred=0.9992940484972735
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.031152657290791714
+[[32mnewton[m]: gits=5  del=0.03768093407373687
+[[32mnewton[m]: |s|=0.037123790831119545  pred=0.0653411784425601
+[[32mnewton[m]: ared/pred=0.9970694361644487
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.020277489025976293
+[[32mnewton[m]: gits=5  del=0.07424758166223909
+[[32mnewton[m]: |s|=0.07361515612469902  pred=0.07671447597313089
+[[32mnewton[m]: ared/pred=0.9910106175982618
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.01517242088951696
+[[32mnewton[m]: gits=5  del=0.14723031224939803
+[[32mnewton[m]: |s|=0.12290515834837944  pred=0.0822621296606799
+[[32mnewton[m]: ared/pred=0.9862366642338181
+[[32mnewton[m]: step is good, took a full newton step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9668458857218438
+[[32mnewton[m]: norm x = 45.550933378804594, new tolerance = 0.01517242088951696
+[[32mnewton[m]: relative error: 0.0003330869372827577
+[[32mnewton[m]: converged
+-----------Spring constant = 0.038
+Requested tol=0.045550933378804594
+[[32mnewton[m]: nits=0  res=0.09960912359830643
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9668458857218438
+[[32mnewton[m]: norm x = 45.550933378804594, new tolerance = 0.09960912359830643
+[[32mnewton[m]: relative error: 0.002186763611844138
+[[34mgmres[m] it=1  res=0.09960912268258842
+[[34mgmres[m] it=2  res=0.06113782875618094
+[[34mgmres[m] it=3  res=0.028914960132994046
+[[34mgmres[m] it=4  res=0.01897361199622401
+[[34mgmres[m] it=5  res=0.01475017406404524
+[[32mnewton[m]: nits=0  res=0.053901169385809966
+[[32mnewton[m]: gits=5  del=0.009960912359830643
+[[32mnewton[m]: |s|=0.009851041450682212  pred=0.04565644629494698
+[[32mnewton[m]: ared/pred=1.0011281630904152
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.04796706861796414
+[[32mnewton[m]: gits=5  del=0.019702082901364423
+[[32mnewton[m]: |s|=0.018694033808662823  pred=0.05153916821555548
+[[32mnewton[m]: ared/pred=1.0019962829892113
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.03846601286714954
+[[32mnewton[m]: gits=5  del=0.037388067617325646
+[[32mnewton[m]: |s|=0.03594107700903685  pred=0.061174572553660954
+[[32mnewton[m]: ared/pred=0.9994857042527518
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.026542096660758446
+[[32mnewton[m]: gits=5  del=0.0718821540180737
+[[32mnewton[m]: |s|=0.07017180432609538  pred=0.07372464202106166
+[[32mnewton[m]: ared/pred=0.9910801183229101
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.01851547436486254
+[[32mnewton[m]: gits=5  del=0.14034360865219075
+[[32mnewton[m]: |s|=0.1401208036225828  pred=0.08481853873204148
+[[32mnewton[m]: ared/pred=0.9560840170759691
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.01869465692510424
+[[32mnewton[m]: gits=5  del=0.2802416072451656
+[[32mnewton[m]: |s|=0.14426990318387525  pred=0.08485894953422013
+[[32mnewton[m]: ared/pred=0.9535171848971887
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9681199184844107
+[[32mnewton[m]: norm x = 45.56979687908815, new tolerance = 0.01851547436486254
+[[32mnewton[m]: relative error: 0.00040631022372099356
+[[32mnewton[m]: converged
+-----------Spring constant = 0.036000000000000004
+Requested tol=0.04556979687908815
+[[32mnewton[m]: nits=0  res=0.09926623295620363
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9681199184844107
+[[32mnewton[m]: norm x = 45.56979687908815, new tolerance = 0.09926623295620363
+[[32mnewton[m]: relative error: 0.0021783338911865245
+[[34mgmres[m] it=1  res=0.09926604023487076
+[[34mgmres[m] it=2  res=0.0646781825841589
+[[34mgmres[m] it=3  res=0.0322081000407874
+[[34mgmres[m] it=4  res=0.025115151056191148
+[[34mgmres[m] it=5  res=0.02339249220431322
+[[32mnewton[m]: nits=0  res=0.05803568714706922
+[[32mnewton[m]: gits=5  del=0.009926623295620362
+[[32mnewton[m]: |s|=0.009069768500343522  pred=0.0414966139287711
+[[32mnewton[m]: ared/pred=0.9935881968564133
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.05177324868581998
+[[32mnewton[m]: gits=5  del=0.018139537000687045
+[[32mnewton[m]: |s|=0.017696349927857277  pred=0.04730937365226543
+[[32mnewton[m]: ared/pred=1.003881062122441
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.041810680592447476
+[[32mnewton[m]: gits=5  del=0.035392699855714554
+[[32mnewton[m]: |s|=0.03444741636571021  pred=0.056956355117547645
+[[32mnewton[m]: ared/pred=1.008764557443647
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.029471329211368694
+[[32mnewton[m]: gits=5  del=0.06889483273142041
+[[32mnewton[m]: |s|=0.0669746831704335  pred=0.0685461954076762
+[[32mnewton[m]: ared/pred=1.0182170334871554
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.02981989323878981
+[[32mnewton[m]: gits=5  del=0.133949366340867
+[[32mnewton[m]: |s|=0.13390509882981946  pred=0.07587212904113388
+[[32mnewton[m]: ared/pred=0.9153076445207391
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9694317978864302
+[[32mnewton[m]: norm x = 45.575528781042564, new tolerance = 0.029471329211368694
+[[32mnewton[m]: relative error: 0.0006466481026025415
+[[32mnewton[m]: converged
+-----------Spring constant = 0.034
+Requested tol=0.04557552878104257
+[[32mnewton[m]: nits=0  res=0.11099764826460784
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9694317978864302
+[[32mnewton[m]: norm x = 45.575528781042564, new tolerance = 0.11099764826460784
+[[32mnewton[m]: relative error: 0.002435465944846657
+[[34mgmres[m] it=1  res=0.11099741990241564
+[[34mgmres[m] it=2  res=0.08257552106044157
+[[34mgmres[m] it=3  res=0.0476273866685653
+[[34mgmres[m] it=4  res=0.03478534265481864
+[[34mgmres[m] it=5  res=0.027909850090120987
+[[32mnewton[m]: nits=0  res=0.07572155198501396
+[[32mnewton[m]: gits=5  del=0.011099764826460783
+[[32mnewton[m]: |s|=0.010355002874697294  pred=0.0351723202865248
+[[32mnewton[m]: ared/pred=1.0029505017645608
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.06973248956376836
+[[32mnewton[m]: gits=5  del=0.020710005749394588
+[[32mnewton[m]: |s|=0.02033592233302726  pred=0.041079446886422136
+[[32mnewton[m]: ared/pred=1.0045207963712561
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.06026731461717941
+[[32mnewton[m]: gits=5  del=0.04067184466605452
+[[32mnewton[m]: |s|=0.038981653109417355  pred=0.05040198370775743
+[[32mnewton[m]: ared/pred=1.0065146233444868
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.048108645173641024
+[[32mnewton[m]: gits=5  del=0.07796330621883471
+[[32mnewton[m]: |s|=0.07556760119541935  pred=0.06256019430201351
+[[32mnewton[m]: ared/pred=1.0052558786401136
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.040658666217430986
+[[32mnewton[m]: gits=5  del=0.1511352023908387
+[[32mnewton[m]: |s|=0.14901600899255887  pred=0.07625787454282142
+[[32mnewton[m]: ared/pred=0.9223831960813319
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.052584599438668285
+[[32mnewton[m]: gits=5  del=0.29803201798511775
+[[32mnewton[m]: |s|=0.24230511325350632  pred=0.08308779817443736
+[[32mnewton[m]: ared/pred=0.703028003020434
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9709352928223555
+[[32mnewton[m]: norm x = 45.58963056733974, new tolerance = 0.040658666217430986
+[[32mnewton[m]: relative error: 0.0008918402213717152
+[[32mnewton[m]: converged
+-----------Spring constant = 0.032
+Requested tol=0.045589630567339744
+[[32mnewton[m]: nits=0  res=0.10467929571209111
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9709352928223555
+[[32mnewton[m]: norm x = 45.58963056733974, new tolerance = 0.10467929571209111
+[[32mnewton[m]: relative error: 0.0022961207276613253
+[[34mgmres[m] it=1  res=0.10467858554338584
+[[34mgmres[m] it=2  res=0.085890921135874
+[[34mgmres[m] it=3  res=0.04822894070907501
+[[34mgmres[m] it=4  res=0.03302020760659985
+[[34mgmres[m] it=5  res=0.02611453341896943
+[[32mnewton[m]: nits=0  res=0.07948255946641032
+[[32mnewton[m]: gits=5  del=0.010467929571209112
+[[32mnewton[m]: |s|=0.010258842211222734  pred=0.02534567597142086
+[[32mnewton[m]: ared/pred=0.9941236633061984
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.07366430892446123
+[[32mnewton[m]: gits=5  del=0.02051768442244547
+[[32mnewton[m]: |s|=0.020353642617005747  pred=0.03108250952965637
+[[32mnewton[m]: ared/pred=0.9978276290091037
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.0644512803729074
+[[32mnewton[m]: gits=5  del=0.040707285234011494
+[[32mnewton[m]: |s|=0.03977712374633057  pred=0.04048058743945937
+[[32mnewton[m]: ared/pred=0.9937606611896779
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.05169056194298878
+[[32mnewton[m]: gits=5  del=0.07955424749266114
+[[32mnewton[m]: |s|=0.07887026031186654  pred=0.053928944040652065
+[[32mnewton[m]: ared/pred=0.9825657578082562
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.03629318519099503
+[[32mnewton[m]: gits=5  del=0.1577405206237331
+[[32mnewton[m]: |s|=0.15599144882881205  pred=0.0707918156339079
+[[32mnewton[m]: ared/pred=0.9660171858671819
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.03158369605260207
+[[32mnewton[m]: gits=5  del=0.3119828976576241
+[[32mnewton[m]: |s|=0.24268396046245835  pred=0.07856476229305807
+[[32mnewton[m]: ared/pred=0.930386569322666
+[[32mnewton[m]: step is good, took a full newton step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9719448728781179
+[[32mnewton[m]: norm x = 45.198184366841794, new tolerance = 0.03158369605260207
+[[32mnewton[m]: relative error: 0.0006987824067502242
+[[32mnewton[m]: converged
+-----------Spring constant = 0.03
+Requested tol=0.045198184366841795
+[[32mnewton[m]: nits=0  res=0.11610634911527244
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9719448728781179
+[[32mnewton[m]: norm x = 45.198184366841794, new tolerance = 0.11610634911527244
+[[32mnewton[m]: relative error: 0.0025688277248687484
+[[34mgmres[m] it=1  res=0.1161062245128066
+[[34mgmres[m] it=2  res=0.07991993175767506
+[[34mgmres[m] it=3  res=0.042554821856804745
+[[34mgmres[m] it=4  res=0.029637200574184137
+[[34mgmres[m] it=5  res=0.021171002770094354
+[[32mnewton[m]: nits=0  res=0.07185905415075751
+[[32mnewton[m]: gits=5  del=0.011610634911527244
+[[32mnewton[m]: |s|=0.010978113703626578  pred=0.043962175793124
+[[32mnewton[m]: ared/pred=1.0064855564186048
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.06483540191673094
+[[32mnewton[m]: gits=5  del=0.021956227407253157
+[[32mnewton[m]: |s|=0.021326963219574373  pred=0.05071520546448674
+[[32mnewton[m]: ared/pred=1.0109580889787366
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.05282771939944587
+[[32mnewton[m]: gits=5  del=0.04265392643914875
+[[32mnewton[m]: |s|=0.042193346823984255  pred=0.06219437706169378
+[[32mnewton[m]: ared/pred=1.0174332906824883
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.037272453527746066
+[[32mnewton[m]: gits=5  del=0.08438669364796851
+[[32mnewton[m]: |s|=0.08380280130985426  pred=0.076694102406048
+[[32mnewton[m]: ared/pred=1.027900361492589
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.024712372646563688
+[[32mnewton[m]: gits=5  del=0.16760560261970853
+[[32mnewton[m]: |s|=0.16450315678948033  pred=0.09130690074906984
+[[32mnewton[m]: ared/pred=1.0009536597883024
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.026891547762955072
+[[32mnewton[m]: gits=5  del=0.32900631357896065
+[[32mnewton[m]: |s|=0.2228113515422286  pred=0.09493534634512514
+[[32mnewton[m]: ared/pred=0.9397427279402186
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9733148864442231
+[[32mnewton[m]: norm x = 45.66103226587737, new tolerance = 0.024712372646563688
+[[32mnewton[m]: relative error: 0.0005412136217741911
+[[32mnewton[m]: converged
+-----------Spring constant = 0.028
+Requested tol=0.045661032265877366
+[[32mnewton[m]: nits=0  res=0.11351544363112782
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9733148864442231
+[[32mnewton[m]: norm x = 45.66103226587737, new tolerance = 0.11351544363112782
+[[32mnewton[m]: relative error: 0.0024860463725424418
+[[34mgmres[m] it=1  res=0.11351537823382453
+[[34mgmres[m] it=2  res=0.0793029962493525
+[[34mgmres[m] it=3  res=0.041011828810378605
+[[34mgmres[m] it=4  res=0.02670709158003597
+[[34mgmres[m] it=5  res=0.019987689643290167
+[[32mnewton[m]: nits=0  res=0.0716944341022143
+[[32mnewton[m]: gits=5  del=0.011351544363112783
+[[32mnewton[m]: |s|=0.010479495586192468  pred=0.042039763658622525
+[[32mnewton[m]: ared/pred=0.9947964947784828
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.06463022949087699
+[[32mnewton[m]: gits=5  del=0.020958991172384936
+[[32mnewton[m]: |s|=0.020684019950774114  pred=0.048888881002150664
+[[32mnewton[m]: ared/pred=0.9999249959944948
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.05269815846953752
+[[32mnewton[m]: gits=5  del=0.04136803990154823
+[[32mnewton[m]: |s|=0.04133284834636489  pred=0.060866726731312736
+[[32mnewton[m]: ared/pred=0.9991877077612422
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.03751976156501676
+[[32mnewton[m]: gits=5  del=0.08266569669272977
+[[32mnewton[m]: |s|=0.08047905148888256  pred=0.07630354888181529
+[[32mnewton[m]: ared/pred=0.9959652359527724
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.02473767756881664
+[[32mnewton[m]: gits=5  del=0.1609581029777651
+[[32mnewton[m]: |s|=0.15902044932802084  pred=0.09214954116849834
+[[32mnewton[m]: ared/pred=0.963409746121017
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.02520281108872682
+[[32mnewton[m]: gits=5  del=0.3180408986560417
+[[32mnewton[m]: |s|=0.18702754444982592  pred=0.09352775398778457
+[[32mnewton[m]: ared/pred=0.9442398515625138
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9747206961145257
+[[32mnewton[m]: norm x = 45.68933424264748, new tolerance = 0.02473767756881664
+[[32mnewton[m]: relative error: 0.000541432217800318
+[[32mnewton[m]: converged
+-----------Spring constant = 0.026000000000000002
+Requested tol=0.045689334242647484
+[[32mnewton[m]: nits=0  res=0.11582358397876667
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9747206961145257
+[[32mnewton[m]: norm x = 45.68933424264748, new tolerance = 0.11582358397876667
+[[32mnewton[m]: relative error: 0.0025350245500109355
+[[34mgmres[m] it=1  res=0.1158235731598386
+[[34mgmres[m] it=2  res=0.08679402980178533
+[[34mgmres[m] it=3  res=0.044166778897487595
+[[34mgmres[m] it=4  res=0.0358852514227158
+[[34mgmres[m] it=5  res=0.030428050630035338
+[[32mnewton[m]: nits=0  res=0.07848150115193901
+[[32mnewton[m]: gits=5  del=0.011582358397876667
+[[32mnewton[m]: |s|=0.01150235942204449  pred=0.03733670387036479
+[[32mnewton[m]: ared/pred=1.0001440661843515
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.07087731584539375
+[[32mnewton[m]: gits=5  del=0.02300471884408898
+[[32mnewton[m]: |s|=0.02259861208346405  pred=0.04477265404159249
+[[32mnewton[m]: ared/pred=1.0038776814887755
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.05843517161229104
+[[32mnewton[m]: gits=5  del=0.0451972241669281
+[[32mnewton[m]: |s|=0.04351492789892817  pred=0.05700232073282413
+[[32mnewton[m]: ared/pred=1.006773261661769
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.040389859657632345
+[[32mnewton[m]: gits=5  del=0.08702985579785634
+[[32mnewton[m]: |s|=0.08670021501296979  pred=0.0743880420338918
+[[32mnewton[m]: ared/pred=1.014057128789142
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.03350580234588813
+[[32mnewton[m]: gits=5  del=0.17340043002593958
+[[32mnewton[m]: |s|=0.16283207975517486  pred=0.08539553334869597
+[[32mnewton[m]: ared/pred=0.9639588676933484
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.03350149310175199
+[[32mnewton[m]: gits=5  del=0.3256641595103497
+[[32mnewton[m]: |s|=0.16283207975517486  pred=0.08539553334869597
+[[32mnewton[m]: ared/pred=0.9640093298658668
+[[32mnewton[m]: step is good, took a full newton step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.976008140996097
+[[32mnewton[m]: norm x = 45.709039917144295, new tolerance = 0.03350149310175199
+[[32mnewton[m]: relative error: 0.0007329292665625741
+[[32mnewton[m]: converged
+-----------Spring constant = 0.024
+Requested tol=0.0457090399171443
+[[32mnewton[m]: nits=0  res=0.12815514841560938
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.976008140996097
+[[32mnewton[m]: norm x = 45.709039917144295, new tolerance = 0.12815514841560938
+[[32mnewton[m]: relative error: 0.00280371560303855
+[[34mgmres[m] it=1  res=0.1281550079956266
+[[34mgmres[m] it=2  res=0.09234869798383494
+[[34mgmres[m] it=3  res=0.05206827591467172
+[[34mgmres[m] it=4  res=0.04643848027559799
+[[34mgmres[m] it=5  res=0.037320587159378055
+[[32mnewton[m]: nits=0  res=0.0840257598349887
+[[32mnewton[m]: gits=5  del=0.012815514841560937
+[[32mnewton[m]: |s|=0.012032166083990875  pred=0.043968123000731774
+[[32mnewton[m]: ared/pred=1.0036677840417756
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.07647915659949321
+[[32mnewton[m]: gits=5  del=0.02406433216798175
+[[32mnewton[m]: |s|=0.02378463318194146  pred=0.05121610554268552
+[[32mnewton[m]: ared/pred=1.0089793292277438
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.06456691344700297
+[[32mnewton[m]: gits=5  del=0.04756926636388292
+[[32mnewton[m]: |s|=0.0454682043309451  pred=0.06273069710277623
+[[32mnewton[m]: ared/pred=1.01367014723948
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.049072560924628264
+[[32mnewton[m]: gits=5  del=0.0909364086618902
+[[32mnewton[m]: |s|=0.08848684160990698  pred=0.07786738451074059
+[[32mnewton[m]: ared/pred=1.0156060587866915
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.05269327856932999
+[[32mnewton[m]: gits=5  del=0.17697368321981397
+[[32mnewton[m]: |s|=0.17568748964633  pred=0.0904242346881663
+[[32mnewton[m]: ared/pred=0.8345314738522747
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.977618411268211
+[[32mnewton[m]: norm x = 46.13509635704145, new tolerance = 0.049072560924628264
+[[32mnewton[m]: relative error: 0.001063670931666722
+[[34mgmres[m] it=1  res=0.04905936983798614
+[[34mgmres[m] it=2  res=0.048319486375691785
+[[34mgmres[m] it=3  res=0.03319024875450545
+[[34mgmres[m] it=4  res=0.020931263689053046
+[[34mgmres[m] it=5  res=0.016049315396476527
+[[32mnewton[m]: nits=1  res=0.02802675910201647
+[[32mnewton[m]: gits=5  del=0.0909364086618902
+[[32mnewton[m]: |s|=0.08902079289213129  pred=0.02148314245309117
+[[32mnewton[m]: ared/pred=0.9796426136709601
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.022842193649740477
+[[32mnewton[m]: gits=5  del=0.17804158578426257
+[[32mnewton[m]: |s|=0.17709309025025324  pred=0.032806897977584806
+[[32mnewton[m]: ared/pred=0.7995381731247371
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.023925483575261867
+[[32mnewton[m]: gits=5  del=0.3541861805005065
+[[32mnewton[m]: |s|=0.18900008537613425  pred=0.033023245528089634
+[[32mnewton[m]: ared/pred=0.7614962414271561
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 2
+[[32mnewton[m]: T = 0.9776306951420007
+[[32mnewton[m]: norm x = 46.159483131278215, new tolerance = 0.022842193649740477
+[[32mnewton[m]: relative error: 0.0004948537570227327
+[[32mnewton[m]: converged
+-----------Spring constant = 0.022
+Requested tol=0.04615948313127822
+[[32mnewton[m]: nits=0  res=0.1206872385424337
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9776306951420007
+[[32mnewton[m]: norm x = 46.159483131278215, new tolerance = 0.1206872385424337
+[[32mnewton[m]: relative error: 0.002614570839088417
+[[34mgmres[m] it=1  res=0.12068649165351399
+[[34mgmres[m] it=2  res=0.09296460629434934
+[[34mgmres[m] it=3  res=0.04373317934443313
+[[34mgmres[m] it=4  res=0.0262286293662872
+[[34mgmres[m] it=5  res=0.01670210629646061
+[[32mnewton[m]: nits=0  res=0.08451175408875476
+[[32mnewton[m]: gits=5  del=0.01206872385424337
+[[32mnewton[m]: |s|=0.01152988973383097  pred=0.03647367161757112
+[[32mnewton[m]: ared/pred=0.9918245915295094
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.07731644210415883
+[[32mnewton[m]: gits=5  del=0.02305977946766194
+[[32mnewton[m]: |s|=0.021662896776263606  pred=0.04356363807215852
+[[32mnewton[m]: ared/pred=0.995573334955078
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.06384590347444408
+[[32mnewton[m]: gits=5  del=0.04332579355252721
+[[32mnewton[m]: |s|=0.042911954058020195  pred=0.05713746271311031
+[[32mnewton[m]: ared/pred=0.9948172769482685
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.044210543724592134
+[[32mnewton[m]: gits=5  del=0.08582390811604039
+[[32mnewton[m]: |s|=0.08530164206971055  pred=0.07685866847094731
+[[32mnewton[m]: ared/pred=0.9950301812312798
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.02739595336360871
+[[32mnewton[m]: gits=5  del=0.1706032841394211
+[[32mnewton[m]: |s|=0.16879210980527354  pred=0.09923541104464143
+[[32mnewton[m]: ared/pred=0.9401007583558811
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.031126941547141917
+[[32mnewton[m]: gits=5  del=0.3375842196105471
+[[32mnewton[m]: |s|=0.21659886847682727  pred=0.10398513224587734
+[[32mnewton[m]: ared/pred=0.8612798297310675
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9790490472370156
+[[32mnewton[m]: norm x = 46.15759300753071, new tolerance = 0.02739595336360871
+[[32mnewton[m]: relative error: 0.0005935308056279928
+[[32mnewton[m]: converged
+-----------Spring constant = 0.02
+Requested tol=0.04615759300753071
+[[32mnewton[m]: nits=0  res=0.13261078246302352
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9790490472370156
+[[32mnewton[m]: norm x = 46.15759300753071, new tolerance = 0.13261078246302352
+[[32mnewton[m]: relative error: 0.0028730003846038463
+[[34mgmres[m] it=1  res=0.13260911122660254
+[[34mgmres[m] it=2  res=0.10669122319469686
+[[34mgmres[m] it=3  res=0.05584583206204074
+[[34mgmres[m] it=4  res=0.034216462721783046
+[[34mgmres[m] it=5  res=0.024389719689411324
+[[32mnewton[m]: nits=0  res=0.09840685650897775
+[[32mnewton[m]: gits=5  del=0.013261078246302353
+[[32mnewton[m]: |s|=0.012473313368241324  pred=0.03439654118448965
+[[32mnewton[m]: ared/pred=0.9944001569980316
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.09052341450060267
+[[32mnewton[m]: gits=5  del=0.02494662673648265
+[[32mnewton[m]: |s|=0.024943780040460887  pred=0.04229375998373533
+[[32mnewton[m]: ared/pred=0.99512003611422
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.0771645750847969
+[[32mnewton[m]: gits=5  del=0.049887560080921774
+[[32mnewton[m]: |s|=0.04944340161832246  pred=0.05584539558342655
+[[32mnewton[m]: ared/pred=0.9928519047805187
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.058551586745723375
+[[32mnewton[m]: gits=5  del=0.09888680323664492
+[[32mnewton[m]: |s|=0.0979582006116454  pred=0.0751076429510303
+[[32mnewton[m]: ared/pred=0.9860407384317235
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.04092278565769672
+[[32mnewton[m]: gits=5  del=0.1959164012232908
+[[32mnewton[m]: |s|=0.19205319721935013  pred=0.09753323913675516
+[[32mnewton[m]: ared/pred=0.9400692278533628
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.04507622887444217
+[[32mnewton[m]: gits=5  del=0.38410639443870026
+[[32mnewton[m]: |s|=0.29644417716890153  pred=0.10822106277351883
+[[32mnewton[m]: ared/pred=0.8088495099310801
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9804599301867478
+[[32mnewton[m]: norm x = 46.17506506029435, new tolerance = 0.04092278565769672
+[[32mnewton[m]: relative error: 0.0008862529073702587
+[[32mnewton[m]: converged
+-----------Spring constant = 0.018000000000000002
+Requested tol=0.046175065060294354
+[[32mnewton[m]: nits=0  res=0.1506967552562652
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9804599301867478
+[[32mnewton[m]: norm x = 46.17506506029435, new tolerance = 0.1506967552562652
+[[32mnewton[m]: relative error: 0.0032635959485815295
+[[34mgmres[m] it=1  res=0.15069597951626643
+[[34mgmres[m] it=2  res=0.12533903825190532
+[[34mgmres[m] it=3  res=0.07715839042447156
+[[34mgmres[m] it=4  res=0.06323620246940932
+[[34mgmres[m] it=5  res=0.05624126072715545
+[[32mnewton[m]: nits=0  res=0.11624775315917046
+[[32mnewton[m]: gits=5  del=0.015069675525626519
+[[32mnewton[m]: |s|=0.014232227721148582  pred=0.034888773206768545
+[[32mnewton[m]: ared/pred=0.9873950537880047
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.10820804934893433
+[[32mnewton[m]: gits=5  del=0.028464455442297164
+[[32mnewton[m]: |s|=0.026708407443642328  pred=0.042111616382581735
+[[32mnewton[m]: ared/pred=1.0089545250726852
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.09458763080093115
+[[32mnewton[m]: gits=5  del=0.053416814887284655
+[[32mnewton[m]: |s|=0.05149580189646554  pred=0.05457752943207772
+[[32mnewton[m]: ared/pred=1.0280627400909088
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.07668590623067784
+[[32mnewton[m]: gits=5  del=0.10299160379293108
+[[32mnewton[m]: |s|=0.09901941470342601  pred=0.0698615261164979
+[[32mnewton[m]: ared/pred=1.0593935337480351
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.06233699402847943
+[[32mnewton[m]: gits=5  del=0.19803882940685202
+[[32mnewton[m]: |s|=0.1919417460436177  pred=0.08583192843395972
+[[32mnewton[m]: ared/pred=1.029450961197627
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.07285082568077385
+[[32mnewton[m]: gits=5  del=0.3838834920872354
+[[32mnewton[m]: |s|=0.3264222244706142  pred=0.09445549452905565
+[[32mnewton[m]: ared/pred=0.8241545922089795
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9821210965847219
+[[32mnewton[m]: norm x = 46.18373554475837, new tolerance = 0.06233699402847943
+[[32mnewton[m]: relative error: 0.0013497607608649658
+[[34mgmres[m] it=1  res=0.061989139667910906
+[[34mgmres[m] it=2  res=0.06191951921154633
+[[34mgmres[m] it=3  res=0.04317929197464924
+[[34mgmres[m] it=4  res=0.03121983111488623
+[[34mgmres[m] it=5  res=0.020696282529560423
+[[32mnewton[m]: nits=1  res=0.041019955487188745
+[[32mnewton[m]: gits=5  del=0.19803882940685202
+[[32mnewton[m]: |s|=0.19362771006730184  pred=0.03960852928243641
+[[32mnewton[m]: ared/pred=0.5381931348494499
+[[32mnewton[m]: step is okay, trying a smaller step
+[[32mnewton[m]: nits=1  res=0.034442612915778104
+[[32mnewton[m]: gits=5  del=0.13553939704711127
+[[32mnewton[m]: |s|=0.13290141050254436  pred=0.030790892725721483
+[[32mnewton[m]: ared/pred=0.9059295994168909
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.039423737027810955
+[[32mnewton[m]: gits=5  del=0.26580282100508873
+[[32mnewton[m]: |s|=0.2378161550850502  pred=0.04164071149883895
+[[32mnewton[m]: ared/pred=0.5502609387764028
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 2
+[[32mnewton[m]: T = 0.9823137906602533
+[[32mnewton[m]: norm x = 46.20136175683552, new tolerance = 0.034442612915778104
+[[32mnewton[m]: relative error: 0.0007454891285900745
+[[32mnewton[m]: converged
+-----------Spring constant = 0.016
+Requested tol=0.04620136175683552
+[[32mnewton[m]: nits=0  res=0.14157515244711466
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9823137906602533
+[[32mnewton[m]: norm x = 46.20136175683552, new tolerance = 0.14157515244711466
+[[32mnewton[m]: relative error: 0.003064306917883617
+[[34mgmres[m] it=1  res=0.14157123614385875
+[[34mgmres[m] it=2  res=0.12780160502199933
+[[34mgmres[m] it=3  res=0.07359006288278962
+[[34mgmres[m] it=4  res=0.05117062676468898
+[[34mgmres[m] it=5  res=0.031099725894743704
+[[32mnewton[m]: nits=0  res=0.11922933357750279
+[[32mnewton[m]: gits=5  del=0.014157515244711465
+[[32mnewton[m]: |s|=0.013206916879022566  pred=0.02199549589923526
+[[32mnewton[m]: ared/pred=1.0159270321515594
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.11220100378813096
+[[32mnewton[m]: gits=5  del=0.02641383375804513
+[[32mnewton[m]: |s|=0.02483890858975278  pred=0.02876558793740218
+[[32mnewton[m]: ared/pred=1.0211558589696075
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.09953990284381334
+[[32mnewton[m]: gits=5  del=0.04967781717950556
+[[32mnewton[m]: |s|=0.04818827816866138  pred=0.04080957462090565
+[[32mnewton[m]: ared/pred=1.0300340053475538
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.08056247755418634
+[[32mnewton[m]: gits=5  del=0.09637655633732276
+[[32mnewton[m]: |s|=0.094211250992408  pred=0.0587554698444471
+[[32mnewton[m]: ared/pred=1.0384169347033916
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.056887503581457645
+[[32mnewton[m]: gits=5  del=0.188422501984816
+[[32mnewton[m]: |s|=0.1883065672638872  pred=0.08326546112344527
+[[32mnewton[m]: ared/pred=1.0170801641283567
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.040852278368802286
+[[32mnewton[m]: gits=5  del=0.3766131345277744
+[[32mnewton[m]: |s|=0.3764135778363414  pred=0.11027549374968793
+[[32mnewton[m]: ared/pred=0.913374954429505
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.041760962699631546
+[[32mnewton[m]: gits=5  del=0.7528271556726828
+[[32mnewton[m]: |s|=0.39147029382412424  pred=0.11047542655222983
+[[32mnewton[m]: ared/pred=0.9034967581708646
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9838562720377894
+[[32mnewton[m]: norm x = 46.249328497973416, new tolerance = 0.040852278368802286
+[[32mnewton[m]: relative error: 0.0008833053299485716
+[[32mnewton[m]: converged
+-----------Spring constant = 0.014
+Requested tol=0.04624932849797342
+[[32mnewton[m]: nits=0  res=0.1500017046021415
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9838562720377894
+[[32mnewton[m]: norm x = 46.249328497973416, new tolerance = 0.1500017046021415
+[[32mnewton[m]: relative error: 0.0032433271892523667
+[[34mgmres[m] it=1  res=0.149998236294027
+[[34mgmres[m] it=2  res=0.13120237470762167
+[[34mgmres[m] it=3  res=0.07195073249306523
+[[34mgmres[m] it=4  res=0.04845542223208978
+[[34mgmres[m] it=5  res=0.03547526999459439
+[[32mnewton[m]: nits=0  res=0.12113571857761735
+[[32mnewton[m]: gits=5  del=0.015000170460214148
+[[32mnewton[m]: |s|=0.014839807670305521  pred=0.02877595681608515
+[[32mnewton[m]: ared/pred=1.0031286260614858
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.11274781686561014
+[[32mnewton[m]: gits=5  del=0.029679615340611042
+[[32mnewton[m]: |s|=0.027738485501231012  pred=0.03694384139498895
+[[32mnewton[m]: ared/pred=1.0083923687909848
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.09792404473908817
+[[32mnewton[m]: gits=5  del=0.055476971002462024
+[[32mnewton[m]: |s|=0.052850248477554956  pred=0.05111919316498066
+[[32mnewton[m]: ared/pred=1.018749644482442
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.07514929701683908
+[[32mnewton[m]: gits=5  del=0.10570049695510991
+[[32mnewton[m]: |s|=0.10456497547040466  pred=0.0720989497469455
+[[32mnewton[m]: ared/pred=1.0381899854022987
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.05137124117394487
+[[32mnewton[m]: gits=5  del=0.20912995094080933
+[[32mnewton[m]: |s|=0.20826614657705214  pred=0.09523334868409151
+[[32mnewton[m]: ared/pred=1.0356714826376003
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.05152361739174982
+[[32mnewton[m]: gits=5  del=0.4165322931541043
+[[32mnewton[m]: |s|=0.40650965613381207  pred=0.11452643460745024
+[[32mnewton[m]: ared/pred=0.8598721120406329
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9856369298933187
+[[32mnewton[m]: norm x = 46.69540842627081, new tolerance = 0.05137124117394487
+[[32mnewton[m]: relative error: 0.0011001347435488633
+[[34mgmres[m] it=1  res=0.05134854533948263
+[[34mgmres[m] it=2  res=0.05102853880617601
+[[34mgmres[m] it=3  res=0.037497428981335706
+[[34mgmres[m] it=4  res=0.023106538409932813
+[[34mgmres[m] it=5  res=0.01731151017807895
+[[32mnewton[m]: nits=1  res=0.03065267219306363
+[[32mnewton[m]: gits=5  del=0.20912995094080933
+[[32mnewton[m]: |s|=0.20716979435739005  pred=0.03313870600821081
+[[32mnewton[m]: ared/pred=0.6252075435820511
+[[32mnewton[m]: step is okay, trying a smaller step
+[[32mnewton[m]: nits=1  res=0.028327448767471158
+[[32mnewton[m]: gits=5  del=0.14501885605017303
+[[32mnewton[m]: |s|=0.1438294582886982  pred=0.02643609252060438
+[[32mnewton[m]: ared/pred=0.8716792161516799
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.02884163341179596
+[[32mnewton[m]: gits=5  del=0.2876589165773964
+[[32mnewton[m]: |s|=0.2391153064677343  pred=0.034059730995798176
+[[32mnewton[m]: ared/pred=0.6614734498322463
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 2
+[[32mnewton[m]: T = 0.9857165237255725
+[[32mnewton[m]: norm x = 46.72071613614249, new tolerance = 0.028327448767471158
+[[32mnewton[m]: relative error: 0.0006063145240523709
+[[32mnewton[m]: converged
+-----------Spring constant = 0.012
+Requested tol=0.046720716136142496
+[[32mnewton[m]: nits=0  res=0.1552330897175216
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9857165237255725
+[[32mnewton[m]: norm x = 46.72071613614249, new tolerance = 0.1552330897175216
+[[32mnewton[m]: relative error: 0.003322575134875457
+[[34mgmres[m] it=1  res=0.15522168974502873
+[[34mgmres[m] it=2  res=0.14383298524062277
+[[34mgmres[m] it=3  res=0.07932534984928745
+[[34mgmres[m] it=4  res=0.05249575500720862
+[[34mgmres[m] it=5  res=0.039398022333596884
+[[32mnewton[m]: nits=0  res=0.13425922981199556
+[[32mnewton[m]: gits=5  del=0.01552330897175216
+[[32mnewton[m]: |s|=0.014685848839234258  pred=0.0215689118324891
+[[32mnewton[m]: ared/pred=0.9724115925928747
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.12558650829056192
+[[32mnewton[m]: gits=5  del=0.029371697678468516
+[[32mnewton[m]: |s|=0.028177885048386947  pred=0.030154790432463413
+[[32mnewton[m]: ared/pred=0.9831466576880392
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.10995890115029083
+[[32mnewton[m]: gits=5  del=0.056355770096773894
+[[32mnewton[m]: |s|=0.054872227656412746  pred=0.045752215939404
+[[32mnewton[m]: ared/pred=0.9895518203357327
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.08672582874147836
+[[32mnewton[m]: gits=5  del=0.10974445531282549
+[[32mnewton[m]: |s|=0.10522562432723734  pred=0.06860346503955346
+[[32mnewton[m]: ared/pred=0.9985976792359575
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.05965363341228806
+[[32mnewton[m]: gits=5  del=0.21045124865447468
+[[32mnewton[m]: |s|=0.20815888801143412  pred=0.09857797446884338
+[[32mnewton[m]: ared/pred=0.9695822704841884
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.0552696149182718
+[[32mnewton[m]: gits=5  del=0.41631777602286824
+[[32mnewton[m]: |s|=0.34461902458794347  pred=0.11583506738380392
+[[32mnewton[m]: ared/pred=0.8629811080269351
+[[32mnewton[m]: step is good, took a full newton step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.98749202477824
+[[32mnewton[m]: norm x = 46.73911139015534, new tolerance = 0.0552696149182718
+[[32mnewton[m]: relative error: 0.00118251317310909
+[[34mgmres[m] it=1  res=0.05520252778555875
+[[34mgmres[m] it=2  res=0.05487061371468268
+[[34mgmres[m] it=3  res=0.034109464170131686
+[[34mgmres[m] it=4  res=0.023444498823273825
+[[34mgmres[m] it=5  res=0.017527424189625114
+[[32mnewton[m]: nits=1  res=0.029717776218982268
+[[32mnewton[m]: gits=5  del=0.6892380491758869
+[[32mnewton[m]: |s|=0.12182886922514842  pred=0.03774219072857654
+[[32mnewton[m]: ared/pred=0.6770099510928211
+[[32mnewton[m]: step is okay, trying a smaller step
+[[32mnewton[m]: nits=1  res=0.02742510654725966
+[[32mnewton[m]: gits=5  del=0.0852802084576039
+[[32mnewton[m]: |s|=0.08299065713232864  pred=0.031158462757823135
+[[32mnewton[m]: ared/pred=0.8936419164010606
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.023651544750870484
+[[32mnewton[m]: gits=5  del=0.1659813142646573
+[[32mnewton[m]: |s|=0.12495751319514316  pred=0.03774219072857654
+[[32mnewton[m]: ared/pred=0.8377380739444373
+[[32mnewton[m]: step is good, took a full newton step
+[[32mnewton[m]: iteration 2
+[[32mnewton[m]: T = 0.9875839457061146
+[[32mnewton[m]: norm x = 46.76991994161134, new tolerance = 0.023651544750870484
+[[32mnewton[m]: relative error: 0.0005056999195294246
+[[32mnewton[m]: converged
+-----------Spring constant = 0.01
+Requested tol=0.046769919941611345
+[[32mnewton[m]: nits=0  res=0.16438496136801486
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9875839457061146
+[[32mnewton[m]: norm x = 46.76991994161134, new tolerance = 0.16438496136801486
+[[32mnewton[m]: relative error: 0.003514758237201109
+[[34mgmres[m] it=1  res=0.16436621543050856
+[[34mgmres[m] it=2  res=0.15447584764189629
+[[34mgmres[m] it=3  res=0.07594552973110676
+[[34mgmres[m] it=4  res=0.050683022576123546
+[[34mgmres[m] it=5  res=0.036105434449860384
+[[32mnewton[m]: nits=0  res=0.1439221408009605
+[[32mnewton[m]: gits=5  del=0.016438496136801487
+[[32mnewton[m]: |s|=0.015453936872248435  pred=0.020465189717234683
+[[32mnewton[m]: ared/pred=0.9998842351225155
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.1346960859887475
+[[32mnewton[m]: gits=5  del=0.03090787374449687
+[[32mnewton[m]: |s|=0.029553864266435033  pred=0.029721794121095158
+[[32mnewton[m]: ared/pred=0.998892437593314
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.11724572757987134
+[[32mnewton[m]: gits=5  del=0.059107728532870066
+[[32mnewton[m]: |s|=0.05867824927558094  pred=0.0473110768981479
+[[32mnewton[m]: ared/pred=0.9963678038786917
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.09004987703991726
+[[32mnewton[m]: gits=5  del=0.11735649855116188
+[[32mnewton[m]: |s|=0.11670466115265486  pred=0.07491219068570568
+[[32mnewton[m]: ared/pred=0.9922962290606434
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.05916732709996029
+[[32mnewton[m]: gits=5  del=0.23340932230530972
+[[32mnewton[m]: |s|=0.22806083130686786  pred=0.10586972729413888
+[[32mnewton[m]: ared/pred=0.9938406091830899
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.04635413359126293
+[[32mnewton[m]: gits=5  del=0.4561216626137357
+[[32mnewton[m]: |s|=0.42145794763105654  pred=0.1282795269180409
+[[32mnewton[m]: ared/pred=0.9201065096861718
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.04635546932764035
+[[32mnewton[m]: gits=5  del=0.8429158952621131
+[[32mnewton[m]: |s|=0.42145794763105654  pred=0.1282795269180409
+[[32mnewton[m]: ared/pred=0.9200960969850221
+[[32mnewton[m]: accepting the previous step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9898363010039375
+[[32mnewton[m]: norm x = 46.80269121518588, new tolerance = 0.04635413359126293
+[[32mnewton[m]: relative error: 0.0009904159865111045
+[[32mnewton[m]: converged
+-----------Spring constant = 0.008
+Requested tol=0.04680269121518588
+[[32mnewton[m]: nits=0  res=0.18552947042126658
+[[32mnewton[m]: iteration 0
+[[32mnewton[m]: T = 0.9898363010039375
+[[32mnewton[m]: norm x = 46.80269121518588, new tolerance = 0.18552947042126658
+[[32mnewton[m]: relative error: 0.003964076970878729
+[[34mgmres[m] it=1  res=0.1850606615489478
+[[34mgmres[m] it=2  res=0.1839284629540046
+[[34mgmres[m] it=3  res=0.0895735259836891
+[[34mgmres[m] it=4  res=0.06386186924016868
+[[34mgmres[m] it=5  res=0.045813066881719315
+[[32mnewton[m]: nits=0  res=0.17230570746227772
+[[32mnewton[m]: gits=5  del=0.018552947042126657
+[[32mnewton[m]: |s|=0.01810594627900419  pred=0.013187730397824116
+[[32mnewton[m]: ared/pred=1.0027322791775217
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.16143087096778916
+[[32mnewton[m]: gits=5  del=0.03621189255800838
+[[32mnewton[m]: |s|=0.03472927880659489  pred=0.02390080050480628
+[[32mnewton[m]: ared/pred=1.0082758294489493
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.14082485741878786
+[[32mnewton[m]: gits=5  del=0.06945855761318978
+[[32mnewton[m]: |s|=0.06910824862169089  pred=0.044267267664490156
+[[32mnewton[m]: ared/pred=1.0098796551281024
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.11042362857790533
+[[32mnewton[m]: gits=5  del=0.13821649724338178
+[[32mnewton[m]: |s|=0.1337603680425965  pred=0.074796551948218
+[[32mnewton[m]: ared/pred=1.004135082260976
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.07649047985504902
+[[32mnewton[m]: gits=5  del=0.267520736085193
+[[32mnewton[m]: |s|=0.2621030572750986  pred=0.11351444776227686
+[[32mnewton[m]: ared/pred=0.9605736777627475
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=0  res=0.067829661359245
+[[32mnewton[m]: gits=5  del=0.5242061145501972
+[[32mnewton[m]: |s|=0.45812089641248466  pred=0.13971640353939044
+[[32mnewton[m]: ared/pred=0.842419401590439
+[[32mnewton[m]: step is good, took a full newton step
+[[32mnewton[m]: iteration 1
+[[32mnewton[m]: T = 0.9914907286687092
+[[32mnewton[m]: norm x = 47.20759455657872, new tolerance = 0.067829661359245
+[[32mnewton[m]: relative error: 0.0014368379070437607
+[[34mgmres[m] it=1  res=0.06781752736559145
+[[34mgmres[m] it=2  res=0.06572169402752157
+[[34mgmres[m] it=3  res=0.04343230561379159
+[[34mgmres[m] it=4  res=0.034358546222175816
+[[34mgmres[m] it=5  res=0.025371413944767506
+[[32mnewton[m]: nits=1  res=0.045511404124423435
+[[32mnewton[m]: gits=5  del=0.9162417928249693
+[[32mnewton[m]: |s|=0.20490409514024133  pred=0.04245824741443244
+[[32mnewton[m]: ared/pred=0.525651871990249
+[[32mnewton[m]: step is okay, trying a smaller step
+[[32mnewton[m]: nits=1  res=0.029959021505020077
+[[32mnewton[m]: gits=5  del=0.14343286659816892
+[[32mnewton[m]: |s|=0.1433527463062654  pred=0.03791748868367032
+[[32mnewton[m]: ared/pred=0.9987644532622864
+[[32mnewton[m]: step is good, trying a larger step
+[[32mnewton[m]: nits=1  res=0.02969235456432236
+[[32mnewton[m]: gits=5  del=0.2867054926125308
+[[32mnewton[m]: |s|=0.21286409862170763  pred=0.04245824741443244
+[[32mnewton[m]: ared/pred=0.8982308295174468
+[[32mnewton[m]: step is good, took a full newton step
+[[32mnewton[m]: iteration 2
+[[32mnewton[m]: T = 0.991852587565002
+[[32mnewton[m]: norm x = 47.681951607003974, new tolerance = 0.02969235456432236
+[[32mnewton[m]: relative error: 0.0006227168470168253
+[[32mnewton[m]: converged

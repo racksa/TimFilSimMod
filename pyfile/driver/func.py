@@ -16,19 +16,20 @@ class DRIVER:
         # self.exe_name = 'cilia_resolution'
         # self.date = '20240104_readphase_hold'
         # self.date = '20240112_readphase_free'
-        self.date = '20240114_readphase_free_hemisphere'
+        # self.date = '20240114_readphase_free_hemisphere'
         # self.date = '20240114_readphase_free_diaplectic'
         # self.date = '20240115_resolution'
         # self.date = '20240118_periodic'
         # self.date = '20240119_example_for_periodic'
-        self.date = '20240124_test_solution'
+        # self.date = '20240124_test_solution'
         # self.date = '20240129_test_solution'
         # self.date = '20240207_159fil_hold'
-        self.date = '20240208_test_solution'
+        # self.date = '20240208_test_solution'
 
 
         self.date = '20240214_hold'
-        self.date = '20240214_test_solution_d'
+        self.date = '20240214_test_solution'
+
         self.dir = f"data/{self.category}{self.date}{self.afix}/"
 
 
@@ -100,7 +101,7 @@ class DRIVER:
                         nblob = int(9000 + 0*i)
                         ar = round(8.00, 2)
                         spring_factor = round(0.004 + 0.002*i, 3)
-                        period = 9.918525875650020529e-01
+                        period = 9.837913258934994909e-01
                         sim_length = 500.
 
                         # # find branches wider range

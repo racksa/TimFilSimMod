@@ -19,7 +19,7 @@ mpl.rcParams['mathtext.rm'] = 'Bitstream Vera Sans'
 mpl.rcParams['mathtext.it'] = 'Bitstream Vera Sans:italic'
 mpl.rcParams['mathtext.bf'] = 'Bitstream Vera Sans:bold'
 
-# plt.rcParams.update({'font.size': 16})
+plt.rcParams.update({'font.size': 16})
 
 
 class VISUAL:
@@ -46,6 +46,7 @@ class VISUAL:
 
         self.date = '20240214_hold'
         self.date = '20240214_test_solution'
+        # self.date = '20240214_test_solution_d_double'
         self.dir = f"data/JFNK_sims/{self.date}/"
 
         self.pars_list = {
@@ -80,8 +81,8 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 301000
-        self.frames_setting = 150000
+        self.plot_end_frame_setting = 1500000
+        self.frames_setting = 1500000
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -122,7 +123,6 @@ class VISUAL:
                             str(plot_x[2]),
                             filename)
         
-
     def read_rules(self):
         sim = configparser.ConfigParser()
         try:
@@ -1640,18 +1640,21 @@ class VISUAL:
         # ax4.plot(ts, order_parameters)
 
         ax.set_xlabel(r"$T$")
-        ax.set_ylabel(r"<$|\psi(t_0+T)-\psi(t_0)|/|\psi(t_0)|$>")
+        ax.set_ylabel(r"<$\frac{|\psi(t_0+T)-\psi(t_0)|}{|\psi(t_0)}$>")
+        fig.tight_layout()
 
         ax2.set_xlabel(r"$t/T$")
-        ax2.set_ylabel(r"<$|\psi(t_0+T)-\psi(t_0)|/|\psi(t_0)|$>")
+        ax2.set_ylabel(r"<$\frac{|\psi(t_0+T)-\psi(t_0)|}{|\psi(t_0)|}$>")
+        fig2.tight_layout()
 
         ax3.set_xlabel(r"$t/T$")
         ax3.set_ylabel(r"$<|\psi(t)|>$")
         ax3_right.set_ylabel(r"$<|\psi(t_0+T)-\psi(t_0)|>$")
         ax3.legend(loc='upper left')
         ax3_right.legend(loc=1)
+        fig3.tight_layout()
 
-        plt.tight_layout()
+        fig2.savefig(f'fig/fil_period_errod_index{self.index}_{self.date}.pdf', bbox_inches = 'tight', format='pdf')    
         plt.show()
 
     def periodic_solution(self):
@@ -3670,7 +3673,7 @@ class VISUAL:
         dir = 'data/JFNK_sims/' + sim_dir
 
         fil_references = myIo.read_fil_references(dir + '/fil_references.dat')
-        input_filename = dir + '/psi_guess159.dat'
+        input_filename = dir + '/psi_guess159_stops_at_026.dat'
         nfil = int(len(fil_references)/3)
 
         with open(input_filename, 'r') as input_file:

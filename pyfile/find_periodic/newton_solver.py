@@ -147,7 +147,7 @@ class NEWTON_SOLVER:
         if (save==1):
             with open(self.d.dir + f"errors.dat", "ab") as f:
                 f.write(b"\n")
-                np.savetxt(self.d.dir + f"errors.dat", [self.k, relative_err], newline=" ")
+                np.savetxt(f, [self.k, relative_err], newline=" ")
                 
         # SAVE current solution, new_x (You can add your saving logic here)
     
@@ -226,6 +226,7 @@ class NEWTON_SOLVER:
                 if info == 1:
                     print('[\033[32mnewton\033[m]: trust region too small')
                 info = 3
+                self.saveorbit(1)
                 return info
 
             # Find hookstep s and update x
@@ -275,6 +276,13 @@ class NEWTON_SOLVER:
                     print('[\033[32mnewton\033[m]: norm increased, try a smaller step')
                 self.new_del = snrm * 0.5
                 ginfo = 2
+
+                if ared/pred < -50:
+                    print('[\033[32mnewton\033[m]: no valid update found')
+                    info = 3
+                    self.saveorbit(1)
+                    return info
+            
             elif ared / pred < 0.75:
                 if info == 1:
                     print('[\033[32mnewton\033[m]: step is okay, trying a smaller step')
@@ -307,7 +315,6 @@ class NEWTON_SOLVER:
 
             # End of iteration
             self.new_nits += 1
-            self.saveorbit(1)
             x_ = self.new_x
             fx_ = self.new_fx
             tol_ = self.new_tol
@@ -317,6 +324,7 @@ class NEWTON_SOLVER:
                 if info == 1:
                     print('[\033[32mnewton\033[m]: converged')
                 info = 0
+                self.saveorbit(1)
                 return info
             elif self.new_nits == nits:
                 if info == 1:

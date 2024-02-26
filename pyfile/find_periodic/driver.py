@@ -33,7 +33,7 @@ class DRIVER:
         
         self.current_thread = 0
         self.num_thread = 1
-        self.cuda_device = 4
+        self.cuda_device = 2
     
     def create_ini(self):
         ini = configparser.ConfigParser()

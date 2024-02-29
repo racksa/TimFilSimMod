@@ -83,7 +83,7 @@ class DRIVER:
         # Iterate through the sim list and write to .ini file and execute
         for key, value in self.pars_list.items():
             self.write_ini("Parameters", key, float(self.pars_list[key][-1]))
-        self.simName = f"ciliate_{self.pars_list['nfil'][0]:.0f}fil_{self.pars_list['nblob'][0]:.0f}blob_{self.pars_list['ar'][0]:.2f}R_{self.pars_list['spring_factor'][0]:.3f}torsion"
+        self.simName = f"ciliate_{self.pars_list['nfil'][0]:.0f}fil_{self.pars_list['nblob'][0]:.0f}blob_{self.pars_list['ar'][0]:.2f}R_{self.pars_list['spring_factor'][0]:.4f}torsion"
         self.write_ini("Filenames", "simulation_dir", self.dir)
         self.write_ini("Filenames", "simulation_file", self.simName)
         self.write_ini("Filenames", "simulation_readphase_name", f"phases.dat")

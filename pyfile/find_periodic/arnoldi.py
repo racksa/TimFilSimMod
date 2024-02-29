@@ -114,7 +114,7 @@ class ARNOLDI:
         self.generate_initial_condition(sim_3D)
         k = 0
 
-        while np.absolute(self.difference) > self.tol or k < Num_evals:
+        while np.absolute(self.difference) > y  v or k < Num_evals:
 
             self.save_initial_condition(k)
 

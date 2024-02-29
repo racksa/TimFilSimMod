@@ -14,6 +14,7 @@ import math
 import sys
 import matplotlib as mpl
 import os
+from scipy.optimize import curve_fit
 mpl.rcParams['mathtext.fontset'] = 'stix'
 mpl.rcParams['mathtext.rm'] = 'Bitstream Vera Sans'
 mpl.rcParams['mathtext.it'] = 'Bitstream Vera Sans:italic'
@@ -45,7 +46,7 @@ class VISUAL:
         # self.dir = f"/home/clustor/ma/h/hs2216/{self.date}/"
 
         self.date = '20240214_hold'
-        self.date = '20240214_test_solution'
+        self.date = '20240214_test_solution_s2'
         # self.date = '20240214_test_solution_d_double'
         self.dir = f"data/JFNK_sims/{self.date}/"
 
@@ -81,8 +82,8 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 1500000
-        self.frames_setting = 1500000
+        self.plot_end_frame_setting = 33000
+        self.frames_setting = 60000
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -155,11 +156,17 @@ class VISUAL:
         self.ar = self.pars_list['ar'][self.index]
         self.spring_factor = self.pars_list['spring_factor'][self.index]
         self.N = int(self.nswim*(self.nfil*self.nseg + self.nblob))
-        self.simName = self.dir + f"ciliate_{self.nfil:.0f}fil_{self.nblob:.0f}blob_{self.ar:.2f}R_{self.spring_factor:.3f}torsion"
+        self.simName = self.dir + f"ciliate_{self.nfil:.0f}fil_{self.nblob:.0f}blob_{self.ar:.2f}R_{self.spring_factor:.4f}torsion"
+        try:
+            open(self.simName + '_fil_references.dat')
+        except:
+            self.simName = self.dir + f"ciliate_{self.nfil:.0f}fil_{self.nblob:.0f}blob_{self.ar:.2f}R_{self.spring_factor:.3f}torsion"
         try:
             open(self.simName + '_fil_references.dat')
         except:
             self.simName = self.dir + f"ciliate_{self.nfil:.0f}fil_{self.nblob:.0f}blob_{self.ar:.2f}R_{self.spring_factor:.2f}torsion"
+        
+        
         self.fil_references = myIo.read_fil_references(self.simName + '_fil_references.dat')
 
         self.pars = myIo.read_pars(self.simName + '.par')
@@ -1529,10 +1536,8 @@ class VISUAL:
         ax = fig.add_subplot(1,1,1)
         fig2 = plt.figure()
         ax2 = fig2.add_subplot(1,1,1)
-        fig3 = plt.figure()
-        ax3 = fig3.add_subplot(1,1,1)
-        # fig4 = plt.figure()
-        # ax4 = fig4.add_subplot(1,1,1)
+        # fig3 = plt.figure()
+        # ax3 = fig3.add_subplot(1,1,1)
 
         fil_references_sphpolar = np.zeros((self.nfil,3))
         for i in range(self.nfil):
@@ -1547,10 +1552,8 @@ class VISUAL:
         pi_diff = np.zeros(2*self.nfil)
         pi_diff[:self.nfil] = 2*np.pi
 
-        dframe_min, dframe_max = 0.8, 1.05
-        dframe_array = np.arange(int(dframe_min*self.period), int(dframe_max*self.period)+1)
-        error_array = np.zeros(np.shape(dframe_array))
 
+        # Read and store states
         for i in range(self.plot_end_frame):
             print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
             fil_phases_str = fil_phases_f.readline()
@@ -1560,11 +1563,11 @@ class VISUAL:
                 states[i-self.plot_start_frame][:self.nfil] = np.array(fil_phases_str.split()[1:], dtype=float)
                 states[i-self.plot_start_frame][self.nfil:] = np.array(fil_angles_str.split()[1:], dtype=float)
 
-
+        
+        # Function to compute diff
         def compute_diff(arr, frame1, frame2):
             aux = np.copy(arr[frame1]) # using the F(x) norm instead of F(x+T)
             aux[:self.nfil] = util.box(aux[:self.nfil], 2*np.pi)
-            # detach error from norm
             aux[:self.nfil] = np.ones(self.nfil)*np.pi
             
             diff = arr[frame2] - arr[frame1] - pi_diff
@@ -1577,10 +1580,14 @@ class VISUAL:
             norm = float(np.linalg.norm(aux))
             rel_error = diff_norm / norm
             return diff_norm, norm, rel_error
-        
+
+        # Search for T
+        search_T_min, search_T_max = 0.96, 1.02
+        dframe_array = np.arange(int(search_T_min*self.period), int(search_T_max*self.period)+1)
+        error_array = np.zeros(np.shape(dframe_array))
         try:
             for ti, dframe in enumerate(dframe_array):
-                scan_range = np.arange(dframe, self.frames, dtype=int)
+                # scan_range = np.arange(dframe, self.frames, dtype=int)
                 scan_range = [-1]
                 for frame in scan_range:
                     error_array[ti] += compute_diff(states, frame-dframe, frame)[2]
@@ -1589,20 +1596,57 @@ class VISUAL:
         except:
             print("No. of frames not enough to find the period")
 
-        dframe_soln = dframe_array [np.where(error_array==error_array.min())][0]
+        ax.plot(dframe_array*self.dt, error_array, marker = '+')
+        min_ind = int(np.where(error_array==error_array.min())[0])
+        dframe_soln = dframe_array [min_ind]
         T_soln = dframe_soln * self.dt
-
-
-        ax.plot(dframe_array*self.dt, error_array)
-
         print(f'\033[32mThe real period is T= {T_soln}({dframe_soln} frames)\
                \nwith rel error |x({self.plot_end_frame-1})-x({self.plot_end_frame-1-dframe_soln})|/|x({self.plot_end_frame-1-dframe_soln})|={error_array.min()}\033[m')
         
-        # Calculate the error |F(x) - x| of the beat period.
+        # # Create interpolated states
+        # from scipy.interpolate import CubicSpline
+        # m, n = states.shape
+        # interpolation_factor = 10
+        # p = (self.frames - 1) * interpolation_factor +1
+        # new_indices = np.linspace(0, self.frames - 1, self.frames)
+        # interpolated_arrays = []
+        # for i in range(n):
+        #     cubic_spline = CubicSpline(new_indices, states[:, i])
+        #     interpolated_dimension = cubic_spline(np.linspace(0, m - 1, p))
+        #     interpolated_arrays.append(interpolated_dimension)
+        # states_interpolated = np.column_stack(interpolated_arrays)
+        
+        # # Search for T using cubic spline
+        # dframe_array = np.arange(int(search_T_min*self.period*interpolation_factor), int(search_T_max*self.period*interpolation_factor)+1)
+        # error_array = np.zeros(np.shape(dframe_array))
+        # try:
+        #     for ti, dframe in enumerate(dframe_array):
+        #         scan_range = [-1]
+        #         for frame in scan_range:
+        #             error_array[ti] += compute_diff(states_interpolated, frame-dframe, frame)[2]
+
+        #         error_array[ti] /= len(scan_range)
+        # except:
+        #     print("No. of frames not enough to find the period")
+        # dt = self.dt/interpolation_factor
+        # ax.plot(dframe_array*dt, error_array, marker = '+')
+
+
+        # Calculate the continuous period
+        # def linfit(x, k, c):
+        #     return k*x + c
+        # popt, pcov = curve_fit(linfit, dframe_array[min_ind-5:min_ind]*self.dt, error_array[min_ind-5:min_ind])
+        # ax.plot(dframe_array*self.dt, linfit(dframe_array*self.dt, popt[0], popt[1]))
+
+        # popt2, pcov2 = curve_fit(linfit, dframe_array[min_ind+1:min_ind+6]*self.dt, error_array[min_ind+1:min_ind+6])
+        # ax.scatter(dframe_array[min_ind+1:min_ind+6]*self.dt, error_array[min_ind+1:min_ind+6])
+        # ax.plot(dframe_array*self.dt, linfit(dframe_array*self.dt, popt2[0], popt2[1]))
+        
+
+        # Calculate the error |F(x) - x| using the computed T.
         possible_length = int(min(self.period, self.frames-1))
         error_of_final_period = compute_diff(states, -1-int(possible_length), -1)[2]
 
-    
         print(f'\033[33mThe beat period is T= {self.dt*self.period}({int(self.period)} frames)\
                \nwith rel error |x({self.plot_end_frame-1})-x({self.plot_end_frame-1-possible_length})|/|x({self.plot_end_frame-1-possible_length})|={error_of_final_period}\033[m')
 
@@ -1627,33 +1671,28 @@ class VISUAL:
             
         ax2.plot(ts, rel_error)
 
-        # print(f'phase avg = {np.mean(phase_avgs)}')
-        # print(min(np.abs(diff_norms)))
-        # print(min(np.abs(diff_norms))/min(norms))
-        ax3.plot(ts, norms, label='Norm of states')
-        # ax3.plot(ts, phase_avgs, label='Phase avg')
-        # ax3.plot(ts, angle_avgs, label='Angle avg')
+        # ax3.plot(ts, norms, label='Norm of states')
+        # ax3_right = ax3.twinx()
+        # ax3_right.plot(ts, diff_norms, c='r', label=r'Norm of diff')
 
-        ax3_right = ax3.twinx()
-        ax3_right.plot(ts, diff_norms, c='r', label=r'Norm of diff')
-
-        # ax4.plot(ts, order_parameters)
 
         ax.set_xlabel(r"$T$")
         ax.set_ylabel(r"<$\frac{|\psi(t_0+T)-\psi(t_0)|}{|\psi(t_0)}$>")
+        ax.set_ylim(0)
         fig.tight_layout()
 
         ax2.set_xlabel(r"$t/T$")
         ax2.set_ylabel(r"<$\frac{|\psi(t_0+T)-\psi(t_0)|}{|\psi(t_0)|}$>")
         fig2.tight_layout()
 
-        ax3.set_xlabel(r"$t/T$")
-        ax3.set_ylabel(r"$<|\psi(t)|>$")
-        ax3_right.set_ylabel(r"$<|\psi(t_0+T)-\psi(t_0)|>$")
-        ax3.legend(loc='upper left')
-        ax3_right.legend(loc=1)
-        fig3.tight_layout()
+        # ax3.set_xlabel(r"$t/T$")
+        # ax3.set_ylabel(r"$<|\psi(t)|>$")
+        # ax3_right.set_ylabel(r"$<|\psi(t_0+T)-\psi(t_0)|>$")
+        # ax3.legend(loc='upper left')
+        # ax3_right.legend(loc=1)
+        # fig3.tight_layout()
 
+        fig.savefig(f'fig/fil_finding_period_index{self.index}_{self.date}.pdf', bbox_inches = 'tight', format='pdf')    
         fig2.savefig(f'fig/fil_period_errod_index{self.index}_{self.date}.pdf', bbox_inches = 'tight', format='pdf')    
         plt.show()
 

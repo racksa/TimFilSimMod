@@ -28,7 +28,7 @@ class DRIVER:
 
 
         self.date = '20240214_hold'
-        self.date = '20240214_test_solution'
+        self.date = '20240214_test_solution_s2'
 
         self.dir = f"data/{self.category}{self.date}{self.afix}/"
 
@@ -100,8 +100,8 @@ class DRIVER:
                         nfil = int(159 + 0*i)
                         nblob = int(9000 + 0*i)
                         ar = round(8.00, 2)
-                        spring_factor = round(0.004 + 0.002*i, 3)
-                        period = 9.837913258934994909e-01
+                        spring_factor = round(0.01 + 0.001*i, 3)
+                        period = 0.975717
                         sim_length = 500.
 
                         # # find branches wider range
@@ -207,7 +207,7 @@ class DRIVER:
             readphase_index = ''
             for key, value in self.pars_list.items():
                 self.write_ini("Parameters", key, float(self.pars_list[key][i]))
-            self.simName = f"ciliate_{self.pars_list['nfil'][i]:.0f}fil_{self.pars_list['nblob'][i]:.0f}blob_{self.pars_list['ar'][i]:.2f}R_{self.pars_list['spring_factor'][i]:.3f}torsion"
+            self.simName = f"ciliate_{self.pars_list['nfil'][i]:.0f}fil_{self.pars_list['nblob'][i]:.0f}blob_{self.pars_list['ar'][i]:.2f}R_{self.pars_list['spring_factor'][i]:.4f}torsion"
             self.write_ini("Filenames", "simulation_file", self.simName)
             self.write_ini("Filenames", "simulation_dir", self.dir)
             self.write_ini("Filenames", "simulation_readphase_name", f"phases{readphase_index}.dat")

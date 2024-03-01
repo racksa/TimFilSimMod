@@ -140,7 +140,6 @@ def save_solution(data,filename):
 
 
 def find_eigenmodes(k,nseg,nfil,y_spacing_const,x_spacing_const,f,ndts,fixT,new_x,eval_filename,evec_filename):
-
     # Initialisation
     sim_3D = 0 #0 if 2D, otherwise 3D
     Num_evals = 6

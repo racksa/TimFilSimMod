@@ -101,7 +101,7 @@ class DRIVER:
                         nblob = int(9000 + 0*i)
                         ar = round(8.00, 2)
                         spring_factor = round(0.01 + 0.001*i, 3)
-                        period = 0.975717
+                        period = 0.97596
                         sim_length = 500.
 
                         # # find branches wider range

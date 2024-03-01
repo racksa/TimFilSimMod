@@ -5,7 +5,7 @@ import time
 
 class ARNOLDI:
 
-    def __init__(self,NSEG,NFIL,Ustar,Num_evals):
+    def __init__(self,NSEG,NFIL,Ustar,Num_evals,d):
         NTOTAL = 3*(NSEG-1)*NFIL
         self.NTOTAL = NTOTAL
         self.Q = np.zeros((NTOTAL,NTOTAL))
@@ -15,16 +15,15 @@ class ARNOLDI:
         self.old_evalue = 10*np.ones(Num_evals,dtype = np.complex )
         self.difference = 2*self.tol
         self.Ustar = Ustar
+
+        self.d = d
     
 
-    def generate_initial_condition(self,sim_3D):
+    def generate_initial_condition(self):
         
-        if sim_3D:
-            b = np.random.rand(self.NTOTAL)
-        else:
-            b = np.zeros((int(self.NTOTAL/3),3))
-            b[:,1] = np.random.rand(int(self.NTOTAL/3))
-            b = np.reshape(b,self.NTOTAL)
+        b = np.zeros((int(self.NTOTAL/3),3))
+        b[:,1] = np.random.rand(int(self.NTOTAL/3))
+        b = np.reshape(b,self.NTOTAL)
         
         b = b/la.norm(b)
         self.Q[:,0] = b
@@ -110,18 +109,18 @@ class ARNOLDI:
             np.savetxt(f, eigenVectors[:,0:Num_evals], newline = " ")
             f.write(b"\n")
 
-    def arnoldi_for_eigenvalues(self, sim_3D, Num_evals, sim_name, sim_dir, T, varied_value, eval_filename, evec_filename):
-        self.generate_initial_condition(sim_3D)
+    def arnoldi_for_eigenvalues(self, Num_evals, sim_name, sim_dir, T, varied_value, eval_filename, evec_filename):
+        self.generate_initial_condition()
         k = 0
 
-        while np.absolute(self.difference) > y  v or k < Num_evals:
+        while np.absolute(self.difference) > self.tol or k < Num_evals:
 
             self.save_initial_condition(k)
 
             U = self.Ax(sim_dir,sim_name)
             self.gramschmidt_iteration(k,U)
 
-            self.find_difference(k, Num_evals,T)
+            self.find_difference(k, Num_evals, T)
 
             print("Difference at step " + str(k) + " is " + str(self.difference))
             k += 1    

@@ -314,6 +314,7 @@ class NEWTON_SOLVER:
                 continue
 
             # End of iteration
+            self.saveorbit(0)
             self.new_nits += 1
             x_ = self.new_x
             fx_ = self.new_fx

@@ -82,8 +82,8 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 33000
-        self.frames_setting = 60000
+        self.plot_end_frame_setting = 1900000
+        self.frames_setting = 1500
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -1606,8 +1606,8 @@ class VISUAL:
         # # Create interpolated states
         # from scipy.interpolate import CubicSpline
         # m, n = states.shape
-        # interpolation_factor = 10
-        # p = (self.frames - 1) * interpolation_factor +1
+        # interpolation_factor = 2.4
+        # p = int( (self.frames - 1) * interpolation_factor +1 )
         # new_indices = np.linspace(0, self.frames - 1, self.frames)
         # interpolated_arrays = []
         # for i in range(n):

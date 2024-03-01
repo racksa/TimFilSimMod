@@ -10,12 +10,8 @@ def main():
     #fixT = 1   # Fix T for equilibrium, rather than PO solution
     #follower_force = 50      # Follower force (parameter of dynamical system)
 
-    NSEG = 20      # Number of segments
-
-    NFIL = 159       # Number of filaments
-    # NBLOB = 5000
-    # AR = 6
-
+    NSEG = 20
+    NFIL = 159
     NBLOB = 9000
     AR = 8
 
@@ -24,7 +20,7 @@ def main():
     # AR = 15
 
     # output_filename = f"data/expr_sims/20240208_periodic/psi_guess{NFIL}.dat"
-    output_filename = f"data/JFNK_sims/20240214_periodic_s/psi_guess{NFIL}.dat"
+    output_filename = f"data/JFNK_sims/20240214_periodic_d/psi_guess{NFIL}.dat"
 
     # Number of time steps (ndts) and fixT
     ndts = 300
@@ -41,7 +37,7 @@ def main():
     gtol = 5e-3  # 1e-4
     epsJ = 1e-5 # 1e-6  # epsilon used in Jacobian approximation
 
-    f_range = np.arange(0.010, 0.062, 0.0005)
+    f_range = np.arange(0.004, 0.061, 0.001)[::-1]
     # f_range = np.arange(0.035, 0.042, 0.001)[::-1]
     # f_range = np.arange(0.030, 0.062, 0.002)
     for k in f_range:

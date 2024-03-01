@@ -12,7 +12,7 @@ class DRIVER:
         # self.category = 'expr_sims/'
         self.category = 'JFNK_sims/'
 
-        self.date = '20240214_periodic_s'
+        self.date = '20240214_periodic_d'
         self.afix = ''
         # self.dir = f"data/expr_sims/{self.date}{self.afix}/"
         self.dir = f"data/{self.category}{self.date}{self.afix}/"
@@ -33,7 +33,7 @@ class DRIVER:
         
         self.current_thread = 0
         self.num_thread = 1
-        self.cuda_device = 2
+        self.cuda_device = 5
     
     def create_ini(self):
         ini = configparser.ConfigParser()

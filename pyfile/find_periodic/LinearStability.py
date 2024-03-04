@@ -14,29 +14,28 @@ def main():
     NBLOB = 9000
     AR = 8
     
-    folder = f"data/JFNK_sims/20240214_periodic_s"
-    output_filename = folder + "/" + f"psi_guess{NFIL}.dat"
-
     # Number of time steps (ndts) and fixT
     ndts = 300
 
-    nseg = 20
-    nfil = 1
-    f = 5.0
-    k = 1000.0
-    ndts = 300
-    
+    Num_evals = 5
+    Ustar = np.zeros(2*NFIL)
 
-    Num_evals = 6
+    # Initialise the driver
+    d = driver.DRIVER()
+    d.cuda_device = 5
+    d.date = 'soln'
+    d.category = 'JFNK_sims/'
+    d.dir = f"data/{d.category}{d.date}/"
+    eval_filename =  d.dir + f"eigenvalues_pb.dat"
+    evec_filename =  d.dir + f"eigenvectors_pb.dat"
 
-
-    Ustar = np.zeros(2*nfil)
+    output_filename = d.dir + f"psi_guess{NFIL}.dat"
 
     with open(output_filename, 'r') as file:
         num_lines = sum(1 for line in file)
         solns = np.loadtxt(output_filename)
 
-    num_lines = 10
+    num_lines = 1
 
     for i in range(num_lines):
         k = solns[i,0]
@@ -45,18 +44,12 @@ def main():
         Ustar = solns[i,2:]
         print(f'k={k} T={T}')
 
-        eval_filename =  folder + f"/eigenvalues_pb.dat"
-        evec_filename =  folder + f"/eigenvectors_pb.dat"
+        
 
-        d = driver.DRIVER()
-        a = arnoldi.ARNOLDI(nseg,nfil,Ustar,Num_evals,d)
-
-        # These are always changed at the beginning of each Arnoldi iteration
-        d.change_variables(NFIL, NSEG, NBLOB, AR, k, T, 1.)
-        d.update_globals_file()
-
+        a = arnoldi.ARNOLDI(NSEG, NFIL, NBLOB, AR, T,\
+                            Ustar,Num_evals,k,d, eval_filename, evec_filename)
 
         # Begin arnoldi iterations
-        # a.arnoldi_for_eigenvalues(Num_evals, simulation_file, d.dir, T, f, eval_filename, evec_filename)
+        a.arnoldi_for_eigenvalues(T)
 
 main()

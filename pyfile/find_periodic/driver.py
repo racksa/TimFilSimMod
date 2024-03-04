@@ -131,13 +131,14 @@ class DRIVER:
         # print(self.pars_list)
         
 
+        k = float(self.pars_list["spring_factor"][0])
         # command = f"export OPENBLAS_NUM_THREADS=1; \
         #             export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
-        #             ./bin/{self.exe_name} > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][0]:.0f}fil_{self.ite}.out"
-        k = float(self.pars_list["spring_factor"][0])
+        #             ./bin/{self.exe_name} > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][0]:.0f}fil_{k}.out"
         command = f"export OPENBLAS_NUM_THREADS=1; \
                     export CUDA_VISIBLE_DEVICES={self.cuda_device}; \
-                    ./bin/{self.exe_name} > terminal_outputs/output_{self.date}_{self.pars_list['nfil'][0]:.0f}fil_{k}.out"
-       
+                    ./bin/{self.exe_name}"
+
+        
         os.system(command)
         self.ite += 1

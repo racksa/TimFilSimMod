@@ -46,7 +46,7 @@ class VISUAL:
         # self.dir = f"/home/clustor/ma/h/hs2216/{self.date}/"
 
         self.date = '20240214_hold'
-        self.date = '20240214_test_solution_s2'
+        self.date = '20240214_test_solution_d'
         # self.date = '20240214_test_solution_d_double'
         self.dir = f"data/JFNK_sims/{self.date}/"
 
@@ -1678,7 +1678,8 @@ class VISUAL:
 
         ax.set_xlabel(r"$T$")
         ax.set_ylabel(r"<$\frac{|\psi(t_0+T)-\psi(t_0)|}{|\psi(t_0)}$>")
-        ax.set_ylim(0)
+        ax.set_ylim(0, 0.02)
+        ax.set_xlim(0.9, 1.)
         fig.tight_layout()
 
         ax2.set_xlabel(r"$t/T$")

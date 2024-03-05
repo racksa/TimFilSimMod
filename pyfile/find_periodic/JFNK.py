@@ -30,7 +30,7 @@ def main():
     n = 2*NFIL+1
     mgmres = 5  # 10  # max GMRES iterations
     nits = 150  # max Newton iterations
-    rel_err_ini = 3e-4  # 1e-8 Relative error |F|/|x|
+    rel_err_ini = 1e-8  # 1e-8 Relative error |F|/|x|
     del_value_ini = -1  # These rarely need changing for any problem
     mndl_ini = 1e-20
     mxdl_ini = 1e20
@@ -38,6 +38,7 @@ def main():
     epsJ = 1e-5 # 1e-6  # epsilon used in Jacobian approximation
 
     f_range = np.arange(0.004, 0.061, 0.001)[::-1]
+    f_range = [0.06]
     # f_range = np.arange(0.035, 0.042, 0.001)[::-1]
     # f_range = np.arange(0.030, 0.062, 0.002)
     for k in f_range:

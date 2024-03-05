@@ -28,7 +28,7 @@ class DRIVER:
 
 
         self.date = '20240214_hold'
-        self.date = '20240214_test_solution_s2'
+        self.date = '20240214_test_solution_d'
 
         self.dir = f"data/{self.category}{self.date}{self.afix}/"
 
@@ -101,8 +101,12 @@ class DRIVER:
                         nblob = int(9000 + 0*i)
                         ar = round(8.00, 2)
                         spring_factor = round(0.01 + 0.001*i, 3)
-                        period = 0.97596
+                        period = 9.5520180464e-01
                         sim_length = 500.
+
+                        # 9
+                        periods = [0.984372, 0.982040, 0.980421, 0.979161, 0.977439, 0.975960, 0.975093, 0.973299, 0.972009, 0.970836,\
+                                   0.969454, 0.968152, 0.967049, 0.965561, 0.964556, 0.96320,  0.96232, ]
 
                         # # find branches wider range
                         # nfil = int(639 + 0*i)
@@ -143,8 +147,6 @@ class DRIVER:
                             nfil = 1
                             nblob = 0
                             
-                        
-                        
                         self.pars_list["nswim"].append(1)
                         self.pars_list["nseg"].append(nseg)
                         self.pars_list["nfil"].append(nfil)

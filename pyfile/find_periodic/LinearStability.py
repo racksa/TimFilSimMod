@@ -6,6 +6,7 @@ import numpy as np
 import time
 import sys
 import os
+import util
 
 def main():
     # Initialisation
@@ -22,7 +23,7 @@ def main():
 
     # Initialise the driver
     d = driver.DRIVER()
-    d.cuda_device = 5
+    d.cuda_device = 1
     d.date = 'soln'
     d.category = 'JFNK_sims/'
     d.dir = f"data/{d.category}{d.date}/"
@@ -42,9 +43,8 @@ def main():
         T = solns[i,1]
         dt = T/ndts
         Ustar = solns[i,2:]
+        Ustar[:NFIL] = util.box(Ustar[:NFIL], 2*np.pi)
         print(f'k={k} T={T}')
-
-        
 
         a = arnoldi.ARNOLDI(NSEG, NFIL, NBLOB, AR, T,\
                             Ustar,Num_evals,k,d, eval_filename, evec_filename)

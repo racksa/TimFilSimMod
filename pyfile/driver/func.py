@@ -28,7 +28,7 @@ class DRIVER:
 
 
         self.date = '20240214_hold'
-        self.date = '20240214_test_solution_d'
+        self.date = '20240214_test_solution_d2'
 
         self.dir = f"data/{self.category}{self.date}{self.afix}/"
 
@@ -101,7 +101,7 @@ class DRIVER:
                         nblob = int(9000 + 0*i)
                         ar = round(8.00, 2)
                         spring_factor = round(0.01 + 0.001*i, 3)
-                        period = 9.5520180464e-01
+                        period = 9.557528727568270766e-01
                         sim_length = 500.
 
                         # 9

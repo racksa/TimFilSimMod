@@ -16,7 +16,7 @@ class ARNOLDI:
         self.T = T
         self.Q = np.zeros((self.NTOTAL,self.NTOTAL))
         self.H = np.zeros((self.NTOTAL,self.NTOTAL))
-        self.epsilon = 5e-3
+        self.epsilon = .1
         self.tol = 1e-5
         self.old_evalue = 10*np.ones(self.Num_evals,dtype = np.complex )
         self.difference = 2*self.tol
@@ -32,7 +32,8 @@ class ARNOLDI:
     def generate_initial_condition(self):
         
         b = np.random.rand(self.NTOTAL)
-        b[:self.NFIL] *= 50
+        # b[:self.NFIL] *= 50
+        b[self.NFIL:] = 0
         
         b = b/la.norm(b)
         # print(b*self.epsilon)
@@ -43,7 +44,7 @@ class ARNOLDI:
 
         input_filename = self.d.dir + "psi.dat"
 
-        initial_condition = self.Ustar #+ self.epsilon * self.Q[:,k]
+        initial_condition = self.Ustar + self.epsilon * self.Q[:,k]
         x = np.insert( initial_condition, 0, [self.ct_var, self.T ])
 
         np.savetxt(input_filename, x, newline = " ")

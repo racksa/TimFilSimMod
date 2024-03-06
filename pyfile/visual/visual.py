@@ -46,7 +46,7 @@ class VISUAL:
         # self.dir = f"/home/clustor/ma/h/hs2216/{self.date}/"
 
         self.date = '20240214_hold'
-        self.date = '20240214_test_solution_d'
+        self.date = '20240214_test_solution_d2'
         # self.date = '20240214_test_solution_d_double'
         self.dir = f"data/JFNK_sims/{self.date}/"
 
@@ -1536,8 +1536,8 @@ class VISUAL:
         ax = fig.add_subplot(1,1,1)
         fig2 = plt.figure()
         ax2 = fig2.add_subplot(1,1,1)
-        # fig3 = plt.figure()
-        # ax3 = fig3.add_subplot(1,1,1)
+        fig3 = plt.figure()
+        ax3 = fig3.add_subplot(1,1,1)
 
         fil_references_sphpolar = np.zeros((self.nfil,3))
         for i in range(self.nfil):
@@ -1662,7 +1662,6 @@ class VISUAL:
         order_parameters = np.zeros(self.frames-dframe_soln)
         for i in range(self.frames-dframe_soln):
             diff_norms[i], norms[i], rel_error[i] = compute_diff(states, i, dframe_soln+i )
-
             # order_parameters[i] = np.abs(np.mean(np.exp(1j*states[i][:self.nfil])))
 
             # phase_avgs[i] = np.mean(aux[:self.nfil])
@@ -1671,27 +1670,27 @@ class VISUAL:
             
         ax2.plot(ts, rel_error)
 
-        # ax3.plot(ts, norms, label='Norm of states')
-        # ax3_right = ax3.twinx()
-        # ax3_right.plot(ts, diff_norms, c='r', label=r'Norm of diff')
+        ax3.plot(ts, norms, label='Norm of states')
+        ax3_right = ax3.twinx()
+        ax3_right.plot(ts, diff_norms, c='r', label=r'Norm of diff')
 
 
         ax.set_xlabel(r"$T$")
-        ax.set_ylabel(r"<$\frac{|\psi(t_0+T)-\psi(t_0)|}{|\psi(t_0)}$>")
+        ax.set_ylabel(r"<$\frac{\|\psi(t_0+T)-\psi(t_0)\|}{\|\psi(t_0)\|}$>")
         ax.set_ylim(0, 0.02)
         ax.set_xlim(0.9, 1.)
         fig.tight_layout()
 
         ax2.set_xlabel(r"$t/T$")
-        ax2.set_ylabel(r"<$\frac{|\psi(t_0+T)-\psi(t_0)|}{|\psi(t_0)|}$>")
+        ax2.set_ylabel(r"<$\frac{\|\psi(t_0+T)-\psi(t_0)\|}{\|\psi(t_0)\|}$>")
         fig2.tight_layout()
 
-        # ax3.set_xlabel(r"$t/T$")
-        # ax3.set_ylabel(r"$<|\psi(t)|>$")
-        # ax3_right.set_ylabel(r"$<|\psi(t_0+T)-\psi(t_0)|>$")
-        # ax3.legend(loc='upper left')
-        # ax3_right.legend(loc=1)
-        # fig3.tight_layout()
+        ax3.set_xlabel(r"$t/T$")
+        ax3.set_ylabel(r"$<|\psi(t)|>$")
+        ax3_right.set_ylabel(r"$<\|\psi(t_0+T)-\psi(t_0)\|>$")
+        ax3.legend(loc='upper left')
+        ax3_right.legend(loc=1)
+        fig3.tight_layout()
 
         fig.savefig(f'fig/fil_finding_period_index{self.index}_{self.date}.pdf', bbox_inches = 'tight', format='pdf')    
         fig2.savefig(f'fig/fil_period_errod_index{self.index}_{self.date}.pdf', bbox_inches = 'tight', format='pdf')    

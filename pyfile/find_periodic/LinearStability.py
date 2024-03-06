@@ -18,7 +18,7 @@ def main():
     # Number of time steps (ndts) and fixT
     ndts = 300
 
-    Num_evals = 5
+    Num_evals = 6
     Ustar = np.zeros(2*NFIL)
 
     # Initialise the driver

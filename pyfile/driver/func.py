@@ -11,7 +11,7 @@ class DRIVER:
         # self.category = 'expr_sims/'
         self.category = 'JFNK_sims/'
         
-        self.exe_name = 'cilia_periodic_300'
+        self.exe_name = 'cilia_periodic_300_1e-6'
         # self.exe_name = 'cilia_readphase_free'
         # self.exe_name = 'cilia_resolution'
         # self.date = '20240104_readphase_hold'
@@ -28,7 +28,7 @@ class DRIVER:
 
 
         self.date = '20240214_hold'
-        self.date = '20240214_test_solution_d2'
+        self.date = '20240214_test_solution_s3'
 
         self.dir = f"data/{self.category}{self.date}{self.afix}/"
 
@@ -101,12 +101,19 @@ class DRIVER:
                         nblob = int(9000 + 0*i)
                         ar = round(8.00, 2)
                         spring_factor = round(0.01 + 0.001*i, 3)
-                        period = 9.557528727568270766e-01
-                        sim_length = 500.
+                        period = 9.552028433455451717e-01
+                        sim_length = 20.
 
                         # 9
                         periods = [0.984372, 0.982040, 0.980421, 0.979161, 0.977439, 0.975960, 0.975093, 0.973299, 0.972009, 0.970836,\
-                                   0.969454, 0.968152, 0.967049, 0.965561, 0.964556, 0.96320,  0.96232, ]
+                                   0.969454, 0.968152, 0.967049, 0.965561, 0.964556, 0.96320,  0.96232, 0.96128, 0.96008, 0.95909,\
+                                   0.95807, 0.95707, 0.95597, 0.95516, 0.95420, 0.95325, 0.95233, 0.95145, 0.95064, 0.94943,\
+                                   0.94854, 0.94786, 0.94729, 0.94631, 0.94567, 0.94545, 0.94515, 0.94466, 0.94419, 0.94382,\
+                                   ]
+                        try:
+                            period = periods[i]
+                        except:
+                            period = 1.
 
                         # # find branches wider range
                         # nfil = int(639 + 0*i)

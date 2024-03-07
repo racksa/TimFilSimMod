@@ -178,7 +178,7 @@ int main(int argc, char** argv){
   config_file << RBLOB << " " << "%% RBLOB" << std::endl;
   config_file << KB << " " << "%% KB" << std::endl;
   config_file << KT << " " << "%% KT" << std::endl;
-  config_file << TOL << " " << "%% TOL" << std::endl;
+  config_file << LINEAR_SYSTEM_TOL << " " << "%% TOL" << std::endl;
   config_file << TOTAL_TIME_STEPS << " " << "%% TOTAL_TIME_STEPS" << std::endl;
   config_file << DT << " " << "%% DT" << std::endl;
   config_file << PLOT_FREQUENCY_IN_STEPS << " " << "%% PLOT_FREQUENCY_IN_STEPS" << std::endl;

@@ -18,12 +18,12 @@ def main():
     # Number of time steps (ndts) and fixT
     ndts = 300
 
-    Num_evals = 6
+    Num_evals = 7
     Ustar = np.zeros(2*NFIL)
 
     # Initialise the driver
     d = driver.DRIVER()
-    d.cuda_device = 1
+    d.cuda_device = 3
     d.date = 'soln'
     d.category = 'JFNK_sims/'
     d.dir = f"data/{d.category}{d.date}/"
@@ -36,18 +36,15 @@ def main():
         num_lines = sum(1 for line in file)
         solns = np.loadtxt(output_filename)
 
-    num_lines = 1
-
     for i in range(num_lines):
         k = solns[i,0]
         T = solns[i,1]
-        dt = T/ndts
         Ustar = solns[i,2:]
         Ustar[:NFIL] = util.box(Ustar[:NFIL], 2*np.pi)
         print(f'k={k} T={T}')
 
         a = arnoldi.ARNOLDI(NSEG, NFIL, NBLOB, AR, T,\
-                            Ustar,Num_evals,k,d, eval_filename, evec_filename)
+                            Ustar, Num_evals, k, d, eval_filename, evec_filename)
 
         # Begin arnoldi iterations
         a.arnoldi_for_eigenvalues(T)

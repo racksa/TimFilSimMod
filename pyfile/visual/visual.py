@@ -46,7 +46,7 @@ class VISUAL:
         # self.dir = f"/home/clustor/ma/h/hs2216/{self.date}/"
 
         self.date = '20240214_hold'
-        self.date = '20240214_test_solution_d2'
+        self.date = '20240214_test_solution_s3'
         # self.date = '20240214_test_solution_d_double'
         self.dir = f"data/JFNK_sims/{self.date}/"
 
@@ -82,8 +82,8 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 1900000
-        self.frames_setting = 150000
+        self.plot_end_frame_setting = 11860
+        self.frames_setting = 300000
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -1547,6 +1547,7 @@ class VISUAL:
 
         fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
         fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
+        fil_states_f = open(self.simName + '_true_states.dat', "r")
 
         states = np.zeros((self.frames, 2*self.nfil))
         pi_diff = np.zeros(2*self.nfil)
@@ -1556,13 +1557,14 @@ class VISUAL:
         # Read and store states
         for i in range(self.plot_end_frame):
             print(" frame ", i, "/", self.plot_end_frame, "          ", end="\r")
-            fil_phases_str = fil_phases_f.readline()
-            fil_angles_str = fil_angles_f.readline()
+            # fil_phases_str = fil_phases_f.readline()
+            # fil_angles_str = fil_angles_f.readline()
+            fil_states_str = fil_states_f.readline()
 
             if(i>=self.plot_start_frame):
-                states[i-self.plot_start_frame][:self.nfil] = np.array(fil_phases_str.split()[1:], dtype=float)
-                states[i-self.plot_start_frame][self.nfil:] = np.array(fil_angles_str.split()[1:], dtype=float)
-
+                # states[i-self.plot_start_frame][:self.nfil] = np.array(fil_phases_str.split()[1:], dtype=float)
+                # states[i-self.plot_start_frame][self.nfil:] = np.array(fil_angles_str.split()[1:], dtype=float)
+                states[i-self.plot_start_frame] = np.array(fil_states_str.split()[2:], dtype=float)
         
         # Function to compute diff
         def compute_diff(arr, frame1, frame2):
@@ -1571,6 +1573,7 @@ class VISUAL:
             aux[:self.nfil] = np.ones(self.nfil)*np.pi
             
             diff = arr[frame2] - arr[frame1] - pi_diff
+
             # Excluding fils near the pole
             for ind in near_pole_ind:
                 diff[ind] = 0.
@@ -1594,7 +1597,7 @@ class VISUAL:
 
                 error_array[ti] /= len(scan_range)
         except:
-            print("No. of frames not enough to find the period")
+            print(f"No. of frames {self.frames} not enough to find the period")
 
         ax.plot(dframe_array*self.dt, error_array, marker = '+')
         min_ind = int(np.where(error_array==error_array.min())[0])
@@ -1681,15 +1684,17 @@ class VISUAL:
         ax.set_xlim(0.9, 1.)
         fig.tight_layout()
 
+        # ax2.set_ylim(0, 1e-2)
         ax2.set_xlabel(r"$t/T$")
         ax2.set_ylabel(r"<$\frac{\|\psi(t_0+T)-\psi(t_0)\|}{\|\psi(t_0)\|}$>")
         fig2.tight_layout()
 
         ax3.set_xlabel(r"$t/T$")
-        ax3.set_ylabel(r"$<|\psi(t)|>$")
+        ax3.set_ylabel(r"$<\|\psi(t)\|>$")
         ax3_right.set_ylabel(r"$<\|\psi(t_0+T)-\psi(t_0)\|>$")
         ax3.legend(loc='upper left')
         ax3_right.legend(loc=1)
+        # ax3_right.set_ylim(0, 1e-2)
         fig3.tight_layout()
 
         fig.savefig(f'fig/fil_finding_period_index{self.index}_{self.date}.pdf', bbox_inches = 'tight', format='pdf')    

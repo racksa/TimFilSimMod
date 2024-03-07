@@ -16,8 +16,8 @@ class ARNOLDI:
         self.T = T
         self.Q = np.zeros((self.NTOTAL,self.NTOTAL))
         self.H = np.zeros((self.NTOTAL,self.NTOTAL))
-        self.epsilon = .1
-        self.tol = 1e-5
+        self.epsilon = 1e-1
+        self.tol = 1e-3
         self.old_evalue = 10*np.ones(self.Num_evals,dtype = np.complex )
         self.difference = 2*self.tol
         self.Ustar = Ustar
@@ -31,12 +31,13 @@ class ARNOLDI:
 
     def generate_initial_condition(self):
         
-        b = np.random.rand(self.NTOTAL)
-        # b[:self.NFIL] *= 50
-        b[self.NFIL:] = 0
+        b = np.random.rand(self.NTOTAL)-0.5
+        b[:self.NFIL] *= 50
+        # b[self.NFIL:] = 0
         
         b = b/la.norm(b)
-        # print(b*self.epsilon)
+        print(b[:10]*self.epsilon)
+        print(self.Ustar[:10])
         self.Q[:,0] = b
         
             
@@ -61,7 +62,9 @@ class ARNOLDI:
         U[:self.NFIL] -= 2*np.pi
 
         # print(U - self.Ustar)
-        print(f'norm of dU(T) = {la.norm(U-self.Ustar)}')
+        print(f'norm of dU(T) = {la.norm(U-self.Ustar)}, eps*dU = {la.norm(U-self.Ustar)/self.epsilon}')
+        print((U-self.Ustar)[:10])
+        
 
         # Normalise data
         return (U - self.Ustar)/self.epsilon
@@ -111,15 +114,15 @@ class ARNOLDI:
 
         eigenVectors = self.Q[:,0:k] @ eigenVectors[:,idx]
 
-        os.chdir('../stability')
-
         with open(self.evalf, "ab") as f:
-            np.savetxt(f, eigenValues[0:self.Num_evals+1], newline = " ")
             f.write(b"\n")
+            np.savetxt(f, eigenValues[0:self.Num_evals+1], newline = " ")
+            
 
         with open(self.evecf, "ab") as f:
-            np.savetxt(f, eigenVectors[:,0:self.Num_evals], newline = " ")
             f.write(b"\n")
+            np.savetxt(f, eigenVectors[:,0:self.Num_evals], newline = " ")
+            
 
     def arnoldi_for_eigenvalues(self, T):
         self.generate_initial_condition()
@@ -138,4 +141,4 @@ class ARNOLDI:
             print(f"[\033[32mArnoldi\033[m]Difference at step " + str(k) + " is " + str(self.difference))
             k += 1    
 
-        # self.save_evals_and_evecs_to_file(k, T)
+        self.save_evals_and_evecs_to_file(k, T)

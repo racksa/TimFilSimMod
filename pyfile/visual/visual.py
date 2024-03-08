@@ -46,7 +46,7 @@ class VISUAL:
         # self.dir = f"/home/clustor/ma/h/hs2216/{self.date}/"
 
         self.date = '20240214_hold'
-        self.date = '20240214_test_solution_s3'
+        self.date = '20240214_test_solution_s'
         # self.date = '20240214_test_solution_d_double'
         self.dir = f"data/JFNK_sims/{self.date}/"
 
@@ -82,8 +82,8 @@ class VISUAL:
 
         self.check_overlap = False
 
-        self.plot_end_frame_setting = 11860
-        self.frames_setting = 300000
+        self.plot_end_frame_setting = 2200000
+        self.frames_setting = 630000
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -1487,31 +1487,8 @@ class VISUAL:
 
                         data_start = np.array(first_line.split()[1:], dtype=float)
                         data = np.array(last_line.split()[1:], dtype=float)
+                        data[:self.nfil] = util.box(data[:self.nfil], 2*np.pi)
 
-                        # # Compute the difference x(T) - x(0)
-                        # if name == self.simName + '_true_states.dat':
-                        #     stt = 0
-
-                            
-                        #     sin_data_start = data_start[1:]
-                        #     sin_data_end = data[1:]
-
-                        #     sin_data_start[1:self.nfil+1] = util.box(sin_data_start[1:self.nfil+1], 2*np.pi)
-                        #     sin_data_end[1:self.nfil+1] = util.box(sin_data_end[1:self.nfil+1], 2*np.pi)
-                            
-
-                        #     print(sin_data_end[stt:stt+10])
-                        #     print(sin_data_start[stt:stt+10])
-
-                        #     diff = sin_data_end - sin_data_start
-                        #     # diff[1:self.nfil+1] -= 2*np.pi
-                        #     diff[0] = 0
-                        #     print('x(T)-x(0)', diff[stt:stt+10])
-                        #     diff_norm = np.linalg.norm(diff[1:])
-                        #     sin_data_start[1:self.nfil+1] = util.box(sin_data_start[1:self.nfil+1], 2*np.pi)
-                        #     data_norm = np.linalg.norm(sin_data_start[1:])
-                        #     print(f"norm x = {data_norm}  norm diff = {diff_norm}")
-                        #     print('=======rel error ',diff_norm/data_norm)
                         if name == self.simName + '_true_states.dat':
                             data = np.concatenate(([self.spring_factor], data))
 
@@ -1665,18 +1642,12 @@ class VISUAL:
         order_parameters = np.zeros(self.frames-dframe_soln)
         for i in range(self.frames-dframe_soln):
             diff_norms[i], norms[i], rel_error[i] = compute_diff(states, i, dframe_soln+i )
-            # order_parameters[i] = np.abs(np.mean(np.exp(1j*states[i][:self.nfil])))
 
-            # phase_avgs[i] = np.mean(aux[:self.nfil])
-            # angle_avgs[i] = np.mean(aux[self.nfil:])
-            # diff_avgs[i] = np.mean(diff[:self.nfil])
-            
         ax2.plot(ts, rel_error)
 
         ax3.plot(ts, norms, label='Norm of states')
         ax3_right = ax3.twinx()
         ax3_right.plot(ts, diff_norms, c='r', label=r'Norm of diff')
-
 
         ax.set_xlabel(r"$T$")
         ax.set_ylabel(r"<$\frac{\|\psi(t_0+T)-\psi(t_0)\|}{\|\psi(t_0)\|}$>")

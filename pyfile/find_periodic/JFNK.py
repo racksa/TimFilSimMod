@@ -28,7 +28,7 @@ def main():
  
     # n = 3*(NSEG-1)*NFIL+1 #4#3 * (N - 1) * Nf + 1  # Dimension of system, including unknown params
     n = 2*NFIL+1
-    mgmres = 5  # 10  # max GMRES iterations
+    mgmres = 5 # 10  # max GMRES iterations
     nits = 150  # max Newton iterations
     rel_err_ini = 5e-5  # 1e-8 Relative error |F|/|x|
     del_value_ini = -1  # These rarely need changing for any problem

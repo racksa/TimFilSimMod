@@ -23,8 +23,8 @@ def main():
 
     # Initialise the driver
     d = driver.DRIVER()
-    d.cuda_device = 3
-    d.date = 'soln'
+    d.cuda_device = 4
+    d.date = 'soln2'
     d.category = 'JFNK_sims/'
     d.dir = f"data/{d.category}{d.date}/"
     eval_filename =  d.dir + f"eigenvalues_pb.dat"

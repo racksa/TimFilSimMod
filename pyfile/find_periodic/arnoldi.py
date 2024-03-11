@@ -16,7 +16,7 @@ class ARNOLDI:
         self.T = T
         self.Q = np.zeros((self.NTOTAL,self.NTOTAL))
         self.H = np.zeros((self.NTOTAL,self.NTOTAL))
-        self.epsilon = 1e-1
+        self.epsilon = 5e-1
         self.tol = 1e-3
         self.old_evalue = 10*np.ones(self.Num_evals,dtype = np.complex )
         self.difference = 2*self.tol

@@ -46,7 +46,7 @@ class VISUAL:
         # self.dir = f"/home/clustor/ma/h/hs2216/{self.date}/"
 
         self.date = '20240214_hold'
-        self.date = '20240214_test_solution_s'
+        self.date = '20240214_test_solution_s2'
         # self.date = '20240214_test_solution_d_double'
         self.dir = f"data/JFNK_sims/{self.date}/"
 

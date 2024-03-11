@@ -8,7 +8,7 @@ invphi = (math.sqrt(5) - 1) / 2  # 1 / phi
 invphi2 = (3 - math.sqrt(5)) / 2  # 1 / phi^2
 
 def main():
-    tol = 1e-4
+    tol = 1e-6
 
     NSEG = 20      # Number of segments
     NFIL = 159       # Number of filaments
@@ -30,8 +30,8 @@ def main():
     for i in range(num_lines):
         k = solns[i,0]
         T = solns[i,1]
-        T0 = 0.97
-        T3 = 1.
+        T0 = 0.95
+        T3 = 0.98
         Ustar = solns[i,2:]
         Ustar[:NFIL] = util.box(Ustar[:NFIL], 2*np.pi)
         print(f'k={k} T={T}')
@@ -97,7 +97,7 @@ class gss_wrapper:
             print(f"\033[37mIteration {k}: error = yc\033[m")
             with open(self.driver_.dir + "Ts.dat", "ab") as fi:
                 fi.write(b"\n")
-                np.savetxt(fi, [a, d, yc, yd], newline = " ")
+                np.savetxt(fi, [c, d, yc, yd], newline = " ")
 
         if yc < yd:
             return (a, d)

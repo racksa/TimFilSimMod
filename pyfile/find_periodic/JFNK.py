@@ -20,7 +20,7 @@ def main():
     # AR = 15
 
     # output_filename = f"data/expr_sims/20240208_periodic/psi_guess{NFIL}.dat"
-    output_filename = f"data/JFNK_sims/20240214_periodic_s/psi_guess{NFIL}.dat"
+    output_filename = f"data/JFNK_sims/20240214_periodic_d/psi_guess{NFIL}.dat"
 
     # Number of time steps (ndts) and fixT
     ndts = 300
@@ -30,15 +30,15 @@ def main():
     n = 2*NFIL+1
     mgmres = 5 # 10  # max GMRES iterations
     nits = 150  # max Newton iterations
-    rel_err_ini = 5e-5  # 1e-8 Relative error |F|/|x|
+    rel_err_ini = 2e-5  # 1e-8 Relative error |F|/|x|
     del_value_ini = -1  # These rarely need changing for any problem
     mndl_ini = 1e-20
     mxdl_ini = 1e20
     gtol = 5e-3  # 1e-4
     epsJ = 1e-5 # 1e-6  # epsilon used in Jacobian approximation
 
-    f_range = np.arange(0.011, 0.061, 0.001)[::-1]
-    f_range = np.arange(0.010, 0.061, 0.001)
+    f_range = np.arange(0.010, 0.049, 0.001)[::-1]
+    # f_range = np.arange(0.010, 0.061, 0.001)
     # f_range = np.arange(0.035, 0.042, 0.001)[::-1]
     # f_range = np.arange(0.030, 0.062, 0.002)
     for k in f_range:

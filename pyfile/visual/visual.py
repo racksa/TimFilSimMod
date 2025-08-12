@@ -50,6 +50,8 @@ class VISUAL:
         # self.date = '20240214_test_solution_d_double'
         self.dir = f"data/JFNK_sims/{self.date}/"
 
+        self.dir = f"data/expr_sims/20240104_readphase_hold/"
+
         self.pars_list = {
                      "nswim": [],
                      "nseg": [],
@@ -83,7 +85,7 @@ class VISUAL:
         self.check_overlap = False
 
         self.plot_end_frame_setting = 2200000
-        self.frames_setting = 630000
+        self.frames_setting = 300
 
         self.plot_end_frame = self.plot_end_frame_setting
         self.frames = self.frames_setting
@@ -592,6 +594,9 @@ class VISUAL:
         ax3 = fig3.add_subplot(1,1,1)
         fig4 = plt.figure()
         ax4 = fig4.add_subplot(1,1,1)
+        fig5 = plt.figure()
+        ax5 = fig5.add_subplot(1,1,1)
+        
 
         fil_phases_f = open(self.simName + '_filament_phases.dat', "r")
         fil_angles_f = open(self.simName + '_filament_shape_rotation_angles.dat', "r")
@@ -600,6 +605,7 @@ class VISUAL:
         corr_array = np.zeros(self.frames)
         corr_array2 = np.zeros(self.frames)
         corr_array_angle = np.zeros(self.frames)
+        r_array = np.zeros(self.frames)
 
         fil_references_sphpolar = np.zeros((self.nfil,3))
         for fil in range(self.nfil):
@@ -658,6 +664,7 @@ class VISUAL:
                     variance_array_angle[m] = np.var(angles_in_group)
                 
                 corr_array_angle[i-self.plot_start_frame] = np.mean(variance_array_angle)
+                r_array[i-self.plot_start_frame] = np.abs(np.sum(np.exp(1j*fil_phases))/self.nfil)
 
         ax.plot(time_array, corr_array)
         ax.set_xlabel('t/T')
@@ -681,6 +688,8 @@ class VISUAL:
         ax4.set_ylabel('Coordination number 2 (angle)')
         ax4.set_xlim(time_array[0], time_array[-1])
         ax4.set_ylim(0)
+
+        ax5.plot(time_array, r_array)
         
         fig.savefig(f'fig/fil_coordination_parameter_one_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
         fig2.savefig(f'fig/fil_coordination_parameter_two_index{self.index}.pdf', bbox_inches = 'tight', format='pdf')
@@ -1562,7 +1571,7 @@ class VISUAL:
             return diff_norm, norm, rel_error
 
         # Search for T
-        search_T_min, search_T_max = 0.96, 1.02
+        search_T_min, search_T_max = 0.99, 1.02
         dframe_array = np.arange(int(search_T_min*self.period), int(search_T_max*self.period)+1)
         error_array = np.zeros(np.shape(dframe_array))
         try:
@@ -1651,8 +1660,8 @@ class VISUAL:
 
         ax.set_xlabel(r"$T$")
         ax.set_ylabel(r"<$\frac{\|\psi(t_0+T)-\psi(t_0)\|}{\|\psi(t_0)\|}$>")
-        ax.set_ylim(0, 0.02)
-        ax.set_xlim(0.9, 1.)
+        ax.set_ylim(0)
+        # ax.set_xlim(0.9, 1.)
         fig.tight_layout()
 
         # ax2.set_ylim(0, 1e-2)

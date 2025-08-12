@@ -41,8 +41,9 @@ def main():
         T = solns[i,1]
         Ustar = solns[i,2:]
         Ustar[:NFIL] = util.box(Ustar[:NFIL], 2*np.pi)
-        print(f'k={k} T={T}')
+        print(f'{i}, k={k} T={T}')
 
+        
         a = arnoldi.ARNOLDI(NSEG, NFIL, NBLOB, AR, T,\
                             Ustar, Num_evals, k, d, eval_filename, evec_filename)
 

@@ -16,12 +16,13 @@ class ARNOLDI:
         self.T = T
         self.Q = np.zeros((self.NTOTAL,self.NTOTAL))
         self.H = np.zeros((self.NTOTAL,self.NTOTAL))
-        self.epsilon = 5e-1
+        self.epsilon = 1.e-1
         self.tol = 1e-3
         self.old_evalue = 10*np.ones(self.Num_evals,dtype = np.complex )
         self.difference = 2*self.tol
         self.Ustar = Ustar
         self.ct_var = ct_var
+        self.sim_length = 3
 
         self.d = d
 
@@ -40,7 +41,6 @@ class ARNOLDI:
         print(self.Ustar[:10])
         self.Q[:,0] = b
         
-            
     def save_initial_condition(self, k):
 
         input_filename = self.d.dir + "psi.dat"
@@ -51,15 +51,14 @@ class ARNOLDI:
         np.savetxt(input_filename, x, newline = " ")
 
     def Ax(self):
-
-        self.d.change_variables(self.NFIL, self.NSEG, self.NBLOB, self.AR, self.ct_var, self.T, 1.)
+        self.d.change_variables(self.NFIL, self.NSEG, self.NBLOB, self.AR, self.ct_var, self.T, self.sim_length)
         self.d.update_globals_file()
         self.d.run()
 
         # Read output data
         output_filename = self.d.dir + self.d.simName + "_true_states.dat"
         U = np.loadtxt(output_filename)[-1][2:]
-        U[:self.NFIL] -= 2*np.pi
+        U[:self.NFIL] -= 2*np.pi*self.sim_length
 
         # print(U - self.Ustar)
         print(f'norm of dU(T) = {la.norm(U-self.Ustar)}, eps*dU = {la.norm(U-self.Ustar)/self.epsilon}')
@@ -83,7 +82,7 @@ class ARNOLDI:
             self.Q[:, k+1] = U/self.H[k+1, k]
 
     def log_over_T_and_sort(self,evals,T):
-        evals = np.log(np.array(evals,dtype = np.complex_))/T
+        evals = np.log(np.array(evals,dtype = np.complex_))/T/self.sim_length
         idx = evals.argsort()[::-1]   
         evals = evals[idx]
 

@@ -87,6 +87,7 @@ public:
   #elif PRESCRIBED_CILIA
 
     Real phase;
+    Real phase2;
     Real phase_dot;
     Real omega0;
     quaternion body_q;
@@ -106,6 +107,7 @@ public:
     #if FIT_TO_DATA_BEAT
 
       std::vector<Real> s_to_use;
+      std::vector<Real> s_to_use2;
       matrix Ax;
       matrix Ay;
       matrix Bx;
@@ -118,10 +120,17 @@ public:
       #endif
 
       void fill_fourier_coeff_mats();
-      void fitted_shape_tangent(Real& tx, Real& ty, const Real s) const;
-      matrix fitted_shape(const Real s) const;
-      matrix fitted_shape_velocity_direction(const Real s) const;
-      Real fitted_curve_length(const Real s) const;
+
+      // void fitted_shape_tangent(Real& tx, Real& ty, const Real s) const;
+      // matrix fitted_shape(const Real s) const;
+      // matrix fitted_shape_velocity_direction(const Real s) const;
+      // Real fitted_curve_length(const Real s) const;
+      // void find_fitted_shape_s();
+
+      void fitted_shape_tangent(Real& tx, Real& ty, const Real s, const Real psi) const;
+      matrix fitted_shape(const Real s, const Real psi, const Real z_displacement) const;
+      matrix fitted_shape_velocity_direction(const Real s, const Real psi) const;
+      Real fitted_curve_length(const Real s, const Real psi) const;
       void find_fitted_shape_s();
 
     #elif BUILD_A_BEAT

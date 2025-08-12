@@ -117,7 +117,7 @@ extern std::string SIMULATION_READANGLE_NAME;
   // Essentially, the cilia can 'tip backwards or forwards' in their beat planes.
   // If false, no such rotation ever occurs.
 
-  #define WRITE_GENERALISED_FORCES false
+  #define WRITE_GENERALISED_FORCES true
   // If true, this simulation will save its generalised forces to file for use as the reference values.
   // It will also generate reference s-values for shape sequences which don't result in inextensible filaments.
   // NOTE: This will overwrite any existing reference files unless their names have been changed.
@@ -145,7 +145,7 @@ extern std::string SIMULATION_READANGLE_NAME;
 
 #endif
 
-#define BODY_OR_SURFACE_TYPE 2
+#define BODY_OR_SURFACE_TYPE 0
 // Valid options:
 // 0 = An infinite plane wall at z = 0. This choice has some sub-types (see below).
 // 1 = Deformed planes with 2 principal curvatures (partially implemented)
@@ -209,7 +209,7 @@ extern std::string SIMULATION_READANGLE_NAME;
 
 #endif
 
-#define MOBILITY_TYPE 4
+#define MOBILITY_TYPE 1
 // Valid options:
 // 0 = Basic Stokes drag. No hydrodynamic interactions between particles.
 // 1 = Rotne-Prager-Yamakawa (RPY) mobility matrices (with the corrections due to Swan and Brady if an infinite plane wall is selected).
@@ -425,7 +425,7 @@ extern int TOTAL_TIME_STEPS;
     #define PRESCRIBED_BODY_VELOCITIES true
     #define DYNAMIC_PHASE_EVOLUTION false
     #define DYNAMIC_SHAPE_ROTATION false
-    #define TOTAL_TIME_STEPS STEPS_PER_PERIOD
+    // #define TOTAL_TIME_STEPS STEPS_PER_PERIOD
     #define INITIAL_CONDITIONS_TYPE 0
 
   #endif

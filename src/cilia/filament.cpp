@@ -771,20 +771,25 @@ void filament::accept_state_from_rigid_body(const Real *const x_in, const Real *
 
     }
 
-    void filament::fitted_shape_tangent(Real& tx, Real& ty, const Real s) const {
+    void filament::fitted_shape_tangent(Real& tx, Real& ty, const Real s, const Real psi) const {
 
-      matrix svec(3,1);
-      svec(0) = 1.0;
-      svec(1) = 2.0*s;
-      svec(2) = 3.0*s*s;
-
+      const int num_degrees = Ax.num_cols;
       const int num_fourier_modes = Ax.num_rows;
+
+      matrix svec(num_degrees,1);
+      for(int i = 0; i < num_degrees; i++){
+        svec(i) = float(i+1)*pow(s, i);
+      }
+
       matrix cos_vec(1, num_fourier_modes);
       matrix sin_vec(1, num_fourier_modes-1);
       cos_vec(0) = 1.0;
+      #if FULFORD_AND_BLAKE_BEAT_ORIGINAL
+        cos_vec(0) = 0.5;
+      #endif
       for (int n = 1; n < num_fourier_modes; n++){
-        cos_vec(n) = std::cos(n*phase);
-        sin_vec(n-1) = std::sin(n*phase);
+        cos_vec(n) = std::cos(n*psi);
+        sin_vec(n-1) = std::sin(n*psi);
       }
 
       tx = (cos_vec*Ax + sin_vec*Bx)*svec;
@@ -792,23 +797,28 @@ void filament::accept_state_from_rigid_body(const Real *const x_in, const Real *
 
     }
 
-    matrix filament::fitted_shape(const Real s) const {
+    matrix filament::fitted_shape(const Real s, const Real psi, const Real z_displacement) const {
 
       matrix pos(3,1);
-      pos(2) = 0.0;
+      pos(2) = z_displacement;
 
-      matrix svec(3,1);
-      svec(0) = s;
-      svec(1) = s*s;
-      svec(2) = s*s*s;
-
+      const int num_degrees = Ax.num_cols;
       const int num_fourier_modes = Ax.num_rows;
+
+      matrix svec(num_degrees,1);
+      for(int i = 0; i < num_degrees; i++){
+        svec(i) = pow(s, i+1);
+      }
+
       matrix cos_vec(1, num_fourier_modes);
       matrix sin_vec(1, num_fourier_modes-1);
       cos_vec(0) = 1.0;
+      #if FULFORD_AND_BLAKE_BEAT_ORIGINAL
+        cos_vec(0) = 0.5;
+      #endif
       for (int n = 1; n < num_fourier_modes; n++){
-        cos_vec(n) = std::cos(n*phase);
-        sin_vec(n-1) = std::sin(n*phase);
+        cos_vec(n) = std::cos(n*psi);
+        sin_vec(n-1) = std::sin(n*psi);
       }
 
       pos(0) = (cos_vec*Ax + sin_vec*Bx)*svec;
@@ -818,23 +828,25 @@ void filament::accept_state_from_rigid_body(const Real *const x_in, const Real *
 
     }
 
-    matrix filament::fitted_shape_velocity_direction(const Real s) const {
+    matrix filament::fitted_shape_velocity_direction(const Real s, const Real psi) const {
 
       matrix dir(3,1);
       dir(2) = 0.0;
 
-      matrix svec(3,1);
-      svec(0) = s;
-      svec(1) = s*s;
-      svec(2) = s*s*s;
-
+      const int num_degrees = Ax.num_cols;
       const int num_fourier_modes = Ax.num_rows;
+
+      matrix svec(num_degrees,1);
+      for(int i = 0; i < num_degrees; i++){
+        svec(i) = pow(s, i+1);
+      }
+
       matrix cos_vec(1, num_fourier_modes-1);
       matrix sin_vec(1, num_fourier_modes);
       sin_vec(0) = 0.0;
       for (int n = 1; n < num_fourier_modes; n++){
-        cos_vec(n-1) = n*std::cos(n*phase);
-        sin_vec(n) = -n*std::sin(n*phase);
+        cos_vec(n-1) = n*std::cos(n*psi);
+        sin_vec(n) = -n*std::sin(n*psi);
       }
 
       dir(0) = (sin_vec*Ax + cos_vec*Bx)*svec;
@@ -844,7 +856,7 @@ void filament::accept_state_from_rigid_body(const Real *const x_in, const Real *
 
     }
 
-    Real filament::fitted_curve_length(const Real s) const {
+    Real filament::fitted_curve_length(const Real s, const Real psi) const {
 
       Real length = 0.0;
 
@@ -856,13 +868,13 @@ void filament::accept_state_from_rigid_body(const Real *const x_in, const Real *
         const Real dl = 1.0/Real(num_traps);
 
         // Start with the whole trapeziums
-        fitted_shape_tangent(tx, ty, 0);
+        fitted_shape_tangent(tx, ty, 0, psi);
         Real f0 = sqrt(tx*tx + ty*ty);
         const Real floor_val = myfil_floor(s/dl);
 
         for (int n = 1; n <= floor_val; n++){
 
-          fitted_shape_tangent(tx, ty, n*dl);
+          fitted_shape_tangent(tx, ty, n*dl, psi);
           Real f1 = sqrt(tx*tx + ty*ty);
 
           length += 0.5*dl*(f0 + f1);
@@ -878,7 +890,7 @@ void filament::accept_state_from_rigid_body(const Real *const x_in, const Real *
 
         if (ceil_val > floor_val){
 
-          fitted_shape_tangent(tx, ty, myfil_ceil(s/dl)*dl);
+          fitted_shape_tangent(tx, ty, myfil_ceil(s/dl)*dl, psi);
           Real f1 = sqrt(tx*tx + ty*ty);
 
           length += ((s/dl - floor_val)/(ceil_val - floor_val))*0.5*dl*(f0 + f1);
@@ -892,96 +904,378 @@ void filament::accept_state_from_rigid_body(const Real *const x_in, const Real *
     }
 
     void filament::find_fitted_shape_s(){
-
+      
       s_to_use = std::vector<Real>(NSEG);
       s_to_use[0] = 0.0;
       s_to_use[NSEG-1] = 1.0;
 
-      #if WRITE_GENERALISED_FORCES
+      bool bicilia = false;
 
-        std::ofstream s_values_file(reference_s_values_file_name(), std::ios::app);
+      for (int fp = 0; fp < (bicilia ? 2 : 1); fp++){
 
-        s_values_file << s_to_use[0] << " ";
+        Real psi = (fp == 0 ? phase : phase2);
 
-        const Real total_length = fitted_curve_length(1.0);
+        #if WRITE_GENERALISED_FORCES
 
-        for (int n = 1; n < NSEG-1; n++){
+          std::ofstream s_values_file(reference_s_values_file_name(), std::ios::app);
 
-          const Real target_fraction = Real(n)/Real(NSEG-1);
+          if (fp==0){
 
-          Real s_lower_bound = s_to_use[n-1];
-          Real s_upper_bound = 1.0;
-
-          // Bisection method
-          Real curr_s_estimate = 0.5*(s_lower_bound + s_upper_bound);
-          Real curr_frac_estimate = fitted_curve_length(curr_s_estimate)/total_length;
-
-          while (std::abs(curr_frac_estimate - target_fraction) > 0.1/Real(NSEG)){
-
-            if (curr_frac_estimate > target_fraction){
-
-              s_upper_bound = curr_s_estimate;
-
-            } else {
-
-              s_lower_bound = curr_s_estimate;
-
-            }
-
-            curr_s_estimate = 0.5*(s_lower_bound + s_upper_bound);
-            curr_frac_estimate = fitted_curve_length(curr_s_estimate)/total_length;
+            s_values_file << s_to_use[0] << " ";
 
           }
 
-          s_to_use[n] = curr_s_estimate;
+          const Real total_length = fitted_curve_length(1.0, psi);
 
-          s_values_file << curr_s_estimate << " ";
+          for (int n = 1; n < NSEG-1; n++){
 
-        }
+            const Real target_fraction = Real(n)/Real(NSEG-1);
 
-        s_values_file << s_to_use[NSEG-1] << " ";
-        s_values_file.close();
+            Real s_lower_bound = (fp==0 ? s_to_use[n-1] : s_to_use2[n-1]);
+            Real s_upper_bound = 1.0;
 
-      #else
+            // Bisection method
+            Real curr_s_estimate = 0.5*(s_lower_bound + s_upper_bound);
+            Real curr_frac_estimate = fitted_curve_length(curr_s_estimate, psi)/total_length;
 
-        // Bilinear interpolation
-        Real phi_index = 0.5*phase/PI; // = phase/(2*pi)
-        phi_index -= myfil_floor(phi_index); // Map this ratio into [0,1)
-        phi_index *= (*s_to_use_ref_ptr).num_rows;
+            while (std::abs(curr_frac_estimate - target_fraction) > 0.1/Real(NSEG)){
 
-        int phi_index_int_lower_bound = int(phi_index); // Rounds towards 0.
+              if (curr_frac_estimate > target_fraction){
 
-        matrix svec;
+                s_upper_bound = curr_s_estimate;
 
-        if (phi_index_int_lower_bound == (*s_to_use_ref_ptr).num_rows){
+              } else {
 
-          // This can only be true if phi_index == s_to_use_ref.num_rows
-          // I don't think we can ever actually enter here unless rounding error messes things up,
-          // but better safe than sorry.
-          svec = (*s_to_use_ref_ptr).get_row(0);
+                s_lower_bound = curr_s_estimate;
 
-        } else {
+              }
 
-          // Otherwise, we're safely in the interior
-          const matrix lower = (*s_to_use_ref_ptr).get_row(phi_index_int_lower_bound);
-          const matrix upper = (phi_index_int_lower_bound == (*s_to_use_ref_ptr).num_rows - 1) ? (*s_to_use_ref_ptr).get_row(0) : (*s_to_use_ref_ptr).get_row(phi_index_int_lower_bound+1);
-          svec = lower + (upper - lower)*(phi_index - phi_index_int_lower_bound);
+              curr_s_estimate = 0.5*(s_lower_bound + s_upper_bound);
+              curr_frac_estimate = fitted_curve_length(curr_s_estimate, psi)/total_length;
 
-        }
+            }
+            // force to use uniform s
+            // curr_s_estimate = target_fraction;
 
-        for (int n = 1; n < NSEG-1; n++){
+            if (fp==0){
 
-          Real s_index = ((*s_to_use_ref_ptr).num_cols - 1)*n/Real(NSEG-1);
-          int s_index_lower_bound = int(s_index);
+              s_to_use[n] = curr_s_estimate;
 
-          s_to_use[n] = svec(s_index_lower_bound) + (s_index - s_index_lower_bound)*(svec(s_index_lower_bound+1) - svec(s_index_lower_bound));
+              s_values_file << curr_s_estimate << " ";
 
-        }
+            }
+            else if (fp==1) {
 
-      #endif
+              s_to_use2[n] = curr_s_estimate;
+
+            }
+
+          }
+
+          if (fp==0){
+
+            s_values_file << s_to_use[NSEG-1] << " ";
+            s_values_file.close();
+
+          }
+
+        #else
+
+          // Bilinear interpolation
+          Real phi_index = 0.5*psi/PI; // = phase/(2*pi)
+          phi_index -= myfil_floor(phi_index); // Map this ratio into [0,1)
+          phi_index *= (*s_to_use_ref_ptr).num_rows;
+
+          int phi_index_int_lower_bound = int(phi_index); // Rounds towards 0.
+
+          matrix svec;
+
+          if (phi_index_int_lower_bound == (*s_to_use_ref_ptr).num_rows){
+
+            // This can only be true if phi_index == s_to_use_ref.num_rows
+            // I don't think we can ever actually enter here unless rounding error messes things up,
+            // but better safe than sorry.
+            svec = (*s_to_use_ref_ptr).get_row(0);
+
+          } else {
+
+            // Otherwise, we're safely in the interior
+            const matrix lower = (*s_to_use_ref_ptr).get_row(phi_index_int_lower_bound);
+            const matrix upper = (phi_index_int_lower_bound == (*s_to_use_ref_ptr).num_rows - 1) ? (*s_to_use_ref_ptr).get_row(0) : (*s_to_use_ref_ptr).get_row(phi_index_int_lower_bound+1);
+            svec = lower + (upper - lower)*(phi_index - phi_index_int_lower_bound);
+
+          }
+
+          for (int n = 1; n < NSEG-1; n++){
+
+            Real s_index = ((*s_to_use_ref_ptr).num_cols - 1)*n/Real(NSEG-1);
+            int s_index_lower_bound = int(s_index);
+
+            if (fp==0){
+
+              s_to_use[n] = svec(s_index_lower_bound) + (s_index - s_index_lower_bound)*(svec(s_index_lower_bound+1) - svec(s_index_lower_bound));
+            
+            }
+            else if (fp==1) {
+
+              s_to_use2[n] = svec(s_index_lower_bound) + (s_index - s_index_lower_bound)*(svec(s_index_lower_bound+1) - svec(s_index_lower_bound));
+            
+            }
+
+          }
+
+        #endif
+
+      }
 
     }
 
+
+
+    // void filament::fitted_shape_tangent(Real& tx, Real& ty, const Real s, const Real psi) const {
+
+    //   matrix svec(3,1);
+    //   svec(0) = 1.0;
+    //   svec(1) = 2.0*s;
+    //   svec(2) = 3.0*s*s;
+
+    //   const int num_fourier_modes = Ax.num_rows;
+    //   matrix cos_vec(1, num_fourier_modes);
+    //   matrix sin_vec(1, num_fourier_modes-1);
+    //   cos_vec(0) = 1.0;
+    //   for (int n = 1; n < num_fourier_modes; n++){
+    //     cos_vec(n) = std::cos(n*phase);
+    //     sin_vec(n-1) = std::sin(n*phase);
+    //   }
+
+    //   tx = (cos_vec*Ax + sin_vec*Bx)*svec;
+    //   ty = (cos_vec*Ay + sin_vec*By)*svec;
+
+    // }
+
+    // matrix filament::fitted_shape(const Real s, const Real psi, const Real z_displacement) const {
+
+    //   matrix pos(3,1);
+    //   pos(2) = 0.0;
+
+    //   matrix svec(3,1);
+    //   svec(0) = s;
+    //   svec(1) = s*s;
+    //   svec(2) = s*s*s;
+
+    //   const int num_fourier_modes = Ax.num_rows;
+    //   matrix cos_vec(1, num_fourier_modes);
+    //   matrix sin_vec(1, num_fourier_modes-1);
+    //   cos_vec(0) = 1.0;
+    //   for (int n = 1; n < num_fourier_modes; n++){
+    //     cos_vec(n) = std::cos(n*phase);
+    //     sin_vec(n-1) = std::sin(n*phase);
+    //   }
+
+    //   pos(0) = (cos_vec*Ax + sin_vec*Bx)*svec;
+    //   pos(1) = (cos_vec*Ay + sin_vec*By)*svec;
+
+    //   return pos;
+
+    // }
+
+    // matrix filament::fitted_shape_velocity_direction(const Real s, const Real psi) const {
+
+    //   matrix dir(3,1);
+    //   dir(2) = 0.0;
+
+    //   const int num_degrees = Ax.num_cols;
+    //   const int num_fourier_modes = Ax.num_rows;
+
+    //   matrix svec(num_degrees,1);
+    //   for(int i = 0; i < num_degrees; i++){
+    //     svec(i) = pow(s, i+1);
+    //   }
+
+    //   matrix cos_vec(1, num_fourier_modes-1);
+    //   matrix sin_vec(1, num_fourier_modes);
+    //   sin_vec(0) = 0.0;
+    //   for (int n = 1; n < num_fourier_modes; n++){
+    //     cos_vec(n-1) = n*std::cos(n*psi);
+    //     sin_vec(n) = -n*std::sin(n*psi);
+    //   }
+
+    //   dir(0) = (sin_vec*Ax + cos_vec*Bx)*svec;
+    //   dir(1) = (sin_vec*Ay + cos_vec*By)*svec;
+
+    //   return dir;
+
+    // }
+
+    // Real filament::fitted_curve_length(const Real s, const Real psi) const {
+
+    //   Real length = 0.0;
+
+    //   if (s > 0){
+
+    //     Real tx, ty; // Components of shape tangent
+
+    //     const int num_traps = 10*NSEG;
+    //     const Real dl = 1.0/Real(num_traps);
+
+    //     // Start with the whole trapeziums
+    //     fitted_shape_tangent(tx, ty, 0, psi);
+    //     Real f0 = sqrt(tx*tx + ty*ty);
+    //     const Real floor_val = myfil_floor(s/dl);
+
+    //     for (int n = 1; n <= floor_val; n++){
+
+    //       fitted_shape_tangent(tx, ty, n*dl, psi);
+    //       Real f1 = sqrt(tx*tx + ty*ty);
+
+    //       length += 0.5*dl*(f0 + f1);
+
+    //       f0 = f1;
+
+    //     }
+
+    //     // Interpolate between the mesh points to get the final value.
+    //     // I want to do it like this, rather than have the mesh depend on the input s,
+    //     // to ensure that the output is monotonic.
+    //     const Real ceil_val = myfil_ceil(s/dl);
+
+    //     if (ceil_val > floor_val){
+
+    //       fitted_shape_tangent(tx, ty, myfil_ceil(s/dl)*dl, psi);
+    //       Real f1 = sqrt(tx*tx + ty*ty);
+
+    //       length += ((s/dl - floor_val)/(ceil_val - floor_val))*0.5*dl*(f0 + f1);
+
+    //     }
+
+    //   }
+
+    //   return length;
+
+    // }
+
+    // void filament::find_fitted_shape_s(){
+      
+    //   s_to_use = std::vector<Real>(NSEG);
+    //   s_to_use[0] = 0.0;
+    //   s_to_use[NSEG-1] = 1.0;
+
+
+    //   for (int fp = 0; fp < 1; fp++){
+
+    //     Real psi = phase;
+
+    //     #if WRITE_GENERALISED_FORCES
+
+    //       std::ofstream s_values_file(reference_s_values_file_name(), std::ios::app);
+
+    //       if (fp==0){
+
+    //         s_values_file << s_to_use[0] << " ";
+
+    //       }
+
+    //       const Real total_length = fitted_curve_length(1.0, psi);
+
+    //       for (int n = 1; n < NSEG-1; n++){
+
+    //         const Real target_fraction = Real(n)/Real(NSEG-1);
+
+    //         Real s_lower_bound = s_to_use[n-1];
+    //         Real s_upper_bound = 1.0;
+
+    //         // Bisection method
+    //         Real curr_s_estimate = 0.5*(s_lower_bound + s_upper_bound);
+    //         Real curr_frac_estimate = fitted_curve_length(curr_s_estimate, psi)/total_length;
+
+    //         while (std::abs(curr_frac_estimate - target_fraction) > 0.1/Real(NSEG)){
+
+    //           if (curr_frac_estimate > target_fraction){
+
+    //             s_upper_bound = curr_s_estimate;
+
+    //           } else {
+
+    //             s_lower_bound = curr_s_estimate;
+
+    //           }
+
+    //           curr_s_estimate = 0.5*(s_lower_bound + s_upper_bound);
+    //           curr_frac_estimate = fitted_curve_length(curr_s_estimate, psi)/total_length;
+
+    //         }
+    //         // force to use uniform s
+    //         // curr_s_estimate = target_fraction;
+
+    //         if (fp==0){
+
+    //           s_to_use[n] = curr_s_estimate;
+
+    //           s_values_file << curr_s_estimate << " ";
+
+    //         }
+
+    //       }
+
+    //       if (fp==0){
+
+    //         s_values_file << s_to_use[NSEG-1] << " ";
+    //         s_values_file.close();
+
+    //       }
+
+    //     #else
+
+    //       // Bilinear interpolation
+    //       Real phi_index = 0.5*psi/PI; // = phase/(2*pi)
+    //       phi_index -= myfil_floor(phi_index); // Map this ratio into [0,1)
+    //       phi_index *= (*s_to_use_ref_ptr).num_rows;
+
+    //       int phi_index_int_lower_bound = int(phi_index); // Rounds towards 0.
+
+    //       matrix svec;
+
+    //       if (phi_index_int_lower_bound == (*s_to_use_ref_ptr).num_rows){
+
+    //         // This can only be true if phi_index == s_to_use_ref.num_rows
+    //         // I don't think we can ever actually enter here unless rounding error messes things up,
+    //         // but better safe than sorry.
+    //         svec = (*s_to_use_ref_ptr).get_row(0);
+
+    //       } else {
+
+    //         // Otherwise, we're safely in the interior
+    //         const matrix lower = (*s_to_use_ref_ptr).get_row(phi_index_int_lower_bound);
+    //         const matrix upper = (phi_index_int_lower_bound == (*s_to_use_ref_ptr).num_rows - 1) ? (*s_to_use_ref_ptr).get_row(0) : (*s_to_use_ref_ptr).get_row(phi_index_int_lower_bound+1);
+    //         svec = lower + (upper - lower)*(phi_index - phi_index_int_lower_bound);
+
+    //       }
+
+    //       for (int n = 1; n < NSEG-1; n++){
+
+    //         Real s_index = ((*s_to_use_ref_ptr).num_cols - 1)*n/Real(NSEG-1);
+    //         int s_index_lower_bound = int(s_index);
+
+    //         if (fp==0){
+
+    //           s_to_use[n] = svec(s_index_lower_bound) + (s_index - s_index_lower_bound)*(svec(s_index_lower_bound+1) - svec(s_index_lower_bound));
+            
+    //         }
+    //         else if (fp==1) {
+
+    //           s_to_use2[n] = svec(s_index_lower_bound) + (s_index - s_index_lower_bound)*(svec(s_index_lower_bound+1) - svec(s_index_lower_bound));
+            
+    //         }
+
+    //       }
+
+    //     #endif
+
+    //   }
+
+    // }
+
+    
   #elif BUILD_A_BEAT
 
     Real filament::build_a_beat_tangent_angle(const Real s) const {
@@ -1169,7 +1463,7 @@ void filament::initial_guess(const int nt, const Real *const x_in, const Real *c
 
         #if (DYNAMIC_SHAPE_ROTATION || WRITE_GENERALISED_FORCES)
 
-          matrix ref = FIL_LENGTH*Rshape*fitted_shape(s_to_use[n]);
+          matrix ref = FIL_LENGTH*Rshape*fitted_shape(s_to_use[n], phase, 0.0);
 
           const matrix diff = R*ref;
 
@@ -1197,11 +1491,11 @@ void filament::initial_guess(const int nt, const Real *const x_in, const Real *c
 
         #if (DYNAMIC_SHAPE_ROTATION || WRITE_GENERALISED_FORCES)
 
-          const matrix dir = FIL_LENGTH*R*Rshape*fitted_shape_velocity_direction(s_to_use[n]);
+          const matrix dir = FIL_LENGTH*R*Rshape*fitted_shape_velocity_direction(s_to_use[n], phase);
 
         #else
 
-          const matrix dir = FIL_LENGTH*R*fitted_shape_velocity_direction(s_to_use[n]);
+          const matrix dir = FIL_LENGTH*R*fitted_shape_velocity_direction(s_to_use[n], phase);
 
         #endif
 
